@@ -1,0 +1,8 @@
+@IMPORT url("default.css");
+@IMPORT url("file.css");
+
+.inheritor{
+	background-image: url("inheritor.gif");
+	background-repeat: no-repeat;
+	text-indent: 16px;
+}

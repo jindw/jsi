@@ -1,0 +1,40 @@
+﻿<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;utf-8"/>
+<title>JavaScript Integeration 自解析API文档</title>
+<script src="../../../boot.js"></script>
+<script src="../../../source.js"></script>
+<script>
+$import("org.xidea.jsidoc.JSIDoc",true);
+$import("org.xidea.jsidoc.MenuUI",true);
+</script>
+<style>
+frame,frameset{
+    border-color:#CCF;
+}
+</style>
+<script>
+JSIDoc.initialize(["boot.js","boot-core.js","boot-log.js"],["org.xidea.syntax","org.xidea.jsidoc"]);
+var link = window.location.href.replace(/^[^\#]*([\#].*)?$/,'$1');
+window.onload = function(){
+    if(link && link.length>2){
+        var content = document.getElementById("content");
+        content.src = decodeURIComponent(link.substr(1));
+        link = '';
+    }
+}
+function contentLoad(frame){
+    //alert(history.length)
+    if(window.all){
+        document.location.replace("#"+encodeURIComponent(frame.contentWindow.location.href));
+    }
+    //alert(history.length)
+}
+</script>
+</head>
+<frameset cols="216,*"
+ border="1" frameborder="1" bordercolor="#CCF" framespacing="0" margin="0">
+<frame id="menu" name="menu"  src="html/controller.html?@menu"></frame>
+<frame id="content" name="content" onload="contentLoad(this)" src="html/welcome.html"></frame>
+</frameset>
+</html>

@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<html xmlns="http://www.xidea.org/taglib/xhtml"
+	xmlns:c="http://www.xidea.org/taglib/core">
+<head>
+<link rel="stylesheet" type="text/css" href="../styles/default.css" />
+<meta http-equiv="Content-Type" content="text/html;utf-8" />
+<title>Constructor Information:${objectInfo.name}</title>
+</head>
+<body>
+<c:if test="${objectInfo.packageInfo.name}">
+	<h2><a
+		href="?${objectInfo.packageInfo.getPath()}">${objectInfo.packageInfo.name}</a></h2>
+</c:if>
+<div><a class="item-constructor">Object</a></div>
+<c:forEach var='c' items="${objectInfo.getInheritList()}" varStatus="i">
+	<div class='inheritor' style="margin-left:${(1+i.index)*34}px;">
+	<c:if test="${i.last}">
+		<a class="item-constructor"> ${c.name}</a>
+	</c:if> <c:else>
+		<a class="item-constructor"
+			href="?${c.getPath()}"> ${c.name}</a>
+	</c:else></div>
+</c:forEach>
+<h2>类(构造器)信息</h2>
+<table border="0" cellpadding="0" width="100%" cellspacing="0"
+	class="content">
+	<thead>
+		<tr>
+			<th><span class="item-constructor"> ${objectInfo.getAccess()}
+			<a
+				href="?${objectInfo.fileInfo.getPath()}#${objectInfo.name}">${objectInfo.name}</a>${objectInfo.getParams()}</span></th>
+		</tr>
+	</thead>
+	<tr>
+		<td>
+		<ul>
+			${objectInfo.getDescription()}
+		</ul>
+		</td>
+	</tr>
+	<c:if test="${objectInfo.getParams().length}">
+		<tr>
+			<td>
+			<h2>参数</h2>
+			<ul>
+				<c:forEach var="param" items="${objectInfo.getParams().data}">
+					<h3>${param.name}</h3>
+					<p>${param.description||''}</p>
+				</c:forEach>
+			</ul>
+			</td>
+		</tr>
+	</c:if>
+</table>
+<c:set var="memberInfos" value="${objectInfo.getStaticInfos()}"/>
+<c:if test="${memberInfos.length>0}">
+	<table cellpadding="0" width="100%" cellspacing="0" class="content">
+		<thead>
+			<tr>
+				<th colspan="3">类属性摘要</th>
+			</tr>
+		</thead>
+		<c:forEach var="memberName" items="${memberInfos}">
+			<c:set var="memberInfo" value="${memberInfos[memberName]}" />
+			<tr>
+				<td><span
+					title="${memberInfo.getAccess()} static ${memberInfo.type}"
+					class="item-${memberInfo.type}"> 
+					<a href="#${memberInfo.name}">${memberName}</a>
+				</span></td>
+				<td>${memberInfo.getAccess()||'&#160;'}</td>
+				<td>${memberInfo.getShortDescription()}&#160;</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+				</td>
+			</tr>
+		</c:forEach>
+	</table>
+	<br />
+	<br />
+</c:if>
+<c:set var="memberInfos" value="${objectInfo.getInstanceInfos()}" />
+<c:if test="${memberInfos.length>0}">
+	<table cellpadding="0" width="100%" cellspacing="0" class="content">
+		<thead>
+			<tr>
+				<th colspan="3">实例属性摘要</th>
+			</tr>
+		</thead>
+		<c:forEach var="memberName" items="${memberInfos}">
+			<c:set var="memberInfo" value="${memberInfos[memberName]}" />
+			<tr>
+				<td><span
+					class="item-${memberInfo.type}">
+					<c:if  test="${memberInfo.getPlace() == objectInfo}">
+                      <a title="${memberInfo.type}" href="#${memberInfo.name}">${memberName}</a>
+                    </c:if> <c:else>
+                      <c:set var="memberInfo" value="${memberInfo.getPlace().getInstanceInfo(memberName) || memberInfo}" />
+                      
+                      <a title="${memberInfo.type} 继承自:${memberInfo.getPlace().getPath()}"
+                         href="?${memberInfo.getPlace().getPath()}#${memberInfo.name}">${memberName}[&#8593;]</a>
+                    </c:else>
+				</span></td>
+				<td>${memberInfo.getAccess()||'&#160;'}</td>
+				<td>${memberInfo.getShortDescription()}&#160;</td>
+			</tr>
+			<tr>
+				<td colspan="3">
+				</td>
+			</tr>
+		</c:forEach>
+	</table>
+	<br />
+	<br />
+</c:if>
+<c:set var="memberInfos" value="${objectInfo.getDeclaredStaticInfos()}" />
+<c:if test="${memberInfos.length>0}">
+    <h2>类属性详细信息</h2>
+    <c:forEach var="memberName" items="${memberInfos}">
+        <c:set var="memberInfo" value="${memberInfos[memberName]}" />
+        <a name="${memberInfo.name}"></a>
+        <c:choose>
+            <c:when test="${memberInfo.type == 'function'}">
+                <span class="item-function"> static ${memberInfo.getAccess()}
+                ${memberInfo.getReturnInfo()} <a
+                    href="?${memberInfo.fileInfo.getPath()}#${memberInfo.name}">${memberName}</a>${memberInfo.getParams()}</span>
+                <ul>
+                    ${memberInfo.getDescription()}
+                </ul>
+                <c:if test="${memberInfo.getParams().length}">
+                    <h2>参数</h2>
+                    <ul>
+                        <c:forEach var="param" items="${memberInfo.getParams().data}">
+                            <h3>${param.name}</h3>
+                            <p>${param.description||''}</p>
+                        </c:forEach>
+                    </ul>
+                </c:if>
+                <c:if test="${memberInfo.getReturnInfo().isValid()}">
+                    <h2>返回</h2>
+                    <ul>
+                        <p>${memberInfo.getReturnInfo().description||''}</p>
+                    </ul>
+                </c:if>
+            </c:when>
+            <c:when test="${memberInfo.type == 'constructor'}">
+                <span class="item-constructor"> static ${memberInfo.getAccess()} <a
+                    href="?${memberInfo.fileInfo.getPath()}#${memberInfo.name}">${memberName}</a>${memberInfo.getParams()}</span>
+                <ul>
+                    ${memberInfo.getDescription()}
+                </ul>
+                <ul>
+                    <p>参考：<a class="item-constructor"
+                        href="?${memberInfo.getPath()}">${memberInfo.name}</a></p>
+                </ul>
+            </c:when>
+            <c:when test="${memberInfo.type == 'object'}">
+                <span class="item-object"> static ${memberInfo.getAccess()} <a
+                    href="?${memberInfo.fileInfo.getPath()}#${memberInfo.name}">${memberName}</a></span>
+                <ul>
+                    ${memberInfo.getDescription()}&#160;
+                </ul>
+                <c:set var="constructorInfo" value="${memberInfo.getConstructorInfo()}" />
+                <c:if test="${constructorInfo}">
+                    <ul>
+                        <p>构造器：<a class="item-constructor"
+                            href="?constructorInfo.getPath()">${constructorInfo.name}</a></p>
+                    </ul>
+                </c:if>
+            </c:when>
+            <c:otherwise>
+                <span class="item-${memberInfo.type}"> static ${memberInfo.getAccess()}
+                <a
+                    href="?${memberInfo.fileInfo.getPath()}#${memberInfo.name}">${memberName}</a></span>
+                <ul>
+                    ${memberInfo.getDescription()}&#160;
+                </ul>
+            </c:otherwise>
+        </c:choose>
+        <hr />
+    </c:forEach>
+    <br />
+</c:if>
+
+
+
+<c:set var="memberInfos" value="${objectInfo.getDeclaredInstanceInfos()}" />
+<c:if test="${memberInfos.length>0}">
+	<h2>实例属性详细信息</h2>
+	<c:forEach var="memberName" items="${memberInfos}">
+		<c:set var="memberInfo" value="${memberInfos[memberName]}" />
+		<a name="${memberInfo.name}"></a>
+		<c:choose>
+			<c:when test="${memberInfo.type == 'function'}">
+				<span class="item-function"> ${memberInfo.getAccess()}
+				${memberInfo.getReturnInfo()} <a
+					href="?${memberInfo.fileInfo.getPath()}#${memberInfo.name}">${memberName}</a>${memberInfo.getParams()}</span>
+				<ul>
+					${memberInfo.getDescription() ||'&#160;'}
+				</ul>
+				<c:if test="${memberInfo.getParams().length}">
+					<h2>参数</h2>
+					<ul>
+						<c:forEach var="param" items="${memberInfo.getParams().data}">
+							<h3>${param.name}</h3>
+							<p>${param.description||''}</p>
+						</c:forEach>
+					</ul>
+				</c:if>
+				<c:if test="${memberInfo.getReturnInfo().isValid()}">
+					<h2>返回</h2>
+					<ul>
+						<p>${memberInfo.getReturnInfo().description||''}</p>
+					</ul>
+				</c:if>
+			</c:when>
+			<c:when test="${memberInfo.type == 'constructor'}">
+				<span class="item-constructor"> ${memberInfo.getAccess()}<a
+                    href="?${memberInfo.fileInfo.getPath()}#${memberInfo.name}">${memberName}</a>${memberInfo.getParams()}</span>
+                <ul>
+                    ${memberInfo.getDescription() ||'&#160;'}
+                </ul>
+				<ul>
+					<p>参考：<a class="item-constructor"
+						onclick="return parent.jsdoc.gen({cmd:'genObject',args:['${memberInfo.name}','${memberInfo.fileInfo.packageInfo.name}']},'${memberInfo.name}')"
+						href="?${memberInfo.fileInfo.getPath()}#${memberInfo.name}">${memberInfo.name}</a></p>
+				</ul>
+			</c:when>
+			<c:when test="${memberInfo.type == 'object'}">
+				<span class="item-object"> ${memberInfo.getAccess()} <a
+					href="?${memberInfo.fileInfo.getPath()}#${memberInfo.name}">${memberName}</a></span>
+				<ul>
+					${memberInfo.getDescription() ||'&#160;'}
+				</ul>
+                <c:set var="constructorInfo" value="${memberInfo.getConstructorInfo()}" />
+                <c:if test="${constructorInfo}">
+                    <ul>
+                        <p>构造器：<a class="item-constructor"
+                            href="?${constructorInfo.getPath()}">${constructorInfo.name}</a></p>
+                    </ul>
+                </c:if>
+            </c:when>
+            <c:otherwise>
+                <span class="item-${memberInfo.type}"> ${memberInfo.getAccess()} <a
+                    href="?${memberInfo.fileInfo.getPath()}#${memberInfo.name}">${memberName}</a></span>
+                <ul>
+                    ${memberInfo.getDescription() }
+                </ul>
+			</c:otherwise>
+		</c:choose>
+		<hr />
+	</c:forEach>
+	<br />
+</c:if>
+</body>
+</html>

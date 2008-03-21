@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<html xmlns="http://www.xidea.org/taglib/xhtml"
+	xmlns:c="http://www.xidea.org/taglib/core">
+<head>
+<base target="content"/>
+<meta http-equiv="Content-Type" content="text/html;utf-8" />
+<title>JSIntegeration Doc Menu</title>
+<link rel="stylesheet" type="text/css" href="../styles/menu.css" />
+<script>//<!-- opera bug --><![CDATA[
+function collapse(li){
+  while(li && li.tagName!="LI"){
+    li = li.parentNode;
+  }
+  if(li.className.indexOf("open")>-1){
+    li.className = li.className.replace(/\bopen\b/,'closed');
+  }else{
+    li.className = li.className.replace(/\bclosed\b/,'open');
+  }
+}
+
+window.onload = window.onresize = function(){
+    var content = document.getElementById("content");
+    content.style.width = document.body.clientWidth-10+'px';
+    content.style.height = document.body.clientHeight-35+'px';
+}
+//]]> 
+</script>
+<script>
+function doExport(){
+    //window.open('export.html','test','left=100,top=100,width=400px,height=500px,resizable=1,scrollbars=yes');
+    //return false;
+    return true;
+}
+</script>
+
+</head>
+<body style="margin: 0px;padding: 0px;">
+<div id="header">
+<a title="JSI首页" href="http://www.xidea.org/project/jsi" target="_top" class="boxlink">项目首页</a> 
+<a title="JSIDoc主页" href="welcome.html" class="boxlink">文档首页</a> 
+<a title="JSIDoc主页" href="export.html" onclick="doExport() "  class="boxlink">导出</a> 
+
+</div>
+<div id="content">
+<h4>JSI脚本</h4>
+<ul class="root-pane">
+	<c:forEach var="object" items="${rootInfo.getObjectInfos()}">
+      <c:if test="${' Log Package ScriptLoader'.indexOf(object.name)>0}">
+		<li title="file:${object.fileInfo.name}"><a
+			class="item-${object.type}"
+			style="color:#888" title="内部对象"
+			href="?:${object.name}">
+          [${object.name}]
+          </a>
+        </li>
+      </c:if>
+      <c:else>
+        <li title="file:${object.fileInfo.name}"><a
+            class="item-${object.type}"
+            href="?:${object.name}">
+          ${object.name}
+          </a>
+        </li>
+      </c:else>
+	</c:forEach>
+</ul>
+<h4>托管脚本示例</h4>
+<ul class="package-pane">
+	<c:forEach var="packageInfo" items="${packageInfos}">
+		<c:if test="${packageInfo.implementation}">
+			<li class="closed">
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr>
+					<td style="width:14px;">
+					<button class="openhandle" onclick="collapse(this)">+</button>
+					<button class="closehandle" onclick="collapse(this)">-</button>
+					</td>
+					<td><a class="item-package-ref"
+						 href="?${packageInfo.implementation}:">${packageInfo.name}
+					</a></td>
+				</tr>
+				<tr>
+					<td colspan="2">
+					<ul>
+						<div>指向: ${packageInfo.implementation}</div>
+					</ul>
+					</td>
+				</tr>
+			</table>
+			</li>
+		</c:if>
+		<c:else>
+			<li title="${packageInfo.getDescription()}" class="closed" onclick="parent.MenuUI.loadPackage(document,'${packageInfo.name}')">
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr>
+					<td style="width:14px;">
+					<button class="openhandle" onclick="collapse(this)">+</button>
+					<button class="closehandle" onclick="collapse(this)">-</button>
+					</td>
+					<td><a class="item-package"
+						href="?${packageInfo.name}:">${packageInfo.name}
+					</a></td>
+				</tr>
+				<tr>
+					<td colspan="2">
+					<ul id="package_${packageInfo.name}" title="loading">
+						<div class="loading">Loading....</div>
+					</ul>
+					</td>
+				</tr>
+			</table>
+			</li>
+		</c:else>
+	</c:forEach>
+</ul>
+</div>
+</body>
+</html>

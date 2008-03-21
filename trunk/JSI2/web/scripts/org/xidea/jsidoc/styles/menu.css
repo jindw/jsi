@@ -1,0 +1,67 @@
+@IMPORT url("default.css");
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#CCF;
+}
+#header{
+    z-index:2;
+    position:absolute;
+    top:0px;
+	background-color:#CCF;
+	text-align: right;
+    width:100%;
+    height:25px;
+}
+#header a{
+    font-size:12px;
+    line-height:12px;
+    color:#333333;
+    border: 1px solid #000000;
+    text-decoration:none;
+    margin: 2px;
+    padding: 2px;
+}
+#content{
+    position:absolute;
+    overflow-x:hidden;
+    overflow:auto;
+    top:25px;
+    border:5px solid #CCF;
+    height:98%;
+    background:#FFF;
+    /*height:expression((this.parentNode.clientHeight-40)+'px');*/
+    /*width:expression((this.parentNode.clientWidth-10)+'px');*/
+}
+
+h2,h3,h4,h5{
+    width:100%;
+    text-indent: 4px;
+    margin: 0px;
+    background-color: #EEF;
+}
+li{
+    position:static;
+    margin: 0px;
+    padding-left: 5px;
+    list-style-type: none;
+    overflow:hidden;
+}
+.root-pane li{
+    padding-left: 25px;
+}
+li li{
+    padding-top: 4px;
+    padding-left: 20px;
+}
+ul{
+    zoom:1;
+    width:100%;
+    overflow:hidden;
+    background-color:#FFF;
+    margin: 0px;
+    margin-top: 6px;
+    padding: 0px;
+}
