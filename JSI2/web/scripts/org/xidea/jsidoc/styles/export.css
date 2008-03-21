@@ -1,0 +1,91 @@
+@IMPORT url("default.css");
+html,body{
+    width:100%;
+    height:100%;
+    padding:0px;
+    margin:0px;
+    overflow:hidden;
+}
+.open tbody{
+    padding-left: 20px;
+    display: ;
+}
+.closed tbody{
+    display: none;
+}
+.handlebox,.checkbox,.flagbox{
+    width:20px;
+}
+.checkbox0,.checkbox1,.checkbox2,.checkbox3,.checkbox4{
+    background-image: url("checkbox.gif");
+    background-repeat: no-repeat;
+    cursor:pointer;
+    width:20px;
+}
+.checkbox1{
+    background-position: 0 -32px;
+}
+.checkbox2{
+    background-position: 0 -64px;
+}
+.checkbox3{
+    background-position: 0 -96px;
+}
+.checkbox4{
+    background-position: 0 -128px;
+}
+
+td{
+    vertical-align:top;
+}
+#header{
+    font-size: 100%;
+    font-weight:bold;
+    padding-top:3px;
+    text-indent:12px;
+    overflow:hidden;
+}
+#header,#footer{
+    position:absolute;
+    background:#CCF;
+    width:100%;
+    height:28px;
+}
+#footer{
+    bottom:0px;
+}
+#body{
+    padding-top:40px;
+    height:90%;
+}
+#treeContainer,#output{
+    position:absolute;
+    top:35px;
+    width:47%;
+    height:85%;
+    padding:1%;
+    border:1px solid #DDD;
+    overflow:auto;
+}
+#treeContainer{
+    left:5px;
+}
+
+#output{
+    right:5px;
+}
+fieldset{
+    height:32%;
+    padding:0px;
+    padding-top:5px;
+    padding-left:8px;
+}
+legend{
+    font-size: 110%;
+    font-weight:bold;
+}
+#fileListOutput,#objectListOutput{
+    height:85%;
+    overflow:auto;
+    cursor:pointer;
+}

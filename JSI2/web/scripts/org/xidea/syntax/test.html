@@ -1,0 +1,70 @@
+<HTML>
+<SCRIPT src="../../../boot.js" language="JavaScript">
+</SCRIPT>
+<SCRIPT language="JavaScript">
+</SCRIPT>
+<style>
+  .comment,.mcomment{
+    color:blue;
+  }
+  .source{
+    border:1px blue solid;
+  }
+
+  .keyword{
+    color:red;
+  }
+  .document{
+    color:#00F;
+  }
+  .code{
+    clear:both;
+    color:#888;
+  }
+</style>
+<BODY>
+<textarea>
+//for test
+//$import("js.lang.ext.RegExp");
+//alert(RegExp);
+//$import("js.io.Request");
+//alert(Request)
+$import("org.xidea.syntax.ECMAParser");
+alert(ECMAParser)
+$import("org.xidea.syntax.LineIterator");
+/**
+ * @public
+ */
+function test(){
+}
+</textarea>
+
+<SCRIPT>
+$import("org.xidea.syntax.ECMAParser");
+$import("org.xidea.syntax.LineIterator");
+
+//var text = new Request("source-parser.js").send().getText();
+//var text = "/**\n * @param xxxxx\n */\nvar text = '123'";
+//var text = "var text = '123';text = \"456\";var b = 1>4;/**comment */  comm//123";
+var text = document.getElementsByTagName("textarea")[0].value;
+var p = new ECMAParser(text);
+try{
+  p.parse();
+  var buf = "";
+  var l,it = new LineIterator(p);
+  //alert(p.partitions.length)
+  while(null!=(l = it.next())){
+    document.write("<div>"+l+"</div>");
+  }
+}catch(e){
+  var buf = "";
+  for(var n in e){
+    buf+=n+":"+e[n]+";"
+  }
+  alert(buf);
+  throw e;
+}
+//alert(document.body.innerHTML)
+</SCRIPT>
+
+</BODY></HTML>

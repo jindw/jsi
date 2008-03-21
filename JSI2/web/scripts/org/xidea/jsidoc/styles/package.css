@@ -1,0 +1,53 @@
+@IMPORT url("default.css");
+@IMPORT url("source.css");
+.package-source{
+	overflow: auto;
+	width: 90%;
+	margin: 2%;
+	margin-left: 6%;
+	max-height: 180px;
+}
+.xidea--syntax-source{
+	width: 100%;
+	height:60px;
+}
+.xidea--syntax-source th{
+	height:12px;
+	text-align: left;
+	color: black;
+}
+.xidea--syntax-source td{
+	vertical-align: top;
+}
+.content{
+	padding: 0px;
+}
+.content th{
+	background-color:#EEEEFF;
+	text-align: left;
+}
+.content td,.content th{
+}
+.space{
+	height: 40px;
+}
+.space td{
+}
+
+h2{
+    background-image: url("item-package.gif");
+    background-repeat: no-repeat;
+    margin-left: 4px;
+    background: #DDDDFF;
+    text-align: left;
+    border-right:1px solid #ccc;
+    border-bottom:1px solid #ccc;
+    padding:3px;
+    margin:0px;
+    height:20px;
+    overflow:hidden;
+    font-size: 110%;
+}
+table.content{
+    margin:1%;
+}

@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<title>Test $Request</title>
+	</head>
+	<script src="../../../../boot.js"></script>
+	<body topmargin="0" bottommargin="0">
+	<div id="loading">Loading.....<div>
+	<script>
+	  var className = window.location.href;
+	  className = className.substr(className.lastIndexOf("?")+1);
+	  var path = className.replace('@','.');
+	  className = className.substr(className.indexOf('@')+1);
+	  var target = new Object();
+	  try{
+
+	    $import(path,null,target);
+	    var cs = className.split(".");
+	    var clazz=target;
+	    for(var i=0;i<cs.length;i++){
+	      clazz =  clazz[cs[i]];
+	    }
+	    
+	    try{
+	      document.getElementById("loading").style.display='none';
+	      if(clazz==null){
+	        document.write("load a null value:"+path);
+	        setTimeout(
+	          function(){window.parent.LoaderTest.loadNull(path);},100
+	        )
+	      }else{
+	        document.write("load success:"+path);
+	        setTimeout(
+	          function(){window.parent.LoaderTest.loadSuccess(path);},100
+	        );
+	      }
+	    }catch(e){alert(e)}
+	  }catch(e){
+	    document.getElementById("loading").style.display='none';
+	    document.write("load fail:"+path+":"+path);
+	    setTimeout(
+	        function(){window.parent.LoaderTest.loadFailure(path,e);},100
+	    );
+	  }
+
+	</script>
+	</body>
+</html>
