@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:d="http://www.xidea.org/taglib/decorator" xml:lang="zh_CN"
+  lang="zh_CN">
+  <head>  
+    <title>重用aculo Effect脚本实例</title>
+    <link rel="stylesheet" href="../styles/default.css" type="text/css" />
+    <script src="../scripts/boot.js"></script>
+    <script>
+      $import("example.slidePanel");
+    </script>
+  </head>
+  <body>
+    <div id="main" class="menu">
+      <div onclick="slidePanel('panel1')" class="header"> 面板 1 </div>
+      <div id="panel1" class="panel">
+        <ul>
+          <li>text1</li>
+          <li>text2</li>
+          <li>text3</li>
+        </ul>
+      </div>
+      <div onclick="slidePanel('panel2')" class="header"> 面板 2 </div>
+      <div id="panel2" class="panel">
+        <ul>
+          <li>text1</li>
+          <li>text2</li>
+          <li>text3</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

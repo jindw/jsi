@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:d="http://www.xidea.org/taglib/decorator" xml:lang="zh_CN"
+  lang="zh_CN">
+<head>
+<script src="../scripts/boot.js"></script>
+<title>灭鼠记-JSI</title>
+</head>
+<body>
+<script>
+//导入下列脚本中将直接引用的类Cat和Mouse
+//$import("example.cat.Animal");
+$import("example.cat.Cat");
+$import("example.cat.Mouse");
+
+//有只猫
+var cat = new Cat();
+//有只老鼠
+var mouse = new Mouse();
+
+//打印猫抓到老鼠的结果
+document.write("<h1>猫抓老鼠的结果： "+cat.lookForFood(mouse)+"<h1>");
+</script>
+</body>
+</html>
