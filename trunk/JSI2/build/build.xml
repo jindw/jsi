@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="GBK"?>
+<project name="JSIntegration" default="build" basedir="../">
+	<property name="version" value="2.0-preview-2007-05-11" />
+	<taskdef resource="jst-task.properties" classpath="build/lib/JSA.jar" />
+	<target name="init">
+		<delete dir="build/temp">
+		</delete>
+		<mkdir dir="build/temp/scripts" />
+		<mkdir dir="build/dest" />
+	</target>
+	<target name="build-static">
+		<unzip src="build/dest/JSI-${version}.zip" dest="build/temp/server">
+		</unzip>
+		<move todir="build/temp/server-dyn" includeemptydirs="false">
+			<fileset dir="build/temp/server" defaultexcludes="false">
+				<exclude name="**/*.xml" />
+				<exclude name="**/*.xsl" />
+				<exclude name="**/*.htm" />
+				<exclude name="**/*.html" />
+				<exclude name="**/*.xhtml" />
+				<exclude name="**/*.css" />
+				<exclude name="**/*.doc" />
+				<exclude name="**/*.js" />
+				<exclude name="**/*.htc" />
+				<exclude name="**/*.hta" />
+				<exclude name="**/*.txt" />
+				<exclude name="**/*.jpeg" />
+				<exclude name="**/*.jpg" />
+				<exclude name="**/*.png" />
+				<exclude name="**/*.gif" />
+				<exclude name="**/*.swf" />
+			</fileset>
+		</move>
+	</target>
+	<target name="build" depends="compress">
+		<delete file="build/dest/JSI-${version}.tar">
+		</delete>
+		<tar destfile="build/dest/JSI-${version}.tar" compression="gzip">
+			<tarfileset dir="build/temp">
+				<include name="scripts/**/*.*" />
+				<exclude name="**/*.db" />
+			</tarfileset>
+			<tarfileset dir="web">
+				<exclude name="scripts/**/*.*" />
+				<exclude name="WEB-INF/**/*.*" />
+				<exclude name="**/*.db" />
+				<include name="**/*.*" />
+			</tarfileset>
+		</tar>
+		<zip destfile="build/dest/JSI-${version}.zip" compress="true">
+			<zipfileset dir="build/temp">
+				<include name="scripts/**/*.*" />
+				<exclude name="**/*.db" />
+			</zipfileset>
+			<zipfileset dir="web">
+				<exclude name="scripts/**/*.*" />
+				<exclude name="WEB-INF/**/*.*" />
+				<exclude name="**/*.db" />
+				<include name="**/*.*" />
+			</zipfileset>
+		</zip>
+	</target>
+	<target name="buildFull">
+		<zip destfile="build/dest/JSI-full-${version}.zip">
+			<zipfileset src="build/dest/JSI-${version}.zip" />
+			<zipfileset src="build/lib/JSI-thirdparty-2007-05-09.zip" />
+		</zip>
+	</target>
+	<target name="compress" depends="init">
+		<jsicompile syntaxcompression="false" destDir="build/temp/scripts" charset="utf-8">
+			<fileset dir="web/scripts">
+				<include name="*/**/*.*" />
+				<include name="*.*" />
+				<exclude name="*rhino*" />
+				<exclude name="preload/**" />
+			</fileset>
+			<preloadgroup path="code-decorator.js">
+				<fileset dir="web/scripts">
+					<include name='js/io/__$package.js' />
+					<include name='js/io/request.js' />
+					<include name='js/io/writer.js' />
+					<include name='js/xml/__$package.js' />
+					<include name='js/xml/template.js' />
+					<include name='js/xml/tag.js' />
+					<include name='js/util/__$package.js' />
+					<include name='js/util/collections.js' />
+					<include name='org/xidea/syntax/__$package.js' />
+					<include name='org/xidea/syntax/syntax-parser.js' />
+					<include name='org/xidea/decorator/__$package.js' />
+					<include name='org/xidea/decorator/code.js' />
+				</fileset>
+			</preloadgroup>
+		</jsicompile>
+	</target>
+	<target name="compressAllInOne">
+		<delete dir="build/temp/scripts2" />
+		<mkdir dir="build/temp/scripts2" />
+		<jsicompile syntaxcompression="false" textcompression="false" destDir="build/temp/scripts2" rebuildboot="true" charset="utf-8">
+			<fileset dir="web/scripts">
+				<include name="*/**/*.*" />
+				<include name="*.*" />
+				<exclude name="*rhino*" />
+				<exclude name="org/**/*.*" />
+				<exclude name="preload/**" />
+			</fileset>
+			<preloadgroup>
+				<fileset dir="web/scripts">
+					<include name="*/**/*.*" />
+					<include name="*.*" />
+					<exclude name="*rhino*" />
+					<exclude name="org/**/*.*" />
+					<exclude name="preload/**" />
+				</fileset>
+			</preloadgroup>
+		</jsicompile>
+	</target>
+	<target name="compressForBaidu">
+		<delete dir="build/temp/scripts2" />
+		<mkdir dir="build/temp/scripts2" />
+		<jsicompile syntaxcompression="false" textcompression="false" destDir="build/temp/scripts2" charset="utf-8">
+			<fileset dir="web/scripts">
+				<include name="js/**/*.js" />
+				<include name="org/xidea/syntax/**/*.js" />
+				<include name="org/xidea/xml/**/*.js" />
+				<include name="org/xidea/util/**/*.js" />
+				<include name="*.*" />
+				<exclude name="*rhino*" />
+			</fileset>
+			<preloadgroup>
+				<fileset dir="web/scripts">
+					<include name="js/**/*.js" />
+					<include name="org/xidea/syntax/**/*.js" />
+					<include name="org/xidea/xml/**/*.js" />
+					<include name="org/xidea/util/**/*.js" />
+					<include name="*.*" />
+					<exclude name="*rhino*" />
+				</fileset>
+			</preloadgroup>
+		</jsicompile>
+	</target>
+	<target name="compressSimple">
+		<delete dir="build/temp/scripts2" />
+		<mkdir dir="build/temp/scripts2" />
+		<jsicompile syntaxcompression="false" textcompression="false" destDir="build/temp/scripts2" charset="utf-8">
+			<fileset dir="web/scripts">
+				<include name="*.*" />
+				<include name="**/*.*" />
+				<include name="js/lang/*.*" />
+				<include name="js/html/*.*" />
+				<include name="js/util/*.*" />
+				<exclude name="*rhino*" />
+			</fileset>
+			<preloadgroup>
+				<fileset dir="web/scripts">
+					<include name="*.*" />
+					<include name="**/*.*" />
+					<include name="js/lang/__package__.js" />
+					<include name="js/html/*.*" />
+					<include name="js/util/*.*" />
+					<exclude name="*rhino*" />
+				</fileset>
+			</preloadgroup>
+		</jsicompile>
+	</target>
+</project>
