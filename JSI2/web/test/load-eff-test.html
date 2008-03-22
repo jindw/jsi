@@ -1,0 +1,120 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script src="../scripts/boot.js"></script>
+</head>
+<body>
+<div id="result"></div>
+<script>
+function showResult(text){
+  document.getElementById("result").innerHTML = text;
+}
+var classpath = [
+'com.yahoo.yui.*',
+'net.conio.prototype.*',
+'net.fckeditor.*',
+'org.jquery.*',
+'us.aculo.script.*'
+];
+
+var scriptpath = [
+
+'com/yahoo/yui/v0_11_1/yahoo.js',
+'com/yahoo/yui/v0_11_1/dom.js',
+'com/yahoo/yui/v0_11_1/event.js',
+'com/yahoo/yui/v0_11_1/animation.js',
+'com/yahoo/yui/v0_11_1/autocomplete.js',
+'com/yahoo/yui/v0_11_1/calendar.js',
+'com/yahoo/yui/v0_11_1/connection.js',
+'com/yahoo/yui/v0_11_1/container.js',
+'com/yahoo/yui/v0_11_1/dragdrop.js',
+'com/yahoo/yui/v0_11_1/logger.js',
+'com/yahoo/yui/v0_11_1/menu.js',
+'com/yahoo/yui/v0_11_1/slider.js',
+'com/yahoo/yui/v0_11_1/treeview.js',
+"net/conio/prototype/v1_5/prototype.js",
+"net/fckeditor/v2_3_1/fckeditor.js",
+"org/jquery/v1_1_2/jquery.js",
+"us/aculo/script/v1_7/builder.js",
+"us/aculo/script/v1_7/effects.js",
+"us/aculo/script/v1_7/controls.js",
+"us/aculo/script/v1_7/dragdrop.js",
+"us/aculo/script/v1_7/slider.js",
+"us/aculo/script/v1_7/unittest.js"
+];
+var x = [
+  //"resource/nbimport.js",
+  "preload/com/yahoo/yui/__$package.js",
+  //"resource/nbimport.js",
+  "preload/com/yahoo/yui/v0_11_1/__$package.js",
+  //"resource/nbimport.js",
+  "preload/com/yahoo/yui/v0_11_1/undefined",
+  //"resource/nbimport.js",
+  "preload/net/conio/prototype/__$package.js",
+  //"resource/nbimport.js",
+  "preload/net/conio/prototype/v1_5/__$package.js",
+  //"resource/nbimport.js",
+  "preload/net/conio/prototype/v1_5/undefined",
+  //"resource/nbimport.js",
+  "preload/net/fckeditor/__$package.js",
+  //"resource/nbimport.js",
+  "preload/net/fckeditor/v2_3_1/__$package.js",
+  //"resource/nbimport.js",
+  "preload/net/fckeditor/v2_3_1/undefined",
+  //"resource/nbimport.js",
+  "preload/org/jquery/__$package.js",
+  //"resource/nbimport.js",
+  "preload/org/jquery/v1_1_2/__$package.js",
+  //"resource/nbimport.js",
+  "preload/org/jquery/v1_1_2/undefined",
+  //"resource/nbimport.js",
+  "preload/us/aculo/script/__$package.js",
+  //"resource/nbimport.js",
+  "preload/us/aculo/script/v1_7/__$package.js",
+  //"resource/nbimport.js",
+  "preload/us/aculo/script/v1_7/undefined",
+  //"resource/nbimport.js"
+
+
+];
+var flag = 2;
+if(flag == 1 || !flag&&confirm('测试同步导入?')){
+  var begin = new Date();
+  for(var i=0;i<classpath.length;i++){
+    $import(classpath[i]);
+  }
+  showResult("同步导入时间:" + (new Date() - begin));
+}else if(flag == 2 || !flag&&confirm('测试延迟导入?')){
+  flag = 2;
+  var begin = new Date();
+  for(var i=0;i<classpath.length;i++){
+    $import(classpath[i],true);
+  }
+}else if(flag == 3 || !flag&&confirm('测试异步导入?')){
+  var begin = new Date();
+  var i = 0;
+  function callback(){
+    if(i<classpath.length){
+      $import(classpath[i++],callback);
+    }else{
+      showResult("异步导入时间:" + (new Date() - begin));
+    }
+  }
+  callback()
+}else{
+  flag = 4;
+  var begin = new Date();
+  for(var i=0;i<scriptpath.length;i++){
+    document.write($JSI.scriptBase + "/"+scriptpath[i]);
+  }
+}
+</script>
+<script>
+  if(flag == 2){
+    showResult("延迟导入时间:" + (new Date() - begin));
+  }else if(flag == 4){
+    showResult("延迟导入时间:" + (new Date() - begin));
+  }
+</script>
+</body>
+</html>

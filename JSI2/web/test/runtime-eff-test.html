@@ -1,0 +1,45 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script src="../scripts/boot.js"></script>
+</head>
+<body>
+<script>
+
+/**
+ * 测试装载单元内程序运行效率
+ */
+function test2(i,j){
+  internal(i,j);
+}
+var a = 0,b = 0;
+/*
+ * 内部函数
+ */
+function internal(i,j){
+  if(j-->=0){
+    internal(i,j);
+  }
+  for(;i>0;i--){
+    a++;b++;
+  }
+}
+$import("org.xidea.example.test");
+var inc =500;
+var jsiTime = 0,scriptTime = 0;
+var i=100,j=10;
+while(inc-->0){
+  var t1 = new Date();
+  test(i,j);
+  var t2 = new Date();
+  test2(i,j);
+  var t3 = new Date();
+  jsiTime+=(t2-t1);
+  scriptTime +=(t3-t2);
+}
+document.write(jsiTime+'/'+scriptTime);
+
+</script>
+
+</body>
+</html>
