@@ -191,8 +191,35 @@ var scriptBase = this.scriptBase;
 var resourceBase = scriptBase + 'html/';
 var packageName = scriptBase.substr($JSI.scriptBase.length).replace(/\//g,'.').replace(/\.$/,'');
 var resourcePackageName = packageName + '.html';
-
-
+var jsiCacher = $JSI.cacheScript;
+$JSI.cacheScript = function(pkg,file2dataMap,value){
+    if(cachedScripts[pkg]){ //比较少见
+    　    pkg = cachedScripts[pkg];
+        if(value == null){//null避免空串影响
+            for(var n in file2dataMap){
+                pkg[n] = file2dataMap[n];
+            }
+        }else{
+            pkg[file2dataMap] = value;
+        }
+    }else {
+        if(value == null){//null避免空串影响
+            cachedScripts[pkg] = file2dataMap;
+        }else{
+        　　(cachedScripts[pkg] = {})[file2dataMap] = value;
+        }
+    }
+};
+/*
+ * 获取脚本缓存。
+ * @private
+ * @param <string>packageName 包名
+ * @param <string>fileName 文件名
+ */
+function getCacheScript(pkg,fileName){
+    pkg = cachedScripts[pkg];
+    return pkg && pkg[fileName];
+};
 /**
  * @internal
  */

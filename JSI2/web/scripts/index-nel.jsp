@@ -8,7 +8,7 @@
     int pos = path.lastIndexOf('/');
     String packageName = path.substring(pos+1);
     String fileName = path.substring(0,pos).replace('/', '.');
-%>$JSI.addCacheScript('<%=packageName%>','<%=fileName%>',function(){eval(this.varText);<jsp:include page="<%=path%>"/>
+%>$JSI.cacheScript('<%=packageName%>','<%=fileName%>',function(){eval(this.varText);<jsp:include page="<%=path%>"/>
 })
 
 <%--

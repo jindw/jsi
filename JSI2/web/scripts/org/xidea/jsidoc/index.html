@@ -27,12 +27,14 @@ function contentLoad(frame){
         document.location.replace("#"+encodeURIComponent(frame.contentWindow.location.href));
     }
 }
-JSIDoc.initialize(
-    ["boot.js","boot-core.js","boot-log.js"],
-    ["org.xidea.syntax","org.xidea.jsidoc"]);
+
 if(search && search.length>2){
     var extpath = decodeURIComponent(search.substr(1));
     document.write("<script src='"+extpath+"'><\/script>")
+}else{
+    JSIDoc.initialize(
+        ["boot.js","boot-core.js","boot-log.js"],
+        ["org.xidea.syntax","org.xidea.jsidoc"]);
 }
 </script>
 
