@@ -102,48 +102,12 @@ if(":debug"){
             //document.write('<script onreadystatechange="if(this.readyState == \'loaded\'){if(/__preload__.js$/.test(this.src)){this.src=\'//:\'}}" type="text/javascript" src="'+src+impls[j]+'"></script>');
             document.write('<script src="'+scriptBase+impls[j]+'"></script>');
         }
-
-
-
-        /*
-         * Package 对象的字符串显示
-         * @private 
-         * @return <String> 
-         */
-        function toPackageString(){
-            var str = this.name;
-            str += ":\n\n this.scriptBase ";
-            str += this.scriptBase ;
-            str += "\n this.objectMap=";
-            for(var name in this.objectMap){
-                str += name+":";
-                str += this.objectMap[name] +",";
-            }
-            str += "\n this.scriptObjectMap=";
-            for(var name in this.scriptObjectMap){
-                str += name+":";
-                str += this.scriptObjectMap[name]+"," ;
-            }
-            str += "\n this.objectScriptMap=";
-            for(var name in this.objectScriptMap){
-                str += name+":";
-                str += this.objectScriptMap[name]+"," ;
-            }
-            str += "\n this.loaderMap=";
-            for(var name in this.loaderMap){
-                str += name+":";
-                str += this.loaderMap[name]+"," ;
-            }
-            return str;
-        };
-//        setTimeout(function(){
-//            var pkg = "debug.temp.$"+new Date().getTime();
-//            $JSI.addCacheScript(pkg,"",function(){});
-//            $import(pkg+':',false,null).constructor.prototype = toPackageString;
-//        },100);
-        
     })();
 }else{
-    //$JSI.scriptBase = "/script2/";
+    /*
+     * JSI2.5 起，为了避免scriptBase 探测。节省代码量，我们使用写死的方法。
+     * 如果您的网页上使用了如base之类的标签，那么，为了摸平浏览器的差异，你可能需要再这里明确指定scriptBase的准确路径。
+     */
+    //$JSI.scriptBase = "http://localhost:8080/script2/";
 }
 
