@@ -44,7 +44,7 @@ public class GenDocSimple {
 			});
 			if (files!=null && files.length > 0) {
 				//System.out.println(pkg);
-				out.println("$JSI.addCacheScript('" + pkg + "',{");
+				out.println("$JSI.cacheScript('" + pkg + "',{");
 				for (int j = 0; j < files.length; j++) {
 					File file = files[j];
 					String fileName = file.getName();
