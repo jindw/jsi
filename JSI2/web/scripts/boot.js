@@ -26,7 +26,7 @@ var $JSI= {
      * @id $JSI.scriptBase
      * @typeof string
      * @static
-     */    
+     */
 };
 
 /**
