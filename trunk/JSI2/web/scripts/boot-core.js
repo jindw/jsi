@@ -153,11 +153,11 @@ var $import = function(freeEval,cachedScripts){
      * @param <string>packageName 包名
      * @param <string>fileName 文件名
      */
-    function getCacheScript(pkg,fileName){
+    function getCachedScript(pkg,fileName){
         return (pkg = cachedScripts[pkg]) && pkg[fileName];
     };
     /**
-     * 添加脚本缓存。
+     * 缓存脚本。
      * @public
      * @param <string>packageName 包名
      * @param <string>key 文件相对路径
