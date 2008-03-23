@@ -3,7 +3,6 @@
 <meta http-equiv="Content-Type" content="text/html;utf-8"/>
 <title>JavaScript Integeration 自解析API文档</title>
 <script src="../../../boot.js"></script>
-<script src="../../../source.js"></script>
 <script>
 $import("org.xidea.jsidoc.JSIDoc",true);
 $import("org.xidea.jsidoc.MenuUI",true);
@@ -14,8 +13,8 @@ frame,frameset{
 }
 </style>
 <script>
-JSIDoc.initialize(["boot.js","boot-core.js","boot-log.js"],["org.xidea.syntax","org.xidea.jsidoc"]);
-var link = window.location.href.replace(/^[^\#]*([\#].*)?$/,'$1');
+var link = window.location.hash;
+var search = window.location.search;
 window.onload = function(){
     if(link && link.length>2){
         var content = document.getElementById("content");
@@ -24,13 +23,19 @@ window.onload = function(){
     }
 }
 function contentLoad(frame){
-    //alert(history.length)
     if(window.all){
         document.location.replace("#"+encodeURIComponent(frame.contentWindow.location.href));
     }
-    //alert(history.length)
+}
+JSIDoc.initialize(
+    ["boot.js","boot-core.js","boot-log.js"],
+    ["org.xidea.syntax","org.xidea.jsidoc"]);
+if(search && search.length>2){
+    var extpath = decodeURIComponent(search.substr(1));
+    document.write("<script src='"+extpath+"'><\/script>")
 }
 </script>
+
 </head>
 <frameset cols="216,*"
  border="1" frameborder="1" bordercolor="#CCF" framespacing="0" margin="0">
