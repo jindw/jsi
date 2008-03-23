@@ -95,7 +95,7 @@ var $import = function(freeEval,cachedScripts){
                 //更新该装载节点状态
                 data[object||0] = 1;
                 //表示缓存库已经存在
-                if(getCacheScript(packageObject.name,file) == null){
+                if(getCachedScript(packageObject.name,file) == null){
                     //hack data[1] = loader != null ||...
                     data[1] = loader;
                 }else{
@@ -154,8 +154,7 @@ var $import = function(freeEval,cachedScripts){
      * @param <string>fileName 文件名
      */
     function getCacheScript(pkg,fileName){
-        pkg = cachedScripts[pkg];
-        return pkg && pkg[fileName];
+        return (pkg = cachedScripts[pkg]) && pkg[fileName];
     };
     /**
      * 添加脚本缓存。
@@ -164,7 +163,7 @@ var $import = function(freeEval,cachedScripts){
      * @param <string>key 文件相对路径
      * @param <string|Function>value 缓存函数或文本
      */
-    $JSI.addCacheScript = function(pkg,file2dataMap,value){
+    $JSI.cacheScript = function(pkg,file2dataMap,value){
         if(cachedScripts[pkg]){ //比较少见
         　    pkg = cachedScripts[pkg];
             if(value == null){//null避免空串影响
@@ -656,7 +655,7 @@ var $import = function(freeEval,cachedScripts){
                 return packageMap[name];
             }
             if(packageMap[name] === undefined){
-                var pscript = getCacheScript(name,'') ||
+                var pscript = getCachedScript(name,'') ||
                     loadTextByURL(scriptBase+(name.replace(/\.|$/g,'/'))+ '__package__.js');
                 if(pscript){
                     return new Package(name,pscript);
@@ -780,11 +779,11 @@ var $import = function(freeEval,cachedScripts){
     function doScriptLoad(packageObject,loader){
         var name = loader.name;
         var packageName = packageObject.name;
-        var cachedScript = getCacheScript(packageName,name);
+        var cachedScript = getCachedScript(packageName,name);
         packageObject.loaderMap[name] = loader;
         try{
             if(cachedScript instanceof Function){
-                //$JSI.addCacheScript(pkgName,name,'')
+                //$JSI.cacheScript(pkgName,name,'')
                 cachedScripts[packageName][name]='';//clear cache
                 return cachedScript.call(loader);
             }else{
@@ -918,7 +917,7 @@ var $import = function(freeEval,cachedScripts){
                     while(filePath = list.pop()){
                         pkg = filePath.replace(/\/[^\/]+$/,'').replace(/\//g,'.');
                         fileName = filePath.substr(pkg.length);
-                        if(!getCacheScript(pkg,fileName)){
+                        if(!getCachedScript(pkg,fileName)){
                             //need hack? xhr.open(); xhr.send('');return ;
                             xhr.open(scriptBase + filePath) ;
                             return xhr.send('');
@@ -930,7 +929,7 @@ var $import = function(freeEval,cachedScripts){
                 var xhr = new XMLHttpRequest();
                 xhr.onreadystatechange = function(){
                     if(xhr.readyState == 4){
-                        $JSI.addCacheScript(pkg,fileName,xhr.responseText) ;
+                        $JSI.cacheScript(pkg,fileName,xhr.responseText) ;
                         next();
                     }
                 }
