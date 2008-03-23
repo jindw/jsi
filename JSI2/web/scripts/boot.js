@@ -15,24 +15,13 @@
  * @version $Id: boot.js,v 1.3 2008/02/25 05:21:27 jindw Exp $
  */
 
-/**
- * JSI对象
- * @public
- */
-var $JSI= {
-    /**
-     * 包加载的根路径，根据启动脚本文件名自动探测。
-     * @public
-     * @id $JSI.scriptBase
-     * @typeof string
-     * @static
-     */
-};
 
 /**
  * 方便调试的支持
  */
 if(":debug"){
+    var $JSI= {
+    };
     /**
      * 调试友好支持
      */
@@ -108,6 +97,19 @@ if(":debug"){
      * JSI2.5 起，为了避免scriptBase 探测。节省代码量，我们使用写死的方法。
      * 如果您的网页上使用了如base之类的标签，那么，为了摸平浏览器的差异，你可能需要再这里明确指定scriptBase的准确路径。
      */
-    //$JSI.scriptBase = "http://localhost:8080/script2/";
+    /**
+     * JSI对象
+     * @public
+     */
+    var $JSI= {
+        /**
+         * 包加载的根路径，根据启动脚本文件名自动探测。
+         * @public
+         * @id $JSI.scriptBase
+         * @typeof string
+         * @static
+         */
+         //scriptBase : "http://localhost:8080/script2/"
+    };
 }
 
