@@ -1,6 +1,17 @@
-<%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"
- isELIgnored="false"%>/**${param['path'] ==null?'':'/'}$JSI.cacheScript("${param['path']}".replace(/\/[^/]*$/,'').replace(/\//g,'.'),"${param['path']}".replace(/^.*\//,''),function(){eval(this.varText);<jsp:include
- page="${param['path'] != null?param['path']:'error'}"/>
+<%
+    String path = request.getParameter("path");
+    if(path == null){
+        // 没有指定需要代理的路径，跳转到JSI项目主页 
+        response.sendRedirect("http://www.xidea.org/project/jsi");
+        return;
+    }
+    int pos = path.lastIndexOf('/');
+    String packageName = path.substring(pos+1);
+    String fileName = path.substring(0,pos).replace('/', '.');
+%>$JSI.cacheScript('<%=packageName%>','<%=fileName%>',function(){eval(this.varText);<jsp:include page="<%=path%>"/>
 })
-${param['path'] == null?'<h3>no script specified!!</h3> <hr>REF:<a href=http://www.xidea.org/project/jsi/>JSI Home</a><script>if(confirm("这时一个JSI的代理程序，但是您未指定脚本路径，\\n跳转到JSI主页了解根多？ "))window.location="http://www.xidea.org/project/jsi/"</script>':''}
-<!--这是一个JSP EL 版的 JSI 代理程序 如果你的配置不支持EL可以使用index-nel.jsp代替 -->/**/
+
+<%--
+这是一个JSP 版本的 JSI 代理程序 
+有些服务段可能禁用EL表达式或者脚本执行功能，所以，我们准备了两个版本的JSP代理程序: JSP 版本和EL版本
+--%>
