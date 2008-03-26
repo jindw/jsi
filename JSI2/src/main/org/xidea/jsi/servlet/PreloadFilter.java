@@ -40,11 +40,11 @@ public class PreloadFilter implements Filter {
 		final String uri = request.getRequestURI().substring(
 				request.getContextPath().length());
 		if (uri.startsWith(scriptBase)) {
-//			if (uri.equals(scriptBase) || uri.endsWith("index.jsp")) {
-//				resp.setContentType(contentType);
-//				outputPreload(req, resp, uri+request.getParameter("path"));
-//				return;
-//			}
+			if (uri.equals(scriptBase) || uri.endsWith("index.jsp")) {
+				resp.setContentType(contentType);
+				outputPreload(req, resp, uri+request.getParameter("path"));
+				return;
+			}
 			if (uri.endsWith(JS_FILE_POSTFIX)) {
 				resp.setContentType(contentType);
 				if (uri.endsWith(PRELOAD_FILE_POSTFIX)) {
