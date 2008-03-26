@@ -1,47 +1,48 @@
 <html>
-	<head>
-		<title>Test $Request</title>
-	</head>
-	<script src="../../../../boot.js"></script>
-	<body topmargin="0" bottommargin="0">
-	<div id="loading">Loading.....<div>
-	<script>
-	  var className = window.location.href;
-	  className = className.substr(className.lastIndexOf("?")+1);
-	  var path = className.replace('@','.');
-	  className = className.substr(className.indexOf('@')+1);
-	  var target = new Object();
-	  try{
-
-	    $import(path,null,target);
-	    var cs = className.split(".");
-	    var clazz=target;
-	    for(var i=0;i<cs.length;i++){
-	      clazz =  clazz[cs[i]];
-	    }
-	    
-	    try{
-	      document.getElementById("loading").style.display='none';
-	      if(clazz==null){
-	        document.write("load a null value:"+path);
-	        setTimeout(
-	          function(){window.parent.LoaderTest.loadNull(path);},100
-	        )
-	      }else{
-	        document.write("load success:"+path);
-	        setTimeout(
-	          function(){window.parent.LoaderTest.loadSuccess(path);},100
-	        );
-	      }
-	    }catch(e){alert(e)}
-	  }catch(e){
-	    document.getElementById("loading").style.display='none';
-	    document.write("load fail:"+path+":"+path);
-	    setTimeout(
-	        function(){window.parent.LoaderTest.loadFailure(path,e);},100
-	    );
-	  }
-
-	</script>
-	</body>
+    <head>
+        <title>Test Suite</title>
+    </head>
+    <script src="../../../../boot.js"></script>
+    <body topmargin="0" bottommargin="0">
+    <div id="loading">Loading.....<div>
+    <script>
+        var parameterMap = {};
+        var query = window.location.search;
+        var params = query.substr(1).split('&');
+        for(var i=0;i<params.length;i++){
+            var kv = params[i].split('=');
+            parameterMap[decodeURIComponent(kv[0])] = decodeURIComponent(kv[0]);
+        }
+        var suite = parent.LoadSuite[parameterMap.id];
+        var path = parameterMap.path;
+        var type = parameterMap.type;
+        var lazy;
+        //继续处理
+        function callback(e){
+            suite.testNext(path,type,target,e);
+        }
+        try{
+	        switch(type){
+	        case 'L'//'lazy':
+	            $import(path,true,target);
+	            lazy = true;
+	            break;
+	        case 'A'//'asynchronous':
+	            $import(path,callback,target);
+	            break;
+	        case 'S'//'synchronous':
+	            $import(path,false,target);
+	            callback();
+	            break;
+	        }
+        }catch(e){
+            callback(e);
+        }
+    </script>
+    <script>
+        if(lazy){
+            callback();
+        }
+    </script>
+    </body>
 </html>
