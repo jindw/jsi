@@ -19,12 +19,15 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 public class PreloadFilter implements Filter {
 
-	protected String scriptBase ;
+	protected String scriptBase;
 
-	//protected String contextPath;
+	private String contentType = "text/html;charset=utf-8";
 
-	//protected int contextLength;
-	
+	// protected String contextPath;
+
+	// protected int contextLength;
+
+	public static final String JS_FILE_POSTFIX = ".js";
 	public static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
 	public static final String PRELOAD_CONTENT__POSTFIX = "\n})";
 
@@ -34,11 +37,20 @@ public class PreloadFilter implements Filter {
 	public void doFilter(ServletRequest req, final ServletResponse resp,
 			FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
-		final String uri = request.getRequestURI().substring(request.getContextPath().length());
+		final String uri = request.getRequestURI().substring(
+				request.getContextPath().length());
 		if (uri.startsWith(scriptBase)) {
-			if (uri.endsWith(PRELOAD_FILE_POSTFIX)) {
-				outputPreload(req, resp, uri);
-				return;
+//			if (uri.equals(scriptBase) || uri.endsWith("index.jsp")) {
+//				resp.setContentType(contentType);
+//				outputPreload(req, resp, uri+request.getParameter("path"));
+//				return;
+//			}
+			if (uri.endsWith(JS_FILE_POSTFIX)) {
+				resp.setContentType(contentType);
+				if (uri.endsWith(PRELOAD_FILE_POSTFIX)) {
+					outputPreload(req, resp, uri);
+					return;
+				}
 			}
 		}
 		chain.doFilter(req, resp);
@@ -55,8 +67,9 @@ public class PreloadFilter implements Filter {
 		}
 	}
 
-	protected void outputPreload(ServletRequest req, final ServletResponse resp,
-			final String uri) throws ServletException, IOException {
+	protected void outputPreload(ServletRequest req,
+			final ServletResponse resp, final String uri)
+			throws ServletException, IOException {
 		final StringWriter bufSting = new StringWriter();
 		final ByteArrayOutputStream bufStream = new ByteArrayOutputStream();
 		final Object[] holder = new Object[2];
@@ -121,17 +134,21 @@ public class PreloadFilter implements Filter {
 
 	public void init(FilterConfig config) throws ServletException {
 		String scriptBase = config.getInitParameter("scriptBase");
+		String contentType = config.getInitParameter("contentType");
 
 		if (scriptBase != null && (scriptBase = scriptBase.trim()).length() > 0) {
 			if (!scriptBase.endsWith("/")) {
-				scriptBase = scriptBase +'/';
+				scriptBase = scriptBase + '/';
 			}
-		}else{
+		} else {
 			scriptBase = "/scripts/";
 		}
-		//this.contextPath = config.getServletContext().getContextPath();
-		//this.contextLength = this.contextPath.length();
-		this.scriptBase =  scriptBase;
+		if (contentType != null) {
+			this.contentType = contentType;
+		}
+		// this.contextPath = config.getServletContext().getContextPath();
+		// this.contextLength = this.contextPath.length();
+		this.scriptBase = scriptBase;
 	}
 
 }
