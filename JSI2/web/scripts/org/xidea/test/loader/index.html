@@ -12,7 +12,15 @@
       var console = document.getElementById("log");
       $JSI.setConsole(console);
       $import("org.xidea.test.loader.LoaderTest");
-      LoaderTest.test(LoaderTest.defaultPackageList);
+      var testSuite = new LoadSuite([
+"example",
+"example.cat",
+"org.xidea.jsidoc",
+"org.xidea.sandbox.syntax",
+"org.xidea.sandbox.util",
+"org.xidea.sandbox.xml"
+]);
+      testSuite.testNext();
     </script>
   </body>
 </html>
