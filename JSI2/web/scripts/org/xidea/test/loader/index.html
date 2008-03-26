@@ -1,9 +1,22 @@
 <html>
   <head>
-    <title>Test $Request</title>
+      <title>Test $Request</title>
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+      <script src="../../../../boot.js"></script>
+      <style>
+          .error{
+               color:red;
+               font-weight:bold;
+          }
+          .warn{
+               color:#990;
+               font-weight:bold;
+          }
+          .loading{
+               color:#000;
+          }
+      </style>
   </head>
-  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <script src="../../../../boot.js"></script>
   <body topmargin="0" bottommargin="0">
     <iframe
      name="loader" border="0" frameborder="0"
@@ -14,12 +27,12 @@
     </script>
     <script>
       var testSuite = new LoadSuite([
-"example",
-"example.cat",
+"example","example.cat",
+"org.xidea.sandbox.syntax"
+
 //"org.xidea.jsidoc",
-"org.xidea.sandbox.syntax",
-"org.xidea.sandbox.util",
-"org.xidea.sandbox.xml"
+//"org.xidea.sandbox.util",
+//"org.xidea.sandbox.xml"
 ]);
       testSuite.startTest();
     </script>

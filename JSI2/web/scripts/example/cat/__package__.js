@@ -15,12 +15,12 @@ this.addDependence("*","Animal");
 
 //猫有抓老鼠的天性，要判断眼前的动物是否老鼠
 //给猫类添加对鼠类的装载后依赖
-this.addDependence("Cat","Mouse",false);
+this.addDependence("Cat","Mouse",true);
 
 
 //老鼠看见猫后要逃跑，需要判断眼前的动物是否猫
 //给鼠类添加对猫类的装载后依赖
-this.addDependence("Mouse","Cat",false);
+this.addDependence("Mouse","Cat",true);
 
 /*
 //养猫

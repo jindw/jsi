@@ -27,6 +27,7 @@ function LoadSuite(packageList,collectAll){
             //ref
         }
     }
+    //confirm("装载测试单元如下：\n\n"+paths.join('\n'));
     this.paths = paths;
     this.index = 0;
 }
@@ -69,7 +70,7 @@ LoadSuite.prototype = {
         if(this.index<this.paths.length){
             this.startTest(type);
         }else{
-            prompt("测试完成",suite);
+            confirm("测试完成"+this);
         }
     },
     /**
@@ -97,6 +98,7 @@ LoadSuite.prototype = {
             msg.pop();
             msg.push("</pre>");
         }else{
+            div.className="warn";
             if(this.isValid(previousTarget,previousPath)){
                 div.className="success";
                 msg.push("成功。")

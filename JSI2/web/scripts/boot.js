@@ -84,13 +84,6 @@ if(":debug"){
         }
         var scriptBase = (script.getAttribute('src')||"/scripts/boot.js").replace(/[^\/\\]+$/,'');
         $JSI.scriptBase = computeURL(scriptBase);
-
-
-        var impls = ['boot-core.js','boot-log.js'];
-        for(var j=0;j<impls.length;j++){
-            //document.write('<script onreadystatechange="if(this.readyState == \'loaded\'){if(/__preload__.js$/.test(this.src)){this.src=\'//:\'}}" type="text/javascript" src="'+src+impls[j]+'"></script>');
-            document.write('<script src="'+scriptBase+impls[j]+'"></script>');
-        }
     })();
 }else{
     /*
@@ -158,9 +151,8 @@ if(":debug"){
 var $import = function(freeEval,cachedScripts){
     if(":debug"){
         function error(text){
-            error = prompt("Core Error",
-                           text+"\n\n继续显示系统错误信息？")
-                       ?error:Function.prototype;
+            error = confirm("Core Error",
+                           text+"\n\n继续显示系统错误信息？ ")?error:Function.prototype;
         }
     }
     var packageMap = {};
@@ -688,7 +680,9 @@ var $import = function(freeEval,cachedScripts){
                 loader = new ScriptLoader(packageObject,fileName);
             }else{
                 //TODO: try parent
-                //throw new Error('script not found')
+                if(":debug"){
+                    throw new Error('Script:['+fileName+'] Not Found')
+                }
             }
         }
         if(loader.initialize){
@@ -745,6 +739,11 @@ var $import = function(freeEval,cachedScripts){
      * @param <string>name 包名
      */
     function realPackage(packageObject){
+        if(":debug"){
+            if(!packageObject){
+                alert('包对象不能为空:'+arguments.callee)
+            }
+        }
         while(packageObject.implementation){
             packageObject = findPackage(packageObject.implementation,true);
         }
@@ -950,7 +949,7 @@ var $import = function(freeEval,cachedScripts){
                     loadDependence(dependenceList[i],vars);
                 }
             }
-            //谨慎，这里的i上面已经声明，不过，他们只有两种可能，undefined和0
+            //谨慎，这里的i上面已经声明，不过，他们只有两种可能，undefined和0 
             for(var i in dependenceMap){
                   break;
             }
@@ -1023,14 +1022,24 @@ var $import = function(freeEval,cachedScripts){
                     list.push(filePath);
                 }
             }
+            
             if(col instanceof Function){
+                //alert([list , path ,  target,col].join('\n'))
+                function callback() {
+                    if(xhr.readyState == 4){
+                        $JSI.cacheScript(pkg,fileName,xhr.responseText) ;
+                        //xhr.abort();
+                        setTimeout(next,1);
+                    }
+                }
                 function next(){
                     while(filePath = list.pop()){
                         pkg = filePath.replace(/\/[^\/]+$/,'').replace(/\//g,'.');
-                        fileName = filePath.substr(pkg.length);
+                        fileName = filePath.substr(pkg.length+1);
                         if(!getCachedScript(pkg,fileName)){
                             //need hack? xhr.open(); xhr.send('');return ;
-                            xhr.open(scriptBase + filePath) ;
+                            xhr.open("get",scriptBase + filePath,true) ;
+                            xhr.onreadystatechange = callback;
                             return xhr.send('');
                         }
                     }
@@ -1038,12 +1047,6 @@ var $import = function(freeEval,cachedScripts){
                     col($import(path,target));
                 }
                 var xhr = new XMLHttpRequest();
-                xhr.onreadystatechange = function(){
-                    if(xhr.readyState == 4){
-                        $JSI.cacheScript(pkg,fileName,xhr.responseText) ;
-                        next();
-                    }
-                }
                 next();
             }else{
                 if(":debug"){
@@ -1074,17 +1077,16 @@ var $import = function(freeEval,cachedScripts){
         if(/\:$/.test(path)){
             return realPackage(findPackageByPath(path));
         }
-        if(arguments.length < 3){
+        switch(arguments.length){
+        case 0:
+            //if("org.xidea.jsi.boot:col"){
+                col = lazyTaskList.shift();
+                //hack return void;
+                return col && col();
+            //}
+        case 2:
             switch(typeof target){
             case 'undefined':
-                if("org.xidea.jsi.boot:col"){
-                    //hack arguments.length ==0
-                    if(!arguments.length){
-                        col = lazyTaskList.shift();
-                        //hack return void;
-                        return col && col();
-                    }
-                }
                 target = this;
                 break;
             case 'boolean':
