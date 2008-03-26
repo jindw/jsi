@@ -11,37 +11,38 @@
         var params = query.substr(1).split('&');
         for(var i=0;i<params.length;i++){
             var kv = params[i].split('=');
-            parameterMap[decodeURIComponent(kv[0])] = decodeURIComponent(kv[0]);
+            parameterMap[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
         }
+        var target = {};
         var suite = parent.LoadSuite[parameterMap.id];
         var path = parameterMap.path;
         var type = parameterMap.type;
         var lazy;
         //继续处理
-        function callback(e){
-            suite.testNext(path,type,target,e);
+        function next(e){
+            suite.nextTest(path,type,target,e);
         }
         try{
 	        switch(type){
-	        case 'L'//'lazy':
-	            $import(path,true,target);
+	        case 'L'://'lazy':
+	            $import(path,target,true);
 	            lazy = true;
 	            break;
-	        case 'A'//'asynchronous':
-	            $import(path,callback,target);
+	        case 'A'://'asynchronous':
+	            $import(path,target,function(){next()});
 	            break;
-	        case 'S'//'synchronous':
-	            $import(path,false,target);
-	            callback();
+	        case 'S'://'synchronous':
+	            $import(path,target,false);
+	            next();
 	            break;
 	        }
         }catch(e){
-            callback(e);
+            next(e);
         }
     </script>
     <script>
         if(lazy){
-            callback();
+            next();
         }
     </script>
     </body>
