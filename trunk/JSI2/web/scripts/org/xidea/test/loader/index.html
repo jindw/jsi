@@ -2,25 +2,26 @@
   <head>
     <title>Test $Request</title>
   </head>
-  <script src="../../boot.js"></script>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <script src="../../../../boot.js"></script>
   <body topmargin="0" bottommargin="0">
     <iframe
      name="loader" border="0" frameborder="0"
      style="border:1px solid black;width:100%;height:40px"></iframe>
-    <div id="log" style="border:1px solid black;width:100%;height:100%"></div>
+    <div id="console" style="border:1px solid black;width:100%;padding-bottom:40px"></div>
     <script>
-      var console = document.getElementById("log");
-      $JSI.setConsole(console);
-      $import("org.xidea.test.loader.LoaderTest");
+      $import("org.xidea.test.loader.LoadSuite",true);
+    </script>
+    <script>
       var testSuite = new LoadSuite([
 "example",
 "example.cat",
-"org.xidea.jsidoc",
+//"org.xidea.jsidoc",
 "org.xidea.sandbox.syntax",
 "org.xidea.sandbox.util",
 "org.xidea.sandbox.xml"
 ]);
-      testSuite.testNext();
+      testSuite.startTest();
     </script>
   </body>
 </html>

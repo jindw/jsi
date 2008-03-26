@@ -28,62 +28,70 @@ function LoadSuite(packageList,collectAll){
         }
     }
     this.paths = paths;
-    this.index = -1;
+    this.index = 0;
 }
 
 
 LoadSuite.prototype = {
+    typeList : "SAL",
+    /**
+     * @public
+     */
     typeText:{
         S:'同步装载',
         A:'异步装载',
         L:'延迟装载'
     },
-    testNext : function(previousPath,type,previousTarget,exception){
-        if(previousPath){
-            this.updateLoading.apply(this,arguments)
-        }
+    /**
+     * @public
+     */
+    startTest:function(type){
+        var path = this.paths[this.index];
+        type = type || this.typeList.charAt(0);
+        this.showLoading(path,type)
+        var src = scriptBase+"loader.html?path="+encodeURIComponent(path) + '&type='+type+'&id='+this.id;
+        window.open(src,"loader");
+    },
+    /**
+     * @public
+     */
+    nextTest : function(previousPath,type,previousTarget,exception){
+        this.updateLoading.apply(this,arguments);
+        var typeList = this.typeList;
         //SALS  S
-        if(type == 'L'){
-            var path = this.paths[++this.index];
-            type = 'S';
+        var index = typeList.indexOf(type);
+        if(index == typeList.length-1){
+            this.index++;
+            type = typeList.charAt(0);
         }else{//SA
-            type = type == 'A'?'L':'A';
-            var path = this.paths[this.index];
+            type = typeList.charAt(index+1);
         }
-        if(path){
-            this.showLoading(path,type)
-            var src = scriptBase+"loader.html?path="+encodeURIComponent(path) + '&type='+type;
-            window.open(src,"loader");
+        if(this.index<this.paths.length){
+            this.startTest(type);
         }else{
             prompt("测试完成",suite);
         }
     },
+    /**
+     * @protected
+     */
     showLoading:function(path,type){
         var div = document.createElement('div');
         div.className = "loading";
         div.innerHTML = this.typeText[type] + ":"+path +'....';
         this.getOutputContainer().appendChild(div);
     },
-    isValid:function(target,path){
-        path = path.split(':')[1];
-        if(path){
-            path = path.split('.');
-            path.reserve();
-            while(path.length){
-                target = target[path.pop()]
-            }
-        }
-        return false;
-        
-    },
-    updateLoading:function(previousPath,type,previousTarget,exception){
+    /**
+     * @protected
+     */
+    updateLoading:function(previousPath,previousType,previousTarget,exception){
         var div = this.getOutputContainer().lastChild;
-        var msg = [this.typeText[type] ,":",path];
+        var msg = [this.typeText[previousType] ,":",previousPath];
         if(exception){
             div.className="error";
             msg.push("失败！！！<br/>Exception:<br/><pre>");
-            for(var n in e){
-                msg.push("  ",n,"=",e[n]);
+            for(var n in exception){
+                msg.push("  ",n,"=",exception[n]);
                 msg.push("\n");
             }
             msg.pop();
@@ -101,6 +109,23 @@ LoadSuite.prototype = {
         }
         msg.push('<hr/>');
         div.innerHTML = msg.join('');
+    },
+    /**
+     * @protected
+     */
+    isValid:function(target,path){
+        path = path.split(':')[1];
+        if(path){
+            path = path.split('.');
+            path.reverse();
+            var object = target
+            while(path.length){
+                object = object[path.pop()]
+            }
+            return object!=target['+undefined'];
+        }
+        return true;
+        
     },
     getOutputContainer:function(){
         return document.getElementById("console");
