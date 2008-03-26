@@ -1,4 +1,4 @@
-<%@ page contentType="text/html; charset=utf-8"
+<%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"
  isELIgnored="false"%>/**${param['path'] ==null?'':'/'}$JSI.cacheScript("${param['path']}".replace(/\/[^/]*$/,'').replace(/\//g,'.'),"${param['path']}".replace(/^.*\//,''),function(){eval(this.varText);<jsp:include
  page="${param['path'] != null?param['path']:'error'}"/>
 })

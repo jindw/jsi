@@ -1,8 +1,9 @@
 <html>
     <head>
         <title>Test Suite</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <script src="../../../../boot.js"></script>
     </head>
-    <script src="../../../../boot.js"></script>
     <body topmargin="0" bottommargin="0">
     <div id="loading">Loading.....<div>
     <script>
@@ -20,8 +21,15 @@
         var lazy;
         //继续处理
         function next(e){
+            if(!e && writeHtml.length){
+                e = new Error("脚本：【 "+path + "】不支持异步装载");
+            }
             suite.nextTest(path,type,target,e);
         }
+        var writeHtml = [];
+        function write(){
+            writeHtml.push(arguments[0])
+        };
         try{
 	        switch(type){
 	        case 'L'://'lazy':
@@ -29,6 +37,7 @@
 	            lazy = true;
 	            break;
 	        case 'A'://'asynchronous':
+                document.write = document.writeln = document.print = document.println = write;
 	            $import(path,target,function(){next()});
 	            break;
 	        case 'S'://'synchronous':

@@ -24,3 +24,4 @@ Cat.prototype.lookForFood = function(animal){
     return "不是老鼠"
   }
 }
+document.write("test");
