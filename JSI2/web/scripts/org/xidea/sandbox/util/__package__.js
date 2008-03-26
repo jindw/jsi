@@ -6,6 +6,7 @@ this.addScript('cookie.js','Cookie');
 this.addScript("tween.js",'Tween');
 
 this.addScript("tween-rule.js",'TweenRuleMap');
+this.addScript("log.js",'log');
 
 
 //HTML DOM 处理相关

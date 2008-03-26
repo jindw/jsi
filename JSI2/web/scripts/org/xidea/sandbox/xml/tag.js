@@ -358,7 +358,6 @@ CoreTag.prototype.include = function(context,node){
                 var xpe = new XPathEvaluator();
                 var nsResolver = xpe.createNSResolver(doc.documentElement);
                 var result = xpe.evaluate(xpath, doc.documentElement, nsResolver, 5, null);
-                
                 var node;
                 while (node = result.iterateNext()){
                     node.removeAttribute("id")
