@@ -269,7 +269,7 @@ var $import = function(freeEval,cachedScripts){
      */
     $JSI.cacheScript = function(pkg,file2dataMap,value){
         if(cachedScripts[pkg]){ //比较少见
-        　    pkg = cachedScripts[pkg];
+            pkg = cachedScripts[pkg];
             if(value == null){//null避免空串影响
                 for(var n in file2dataMap){
                     pkg[n] = file2dataMap[n];
@@ -281,7 +281,7 @@ var $import = function(freeEval,cachedScripts){
             if(value == null){//null避免空串影响
                 cachedScripts[pkg] = file2dataMap;
             }else{
-            　　(cachedScripts[pkg] = {})[file2dataMap] = value;
+              (cachedScripts[pkg] = {})[file2dataMap] = value;
             }
         }
     };
@@ -582,8 +582,8 @@ var $import = function(freeEval,cachedScripts){
                     }
                 }
             }
-            beforeLoadDependences && this.addDependence(scriptPath,　beforeLoadDependences);
-            afterLoadDependences && this.addDependence(scriptPath,　afterLoadDependences,1);
+            beforeLoadDependences && this.addDependence(scriptPath, beforeLoadDependences);
+            afterLoadDependences && this.addDependence(scriptPath, afterLoadDependences,1);
         },
         /**
          * 添加脚本依赖。
