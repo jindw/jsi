@@ -13,7 +13,7 @@ this.addScript('globals-info.js','RootInfo'
                 ,["FileInfo","PackageInfo"])
 
 this.addScript("source-entry.js",'SourceEntry'
-                ,"org.xidea.syntax.ECMAParser");
+                ,"org.xidea.sandbox.syntax.ECMAParser");
 this.addScript("doc-entry.js",'DocEntry'
                 ,'SourceEntry');
 
