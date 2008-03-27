@@ -191,8 +191,8 @@ var scriptBase = this.scriptBase;
 var resourceBase = scriptBase + 'html/';
 var packageName = scriptBase.substr($JSI.scriptBase.length).replace(/\//g,'.').replace(/\.$/,'');
 var resourcePackageName = packageName + '.html';
-var jsiCacher = $JSI.cacheScript;
-$JSI.cacheScript = function(pkg,file2dataMap,value){
+var jsiCacher = $JSI.preload;
+$JSI.preload = function(pkg,file2dataMap,value){
     if(cachedScripts[pkg]){ //比较少见
     　    pkg = cachedScripts[pkg];
         if(value == null){//null避免空串影响

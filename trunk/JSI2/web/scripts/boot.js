@@ -259,7 +259,7 @@ var $import = function(freeEval,cachedScripts){
      * @param <string>key 文件相对路径
      * @param <string|Function>value 缓存函数或文本
      */
-    $JSI.cacheScript = function(pkg,file2dataMap,value){
+    $JSI.preload = function(pkg,file2dataMap,value){
         if(cachedScripts[pkg]){ //比较少见
             pkg = cachedScripts[pkg];
             if(value == null){//null避免空串影响
@@ -891,7 +891,7 @@ var $import = function(freeEval,cachedScripts){
         packageObject.loaderMap[name] = loader;
         try{
             if(cachedScript instanceof Function){
-                //$JSI.cacheScript(pkgName,name,'')
+                //$JSI.preload(pkgName,name,'')
                 cachedScripts[packageName][name]='';//clear cache
                 return cachedScript.call(loader);
             }else{
@@ -1027,7 +1027,7 @@ var $import = function(freeEval,cachedScripts){
                 //alert([list , path ,  target,col].join('\n'))
                 function callback() {
                     if(xhr.readyState == 4){
-                        $JSI.cacheScript(pkg,fileName,xhr.responseText) ;
+                        $JSI.preload(pkg,fileName,xhr.responseText) ;
                         //xhr.abort();
                         setTimeout(next,1);
                     }
