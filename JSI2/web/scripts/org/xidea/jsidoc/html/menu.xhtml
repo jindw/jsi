@@ -23,47 +23,49 @@ window.onload = window.onresize = function(){
     content.style.width = document.body.clientWidth-10+'px';
     content.style.height = document.body.clientHeight-35+'px';
 }
+function openMenu(li){
+    li.className = li.className.replace(/\s*\bopen\b|$/,' open')
+}
+function closeMenu(li){
+    li.className = li.className.replace(/\s*\bopen\b/,'')
+}
+
 //]]> 
 </script>
-<script>
-function doExport(){
-    //window.open('export.html','test','left=100,top=100,width=400px,height=500px,resizable=1,scrollbars=yes');
-    //return false;
-    return true;
-}
-</script>
+
 
 </head>
 <body style="margin: 0px;padding: 0px;">
 <div id="header">
-<a title="JSI首页" href="http://www.xidea.org/project/jsi" target="_top" class="boxlink">项目首页</a> 
-<a title="JSIDoc主页" href="welcome.html" class="boxlink">文档首页</a> 
-<a title="JSIDoc主页" href="export.html" onclick="doExport() "  class="boxlink">导出</a> 
+
+<li class="menu-box" onmouseover="openMenu(this)" onmouseout="closeMenu(this)">
+    <a title="更多" href="#null" target="_self" onclick="return false">&gt;&gt;</a>
+    <ul class="menu-block">
+        <li class="menu-item"><a title="导出成普通脚本，脱离JSI框架" href="../welcome.html">文档首页</a></li>
+        <li class="menu-item"><a title="定制类库" href="/" onclick="alert('尚未实现');return false">定制类库</a></li>
+        <li class="menu-item"><a title="跳转至文档首页" href="/">网站首页</a></li>
+    </ul>
+</li> 
+<li class="menu-box">
+    <a title="导出成普通脚本，脱离JSI框架" href="../export.html">导出</a> 
+</li>
+<li class="menu-box" onmouseover="openMenu(this)" onmouseout="closeMenu(this)">
+    <a title="JSI内核脚本">内核脚本参考</a> 
+    <ul class="menu-block root-pane" style="left:0px;width:150px;">
+        <li class="menu-item">内部对象参考</li>
+        <li class="menu-item"><a class="item-constructor" href="?:Package">Package</a></li>
+        <li class="menu-item"><a class="item-constructor" href="?:ScriptLoader">ScriptLoader</a></li>
+        <li class="menu-item">可用对象参考</li>
+        <li class="menu-item"><a class="item-object" href="?:$JSI">$JSI</a></li>
+        <li class="menu-item"><a class="item-function" href="?:$import">$import</a></li>
+        <li class="menu-item"><a class="item-constructor" href="?:XMLHttpRequest">XMLHttpRequest</a></li>
+        <li class="menu-item"><a title="JSI开源项目首页" href="http://www.xidea.org/project/jsi" target="_top">JSI首页</a></li>
+    </ul> 
+</li>
 
 </div>
 <div id="content">
-<h4>JSI脚本</h4>
-<ul class="root-pane">
-	<c:forEach var="object" items="${rootInfo.getObjectInfos()}">
-      <c:if test="${' Log Package ScriptLoader'.indexOf(object.name)>0}">
-		<li title="file:${object.fileInfo.name}"><a
-			class="item-${object.type}"
-			style="color:#888" title="内部对象"
-			href="?:${object.name}">
-          [${object.name}]
-          </a>
-        </li>
-      </c:if>
-      <c:else>
-        <li title="file:${object.fileInfo.name}"><a
-            class="item-${object.type}"
-            href="?:${object.name}">
-          ${object.name}
-          </a>
-        </li>
-      </c:else>
-	</c:forEach>
-</ul>
+
 <h4>托管脚本</h4>
 <ul class="package-pane">
 	<c:forEach var="packageInfo" items="${packageInfos}">

@@ -1,13 +1,15 @@
 ﻿<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html;utf-8" />
-<link rel="stylesheet" type="text/css" href="../styles/export.css" />
-<script src="../../../../boot.js"></script>
+<link rel="stylesheet" type="text/css" href="styles/export.css" />
 <script>
-    var bootScript = '<script src="../%1"><\/script>';
-    if(!this.$JSI){
-        document.write(bootScript.replace(/%1/,"boot.js"));
-        document.write(bootScript.replace(/%1/,"source.js"));
+    var bootScript = '<script src="%1"><\/script>';
+    var parentScripts = parent.document.getElementsByTagName("script");
+    for(var i=0;i<parentScripts.length;i++){
+        var src = parentScripts[i].src;
+        if(src && !/^data:|(?:__preload__|lazy-trigger).js$/.test(src)){
+            document.write(bootScript.replace(/%1/,src));
+        }
     }
 </script>
 

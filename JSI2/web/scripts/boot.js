@@ -134,12 +134,12 @@ if(":debug"){
  * </p>
  * @public
  * @param <string> path (package:Object|package.Object|package:*|package.*| scriptPath)
- * @param <Object> target 可选参数，指定导入容器。
- *                    当该参数为有效对象时(instanceof Object && not instanceof Function)，导入的元素将赋值成其属性；
- *                    当该参数未指定时 (arguments.length==1)， target为全局变量容器,这种情况等价于直接声明的全局变量。
  * @param <Function|boolean> col callbackOrLazyLoad 可选参数,默认为null。
  *                    如果其值为函数，表示异步导入模式；
  *                    如果其值为真，表示延迟同步导入模式，否则为即时同步导入（默认如此）。
+ * @param <Object> target 可选参数，指定导入容器。
+ *                    当该参数为有效对象时(instanceof Object && not instanceof Function)，导入的元素将赋值成其属性；
+ *                    当该参数未指定时 (arguments.length==1)， target为全局变量容器,这种情况等价于直接声明的全局变量。
  * @return <Package|object|void> 用于即时导入时返回导入的对象
  *                    <ul>
  *                      <li>导入单个对象时:返回导入对象;</li>
@@ -316,7 +316,7 @@ var $import = function(freeEval,cachedScripts){
         }
     }
     /**
-     * 包信息数据结构类<b> &#160;(JSI 内部对象)</b>.
+     * 包信息数据结构类<b> &#160;(JSI 内部对象，普通用户不可见)</b>.
      * <p>在包目录下，有个包定义脚本（__package__.js）；
      * 在包的构造中执行这段脚本，执行中，this指向当前包对象</p>
      * <p>其中,两个常用方法,<a href="#Package.prototype.addScript">addScript</a>,<a href="#Package.prototype.addDependence">addDependence</a></p>
@@ -794,7 +794,7 @@ var $import = function(freeEval,cachedScripts){
 
 
     /**
-     * 脚本装载器<b> &#160;(JSI 内部对象)</b>.
+     * 脚本装载器<b> &#160;(JSI 内部对象，普通用户不可见)</b>.
      * 该对象的属性可以在JSI托管脚本内调用,但是,如果你使用了这些属性,你的脚本就无法脱离JSI环境(导出).
      * <pre><code>eg:
      *   var scriptBase = this.scriptBase;//获取当前脚本所在的目录
@@ -1084,6 +1084,9 @@ var $import = function(freeEval,cachedScripts){
                 //hack return void;
                 return col && col();
             //}
+        case 1:
+            target = this;
+            break;
         case 2:
             switch(typeof target){
             case 'undefined':
