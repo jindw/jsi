@@ -12,6 +12,7 @@ var thisPkg = $import(packageName);
 var Core = {
     $JSI:{},
     Package : function (){},
+    $import : function (){},
     ScriptLoader : this.constructor,
     XMLHttpRequest:function(){}
 };
