@@ -122,7 +122,7 @@ public class PreloadFilter implements Filter {
 		String pkg = path.substring(0, path.lastIndexOf('/')).replace('/', '.');
 		String file = path.substring(pkg.length() + 1);
 		StringBuffer buf = new StringBuffer();
-		buf.append("$JSI.cacheScript(");
+		buf.append("$JSI.preload(");
 		buf.append("'" + pkg + "',");
 		buf.append("'" + file + "',");
 		buf.append("function(){");
