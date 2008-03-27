@@ -134,12 +134,13 @@ if(":debug"){
  * </p>
  * @public
  * @param <string> path (package:Object|package.Object|package:*|package.*| scriptPath)
+ * @param <Object> target 可选参数，指定导入容器。
+ *                    当该参数为有效对象时(instanceof Object && not instanceof Function)，导入的元素将赋值成其属性；
+ *                    当该参数为boolean型或函数(typeof target in ['boolean','function'])且未指定第三个参数时，将其当做第三个参数，而target本身等价为未指定；
+ *                    当该参数未指定时，target为全局变量容器,这种情况等价于直接声明的全局变量。
  * @param <Function|boolean> col callbackOrLazyLoad 可选参数,默认为null。
  *                    如果其值为函数，表示异步导入模式；
  *                    如果其值为真，表示延迟同步导入模式，否则为即时同步导入（默认如此）。
- * @param <Object> target 可选参数，指定导入容器。
- *                    当该参数为有效对象时(instanceof Object && not instanceof Function)，导入的元素将赋值成其属性；
- *                    当该参数未指定时 (arguments.length==1)， target为全局变量容器,这种情况等价于直接声明的全局变量。
  * @return <Package|object|void> 用于即时导入时返回导入的对象
  *                    <ul>
  *                      <li>导入单个对象时:返回导入对象;</li>
@@ -1079,19 +1080,19 @@ var $import = function(freeEval,cachedScripts){
         }
         switch(arguments.length){
         case 0:
-            //if("org.xidea.jsi.boot:col"){
-                col = lazyTaskList.shift();
-                //hack return void;
-                return col && col();
-            //}
+            col = lazyTaskList.shift();
+            if(":debug"){
+                if(!(col instanceof Function)){
+                    error("延迟导入错误，非法内部状态！！ ");
+                }
+            }
+            //hack return void;
+            return col && col();
         case 1:
             target = this;
             break;
         case 2:
             switch(typeof target){
-            case 'undefined':
-                target = this;
-                break;
             case 'boolean':
             case 'function':
                 col = target;
