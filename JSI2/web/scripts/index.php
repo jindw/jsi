@@ -4,7 +4,7 @@
     $fileName = substr($path, $pos + 1);
     $packageName = preg_replace("/\//", "." ,substr($path, 0, $pos));
     
-    echo("\$JSI.cacheScript('$packageName','$fileName',function(){eval(this.varText);");
+    echo("\$JSI.preload('$packageName','$fileName',function(){eval(this.varText);");
     readfile($path)
     //require($path)
     echo("\n})");

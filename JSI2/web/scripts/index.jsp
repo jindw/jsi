@@ -20,7 +20,7 @@
         source.append(cbuf,0,count);
     }
     
-%>$JSI.cacheScript('<%=packageName%>','<%=fileName%>',function(){eval(this.varText);<%=source%>
+%>$JSI.preload('<%=packageName%>','<%=fileName%>',function(){eval(this.varText);<%=source%>
 })
 
 <%--
