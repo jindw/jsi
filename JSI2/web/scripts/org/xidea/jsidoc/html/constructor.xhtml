@@ -2,7 +2,7 @@
 <html xmlns="http://www.xidea.org/taglib/xhtml"
 	xmlns:c="http://www.xidea.org/taglib/core">
 <head>
-<link rel="stylesheet" type="text/css" href="../styles/default.css" />
+<link rel="stylesheet" type="text/css" href="../styles/object.css" />
 <meta http-equiv="Content-Type" content="text/html;utf-8" />
 <title>Constructor Information:${objectInfo.name}</title>
 </head>
@@ -62,7 +62,7 @@
 		</thead>
 		<c:forEach var="memberName" items="${memberInfos}">
 			<c:set var="memberInfo" value="${memberInfos[memberName]}" />
-			<tr>
+			<tr class="access-${memberInfo.getAccess()}">
 				<td><span
 					title="${memberInfo.getAccess()} static ${memberInfo.type}"
 					class="item-${memberInfo.type}"> 
@@ -90,7 +90,7 @@
 		</thead>
 		<c:forEach var="memberName" items="${memberInfos}">
 			<c:set var="memberInfo" value="${memberInfos[memberName]}" />
-			<tr>
+			<tr class="access-${memberInfo.getAccess()}">
 				<td><span
 					class="item-${memberInfo.type}">
 					<c:if  test="${memberInfo.getPlace() == objectInfo}">

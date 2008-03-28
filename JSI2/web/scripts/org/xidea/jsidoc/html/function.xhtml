@@ -77,7 +77,7 @@
         </thead>
         <c:forEach var="memberName" items="${memberInfos}">
             <c:set var="memberInfo" value="${memberInfos[memberName]}" />
-            <tr>
+            <tr class="access-${memberInfo.getAccess()}">
                 <td><span
                     title="${memberInfo.getAccess()} static ${memberInfo.type}"
                     class="item-${memberInfo.type}"> <c:if
