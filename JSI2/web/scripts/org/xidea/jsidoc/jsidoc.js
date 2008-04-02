@@ -192,9 +192,10 @@ var resourceBase = scriptBase + 'html/';
 var packageName = scriptBase.substr($JSI.scriptBase.length).replace(/\//g,'.').replace(/\.$/,'');
 var resourcePackageName = packageName + '.html';
 var jsiCacher = $JSI.preload;
+var cachedScripts = {};
 $JSI.preload = function(pkg,file2dataMap,value){
     if(cachedScripts[pkg]){ //比较少见
-    　    pkg = cachedScripts[pkg];
+        pkg = cachedScripts[pkg];
         if(value == null){//null避免空串影响
             for(var n in file2dataMap){
                 pkg[n] = file2dataMap[n];
@@ -206,7 +207,7 @@ $JSI.preload = function(pkg,file2dataMap,value){
         if(value == null){//null避免空串影响
             cachedScripts[pkg] = file2dataMap;
         }else{
-        　　(cachedScripts[pkg] = {})[file2dataMap] = value;
+            (cachedScripts[pkg] = {})[file2dataMap] = value;
         }
     }
 };

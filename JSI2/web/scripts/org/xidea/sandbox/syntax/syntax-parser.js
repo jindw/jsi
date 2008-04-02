@@ -310,7 +310,7 @@ LineIterator.prototype = {
             this.anchor = "";
             if(anchor && anchor.position<line.end){
                 do{
-                    this.anchor += "<a name=\""+anchor.name+"\" />";
+                    this.anchor += "<a name=\""+anchor.name+"\" ></a>";
                     anchor = this.anchors[++this.anchorsIndex];
                 }while(anchor && anchor.position<line.end)
             }
