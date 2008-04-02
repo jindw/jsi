@@ -23,13 +23,12 @@ public class PreloadFilter implements Filter {
 
 	private String contentType = "text/html;charset=utf-8";
 
-	// protected String contextPath;
-
-	// protected int contextLength;
-
 	public static final String JS_FILE_POSTFIX = ".js";
 	public static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
-	public static final String PRELOAD_CONTENT__POSTFIX = "\n})";
+	public static final String PRELOAD_PREFIX = "$JSI.preload(";
+	public static final String PRELOAD_CONTENT_PREFIX = "function(){eval(this.varText);";
+	public static final String PRELOAD_CONTENT_POSTFIX = "\n}";
+	public static final String PRELOAD_POSTFIX = ")";
 
 	public void destroy() {
 	}
@@ -107,13 +106,15 @@ public class PreloadFilter implements Filter {
 			PrintWriter out = (PrintWriter) holder[1];
 			out.write(preloadPerfix.toString());
 			out.write(bufSting.toString());
-			out.write(PRELOAD_CONTENT__POSTFIX);
+			out.write(PRELOAD_CONTENT_POSTFIX);
+			out.print(PRELOAD_POSTFIX);
 			out.flush();
 		} else {
 			ServletOutputStream out = (ServletOutputStream) holder[1];
 			out.print(preloadPerfix.toString());
 			bufStream.writeTo(out);
-			out.print(PRELOAD_CONTENT__POSTFIX);
+			out.print(PRELOAD_CONTENT_POSTFIX);
+			out.print(PRELOAD_POSTFIX);
 			out.flush();
 		}
 	}
@@ -122,13 +123,10 @@ public class PreloadFilter implements Filter {
 		String pkg = path.substring(0, path.lastIndexOf('/')).replace('/', '.');
 		String file = path.substring(pkg.length() + 1);
 		StringBuffer buf = new StringBuffer();
-		buf.append("$JSI.preload(");
+		buf.append(PRELOAD_PREFIX);
 		buf.append("'" + pkg + "',");
 		buf.append("'" + file + "',");
-		buf.append("function(){");
-		if (!"__package__.js".equals(file)) {
-			buf.append("eval(this.varText);");
-		}
+		buf.append(PRELOAD_CONTENT_PREFIX);
 		return buf.toString();
 	}
 

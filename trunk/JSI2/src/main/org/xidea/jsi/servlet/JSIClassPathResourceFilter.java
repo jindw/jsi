@@ -61,7 +61,8 @@ public class JSIClassPathResourceFilter extends PreloadFilter {
 			if (preload) {
 				out.print(this.buildPreloadPerfix(path));
 				output(in, out);
-				out.print(PRELOAD_CONTENT__POSTFIX);
+				out.print(PRELOAD_CONTENT_POSTFIX);
+				out.print(PRELOAD_POSTFIX);
 			} else {
 				output(in, out);
 			}

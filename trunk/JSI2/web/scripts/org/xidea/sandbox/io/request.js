@@ -57,7 +57,7 @@ function Request(url,options,onFinish,onStep) {
             //  break;
             //case 4: // (完成) 数据接收完毕,此时可以通过通过responseBody和responseText获取完整的回应数据
             //判断请求是否成功
-            var success = this.getStatus();
+            var success = _this.getStatus();
             success = success ?success >= 200 && success < 300 : success;
             if(success){
                 _this.onSuccess && _this.onSuccess();

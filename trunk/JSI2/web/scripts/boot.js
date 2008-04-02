@@ -546,9 +546,9 @@ var $import = function(freeEval,cachedScripts){
          * @public
          * @typeof function
          * @param <string>scriptPath 指定脚本路径
-         * @param <string|Array>objectNames[opt] 字符串或其数组
-         * @param <string|Array>beforeLoadDependences[opt] 装在前依赖
-         * @param <string|Array>afterLoadDependences[opt] 装在后依赖
+         * @param <string|Array>objectNames [opt] 字符串或其数组
+         * @param <string|Array>beforeLoadDependences [opt] 装在前依赖
+         * @param <string|Array>afterLoadDependences [opt] 装在后依赖
          */
         addScript :  function(scriptPath, objectNames, beforeLoadDependences, afterLoadDependences){
             var objects = this.scriptObjectMap[scriptPath];
