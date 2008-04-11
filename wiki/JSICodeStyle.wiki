@@ -1,6 +1,4 @@
 #labels CodeStyle,Phase-Design,JavaScript
-#JavaScript Code Style in JSI
-
 === 命名约定 ===
   * 基本参照Java代码风格。
 {{{
