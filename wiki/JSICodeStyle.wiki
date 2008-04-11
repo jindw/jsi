@@ -1,0 +1,22 @@
+#labels CodeStyle,Phase-Design,JavaScript
+#JavaScript Code Style in JSI
+
+= 命名约定 =
+  * 基本参照Java代码风格。
+{{{
+参考：http://java.sun.com/docs/codeconv/
+}}}
+  * 变量所用单词尽量不用缩写。
+{{{
+缩写的单词容易造成语意的不明，而且容易造成争议。
+}}}
+
+= 代码风格 =
+  * 少用属性
+{{{
+JavaScript 的属性动态性太强，实际编码中应该尽力避免。
+}}}
+  * 目录名以/结尾。
+{{{
+JSI内核中，有一些地方需要记录目录地址。这里我们统一以“/”结尾。
+}}}
