@@ -74,9 +74,7 @@ var nativeTypeAlias = {
     'double':"Number",
     'float':"Number",
     'byte':"Number",
-    'char':"String",
-    'string':"String",
-    'object':"Object"
+    'char':"String"
 }
 //var nativeURLPattern = "file:///F:/javascriptref/js55/html/jsobj%1.htm";
 //var nativeURLPattern = "file:///F:/javascriptref/mozilla/%1.html";
@@ -87,6 +85,7 @@ var nativeTypeURLMap = {}
 var nativeTypes = ["Object","Function","RegExp","Array","String","Date","Number","Boolean"];//"Math","Global",
 var type = nativeTypes.pop();
 do{
+    nativeTypeAlias[type.toLowerCase()] = type
     nativeTypeURLMap[type] = nativeURLPattern.replace("%1",type.toLowerCase());
 }while(type = nativeTypes.pop())
 function buildTypeHTML(avaliableObjectInfoMap,type){

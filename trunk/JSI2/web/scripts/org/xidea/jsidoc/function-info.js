@@ -128,7 +128,7 @@ ConstructorInfo.prototype.getSuperInfo = function(){
                 this._superInfo = null;
             }
         }else{
-            this._superInfo = null;
+            //this._superInfo = null;
         }
     }
     return this._superInfo;
