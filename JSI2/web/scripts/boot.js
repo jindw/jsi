@@ -106,6 +106,23 @@ if(":debug"){
     };
 }
 
+
+
+
+if("org.xidea.jsi.boot:$log"){
+    /**
+     * 全局日志
+     * <p>JSI 可选功能,你也可以使用JSA将代码中的日志处理信息清除。<p>
+     * <p>自JSI2.1之后，只有全局日志，没有装在单元日志了。<p>
+     * @typeof object
+     * @public
+     */
+    var $log;//将在$import 闭包中初始化
+}
+
+
+
+
 /**
  * 导入指定元素（脚本、函数、类、变量）至指定目标,默认方式为同步导入，默认目标为全局对象（Global == window(html)）。
  * <pre class="code"><code>  //Example:
@@ -150,11 +167,75 @@ if(":debug"){
  *                    <p>一般可忽略返回值.因为默认情况下,导入为全局变量;无需再显示申明了.</p>
  */
 var $import = function(freeEval,cachedScripts){
-    if(":debug"){
-        function error(text){
-            error = confirm("Core Error",
-                           text+"\n\n继续显示系统错误信息？ ")?error:Function.prototype;
+    if("org.xidea.jsi.boot:$log"){
+        $log = function (){
+            var i = 0;
+            var temp = [];
+            if(this == $log){
+                var bindLevel = arguments[i++];
+                temp.push(arguments[i++],":\n\n");
+            }
+            while(i<arguments.length){
+                var msg = arguments[i++]
+                if(msg instanceof Object){
+                    temp.push(msg,"{");
+                    for(var n in msg){
+                        temp.push(n,":",msg[n],";");
+                    }
+                    temp.push("}\n");
+                }else{
+                    temp.push(msg,"\n");
+                }
+            }
+            if(bindLevel >= 0){
+                temp.push("\n\n继续弹出 "+temp[0]+" 日志?");
+                if(!confirm(temp.join(''))){
+                    consoleLevel = bindLevel+1;
+                }
+            }else{
+                alert(temp.join(''));
+            }
         }
+        /**
+         * 设置日志级别
+         * 默认级别为debug
+         * @protected
+         */
+        $log.setLevel = function(level){
+            if(logLevelNameMap[level]){
+                consoleLevel = level;
+            }else{
+                var i = logLevelNameMap.length;
+                level = level.toLowerCase();
+                while(i--){
+                    if(logLevelNameMap[i] == level){
+                        consoleLevel = i;
+                        return;
+                    }
+                }
+                $log("unknow logLevel:"+level);
+            }
+        };
+        /*
+         * @param bindLevel 绑定函数的输出级别，只有该级别大于等于输出级别时，才可输出日志
+         */
+        function buildLevelLog(bindLevel,bindName){
+            return function(){
+                if(bindLevel>=consoleLevel){
+                    var msg = [bindLevel,bindName];
+                    msg.push.apply(msg,arguments);
+                    $log.apply($log,msg);
+                }
+            }
+        }
+        var logLevelNameMap = "trace,debug,info,warn,error,fatal".split(',');
+        var consoleLevel = 1;
+        /* 
+         * 允许输出的级别最小 
+         * @hack 先当作一个零时变量用了
+         */
+        var logLevelIndex = logLevelNameMap.length;
+        //日志初始化 推迟到后面，方便var 压缩
     }
     var packageMap = {};
     var scriptBase = $JSI.scriptBase;
@@ -239,6 +320,14 @@ var $import = function(freeEval,cachedScripts){
                 }
             }
         }
+    }
+    //这段代码放在后面，仅仅是为了区区4个字节的压缩。
+    if("org.xidea.jsi.boot:$log"){
+        while(logLevelIndex--){
+            var logName = logLevelNameMap[logLevelIndex];
+            $log[logName] = buildLevelLog(logLevelIndex,logName);
+        };
+
     }
     if(!scriptBase){
         scriptBase = document.getElementsByTagName('script');
@@ -406,7 +495,9 @@ var $import = function(freeEval,cachedScripts){
             }
         }catch(e){
             if(":debug"){
-                error("Package Syntax Error:"+name+"\n\nException:"+e);
+                if("org.xidea.jsi.boot:$log"){
+                    $log.error("Package Syntax Error:"+name+"\n\nException:"+e);
+                }
             }
             throw e;
         }
@@ -438,8 +529,10 @@ var $import = function(freeEval,cachedScripts){
                 var afterLoad = dep[2];
                 if(":debug"){
                     if(!targetPath){
-                        error(dep.join('\n'));
-                        error(list.join('\n'));
+                        if("org.xidea.jsi.boot:$log"){
+                            $log.error(dep.join('\n'));
+                            $log.error(list.join('\n'));
+                        }
                     }
                 }
     
@@ -901,7 +994,9 @@ var $import = function(freeEval,cachedScripts){
             }
         }catch(e){
             if(":debug"){
-                error("Load Error:\n"+loader.scriptBase + name+"\n\nException:"+e);
+                if("org.xidea.jsi.boot:$log"){
+                    $log.error("Load Error:\n"+loader.scriptBase + name+"\n\nException:"+e);
+                }
             }
             throw e;
         }finally{
@@ -1051,13 +1146,18 @@ var $import = function(freeEval,cachedScripts){
                 next();
             }else{
                 if(":debug"){
-                    if(location.protocol != 'file:'){
-                        document.write(list.join("\n").
-                                replace(/.+/g,"<script src='"+scriptBase+"?path=$&'></script>"))
+                    if(location.protocol == 'file:'){
+                        //alert(scriptBase+list[0].replace(/.js$/gm,"__preload__.js"))
+                        try{
+                            loadTextByURL(scriptBase+list[0].replace(/.js$/gm,"__preload__.js"))
+                            document.write(list.join("\n").
+                                replace(/.js$/gm,"__preload__.js").
+                                replace(/.+/g,"<script src='"+scriptBase+"$&' onerror='return alert'></script>"));
+                        }catch(e){
+                        }
                     }else{
                         document.write(list.join("\n").
-                                replace(/.js$/gm,"__preload__.js").
-                                replace(/.+/g,"<script src='"+scriptBase+"$&'></script>"))
+                                replace(/.+/g,"<script src='"+scriptBase+"?path=$&'></script>"))
                     }
                 }else{
                     document.write(list.join("\n").
@@ -1083,7 +1183,9 @@ var $import = function(freeEval,cachedScripts){
             col = lazyTaskList.shift();
             if(":debug"){
                 if(!(col instanceof Function)){
-                    error("延迟导入错误，非法内部状态！！ ");
+                    if("org.xidea.jsi.boot:$log"){
+                        $log.error("延迟导入错误，非法内部状态！！ ");
+                    }
                 }
             }
             //hack return void;

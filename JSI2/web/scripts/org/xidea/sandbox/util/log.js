@@ -15,7 +15,7 @@
  * @version $Id: boot-log.js,v 1.4 2008/02/20 15:42:03 jindw Exp $
  */
  
-    /** 
+/** 
  * 输出<b>[$1]</b>级别的日志信息
  * <ul><pre>
  * trace : 输出跟踪级别的日志信息（比debug级别更低）
