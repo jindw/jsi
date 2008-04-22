@@ -1,0 +1,2358 @@
+<?xml version="1.0" encoding="utf-8"?><script-map export='org.xidea.sandbox.xml:XSLTProcessor,org.xidea.sandbox.xml:XPathResult,org.xidea.sandbox.xml:XPathEvaluator,org.xidea.sandbox.xml:XMLSerializer,org.xidea.sandbox.xml:XHTMLTag,org.xidea.sandbox.xml:Template,org.xidea.sandbox.xml:OutputContext,org.xidea.sandbox.xml:NodeType,org.xidea.sandbox.xml:DefaultTag,org.xidea.sandbox.xml:DOMParser,org.xidea.sandbox.xml:CoreTag,org.xidea.sandbox.xml:AbstractTag,org.xidea.jsidoc.export:xmlReplacer,org.xidea.jsidoc.export:findPackages,org.xidea.jsidoc.export:Exporter,org.xidea.jsidoc.export:ExportUI,org.xidea.jsidoc.export:DependenceInfo'>
+<script path='org/xidea/sandbox/util/browser-info.js'>/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id: browser-info.js,v 1.3 2008/02/19 14:43:47 jindw Exp $
+ */
+
+
+
+/** 
+ * 检测是否是指定版本范围内的&lt;b&gt;[$1]&lt;/b&gt;浏览器
+ * @public 
+ * @param &lt;string|double&gt; minVersion 最小版本
+ * @param &lt;string|double&gt; maxVersion 最大版本
+ * @id BrowserInfo.is*
+ */
+var falseChecker = function(minVersion,maxVersion){return false};
+/**
+ * BrowserInfo 对象，用于判断浏览器的相关信息，如浏览器类型、客户端语言（简体中文？英语..未实现）、操作系统（未实现）等等。
+ * @public
+ */
+var BrowserInfo = {
+    isIE : falseChecker,
+    isOpera : falseChecker,
+    isGecko : falseChecker,
+    isNetscape : falseChecker,
+    isMozilla : falseChecker,
+    isFirefox : falseChecker,
+    isKhtml : falseChecker,
+    isSafari : falseChecker,
+    isKonqueror : falseChecker//,
+};
+
+//这段打算用函数式风格重写
+function Version(version){
+    var vs = version.match(/([\d\.]*)(.*)?/);
+    this.flag = vs[2]?vs[2].replace(/^\s+(.*[^\s])\s+$/,'$1')||'':'';
+    vs = vs[1].match(/(\d+(\.\d+)?)/g); 
+    for(var i = vs.length-1;i&gt;=0;i--){
+        vs[i] = parseFloat(vs[i]);
+    }
+    this.version = version;
+    this.value = vs[0];
+    this.values = vs;
+}
+Version.prototype.compare = function(v){
+    if(typeof v == 'number'){
+        if(v == this.value){
+            for(var i = 1;i&lt;this.values.length;i++){
+                if(this.values[i])return 1;
+            }
+            return 0;
+        }else{
+            //alert(v-this.value)
+            return v-this.value;
+        }
+    }else{
+        if(typeof v == 'string'){
+            if(v == this.version){
+                return 0;
+            }
+            v = new Version(v);
+        }
+        if(v.value == this.value){
+            var l = Math.min(this.values.length,v.values.length);
+            for(var i = 1;i&lt;l;i++){
+                if(this.values[i])return 1;
+            }
+            l = v.values.length - this.value.length;
+            if(l&gt;0){
+                return 1;
+            }else if(l&lt;0){
+                return -1;
+            }
+            if(v.flag == this.flag){
+                return 0;
+            }else if(!v.flag ){
+                return 1;
+            }else if(!this.flag ){
+                return -1;
+            }else{
+                return v.flag&gt;this.flag?1:-1;
+            }
+        }else{
+            return v.value - this.value
+        }
+    }
+  
+  
+}
+Version.prototype.before = function(v){
+    return this.compare(v)&gt;=0;
+}
+Version.prototype.after = function(v){
+    return this.compare(v)&lt;=0;
+}
+
+
+function buildBrowserChecker(version){
+    var v = new Version(version);
+    //function check(min,max){
+    return function(min,max){
+        if(min == null){
+            if(max == null){
+                return version;
+            }else{
+                return v.before(max)? version:false;
+            }
+        }else if(max == null){
+            return v.after(min)? version:false;
+        }else{
+            return v.after(min) &amp;&amp; v.before(max)? version:false;
+        }
+    }
+}
+var ua = window.navigator.userAgent;
+if(ua.indexOf("Opera") &gt; 0){//Opera
+    var version = ua.replace(/.*Opera\s+([^; ]+).*/,'$1');
+    BrowserInfo.isOpera = buildBrowserChecker(version);
+}else if(ua.indexOf(" MSIE ") &gt; 0){//MSIE
+    var version = ua.replace(/.*MSIE\s+([^; ]+).*/,'$1');
+    BrowserInfo.isIE = buildBrowserChecker(version);
+    if(BrowserInfo.isIE(null,5.9)){
+        BrowserInfo.isQuirks = function(){return true;};
+    }
+}else if(ua.indexOf("Gecko/") &gt; 0){//mozilla netscape firefox ...
+    var version = ua.replace(/.*Gecko[\s\/]*([^;\/\) ]+).*/,'$1');
+    BrowserInfo.isGecko = buildBrowserChecker(version);
+    if(ua.indexOf("Firefox") &gt; 0){
+        var version = ua.replace(/.*Firefox[\s\/]*([^;\/\) ]+).*/,'$1');
+        BrowserInfo.isFirefox = buildBrowserChecker(version);
+    }else if(ua.indexOf("Netscape") &gt; 0){
+        var version = ua.replace(/.*Netscape[\s\/]*([^;\/\) ]+).*/,'$1');
+        BrowserInfo.isNetscape = buildBrowserChecker(version);
+    }else if(ua.indexOf("Mozilla") &gt; 0){
+        var version = ua.replace(/.*rv:([^;\/\) ]+).*/,'$1');
+        BrowserInfo.isMozilla = buildBrowserChecker(version);
+    }
+}else if(ua.indexOf("KHTML") &gt; 0){//khtml 
+    if(ua.indexOf("Konqueror") &gt; 0){//Konqueror 糟糕的浏览器
+        //var version = ua.replace(/.*AppleWebKit\/([^;\/ ]+).*/,'$1');
+        //BrowserInfo.isKhtml = buildBrowserChecker(version);
+        BrowserInfo.isKhtml = function(){return true;};
+        version = ua.replace(/.*Konqueror\/([^;\/ ]+).*/,'$1');
+        BrowserInfo.isKonqueror = buildBrowserChecker(version);
+    }
+}else if(ua.indexOf("Safari") &gt; 0){//Safari khtml 
+    //var version = ua.replace(/.*AppleWebKit\/([^;\/ ]+).*/,'$1');
+    //BrowserInfo.isKhtml = buildBrowserChecker(version);
+    BrowserInfo.isKhtml = function(){return true;};
+    version = ua.replace(/.*Safari\/([^;\/ ]+).*/,'$1');
+    BrowserInfo.isSafari = buildBrowserChecker(version);
+}else{
+    //UNKNOW 
+}
+//@Deprecated ???
+//for(var n in BrowserInfo){
+//    window.navigator[n] = BrowserInfo[n];
+//}</script>
+<script path='org/xidea/sandbox/util/__package__.js'>/*
+ * 杂项，任务队列，IO，编码...
+ */
+this.addScript('cookie.js','Cookie');
+
+this.addScript("tween.js",'Tween');
+
+this.addScript("tween-rule.js",'TweenRuleMap');
+this.addScript("log.js",'log');
+
+
+//HTML DOM 处理相关
+
+this.addScript("browser-info.js",'BrowserInfo');
+this.addScript("event-util.js",'EventUtil',
+               "BrowserInfo");
+this.addScript("style-util.js",'StyleUtil',
+               "BrowserInfo");
+
+
+this.addScript("task-queue.js",['TaskQueue','LoadTask','ScriptLoadTask']);
+
+this.addScript("chinese-calendar.js",['getLunarString']);
+this.addScript("commons.js",'CommonUtil');
+this.addScript("collections.js",['Iterator','StackMap']);
+</script>
+<script path='org/xidea/sandbox/xml/mozilla-xml.js'>/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id: mozilla-xml.js,v 1.3 2008/02/19 13:39:03 jindw Exp $
+ */
+
+var XSLTProcessor = window.XSLTProcessor;
+var XPathEvaluator = window.XPathEvaluator;
+var DOMParser = window.DOMParser;
+var XMLSerializer = window.XMLSerializer;
+var XPathResult = window.XPathResult;
+
+// xpathResultConstants = 
+if(!XPathResult){
+  XPathResult = function(value,resultType){
+    this.resultType = resultType;
+    if(resultType &gt; 7){
+      this.singleNodeValue = value;
+    }else if(resultType &gt; 3){
+      this.value = [];
+      for(var i = 0;i&lt;value.length;i++){
+        this.value.push(value.item(i))
+      }
+    //}else if(resultType &gt;5){//selectNodes
+      this.snapshotLength = value.length;
+    }
+  }
+  XPathResult.prototype = {
+    /**
+     * This function returns an object that implements the Node interface.
+     * This function can raise an object that implements the XPathException interface or the DOMException interface.
+     */
+    iterateNext:function(){
+      this.values[this.index++];
+    },
+    /**
+     * This function returns an object that implements the Node interface.
+     * The index parameter is a Number.
+     * This function can raise an object that implements the XPathException interface. 
+     */
+    snapshotItem:function(index){
+      this.values[index];
+    },
+    /*The value of the constant XPathResult.ANY_TYPE is */
+    ANY_TYPE:0,
+    /*The value of the constant XPathResult.NUMBER_TYPE is */
+    NUMBER_TYPE:1,
+    /*The value of the constant XPathResult.STRING_TYPE is */
+    STRING_TYPE:2,
+    /*The value of the constant XPathResult.BOOLEAN_TYPE is */
+    BOOLEAN_TYPE:3,
+    /*The value of the constant XPathResult.UNORDERED_NODE_ITERATOR_TYPE is */
+    UNORDERED_NODE_ITERATOR_TYPE:4,
+    /*The value of the constant XPathResult.ORDERED_NODE_ITERATOR_TYPE is */
+    ORDERED_NODE_ITERATOR_TYPE:5,
+    /*The value of the constant XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE is */
+    UNORDERED_NODE_SNAPSHOT_TYPE:6,
+    /*The value of the constant XPathResult.ORDERED_NODE_SNAPSHOT_TYPE is */
+    ORDERED_NODE_SNAPSHOT_TYPE:7,
+    /*The value of the constant XPathResult.ANY_UNORDERED_NODE_TYPE is */
+    ANY_UNORDERED_NODE_TYPE:8,
+    /*The value of the constant XPathResult.FIRST_ORDERED_NODE_TYPE is */
+    FIRST_ORDERED_NODE_TYPE:9
+  };
+}
+if(BrowserInfo.isIE()){
+  if(!XSLTProcessor){//IE7-
+    var xsltemplateProgid = ["Msxml2.XSLTemplate.6.0", "MSXML2.XSLTemplate.3.0"];
+    var freeThreadedDOMDocumentProgid = ["MSXML2.FreeThreadedDOMDocument.6.0", "MSXML2.FreeThreadedDOMDocument.3.0"];
+    var xmlWriterProgid = ["Msxml2.MXXMLWriter.6.0", "Msxml2.MXXMLWriter.3.0", "MSXML2.MXXMLWriter", "MSXML.MXXMLWriter", "Microsoft.XMLDOM"];
+    var domProgid = ["Msxml2.DOMDocument.6.0", "Msxml2.DOMDocument.3.0", "MSXML2.DOMDocument", "MSXML.DOMDocument", "Microsoft.XMLDOM"];
+    function createActiveXObject(progids){
+      if(progids instanceof Array){
+        for(var i = 0;i&lt;progids.length;i++){
+          try{
+            var result = new ActiveXObject(progids[i]);
+            progids = progids[i];
+            return result;
+          }catch(e){
+          }
+        }
+      }else{
+        return new ActiveXObject(progids);
+      }
+    }
+    /**
+     * Basic implementation of Mozilla's XSLTProcessor for IE. 
+     * Reuses the same XSLT stylesheet for multiple transforms
+     * @constructor
+     */
+    XSLTProcessor = function(){
+        this.template = createActiveXObject(xsltemplateProgid);
+    };
+
+    /**
+     * 引入 XSLT 样式表 styleSheet 为 XSLT stylesheet 的根结点。 
+     * Imports the given XSLT DOM and compiles it to a reusable transform
+     * &lt;b&gt;Note:&lt;/b&gt; If the stylesheet was loaded from a URL and contains xsl:import or xsl:include elements,it will be reloaded to resolve those
+     * @argument xslDoc The XSLT DOMDocument to import
+     */
+    XSLTProcessor.prototype.importStylesheet = function(xslDoc){
+        var converted = createActiveXObject(freeThreadedDOMDocumentProgid);
+        xslDoc.setProperty("SelectionLanguage", "XPath");
+        xslDoc.setProperty("SelectionNamespaces", "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'");
+        // make included/imported stylesheets work if exist and xsl was originally loaded from url
+        if(xslDoc.url &amp;&amp; xslDoc.selectSingleNode("//xsl:*[local-namespaceURI() = 'import' or local-name() = 'include']") != null){
+            converted.async = false;
+            if (freeThreadedDOMDocumentProgid == "MSXML2.FreeThreadedDOMDocument.6.0") { 
+                converted.setProperty("AllowDocumentFunction", true); 
+                converted.resolveExternals = true; 
+            }
+            converted.load(xslDoc.url);
+        } else {
+            converted.loadXML(xslDoc.xml);
+        }
+        converted.setProperty("SelectionNamespaces", "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'");
+        var output = converted.selectSingleNode("//xsl:output");
+        this.outputMethod = output ? output.getAttribute("method") : "html";
+        this.template.stylesheet = converted;
+        this.processor = this.template.createProcessor();
+        // for getParameter and clearParameters
+        this.paramsSet = new Array();
+    };
+
+    /**
+     * 使用由importStylesheet()引入的样式表对结点source进行转换. 
+     * Transform the given XML DOM and return the transformation result as a new DOM document
+     * @argument sourceDoc The XML DOMDocument to transform
+     * @return The transformation result as a DOM Document
+     */
+    XSLTProcessor.prototype.transformToDocument = function(sourceDoc){
+      // fix for bug 1549749
+      this.processor.input = sourceDoc;
+      this.processor.transform();
+      var oDoc = createActiveXObject(domProgid);
+      oDoc.loadXML(this.processor.output||"");
+      return oDoc;
+    };
+    /**
+     * 使用由importStylesheet()引入的样式表对结点source进行转换，owner 是转换结果的 DOMDocument. 
+     * Transform the given XML DOM and return the transformation result as a new DOM fragment.
+     * &lt;b&gt;Note&lt;/b&gt;: The xsl:output method must match the nature of the owner document (XML/HTML).
+     * @argument sourceDoc The XML DOMDocument to transform
+     * @argument ownerDoc The owner of the result fragment
+     * @return The transformation result as a DOM Document
+     */
+    XSLTProcessor.prototype.transformToFragment = function (sourceDoc, ownerDoc) {
+      this.processor.input = sourceDoc;
+      this.processor.transform();
+      var s = this.processor.output;
+      var f = ownerDoc.createDocumentFragment();
+      if (this.outputMethod == 'text') {
+        f.appendChild(ownerDoc.createTextNode(s));
+      } else if (ownerDoc.body &amp;&amp; ownerDoc.body.innerHTML) {
+        var container = ownerDoc.createElement('div');
+        container.innerHTML = s;
+        while (container.hasChildNodes()) {
+          f.appendChild(container.firstChild);
+        }
+      }
+      else {
+        var oDoc = new ActiveXObject(domProgid);
+        if (s.substring(0, 5) == '&lt;?xml') {
+          s = s.substring(s.indexOf('?&gt;') + 2);
+        }
+        var xml = ''.concat('&lt;my&gt;', s, '&lt;/my&gt;');
+        oDoc.loadXML(xml);
+        var container = oDoc.documentElement;
+        while (container.hasChildNodes()) {
+          f.appendChild(container.firstChild);
+        }
+      }
+      return f;
+    };
+
+    /**
+     * 设置 XSLT stylesheet 的参数。 
+     * Set global XSLT parameter of the imported stylesheet
+     * @argument namespaceURI The parameter namespace URI
+     * @argument localName The parameter base localName
+     * @argument value The new parameter value
+     */
+    XSLTProcessor.prototype.setParameter = function(namespaceURI, localName, value){
+      // make value a zero length string if null to allow clearing
+      value = value || "";
+      namespaceURI = namespaceURI || "";
+      if(namespaceURI){
+        this.processor.addParameter(localName, value, namespaceURI);
+      }else{
+        this.processor.addParameter(localName, value);
+      };
+      // update updated params for getParameter 
+      if(!this.paramsSet[namespaceURI]){
+        this.paramsSet[namespaceURI] = {};
+      }
+      this.paramsSet[namespaceURI][localName] = value;
+    };
+    /**
+     * 取得 XSLT stylesheet 的参数的值。 
+     * Gets a parameter if previously set by setParameter. Returns null
+     * otherwise
+     * @argument localName The parameter base name
+     * @argument value The new parameter value
+     * @return The parameter value if reviously set by setParameter, null otherwise
+     */
+    XSLTProcessor.prototype.getParameter = function(namespaceURI, localName){
+        namespaceURI = namespaceURI || "";
+        if(this.paramsSet[namespaceURI]){
+            return this.paramsSet[namespaceURI][localName];
+        }else{
+            return null;
+        }
+    };
+    /**
+     * 去除 XSLT stylesheet 中所有参数的值，这将导致 XSLT 使用默认的参数值。 
+     * Clear parameters (set them to default values as defined in the stylesheet itself)
+     */
+    XSLTProcessor.prototype.clearParameters = function(){
+      for(var namespaceURI in processor.paramsSet){
+        for(var localName in processor.paramsSet[namespaceURI]){
+          if(namespaceURI){
+            this.processor.addParameter(localName, '', namespaceURI);
+          }else{
+            this.processor.addParameter(localName, '');
+          };
+        };
+      };
+      this.paramsSet = new Array();
+    };
+    /**
+     * 去除 XSLT stylesheet 指定参数的值，这将导致 XSLT 使用默认的参数值。 
+     */
+    XSLTProcessor.prototype.removeParameter = function(namespaceURI, localName){
+      var params = this.paramsSet[namespaceURI||''];
+      if(params[localName]){
+        delete params[localName];
+        if(namespaceURI){
+          this.processor.addParameter(localName, '', nsURI);
+        }else{
+          this.processor.addParameter(localName, '');
+        };
+      }
+      
+    }
+    /**
+     * 从 XSLTProcessor 中去除所有样式表和参数。
+     */
+    XSLTProcessor.prototype.reset = function(){
+      //this.template ;
+      this.processor = null;
+      this.paramsSet = null;
+    }
+  }
+    
+
+  if(!DOMParser){
+    DOMParser = function() { };
+    DOMParser.parseFromString = DOMParser.prototype.parseFromString = function(sXml, contentType){
+      var doc = createActiveXObject(domProgid);
+      doc.loadXML(sXml);
+      return doc;
+    };
+  }
+  if(!XMLSerializer){
+    /**
+     * Utility class to serialize DOM Node objects to XML strings
+     * @constructor
+     */
+    XMLSerializer = function(){};
+    /**
+     * Serialize the given DOM Node to an XML string
+     * @param oNode the DOM Node to serialize
+     */
+    XMLSerializer.prototype.serializeToString = function(oNode) {
+        return oNode.xml;
+    };
+  }
+  if(!XPathEvaluator){
+    XPathEvaluator = function(){}
+    XPathEvaluator.prototype.evaluate = function(expression, contextNode, resolver, type, result){
+      if(type&gt;7){//ANY_UNORDERED_NODE_TYPE:8,FIRST_ORDERED_NODE_TYPE:9
+        var value = contextNode.selectSingleNode(expression);
+      }else{
+         var value = contextNode.selectNodes(expression);
+      }
+      return new XPathResult(value,type);
+    }
+    XPathEvaluator.selectSingleNode = function(contextNode,expression){
+      return contextNode.selectSingleNode(expression);
+    };
+    XPathEvaluator.selectNodes = function(contextNode,expression){
+      return contextNode.selectNodes(expression);
+    };
+  }
+}//end ie
+else{
+  if(XPathEvaluator){
+    XPathEvaluator.selectSingleNode = function(contextNode,expression){
+      var evaluator = new XPathEvaluator();
+      var result = evaluator.evaluate(expression,contextNode,null,9,null);
+      return result?result.singleNodeValue:null;
+    };
+    XPathEvaluator.selectNodes = function(contextNode,expression){
+      //ORDERED_NODE_ITERATOR_TYPE:5,
+      var evaluator = new XPathEvaluator();
+      var result = evaluator.evaluate(expression,contextNode,null,5,null);
+      var nodeList = [];
+      var item;
+      while(item = result.iterateNext()){
+        nodeList.push(item);
+      }
+      nodeList.item = function(index){
+        return this[index];
+      }
+      return nodeList;
+    };
+  }else if(document.selectSingleNode){
+    XPathEvaluator = function(expression, contextNode, resolver, type, result){
+      if(type&gt;7){//ANY_UNORDERED_NODE_TYPE:8,FIRST_ORDERED_NODE_TYPE:9
+        var value = XPathEvaluator.selectSingleNode(contextNode,expression);
+      }else{
+        var value = XPathEvaluator.selectNodes(contextNode,expression);
+      }
+      return new XPathResult(value,type);
+    };
+    XPathEvaluator.selectSingleNode = function(contextNode,expression){
+      var doc = contextNode.ownerDocument;
+      if(contextNode.selectSingleNode){
+        return contextNode.selectSingleNode(expression);
+      }else if(doc.selectSingleNode){
+        return doc.selectSingleNode(expression, contextNode);
+      }
+    };
+    XPathEvaluator.selectNodes = function(contextNode,expression){
+      var doc = contextNode.ownerDocument;
+      if(contextNode.selectNodes){
+        return contextNode.selectNodes(expression);
+      }else if(doc.selectNodes){
+        return doc.selectNodes(expression, contextNode);
+      }
+    };
+  }
+  if(!DOMParser){
+    /**
+     * DOMParser is a utility class, used to construct DOMDocuments from XML strings
+     * @constructor
+     */
+    if(BrowserInfo.isKhtml()||BrowserInfo.isOpera(7.2)){
+      DOMParser = function() { };
+      /** 
+       * Construct a new DOM Document from the given XMLstring
+       * @param sXml the given XML string
+       * @param contentType the content type of the document the given string represents (one of text/xml, application/xml, application/xhtml+xml). 
+       * @return a new DOM Document from the given XML string
+       */
+      DOMParser.prototype.parseFromString = function(sXml, contentType){
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open("GET", "data:text/xml;charset=utf-8," + encodeURIComponent(sXml), false);
+        xmlhttp.send(null);
+        return xmlhttp.responseXML;
+      };
+    }
+  }
+}
+
+</script>
+<script path='org/xidea/sandbox/xml/__package__.js'>//,"NODE_ELEMENT","NODE_ATTRIBUTE","NODE_TEXT","NODE_CDATA_SECTION","NODE_ENTITY_REFERENCE","NODE_ENTITY","NODE_PROCESSING_INSTRUCTION","NODE_COMMENT","NODE_DOCUMENT","NODE_DOCUMENT_TYPE","NODE_DOCUMENT_FRAGMENT","NODE_NOTATION"]);
+this.addScript("node-type.js",["NodeType"]);
+
+this.addScript("mozilla-xml.js",['DOMParser','XMLSerializer','XSLTProcessor','XPathEvaluator','XPathResult'],
+                "org.xidea.sandbox.util.BrowserInfo");
+
+this.addScript("template.js",['Template','OutputContext'],
+                null, 
+                ["org.xidea.sandbox.io.Request","tag.js"]);
+
+this.addScript("tag.js",['DefaultTag','AbstractTag','XHTMLTag','CoreTag']);    </script>
+<script path='org/xidea/sandbox/xml/tag.js'>/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id: tag.js,v 1.5 2008/02/28 14:39:06 jindw Exp $
+ */
+
+
+
+/**
+ * 默认的 xml 标记 处理对象。
+ * @public
+ */
+function DefaultTag(){
+}
+DefaultTag.prototype.$namespaceURI = '*';
+/**
+ * @protected
+ */
+DefaultTag.prototype.$Element = function(context,node){
+    context.printIndent();
+    context.print('&lt;');
+    context.print(node.tagName);
+    var attrs = node.attributes;
+    for (var i=0; i&lt;attrs.length; i++) {
+        var attr = attrs.item(i);
+        this.$Attribute(context,attr)
+    }
+    var nl = node.childNodes;
+    if(nl==null || nl.length == 0){
+        context.println('/&gt;');
+    }else{
+        context.print('&gt;');
+        context.depth++;
+        for (var i=0; i&lt;nl.length; i++) {
+            context.output(nl.item(i))
+        }
+        context.depth--;
+        context.printIndent();
+        context.print('&lt;/');
+        context.print(node.tagName);
+        context.println('&gt;');
+    }
+}
+
+
+var xmlns = /^xmlns$|^xmlns:/
+/**
+ * @protected
+ */
+DefaultTag.prototype.$Attribute = function(context,node){
+    var value = context.evalText(node.value);
+    if(value == null || value == ''){return}
+    if(xmlns.test(node.name)){
+        var tag = context.getTaglib(value);
+        if(tag){
+            value = tag.$realNamespaceURI || value;
+        }
+    }
+    context.print(' ');
+    context.print(node.name);
+    context.print('="');
+    context.print(context.encodeAttribute(value));
+    context.print('"');
+}
+/**
+ * @protected
+ */
+DefaultTag.prototype.$Text = function(context,node){
+    context.print(context.evalText(node.data));
+}
+/**
+ * @protected
+ */
+DefaultTag.prototype.$CDATASection = function(context,node){
+    context.print("&lt;![CDATA[");
+    context.print(context.evalText(node.data));
+    context.print("]]&gt;");
+}
+
+/**
+ * @protected
+ */
+DefaultTag.prototype.$EntityReference = function(context,node){
+}
+/**
+ * @protected
+ */
+DefaultTag.prototype.$Entity = function(context,node){
+}
+/**
+ * @protected
+ */
+DefaultTag.prototype.$ProcessingInstruction = function(context,node){
+    context.print("&lt;?");
+    context.print(node.nodeName);
+    context.print(" ");
+    context.print(node.data+"?&gt;");
+}
+/**
+ * @protected
+ */
+DefaultTag.prototype.$Comment = function(context,node){
+     context.print("&lt;!--");
+     context.print(context.encodeText(node.data));
+     context.print("--&gt;");
+}
+/**
+ * @protected
+ */
+DefaultTag.prototype.$Document = function(context,node){
+    for(var n = node.firstChild;n!=null;n = n.nextSibling){
+        context.output(n);
+    }
+}
+/**
+ * @protected
+ */
+DefaultTag.prototype.$DocumentType = function(context,node){
+    //context.print("&lt;!DOCTYPE "+node.nodeName+"[]&gt;");
+    if(node.xml){
+        context.print(node.xml);
+    }else{
+        if(node.publicId){
+            context.print('&lt;!DOCTYPE ');
+            context.print(node.nodeName);
+            context.print(' PUBLIC "');
+            context.print(node.publicId );
+            context.print( '" "');
+            context.print(node.systemId);
+            context.print('"&gt;');
+        }else{
+            context.print("&lt;!DOCTYPE ");
+            context.print(node.nodeName);
+            context.print("[");
+            context.print(node.internalSubset);
+            context.print("]&gt;");
+        }
+    }
+}
+/**
+ * @protected
+ */
+DefaultTag.prototype.$DocumentFragment = function(context,node){
+    var nl = node.childNodes;
+    for (var i=0; i&lt;nl.length; i++) {
+        context.output(nl.item(i))
+    }
+}
+/**
+ * @protected
+ */
+DefaultTag.prototype.$Notation = function(context,node){
+}
+function AbstractTag(){
+}
+AbstractTag.prototype = new DefaultTag();
+AbstractTag.prototype.$Element = function(context,node){
+    var localName = node.localName || node.baseName;
+    if(this[localName] instanceof Function){
+        this[localName](context,node);
+    }else{
+        DefaultTag.prototype.$Element.apply(this,context,node);
+    }
+}
+
+function XHTMLTag(){
+}
+XHTMLTag.prototype = new AbstractTag();
+XHTMLTag.prototype.$namespaceURI = "http://www.xidea.org/taglib/xhtml";
+XHTMLTag.prototype.$realNamespaceURI = "http://www.w3.org/1999/xhtml";
+
+var htmlLeaf = /^meta$|^link$|^img$|^br$|^hr$/i;
+/**
+ * @protected
+ */
+XHTMLTag.prototype.$Element = function(context,node){
+    context.printIndent();
+    context.print('&lt;');
+    context.print(node.tagName);
+    var attrs = node.attributes;
+    for (var i=0; i&lt;attrs.length; i++) {
+        var attr = attrs.item(i);
+        this.$Attribute(context,attr)
+    }
+    var nl = node.childNodes;
+    if(nl==null || nl.length == 0){
+        if(htmlLeaf.test(node.tagName)){//for html
+            context.println('/&gt;');
+        }else{
+            context.println('&gt;');
+            context.print('&lt;/');
+            context.print(node.tagName);
+            context.println('&gt;');
+        }
+    }else{
+        context.print('&gt;');
+        context.depth++;
+        //fix opera bug
+        if(node.tagName.toUpperCase() == 'SCRIPT'){
+            for (var i=0; i&lt;nl.length; i++) {
+                var c = nl.item(i);
+                if(c.nodeType == 4){ //NODE_CDATA_SECTION 
+                    if(/^[\s$]*\/\//.test(c.data)){
+                        context.print('//');
+                    }
+                }
+                context.output(c);
+            }
+        }else{
+            for (var i=0; i&lt;nl.length; i++) {
+                context.output(nl.item(i));
+            }
+        }
+        context.depth--;
+        context.printIndent();
+        context.print('&lt;/');
+        context.print(node.tagName);
+        context.println('&gt;');
+    }
+}
+function CoreTag(){
+}
+CoreTag.prototype = new AbstractTag();
+CoreTag.prototype.$namespaceURI = "http://www.xidea.org/taglib/core";
+/*
+getBegin()
+getCount()
+getCurrent()
+getEnd()
+getIndex()
+getStep()
+isFirst()
+isLast()
+*/
+function VarStatus(items){
+    this.items = items;
+    this.begin = 0;
+    this.end = this.items.length-1;
+    this.step = 1;
+    this.current = this.items[0];
+    this.count = this.items.length;
+    this.index = this.begin;
+    this.first = true;
+    this.last = this.count == 1;
+}
+VarStatus.prototype.next = function(){
+    this.index++;
+    this.first = false;
+    this.last = this.index+1&gt;=this.count;
+    this.current = this.items[this.index];
+}
+function Iterator(items){
+    if(items instanceof Array){
+        this.items = items;
+    }else if(items.hasNext &amp;&amp; items.next){
+        return items;
+    }else{
+        this.items = [items];
+    }
+    this.index = 0;
+}
+Iterator.prototype.hasNext = function(){
+    return this.index&lt;this.items.length;
+}
+Iterator.prototype.next = function(){
+    return this.items[this.index++];
+}
+CoreTag.prototype.forEach = function(context,node){
+    var items = node.getAttribute("items");
+    items = context.evalText(items);
+    var varStatus = node.getAttribute("varStatus");
+    if(varStatus){
+        var status = new VarStatus(items);
+        context.valueStack.setVariable(varStatus,status);
+    }
+    var id = node.getAttribute('var');
+    if(items ){
+        
+        items = new Iterator(items);
+        while(items.hasNext()){
+            try{
+                var item = items.next();
+                if(id){
+                    context.valueStack.setVariable(id,item);
+                }else{
+                    context.valueStack.push(item);
+                }
+                var nl = node.childNodes;
+                for (var j=0; j&lt;nl.length; j++) {
+                    context.output(nl.item(j))
+                }
+            }finally{
+                if(!id)context.valueStack.pop();
+                if(status)status.next();
+            }
+        }
+    }
+}
+CoreTag.prototype['if'] = function(context,node){
+    var test = node.getAttribute("test");
+    test = context.evalText(test);
+    context.valueStack.setVariable("if",test);
+    if(test){
+        var nl = node.childNodes;
+        for (var j=0; j&lt;nl.length; j++) {
+            context.output(nl.item(j))
+        }
+    }
+}
+CoreTag.prototype['elseif'] = function(context,node){
+    var test = context.valueStack.getVariable("if");
+    if(test){
+        this['if'](context,node);
+    }
+}
+CoreTag.prototype['else'] = function(context,node){
+    var test = context.valueStack.getVariable("if");
+    if(!test){
+        var nl = node.childNodes;
+        for (var j=0; j&lt;nl.length; j++) {
+            context.output(nl.item(j))
+        }
+    }
+}
+CoreTag.prototype.choose = function(context,node){
+    try{
+        context.valueStack.push({choose:false});
+        
+        var nl = node.childNodes;
+        for (var j=0; j&lt;nl.length; j++) {
+            context.output(nl.item(j))
+        }
+    }finally{
+        context.valueStack.pop();
+    }
+}
+
+CoreTag.prototype.include = function(context,node){
+    try{
+        var path = node.getAttribute('path');
+        var xpath = node.getAttribute('xpath');
+        
+        if(path == null){
+            var doc = node.ownerDocument;
+        }else{
+            var doc = context.template.load(node.ownerDocument.documentURI,path);//BUG document base....
+            
+        }
+        if(xpath != null){
+            if(document.all){
+                var nodes = doc.selectNodes(xpath);
+                for (var i=0; i&lt;nodes.length; i++) {
+                    context.output(nodes.item(i))
+                }
+            }else{
+                var xpe = new XPathEvaluator();
+                var nsResolver = xpe.createNSResolver(doc.documentElement);
+                var result = xpe.evaluate(xpath, doc.documentElement, nsResolver, 5, null);
+                var node;
+                while (node = result.iterateNext()){
+                    node.removeAttribute("id")
+                    context.output(node)
+                }
+            }
+        }
+    }finally{
+    }
+}
+CoreTag.prototype.when = function(context,node){
+    var test = context.valueStack.getVariable("choose");
+    if(!test){
+        var test = node.getAttribute("test");
+        test = context.evalText(test);
+        context.valueStack.setVariable("choose",test);
+        if(test){
+            var nl = node.childNodes;
+            for (var j=0; j&lt;nl.length; j++) {
+                context.output(nl.item(j))
+            }
+        }
+    }
+}
+CoreTag.prototype.otherwise = function(context,node){
+    var test = context.valueStack.getVariable("choose");
+    if(!test){
+        var nl = node.childNodes;
+        for (var j=0; j&lt;nl.length; j++) {
+            context.output(nl.item(j))
+        }
+    }
+}
+CoreTag.prototype.script = function(context,node){
+    with(context){
+        with(context.valueStack.context){
+            var nl = node.childNodes;
+            for (var j=0; j&lt;nl.length; j++) {
+                var t = nl.item(j);
+                if(t.nodeType == 3 || t.nodeType == 4){//        case 3: //NODE_TEXT case 4: //NODE_CDATA_SECTION 
+                    eval(t.data);
+                }
+            }
+        }
+    }
+}
+
+CoreTag.prototype.out = function(context,node){
+    var esc = context.evalBoolean(node.getAttribute('escapeXml'));
+    var value = node.getAttribute('value')||'';
+    if(value){
+        try{
+            value = context.evalText(value)
+        }catch(e){value = '';}
+    }
+    if(!value &amp;&amp; (value = node.getAttribute('default'))){
+        try{
+            value = context.evalText(value)
+        }catch(e){value = '';}
+    }
+    if(esc){
+        value = context.encodeText(value);
+    }
+    context.print(value);
+}
+/**
+ * eg:&amp;lt;c:set var="bookId" value="${param.Remove}"/&amp;gt;
+ */
+CoreTag.prototype.set = function(context,node){
+    var value = node.getAttribute("value");
+    value = context.evalText(value);
+    context.valueStack.setVariable(node.getAttribute("var"),value);
+}</script>
+<script path='org/xidea/sandbox/xml/template.js'>/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
+ */
+
+/**
+ * 加载文档
+ * @param &lt;string&gt;value xml url or xml string
+ */
+function loadDoc(value){
+    if(/^[\s\ufeff]*&lt;/.test(value)){
+        value = value.replace(/^[\s\ufeff]*&lt;/,'&lt;');
+    }else{
+        var doc = new Request(value).send('',true).getXML();
+        doc.documentURI = value;
+        return doc;
+    }
+    if(window.DOMParser){//code for Mozilla, Firefox, Opera, etc.
+        return new DOMParser().parseFromString(value,"text/xml");
+    }else{
+        var doc=new ActiveXObject("Microsoft.XMLDOM");
+        doc.async="false";
+        doc.loadXML(value);
+        return doc;
+    }
+}
+
+/**
+ * @public
+ * @param xmlDoc
+ */
+function Template(xmlDoc){
+    this.taglib = {};
+    this.putTaglib(new DefaultTag(), '*');
+    this.putTaglib(new XHTMLTag());
+    this.putTaglib(new CoreTag());
+    if(typeof xmlDoc == 'string'){
+        this.doc = loadDoc(xmlDoc);
+    }else if(xmlDoc != null){
+        this.doc = xmlDoc;
+    }
+}
+
+Template.prototype.load = function(base,url){
+    base = base || this.doc.documentURL || this.url;
+    if(base &amp;&amp; !/^\w{3-8}\:\/\//.test(url)){
+        if(url.charAt() == '/'){
+            url = base.replace(/^(\w{3-8}\:\/\/[^\/\\]+).*$/,"$1"+url);
+        }else{
+            url = base.replace(/[^\/]*$/,'')+url;
+            while(url != (url = url.replace(/\w+\.\.\//,'')));
+        }
+    }
+    return loadDoc(url);
+    
+}
+Template.prototype.putTaglib = function(tl,ns){
+    this.taglib[ns||tl.$namespaceURI] = tl;
+}
+
+
+/**
+ * @public
+ * @param data &lt;Object|OutputContext&gt; 数据集合
+ * @param out &lt;Array|Writer|Document&gt; 数组 或者 输出接口至少需要一个成员函数 write(string)
+ */
+Template.prototype.render = function(data,out){
+    if(out == null){
+        if(data instanceof OutputContext){
+            var context = data;
+        }else{
+            var out2 = [];
+            var context = new OutputContext(data,out2);
+        }
+    }else{
+        var context = new OutputContext(data,out);
+    }
+    context.template = this;
+    var ctl = context.taglib;
+    context.taglib = new StackMap(this.taglib);
+    for(var n in ctl){
+        context.taglib[n] = ctl[n];
+    }
+    context.output(this.doc);
+    if(out2){
+        return out2.join('');
+    }
+}
+/**
+ * 值栈对象
+ */
+function ValueStack(data){
+    this.context = data;
+    this.stack = [];
+}
+/**
+ * 压入新的上下文根
+ */
+ValueStack.prototype.push = function(data){
+    this.stack.push(this.context);
+    this.context = new StackMap(this.context);
+    for(var n in    data){
+        this.context[n] = data[n];
+    }
+}
+/**
+ * 弹出顶层上下文根
+ */
+ValueStack.prototype.pop = function(){
+    this.context = this.stack.pop();
+}
+/**
+ * 在上下文对象上设置一个变量
+ */
+ValueStack.prototype.setVariable = function(id,value){
+    this.context[id] = value
+}
+/**
+ * 在上下文对象上获取一个变量
+ */
+ValueStack.prototype.getVariable = function(id){
+    return this.context[id];
+}
+/**
+ * 输出上下文对象
+ * @protected
+ * @param data &lt;Object&gt; 数据集合
+ * @param out &lt;Writer|Document&gt; 输出接口 至少需要一个成员函数 write(string)
+ */
+function OutputContext(data,out){
+    if(data == null){
+        data = {};
+    }
+    this.taglib = {};
+    this.valueStack = new ValueStack(data);
+    this.out = out;
+    if(out instanceof Array){
+        this.print = this.print = arrayWrite;
+    }else if(out.writeln){
+        this.writeln = this.println = nativeWriteln;
+    }
+    this.depth = 0;
+}
+
+/**
+ * @public
+ */
+OutputContext.prototype.putTaglib = Template.prototype.putTaglib;
+/**
+ * @public
+ */
+OutputContext.prototype.print = OutputContext.prototype.write = function(str){
+    this.out.write(str)
+}
+
+/**
+ * @public
+ */
+OutputContext.prototype.writeln = OutputContext.prototype.println = function(str){
+    this.print(str);
+    this.print('\r\n');
+}
+/**
+ * @private
+ */
+function nativeWriteln(str){
+    this.out.writeln(str);
+}
+function arrayWrite(str){
+    this.out.push(str);
+}
+
+/**
+ * @private
+ */
+OutputContext.prototype.printIndent = function(str){
+    return ;
+    this.out.write("\r\n");
+    for(var i = 0;i&lt;this.depth;i++){
+        this.out.write("    ");
+    }
+}
+/**
+ * 计算表达式
+ * @protected
+ */
+OutputContext.prototype.evalExpression = function(el){
+    try{
+        with(this.valueStack.context){
+            return eval(el);
+        }
+    }catch(e){
+        return this.processException(e);
+    }
+}
+/**
+ * 处理表达式计算时发生的异常
+ * @protected
+ * @param &lt;Error&gt; e 异常对象
+ * @return &lt;string&gt; 异常后显示的字符串
+ */
+OutputContext.prototype.processException = function(e){
+    $log.debug('expression eval error:',e);
+    return '';
+}
+/**
+ * 计算boolean值
+ * @protected
+ */
+OutputContext.prototype.evalBoolean = function(str){
+    if(str){
+        switch(str.toLowerCase()){
+            case 'true':
+                return true;
+            case 'false':
+                return false;
+        }
+        try{
+            str = this.evalText(str);
+            if(str == '' || (str.toLowerCase())=='false'){
+                return false;
+            }else{
+                return true;
+            }
+        }catch(e){
+            return null;
+        }
+    }else{
+        return null;
+    }
+}
+/**
+ * 计算带表达式的字符块
+ * @protected
+ * @param &lt;string&gt;str 需要计算的字符块 
+ */
+OutputContext.prototype.evalText = function(str){
+    var k = 0;
+    var result = "";
+    if(!str){
+        return str;
+    }
+    while(true){
+        var i = str.indexOf("${",k);
+        while(str.charAt(i-1) == '\\'){
+            result += str.substring(k,i-1);
+            k = i;
+            i = str.indexOf("${",k+1);
+        }
+        if(i&gt;=0){
+            var j = str.indexOf('}',i);
+            var x = str.indexOf('{',i+2);
+            if(x&gt;i &amp;&amp; x&lt;j){
+                for(var d = 1,j = i+2;j&lt;str.length;j++){
+                    var c = str.charAt(j);
+                    if(c == '\'' || c == '\"'){//跳过字符串
+                        while(j&lt;str.length){
+                            j = str.indexOf(c,j+1);
+                            for(var n = j-1;str.charAt(n) == '\\'; n--);
+                            if((j - n)%2==1){
+                                break;
+                            }
+                        }
+                    }else if( c == '{'){
+                        d++;
+                    }else if (c == '}'){
+                        d--;
+                        if(d == 0){
+                            break;
+                        }
+                    }
+                }
+            }
+            if(i == 0 &amp;&amp; j == (str.length-1)){
+                var el = str.substring(i+2,j);
+                return this.evalExpression(el);
+            }
+            if(j&gt;0){
+                var el = str.substring(i+2,j);
+                var escape = str[i-1]=='!';
+                if(escape){
+                    result += str.substring(k,i-1);
+                }else{
+                    result += str.substring(k,i);
+                }
+                try{
+                    result += this.evalExpression(el);
+                }catch(e){
+                    //TODO:
+                }finally{
+                    k = j+1;
+                    //firefox bug for function toString
+                    //continue;
+                }
+                continue;
+            }else{
+                result += str.substring(k,str.length);
+                break;
+            }
+        }else{
+            result += str.substring(k,str.length);
+            break;
+        }
+    }
+    return result;
+};
+
+/**
+ * 编码 xml 字符节点
+ * @private
+ */
+OutputContext.prototype.encodeText = function(str){
+    return str?str.toString()
+        .replace(/&lt;/g,'&amp;lt;')
+        .replace(/&gt;/g,'&amp;gt;')
+        //.replace(/&amp;/g,'&amp;amp;')
+        :'';
+};
+/**
+ * 编码 xml 属性
+ * @private
+ */
+OutputContext.prototype.encodeAttribute = function(str){
+    return str?str.toString()
+        .replace(/&lt;/g,'&amp;lt;')
+        .replace(/&gt;/g,'&amp;gt;')
+        //.replace(/&amp;/g,'&amp;amp;')
+        :'';//TODO:'"
+};
+
+/**
+ * 分发节点输出处理
+ * @private
+ */
+OutputContext.prototype.getTaglib = function(ns){
+    if(ns){
+        return this.taglib[ns] || this.taglib['*'];
+    }else{
+        return this.taglib['*'];
+    }
+}
+/**
+ * 分发节点输出处理
+ * @private
+ */
+OutputContext.prototype.output = function(node){
+    if(node==null){return;}
+    var taglib = this.getTaglib(node.namespaceURI);
+    switch(node.nodeType){
+        case 1: //NODE_ELEMENT 
+            taglib.$Element(this,node)
+            break;
+        case 3: //NODE_TEXT                                        
+            taglib.$Text(this,node)
+            break;
+        case 4: //NODE_CDATA_SECTION                     
+            taglib.$CDATASection(this,node)
+            break;
+        case 5: //NODE_ENTITY_REFERENCE                
+            this.$EntityReference(this,node)
+            break;
+        case 6: //NODE_ENTITY                                    
+            taglib.$Entity(this,node)
+            break;
+        case 7: //NODE_PROCESSING_INSTRUCTION    
+            taglib.$ProcessingInstruction(this,node)
+            break;
+        case 8: //NODE_COMMENT                                 
+            taglib.$Comment(this,node)
+            break;
+        case 9: //NODE_DOCUMENT                                
+            taglib.$Document(this,node)
+            break;
+        case 10://NODE_DOCUMENT_TYPE                     
+            taglib.$DocumentType(this,node)
+            break;
+        case 11://NODE_DOCUMENT_FRAGMENT             
+            taglib.$DocumentFragment(this,node)
+            break;
+        case 12://NODE_NOTATION 
+            taglib.$Notation(this,node)
+            break;
+        case 2: //NODE_ATTRIBUTE                             
+            taglib.$Attribute(this,node)
+            break;
+        default:
+            this.println("&lt;!-- ERROR： UNKNOW nodeType:"+node.nodeType+"--&gt;")
+    }
+};
+/**
+ * 栈表
+ * @public 
+ * @constructor
+ */
+function StackMap(p){
+    function tc(){};
+    tc.prototype = p;
+    return new tc();
+};
+</script>
+<script path='org/xidea/sandbox/io/request.js'>/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id: request.js,v 1.5 2008/03/15 14:05:10 jindw Exp $
+ */
+
+/**
+ * &lt;p&gt;XMLHttpRequest请求包装类，默认为异步方式。
+ * 支持的事件有 [onStep,onSuccess,onFailure]
+ * 以添加自定义行为&lt;/p&gt;
+ * eg:
+ * &lt;code&gt;&lt;pre&gt;
+ * new Request(url,{username:xxx,password:yyy},
+ *                      function(){
+ *                          //若成功，提示success
+ *                          alert('onSuccess')
+ *                      },
+ *                      function(){
+ *                          //若失败，提示fail
+ *                          alert('onFailure')
+ *                      },
+ *                      function(){
+ *                           //每一步事件都会触发该函数
+ *                           alert('onStep')
+ *                      }
+ *            )
+ *   
+ *   //发送请求, 传送参数：param1=value1同事  指定请求方式为异步(true)
+ *   .send({param1:'value1'},true);&lt;/pre&gt;
+ * &lt;/code&gt;
+ * @constructor
+ * @param &lt;string&gt;url 请求地址
+ * @param &lt;object|string&gt;options 请求选项,当是字符串时,指定的是请求方法(GET|POST|DELETE|PUT|  HEAD|OPTIONS)
+ * @param &lt;Function&gt;onSuccess 请求选项
+ * @param &lt;Function&gt;onFailure 请求选项
+ * @param &lt;Function&gt;onStep 单步事件,每次onreadystatechange都会触发单步处理函数;
+ *                readyState == 4时,也将触发,且发生载onSuccess或者onFailure之前
+ */
+function Request(url,options,onFinish,onStep) {
+    this.xhr = new XMLHttpRequest();
+    this.onFinish = onFinish;
+    //this.onSuccess = onSuccess;
+    //this.onFailure = onFailure;
+    this.onStep = onStep;
+    this.options = options = new RequestOptions(url,options);
+    this.headers = {
+                      "Accept":"'text/javascript, text/html, application/xml, text/xml, */*'",
+                      "Content-Type":options.contentType
+                   };
+    var _this = this;
+    this.onreadystatechange = function(){
+        var state = _this.xhr.readyState;
+        _this.onStep &amp;&amp; _this.onStep(state);
+        if(state == 4){
+            //  break;
+            //case 4: // (完成) 数据接收完毕,此时可以通过通过responseBody和responseText获取完整的回应数据
+            //判断请求是否成功
+            var success = _this.getStatus();
+            success = success ?success &gt;= 200 &amp;&amp; success &lt; 300 : success;
+            if(success){
+                _this.onSuccess &amp;&amp; _this.onSuccess();
+            }else{
+                _this.onFailure &amp;&amp; _this.onFailure();
+            }
+            _this.onFinish &amp;&amp; _this.onFinish(success);
+            _this.free = true;
+            _this.xhr.onreadystatechange = Function.prototype;
+        }
+        //case 0: //(未初始化)  对象已建立，但是尚未初始化（尚未调用open方法）
+        //case 1: // (初始化)  对象已建立，尚未调用send方法
+        //case 2: // (发送数据) send方法已调用，但是当前的状态及http头未知
+        //case 3: // (数据传送中)  已接收部分数据，因为响应及http头不全，这时通过responseBody和responseText获取部分数据会出现错误，
+    };
+    this.free = true;
+};
+
+
+Request.prototype = {
+    /**
+     * 发送请求
+     * @public
+     * @owner Request.prototype
+     * @param params
+     * @sync 同步请求，默认为false，即默认为异步请求
+     * @return void 因为无法判断异步请求何时完成，所有。不要在send请求发送后在做设置操作。
+     */
+    send :  function(params,sync){
+        this.free = false;
+        
+        var headers = this.headers;
+        var options = this.options;
+        //params = buildQueryString(params);
+        sync = sync || options.sync;
+        if (/post/i.test(options.method)) {
+            //headers['Content-type'] = this.options.contentType;
+            /* Force "Connection: close" for Mozilla browsers to work around
+             * a bug where XMLHttpReqeuest sends an incorrect Content-length
+             * header. See Mozilla Bugzilla #246651.
+             */
+            if (this.xhr.overrideMimeType){
+                headers['Connection'] = 'close';
+            }
+        }
+        this.xhr.open(options.method, options.url,!sync);
+        this.xhr.onreadystatechange = this.onreadystatechange;
+        for(var n in headers){
+            //$log.debug(n,headers[n]);
+            this.xhr.setRequestHeader(n,headers[n]);
+        }
+        this.xhr.send(params || '');
+        return this;
+    },
+
+    getStatus:function(){
+        var xhr = this.xhr;
+        //xml 呢？
+        return xhr.readyState  == 4 &amp;&amp;((xhr.responseText || xhr.responseXML) &amp;&amp; xhr.status);
+    },
+    /**
+     * 设置请求http头。（在每次send调用之前有效）
+     * @public
+     * @owner Request.prototype
+     * @param key 
+     * @param value
+     * @return &lt;Request&gt; request 本身，以便继续操作
+     */
+    putHeader : function(key,value){
+        this.headers[key] = value;
+        return this;
+    },
+    /**
+     * 当前请求响应头
+     * @public
+     * @owner Request.prototype
+     * @return &lt;String&gt;
+     */
+    getHeader : function(name) {
+        if(this.xhr.readyState &gt;= 3){
+            return this.xhr.getResponseHeader(name);
+        }else{
+            $log.debug("response not complete");
+        }
+    },
+    /**
+     * 将当前请求返回文本当脚本程序执行
+     * @public
+     * @owner Request.prototype
+     * @return 执行结果
+     */
+    evalResult : function() {
+        if(this.xhr.readyState == 4){
+            return window.eval(this.xhr.responseText);
+        }else{
+            $log.debug("response not complete");
+        }
+    },
+    /**
+     * 将当前请求返回XMLDocument
+     * @public
+     * @owner Request.prototype
+     * @return XMLDocument
+     */
+    getXML : function() {
+        if(this.xhr.readyState == 4){
+            return this.xhr.responseXML;
+        }else{
+            $log.debug("response not complete");
+        }
+    },
+    /**
+     * 将当前请求返回XMLDocument 或者文本数据
+     * @public
+     * @owner Request.prototype
+     * @return XMLDocument
+     */
+    getResult : function() {
+        if(this.xhr.readyState == 4){
+            var xhr = this.xhr;
+            return /\bxml\b/.test(xhr.getResponseHeader("Content-Type"))?xhr.responseXML:xhr.responseText;
+        }else{
+            $log.debug("response not complete");
+        }
+    },
+    
+    /**
+     * 将当前请求返回XMLDocument文本
+     * @public
+     * @owner Request.prototype
+     * @return String
+     */
+    getText : function() {
+        if(this.xhr.readyState &gt;= 3){
+            return this.xhr.responseText;
+        }else{
+            $log.debug("response not complete");
+        }
+    }
+
+};
+
+function RequestOptions(url,options){
+    this.url = url;
+    if(options){
+        if(options.constructor == String){
+            this.method = options;
+        }else{
+            for(var n in options){
+                this[n] = options[n];
+            }
+        }
+    }
+}
+RequestOptions.prototype =    {
+    method:       'get',
+    contentType:  'application/x-www-form-urlencoded',
+    encoding:     'UTF-8'
+}
+
+</script>
+<script path='org/xidea/sandbox/io/__package__.js'>this.addScript("request.js",['Request']);
+this.addScript("writer.js",['Writer']);
+this.addScript("reader.js",['Reader']);
+this.addScript("file.js",['File']);</script>
+<script path='org/xidea/sandbox/xml/node-type.js'>/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id: node-type.js,v 1.3 2008/02/19 13:39:03 jindw Exp $
+ */
+
+/*
+ * 节点类型参考，当文档看待吧，使用时直接用常量更快。
+ */
+//$m style
+var NODE_ELEMENT                =1 ;
+var NODE_ATTRIBUTE              =2 ;
+var NODE_TEXT                   =3 ;
+var NODE_CDATA_SECTION          =4 ;
+var NODE_ENTITY_REFERENCE       =5 ;
+var NODE_ENTITY                 =6 ;
+var NODE_PROCESSING_INSTRUCTION =7 ;
+var NODE_COMMENT                =8 ;
+var NODE_DOCUMENT               =9 ;
+var NODE_DOCUMENT_TYPE          =10;
+var NODE_DOCUMENT_FRAGMENT      =11;
+var NODE_NOTATION               =12;
+/**
+ * 节点类型参考
+ */
+var NodeType = {
+  ELEMENT                       :NODE_ELEMENT                ,
+  ATTRIBUTE                     :NODE_ATTRIBUTE              ,
+  TEXT                          :NODE_TEXT                   ,
+  CDATA_SECTION                 :NODE_CDATA_SECTION          ,
+  ENTITY_REFERENCE              :NODE_ENTITY_REFERENCE       ,
+  ENTITY                        :NODE_ENTITY                 ,
+  PROCESSING_INSTRUCTION        :NODE_PROCESSING_INSTRUCTION ,
+  COMMENT                       :NODE_COMMENT                ,
+  DOCUMENT                      :NODE_DOCUMENT               ,
+  DOCUMENT_TYPE                 :NODE_DOCUMENT_TYPE          ,
+  DOCUMENT_FRAGMENT             :NODE_DOCUMENT_FRAGMENT      ,
+  NOTATION                      :NODE_NOTATION               
+}
+
+/*
+1 //NODE_ELEMENT                 
+2 //NODE_ATTRIBUTE               
+3 //NODE_TEXT                    
+4 //NODE_CDATA_SECTION           
+5 //NODE_ENTITY_REFERENCE        
+6 //NODE_ENTITY                  
+7 //NODE_PROCESSING_INSTRUCTION  
+8 //NODE_COMMENT                 
+9 //NODE_DOCUMENT                
+10//NODE_DOCUMENT_TYPE           
+11//NODE_DOCUMENT_FRAGMENT       
+12//NODE_NOTATION                
+*/</script>
+<script path='org/xidea/jsidoc/export/fn.js'>/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id: fn.js,v 1.5 2008/02/24 08:58:15 jindw Exp $
+ */
+
+
+
+
+/**
+ * @private
+ */
+function findPackages(sourcePackageNames,findDependence){
+    var packageMap = {};
+    var packageFlags = {};
+    var currentList = [].concat(sourcePackageNames);
+    for(var i = 0;i&lt;currentList.length;i++){
+        packageFlags[currentList[i]] = true;
+    }
+    do{
+        var newList = [];
+        for(var i = 0;i&lt;currentList.length;i++){
+            try{
+                var packageObject = $import(currentList[i]+':');
+                if(packageObject == null){
+                    continue;
+                }
+            }catch(e){
+                continue;
+            }
+            packageMap[currentList[i]] = packageObject;
+            if(packageObject.name!=currentList[i]){
+                if(!packageFlags[packageObject.name]){
+                    packageFlags[packageObject.name] = true;
+                    newList.push(packageObject.name);
+                }
+            }else if(findDependence){
+                if(packageObject.initialize){
+                    packageObject.initialize();
+                }
+                var dependenceMap = packageObject.dependenceMap;
+                for(var scriptFile in dependenceMap){
+                    var dependences = dependenceMap[scriptFile];
+                    for(var j=0;j&lt;dependences.length;j++){
+                        var dependence = dependences[j];
+                        try{
+                            var packageObject = dependence[0];
+                            var packageName = packageObject.name;
+                            if(!packageFlags[packageName]){
+                                packageFlags[packageName] = true;
+                                newList.push(packageName);
+                            }
+                        }catch(e){
+                            //依赖可能无效
+                        }
+                    }
+                }
+            }
+        }
+        currentList = newList;
+    }while(currentList.length&gt;0);
+    
+    var result = [];
+    for(var n in packageMap){
+        result.push(n);
+    }
+    return sortPackages(sourcePackageNames,result);
+
+};
+function sortPackages(sourcePackageNames,allPackageNames){
+    /** 升序 */
+    var short2longList = sourcePackageNames.concat([]).sort(function(a,b){return a.length-b.length});
+    var listMap = {};
+    var emptyMap = {};
+    var i = allPackageNames.length;
+    var extention = [];
+    var result = [];
+    list:
+    while(i--){
+        var item = allPackageNames[i];
+        var j = short2longList.length;
+        while(j--){
+            var key = short2longList[j]
+            if(item.indexOf(key) == 0){
+                if(listMap[key] == emptyMap[key]){
+                    listMap[key]= [];
+                }
+                listMap[key].push(item);
+                continue list;
+            }
+        }
+        extention.push(item);
+    }
+    for(var i=0;i&lt;sourcePackageNames.length;i++){
+        var list = listMap[sourcePackageNames[i]];
+        result.push.apply(result,list.sort());
+    }
+    result.push.apply(result,extention.sort());
+    return result;
+}
+
+function xmlReplacer(c){
+    switch(c){
+        case '&lt;':
+          return '&amp;lt;';
+        case '&gt;':
+          return '&amp;gt;';
+        case '&amp;':
+          return '&amp;amp;';
+        case "'":
+          return '&amp;#39;';
+        case '"':
+          return '&amp;#34;';
+    }
+}</script>
+<script path='org/xidea/jsidoc/export/__package__.js'>/*
+ * JavaScript Integration Doc Tool
+ * //为了方便导出bug检查,改包中不能包含外部引用
+ */
+
+this.addScript("dependence-info.js",'DependenceInfo');
+
+this.addScript("export.js",['Exporter']
+              ,'DependenceInfo');
+this.addScript("export-ui.js",['ExportUI']
+              ,['DependenceInfo','org.xidea.sandbox.xml:Template',"org.xidea.sandbox.io:Request"]);
+
+this.addScript("fn.js",['findPackages','xmlReplacer']);
+              
+this.addDependence("*","*",true);
+              </script>
+<script path='org/xidea/jsidoc/export/dependence-info.js'>/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id: dependence-info.js,v 1.5 2008/03/02 08:01:09 jindw Exp $
+ */
+
+
+var dependenceInfoMap = {};
+
+
+/**
+ * @param packageName 包名,不可为空
+ * @param fileName 文件名,当为空时 objectName 参数一定不为空 (偷懒行为,构造时自动通过objectName查找)
+ * @param objectName 对象名,可为空
+ * 
+ */ 
+function DependenceInfo(path){
+    if(dependenceInfoMap[path]){
+        return dependenceInfoMap[path];
+    }else{
+        dependenceInfoMap[path] = this;
+    }
+    var packageFileObject = parsePath(path);
+    packageName = packageFileObject[0];
+    fileName = packageFileObject[1];
+    objectName = packageFileObject[2];
+    var packageObject = this.packageObject = $import(packageName+':');
+    if(packageObject.initialize){
+        packageObject.initialize();
+    }
+    this.path = path;
+    this.filePath = packageName.replace(/\.|$/g,'/')+fileName;
+    this.fileName = fileName;
+    this.objectName = objectName;
+    this.subInfos = [];
+    if(objectName){
+        this.objectNames = [objectName];
+    }else{
+        this.objectNames = [];
+        var map = this.packageObject.objectScriptMap;
+        for(var n in map){
+            if(map[n] == fileName){
+                this.objectNames.push(n);
+            }
+        }
+    }
+}
+DependenceInfo.prototype = {
+    /**
+     * 获取装载前依赖对应的变量(直接依赖)
+     * @public
+     * @owner DependenceInfo.prototype
+     */
+    getBeforeVars : function(){
+        
+    },
+    /**
+     * 获取装载后依赖对应的变量(直接依赖)
+     * @public
+     * @owner DependenceInfo.prototype
+     */
+    getAfterVars : function(){
+        
+    },
+    /**
+     * 获取全部(直接和间接)装载后依赖
+     * @public
+     * @owner DependenceInfo.prototype
+     */
+    getBeforeInfos : function(){
+        return findDependence(this,0)
+    },
+    /**
+     * 获取全部(直接和间接)装载前依赖
+     * @public
+     * @owner DependenceInfo.prototype
+     */
+    getAfterInfos : function(){
+        return findDependence(this,1)
+    },
+    /**
+     * 本依赖包含指定依赖
+     * @public
+     * @owner DependenceInfo.prototype
+     */
+    implicit : function(dest){
+        if(this.packageObject == dest.packageObject &amp;&amp; this.fileName == dest.fileName){
+            if(this.objectName == null || this.objectName == dest.objectName){
+                return true;
+            }else{
+                //this.objectName != null
+                //dest.objectName == null || not null
+                return ! dest.getAfterInfos().length;
+            }
+        }
+    }
+    
+};
+if(":debug"){
+    DependenceInfo.prototype.toString = function(){
+        return [this.packageObject.name,this.fileName,this.objectName].join('/');
+    }
+}
+function parsePath(path){
+    var pos = path.lastIndexOf('/');
+    if(pos&gt;0){
+        //file
+        var packageName = path.substr(0,pos).replace(/\//g,'.');
+        var fileName = path.substr(pos+1);
+    }else{
+        pos = path.lastIndexOf(':');
+        if(pos == -1){
+            pos = path.lastIndexOf('.');
+        }
+        var packageName = path.substr(0,pos);
+        var objectName = path.substr(pos+1);
+        var fileName = $import(packageName+':').objectScriptMap[objectName];
+    }
+    return [packageName,fileName,objectName]
+}
+function findDependence(dependenceInfo,index){
+    if(!dependenceInfo.subInfos[index]){
+        var dependences = dependenceInfo.packageObject.dependenceMap[dependenceInfo.fileName];
+        var result = [];
+        var i = dependences &amp;&amp; dependences.length;
+        dependenceLoop:
+        while(i--){
+            var dependence = dependences[i];
+            if(!index == !dependence[4]){
+                var thisObject = dependence[3];
+                if(!index || !thisObject || !this.objectName || this.objectName == thisObject){
+                    if(dependence[2]){//object
+                        var path = dependence[0].name + ':' + dependence[2];
+                    }else{
+                        var path = dependence[0].name.replace(/\.|$/g,'/') + dependence[1];
+                    }
+                    var itemInfo = new DependenceInfo(path);
+                    var j = result.length;
+                    while(j--){
+                        if(result[j].implicit(itemInfo)){
+                            continue dependenceLoop;
+                        }
+                    }
+                    result.push(itemInfo);
+                }
+            }
+        }
+        dependenceInfo.subInfos[index] = result;
+    }
+    return dependenceInfo.subInfos[index];
+}
+</script>
+<script path='org/xidea/jsidoc/export/export.js'>/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id: export.js,v 1.8 2008/02/24 08:58:15 jindw Exp $
+ */
+
+function Exporter(){
+    this.imports = [];
+    this.result = [];
+    this.cachedInfos = [];
+}
+Exporter.prototype = {
+    addImport : function(path){
+        this.imports.push(path);
+        addDependenceInfo(new DependenceInfo(path),this.result,this.cachedInfos)
+    },
+    getResult : function(){
+        return this.result;
+    },
+//    isLoaded : function(path){
+//        var packageFileObject = parsePath(path);
+//    },
+    getContent : function(){
+        var content = [];
+        for(var i = 0;i&lt;this.result.length;i++){
+            content[i] = this.getSource(this.result[i]);
+        }
+        return content.join('\n')
+    },
+    getFileMap : function(){
+        var content = ["&lt;script-map import='",this.imports.join(','),"'&gt;\n"];
+        var packageFileMap = {};
+        for(var i = 0;i&lt;this.result.length;i++){
+            var path = this.result[i];
+            var packagePath = path.replace(/[^\/\/]+$/,"__package__.js");
+            if(packageFileMap[packagePath]){
+                packagePath = null;
+            }else{
+                packageFileMap[packagePath] = true;
+            }
+            do{
+                var txt = this.getSource(path);
+                content.push("&lt;script path='",path,"'&gt;") ;
+                content.push(txt.replace(/[&lt;&gt;&amp;]/g,xmlReplacer));
+                content.push("&lt;/script&gt;\n");
+            }while(path != packagePath &amp;&amp; (path = packagePath))
+        }
+        content.push("&lt;/script-map&gt;\n");
+        return content.join('')
+    },
+    getSource:function(path){
+        if(parentJSIDoc &amp;&amp; parentJSIDoc.getSource){
+            var packageName = path.substr(0,path.lastIndexOf('/')).replace(/\//g,'.');
+            //$log.info(packageName,path.substr(packageName.length+1));
+            var rtv = parentJSIDoc.getSource(packageName,path.substr(packageName.length+1));
+        }else{
+            var rtv = loadTextByURL($JSI.scriptBase +path);
+        }
+        if(rtv == null){
+            $log.error("装载源代码失败:",path);
+        }
+        return rtv;
+    }
+}
+
+var parentJSIDoc = parent.JSIDoc;
+
+
+/*
+
+    getResource : function(packageName,path){
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET',$JSI.scriptBase + (packageName?packageName.replace(/\.|$/g,'/'):'')+path,false);
+        xhr.send('')
+        return xhr.responseText;
+    }
+ */
+function addDependenceInfo(dependenceInfo,result,cachedInfos){
+    var befores = dependenceInfo.getBeforeInfos();
+    var i = befores.length;
+    dependenceLoop:
+    while(i--){
+        var item = befores[i];
+        var j = cachedInfos.length;
+        while(j--){
+            if(cachedInfos[j].implicit(item)){
+                continue dependenceLoop;
+            }
+            if(cachedInfos[j].implicit(dependenceInfo)){
+                return;
+            }
+        }
+        addDependenceInfo(item,result,cachedInfos);
+    }
+    
+    cachedInfos.push(dependenceInfo);
+    var path = dependenceInfo.filePath;
+    var i = result.length;
+    while(i--){
+        if(path == result[i]){
+            i++;
+            break;
+        }
+    }
+    if(i&lt;=0){//-1,0
+        result.push(path);
+    }
+    var afters = dependenceInfo.getAfterInfos();
+    var i = afters.length;
+    dependenceLoop:
+    while(i--){
+        var item = afters[i];
+        var j = cachedInfos.length;
+        while(j--){
+            if(cachedInfos[j].implicit(item)){
+                continue dependenceLoop;
+            }
+        }
+        addDependenceInfo(item,result,cachedInfos);
+    }
+    
+}
+
+function loadTextByURL(url){
+    //$log.info(url);
+    var req = new XMLHttpRequest();
+    req.open("GET",url,false);
+    try{
+        //for ie file 404 will throw exception 
+        req.send(null);
+        if(req.status &gt;= 200 &amp;&amp; req.status &lt; 300 || req.status == 304 || !req.status){
+            //return  req.responseText;
+            return req.responseText;
+        }else{
+            $log.debug("load faild:",url,"status:",req.status);
+        }
+    }catch(e){
+        $log.debug(e);
+    }finally{
+        req.abort();
+    }
+};</script>
+<script path='org/xidea/jsidoc/export/export-ui.js'>/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id: export-ui.js,v 1.5 2008/02/24 08:58:15 jindw Exp $
+ */
+
+var packageNodes = [];
+var nodeMap = {};
+var checkMap = {};
+var TREE_CONTAINER_ID = "treeContainer";
+var FILE_LIST_OUTPUT_ID = "fileListOutput";
+var OBJECT_LIST_OUTPUT_ID = "objectListOutput";
+var EXPORT_BUTTON = "exportButton";
+
+var inc = 0;
+//var PACKAGE_TEMPLATE = "&lt;li&gt;&lt;/li&gt;"
+var ExportUI = {
+    initialize:function(sourcePackage,treeTemplateText){
+        var nameList = findPackages(sourcePackage,true);
+        var treeTemplate = new Template(treeTemplateText);
+        for(var i=0; i&lt;nameList.length; i++) {
+            var name = nameList[i];
+            var packageObject = $import(name+':');
+            if(packageObject.name == nameList[i]){
+                packageNodes.push(name);
+                packageNodes[name] = new PackageNode(packageObject);
+            }
+        }
+        document.getElementById(TREE_CONTAINER_ID).innerHTML = treeTemplate.render({packageNodes:packageNodes});
+    },
+    clickScript : function(objectId){
+        var checked = checkMap[objectId];
+        if(checked){
+            delete checkMap[objectId];
+        }else{
+            checkMap[objectId] = true;
+        }
+        update();
+    },
+    clickPackage : function(packageId){
+        var packageNode = nodeMap[packageId];
+        var selectedCount = getPackageSelectedCount(packageNode)
+        var childNodes = packageNode.children;
+        var i = childNodes.length;
+        if(selectedCount &lt; i){
+            while(i--){
+                checkMap[childNodes[childNodes[i]].id] = true;
+            }
+        }else{
+            while(i--){
+                delete checkMap[childNodes[childNodes[i]].id];
+            }
+        }
+        update();
+    },
+    doExport : function(form){
+        var level = form.level;
+        var i=level.length;
+        while(i--){
+            var input = level[i];
+            if(input.checked){
+                level = input.value;
+                break;
+            }
+        }
+        var exporter = new Exporter();
+        for(var path in checkMap){
+            exporter.addImport(path);
+        }
+        switch(level*1){
+        case -1:
+            showResult(exporter.getFileMap());
+            break;
+        case 0:
+            showResult(exporter.getContent());
+            break;
+        case 1:
+            //submit to JSA
+            var xmlContent = exporter.getContent();
+            var compressServiceURL = form.action;
+            if(compressServiceURL != window.location.href){
+                showResult("数据装在中.....");
+                var request = new Request(compressServiceURL,"post",function(){
+                    showResult(this.getText())
+                });
+                var postfix = form.postfix.value;
+                request.send("type=xml&amp;postfix="+postfix+"&amp;source="+encodeURIComponent(xmlContent));
+                break;
+            }
+            showResult("数据装在中.....");
+        case 2:
+        default:
+            $log.error("不支持导出级别["+level+"],将导出xml格式打包文件");
+            showResult(exporter.getFileMap());
+            break;
+        }
+    }
+}
+
+function showResult(content){
+    var dialog = window.open('about:blank','source','modal=yes,left=200,top=100,width=600px,height=600px');
+    var document = dialog.document;
+    document.open();
+    document.write("&lt;html&gt;&lt;style&gt;*{width:100%;height:100%;padding:0px;margin:0px;}&lt;/style&gt;&lt;body&gt;&lt;textarea&gt;");
+    document.write(content.replace(/[&lt;&gt;&amp;]/g,xmlReplacer));
+    document.write("&lt;/textarea&gt;&lt;/body&gt;&lt;/html&gt;");
+    document.close();
+}
+function update(){
+    var i = packageNodes.length;
+    var resultMap = updateOutput();
+    while(i--){
+        var packageNode = packageNodes[packageNodes[i]];
+        var childNodes = packageNode.children;
+        var selectCount = 0;
+        var j = childNodes.length;
+        var packageState13 = 2;
+        while(j--){
+            var child = childNodes[childNodes[j]];
+            var checked = checkMap[child.id];
+            if(checked){
+                var state = 4;//装载并导出
+            }else{
+                var state = 0;
+                //1:文件已经装载,但缺乏相关依赖
+                //2:文件及依赖文件已经装载
+                //3:文件及依赖文件已经装载并且注入了相关依赖 (暂时不考虑2,3区别)
+                if(resultMap[child.filePath]){
+                    var dependenceInfo = new DependenceInfo(child.id);
+                    //var allLoaded = true;
+                    var state = 2;
+                    var afterInfos = dependenceInfo.getAfterInfos();
+                    var k = afterInfos.length;
+                    while(k--){
+                        var subDependenceInfo = afterInfos[k];
+                        if(!resultMap[subDependenceInfo.filePath]){
+                            //allLoaded = false;
+                            state = 1;
+                            break;
+                        }
+                    }
+                    packageState13 = Math.min(packageState13,state);
+                }else{
+                    packageState13 = 1;
+                }
+                
+                
+            }
+            updateNode(child,state);
+            selectCount +=state;
+        }
+        if(selectCount ==0){
+            updateNode(packageNode,0);
+        }else{
+            updateNode(packageNode,selectCount == childNodes.length*4?4:packageState13);
+        }
+    }
+    //update button
+    var button = document.getElementById(EXPORT_BUTTON);
+    button.disabled = true;
+    for(var n in checkMap){
+        button.disabled = false;
+        break;
+    }
+}
+function updateNode(node,state){
+    document.getElementById(node.htmlId).className = "checkbox"+state;
+}
+function updateOutput(){
+    var fileListOutput = document.getElementById(FILE_LIST_OUTPUT_ID);
+    var objectListOutput = document.getElementById(OBJECT_LIST_OUTPUT_ID);
+    var objectNames = [];
+    var exporter = new Exporter();
+    for(var path in checkMap){
+        exporter.addImport(path);
+        var objectName = path.split(':')[1];
+        if(objectName){
+            objectNames.push("&lt;div title='",path,"'&gt;",objectName,"&lt;/div&gt;");
+        }
+    }
+    var result = exporter.getResult();
+    var resultMap = {};
+    for(var i=0; i&lt;result.length; i++) {
+        resultMap[result[i]] = true;
+    }
+    fileListOutput.innerHTML = result.join('&lt;br /&gt;');
+    objectListOutput.innerHTML = objectNames.join('');
+    return resultMap;
+}
+function getPackageSelectedCount(packageNode){
+    var childNodes = packageNode.children;
+    var i = childNodes.length;
+    var j = 0;
+    while(i--){
+        if(checkMap[childNodes[childNodes[i]].id]){
+            j++;
+        }
+    }
+    return j;
+}
+function buildPackageNodes(packageObject){
+    var nodes = [];
+    for(var fileName in packageObject.scriptObjectMap){
+        var objectNames = packageObject.scriptObjectMap[fileName];
+        if(objectNames == null || objectNames.length==0){
+            var fileNode = new FileNode(packageObject,fileName);
+            nodes.push(fileName);
+            nodes[fileName] = fileNode;
+        }
+    }
+    for(var objectName in packageObject.objectScriptMap){
+        var objectNode = new ObjectNode(packageObject,objectName);
+        nodes.push(objectName);
+        nodes[objectName] = objectNode;
+    }
+    nodes.sort();
+    return nodes;
+}
+function PackageNode(packageObject){
+    this.shortName = packageObject.name;
+    this.id = packageObject.name +':';
+    this.children = buildPackageNodes(packageObject);
+    nodeMap[this.id] = this;
+    this.htmlId = "__$ID"+inc++;
+}
+function FileNode(packageObject,fileName){
+    this.shortName = fileName;
+    this.packageName = packageObject.name;
+    this.filePath = this.id = packageObject.name.replace(/\.|$/g,'/')+fileName;
+    nodeMap[this.id] = this;
+    this.htmlId = "__$ID"+inc++;
+}
+function ObjectNode(packageObject,objectName){
+    this.shortName = objectName;
+    this.packageName = packageObject.name;
+    this.filePath = packageObject.name.replace(/\.|$/g,'/')+packageObject.objectScriptMap[objectName];
+    this.id = packageObject.name+':'+objectName
+    nodeMap[this.id] = this;
+    this.htmlId = "__$ID"+inc++;
+}
+</script>
+</script-map>
