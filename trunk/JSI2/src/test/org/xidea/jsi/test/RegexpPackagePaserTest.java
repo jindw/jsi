@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.xidea.jsi.JSIRoot;
+import org.xidea.jsi.impl.FileJSIRoot;
 
 import junit.framework.TestCase;
 
@@ -19,7 +20,7 @@ public class RegexpPackagePaserTest extends TestCase {
 	}
 
 	public void testParse() {
-		JSIRoot context = new JSIRoot(RegexpPackagePaserTest.class
+		JSIRoot context = new FileJSIRoot(RegexpPackagePaserTest.class
 				.getResource("/").getFile(), "utf-8");
 //		String source = context.("org.xidea.jsdoc",
 //				JSIContext.PACKAGE_FILE);
