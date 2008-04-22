@@ -1,4 +1,4 @@
-package org.xidea.jsi;
+package org.xidea.jsi.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,8 +9,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.xidea.jsi.JSIDependence;
+import org.xidea.jsi.JSIPackage;
+import org.xidea.jsi.JSIRoot;
+import org.xidea.jsi.ScriptLoader;
 
-public class JSIPackage {
+public class DefaultJSIPackage implements JSIPackage {
 	private JSIRoot root;
 	private String name;
 	private String implementation;
@@ -20,13 +24,16 @@ public class JSIPackage {
 	private List<List<Object>> unparsedDependenceList = new ArrayList<List<Object>>();
 	private Map<String, List<JSIDependence>> dependenceMap = new HashMap<String, List<JSIDependence>>();
 
-	JSIPackage(JSIRoot root, String name) {
+	public DefaultJSIPackage(JSIRoot root, String name) {
 		this.root = root;
 		this.name = name;
 	}
+	/* (non-Javadoc)
+	 * @see org.xidea.jsi.impl.JSIPackage2#addScript(java.lang.String, java.lang.Object, java.lang.Object, java.lang.Object)
+	 */
 	public void addScript(String scriptName, Object objectNames,
 			Object beforeLoadDependences, Object afterLoadDependences) {
-		loaderMap.put(scriptName, new ScriptLoader(this,scriptName));
+		loaderMap.put(scriptName, new DefaultScriptLoader(this,scriptName));
 		List<String> objects = new ArrayList<String>();
 		if (objectNames instanceof String) {
 			objects.add((String) objectNames);
@@ -53,16 +60,19 @@ public class JSIPackage {
 			}
 		}
 		if (beforeLoadDependences != null) {
-			this.addDependence(scriptName, beforeLoadDependences, true);
+			this.addDependence(scriptName, beforeLoadDependences, false);
 		}
 		if (afterLoadDependences != null) {
-			this.addDependence(scriptName, afterLoadDependences, false);
+			this.addDependence(scriptName, afterLoadDependences, true);
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xidea.jsi.impl.JSIPackage2#addDependence(java.lang.String, java.lang.Object, boolean)
+	 */
 	public void addDependence(String thisPath, Object targetPath,
-			boolean beforeLoad) {
-		if (beforeLoad) {
+			boolean afterLoad) {
+		if (!afterLoad) {
 			String file = this.objectScriptMap.get(thisPath);
 			if (file != null) {
 				thisPath = file;
@@ -72,17 +82,20 @@ public class JSIPackage {
 			for (Iterator<Object> it = ((List<Object>) targetPath).iterator(); it
 					.hasNext();) {
 				// JSI js 做了展开优化
-				this.addDependence(thisPath, it.next(), beforeLoad);
+				this.addDependence(thisPath, it.next(), afterLoad);
 			}
 		} else {
 			List<Object> args = new ArrayList<Object>();
 			args.add(thisPath);
 			args.add(targetPath);
-			args.add(beforeLoad);
+			args.add(afterLoad);
 			unparsedDependenceList.add(args);
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xidea.jsi.impl.JSIPackage2#initialize()
+	 */
 	public void initialize() {
 		if (unparsedDependenceList != null) {
 			// parse unparsedDependenceList
@@ -110,19 +123,19 @@ public class JSIPackage {
 				boolean allSource = "*".equals(thisPath);
 				boolean allTarget = targetPath.endsWith("*");
 				if (allSource || allTarget) {
-					Collection<String> sourceFileMap;
+					Collection<String> thisFileMap;
 					Collection<String> targetFileMap;
 
 					if (allSource) {
-						sourceFileMap = this.scriptObjectMap.keySet();
+						thisFileMap = this.scriptObjectMap.keySet();
 					} else {
-						String file = this.objectScriptMap.get(thisPath);
+						String file = this.objectScriptMap.get(thisPath);//file -> thisFile
 						if (file != null) {
 							thisObjectName = thisPath;
 						} else {
 							file = thisPath;
 						}
-						sourceFileMap = Arrays.asList(new String[] { file });
+						thisFileMap = Arrays.asList(new String[] { file });
 					}
 					if (allTarget) {
 						if (targetPath.equals("*")) {// *x*
@@ -133,11 +146,11 @@ public class JSIPackage {
 							targetPackage = root.requirePackage(
 									targetPackage.getName(), true);
 						}
-						targetFileMap = targetPackage.scriptObjectMap.keySet();
+						targetFileMap = targetPackage.getScriptObjectMap().keySet();
 					} else {
-						String file = this.objectScriptMap.get(targetPath);
+						String file = this.objectScriptMap.get(targetPath);//file targetFile
 						if (file != null) {
-							thisObjectName = targetPath;
+							targetObjectName = targetPath;
 						} else if (this.scriptObjectMap.containsKey(targetPath)) {
 							file = targetPath;
 						} else {
@@ -147,7 +160,7 @@ public class JSIPackage {
 									.getName().length() + 1);
 							targetPackage = root.requirePackage(
 									targetPackage.getName(), true);
-							file = targetPackage.objectScriptMap
+							file = targetPackage.getObjectScriptMap()
 									.get(targetPath);
 							if (file != null) {
 								targetObjectName = targetPath;
@@ -158,16 +171,16 @@ public class JSIPackage {
 						targetFileMap = Arrays.asList(new String[] { file });
 					}
 					for (String targetFile : targetFileMap) {
-						JSIDependence dep = new JSIDependence(
+						DefaultJSIDependence dep = new DefaultJSIDependence(
 								this.root, targetPackage, targetFile,
 								targetObjectName, afterLoad);
-						for (String sourceFile : sourceFileMap) {
-							if (!(samePackage && sourceFile.equals(targetFile))) {
-								saveDependence(dep, sourceFile, thisObjectName);
+						for (String thisFile : thisFileMap) {
+							if (!(samePackage && thisFile.equals(targetFile))) {
+								saveDependence(dep, thisFile, thisObjectName);
 							}
 						}
 					}
-				} else {
+				} else {//单挑
 					String thisFile = this.objectScriptMap.get(thisPath);
 					if (thisFile != null) {
 						thisObjectName = thisPath;
@@ -177,7 +190,7 @@ public class JSIPackage {
 
 					String file = this.objectScriptMap.get(targetPath);
 					if (file != null) {
-						thisObjectName = targetPath;
+						targetObjectName = targetPath;
 					} else if (this.scriptObjectMap.containsKey(targetPath)) {
 						file = targetPath;
 					} else {
@@ -187,7 +200,7 @@ public class JSIPackage {
 								.getName().length() + 1);
 						targetPackage = root.requirePackage(targetPackage
 								.getName(), true);
-						file = targetPackage.objectScriptMap
+						file = targetPackage.getObjectScriptMap()
 								.get(targetPath);
 						if (file != null) {
 							targetObjectName = targetPath;
@@ -195,26 +208,29 @@ public class JSIPackage {
 							file = targetPath;
 						}
 					}
-					JSIDependence dep = new JSIDependence(this.root,
-							targetPackage, file, thisObjectName,
+					DefaultJSIDependence dep = new DefaultJSIDependence(this.root,
+							targetPackage, file, targetObjectName,
 							afterLoad);
-					saveDependence(dep, thisFile, targetObjectName);
+					saveDependence(dep, thisFile, thisObjectName);
 				}
 
 			}
 		}
 	}
 
-	private void saveDependence(JSIDependence dep, String sourceFile,
-			String object) {
-		List<JSIDependence> depList = this.dependenceMap.get(sourceFile);
+	private void saveDependence(DefaultJSIDependence dep, String thisFile,
+			String thisObject) {
+		List<JSIDependence> depList = this.dependenceMap.get(thisFile);
 		if (depList == null) {
-			dependenceMap.put(sourceFile,
+			dependenceMap.put(thisFile,
 					depList = new ArrayList<JSIDependence>());
 		}
-		depList.add(dep);
+		depList.add(dep.instanceFor(thisObject));
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xidea.jsi.impl.JSIPackage2#setImplementation(java.lang.String)
+	 */
 	public void setImplementation(String implementation) {
 		if (implementation.startsWith("..")) {
 			implementation = this.name + implementation;
@@ -228,35 +244,52 @@ public class JSIPackage {
 		this.implementation = implementation;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xidea.jsi.impl.JSIPackage2#getName()
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xidea.jsi.impl.JSIPackage2#getImplementation()
+	 */
 	public String getImplementation() {
 		return implementation;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xidea.jsi.impl.JSIPackage2#getScriptObjectMap()
+	 */
 	public Map<String, List<String>> getScriptObjectMap() {
 		return this.scriptObjectMap;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xidea.jsi.impl.JSIPackage2#getObjectScriptMap()
+	 */
 	public Map<String, String> getObjectScriptMap() {
 		return this.objectScriptMap;
 	}
 
-	/**
-	 * 此处的loaderMap与JSI脚本中的loaderMap不同。loaderMap在包初始化时就一稳定
-	 * @return
+	/* (non-Javadoc)
+	 * @see org.xidea.jsi.impl.JSIPackage2#getLoaderMap()
 	 */
 	public Map<String, ScriptLoader> getLoaderMap() {
 		return loaderMap;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xidea.jsi.impl.JSIPackage2#getDependenceMap()
+	 */
 	public Map<String, List<JSIDependence>> getDependenceMap() {
 		return dependenceMap;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xidea.jsi.impl.JSIPackage2#loadText(java.lang.String)
+	 */
 	public String loadText(String scriptName) {
-		return this.root.loadTextByPackageAndFile(this.name, scriptName);
+		return this.root.loadText(this.name, scriptName);
 	}
 }

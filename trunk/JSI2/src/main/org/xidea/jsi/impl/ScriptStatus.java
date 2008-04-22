@@ -1,17 +1,23 @@
-package org.xidea.jsi;
+package org.xidea.jsi.impl;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ScriptStatus {
+
+/**
+ * @scope Session
+ * @see DefaultScriptLoader
+ * @author jindw
+ */
+class ScriptStatus {
 
 	private Map<String, Boolean> flagMap = new HashMap<String, Boolean>();
-
 	/**
+	 * 测试是否已经装载，若未装载，也将其标记为装载
 	 * @param object
 	 * @return 是否已经装载
 	 */
-	public boolean testObject(String object) {
+	public boolean load(String object) {
 		if (flagMap == null) {
 			return true;
 		}else if (object == null) {

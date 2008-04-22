@@ -8,7 +8,7 @@ this.addScript("dependence-info.js",'DependenceInfo');
 this.addScript("export.js",['Exporter']
               ,'DependenceInfo');
 this.addScript("export-ui.js",['ExportUI']
-              ,['DependenceInfo','org.xidea.sandbox.xml:Template']);
+              ,['DependenceInfo','org.xidea.sandbox.xml:Template',"org.xidea.sandbox.io:Request"]);
 
 this.addScript("fn.js",['findPackages','xmlReplacer']);
               
