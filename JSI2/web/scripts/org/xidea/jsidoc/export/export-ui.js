@@ -61,24 +61,51 @@ var ExportUI = {
         while(i--){
             var input = level[i];
             if(input.checked){
-                doExportByLevel(input.value);
-                return;
+                level = input.value;
+                break;
             }
         }
-        $log.error("不支持导出级别:",level)
+        var exporter = new Exporter();
+        for(var path in checkMap){
+            exporter.addImport(path);
+        }
+        switch(level*1){
+        case -1:
+            showResult(exporter.getFileMap());
+            break;
+        case 0:
+            showResult(exporter.getContent());
+            break;
+        
+        case 1:
+            //按2处理
+        case 2:
+            //submit to JSA
+            var xmlContent = exporter.getFileMap();
+            var compressServiceURL = form.action;
+            if(compressServiceURL != window.location.href){
+                showResult("数据装在中.....");
+                var request = new Request(compressServiceURL,"post",function(){
+                    showResult(this.getText())
+                });
+                var prefix = form.prefix.value;//PARAM_PREFIX
+                request.send("type=xml&prefix="+prefix+"&source="+encodeURIComponent(xmlContent));
+                break;
+            }
+            showResult("数据装在中.....");
+        default:
+            $log.error("不支持导出级别["+level+"],将导出xml格式打包文件");
+            showResult(exporter.getFileMap());
+            break;
+        }
     }
 }
-function doExportByLevel(level){
-    var exporter = new Exporter();
-    for(var path in checkMap){
-        exporter.addImport(path);
+var dialog;
+function showResult(content){
+    if(dialog){
+        dialog.close();
     }
-    if(level == 0){
-        var content = exporter.getContent();
-    }else if(level == 1){
-        var content = exporter.getFileMap();
-    }
-    var dialog = window.open('about:blank','source','modal=yes,left=200,top=100,width=600px,height=600px');
+    dialog = window.open('about:blank','source','modal=yes,left=200,top=100,width=600px,height=600px');
     var document = dialog.document;
     document.open();
     document.write("<html><style>*{width:100%;height:100%;padding:0px;margin:0px;}</style><body><textarea>");

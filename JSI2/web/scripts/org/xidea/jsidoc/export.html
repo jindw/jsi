@@ -64,17 +64,19 @@
         </fieldset>
         <fieldset>
             <legend>导出操作</legend>
-            <form onsubmit="return false">
+            <form onsubmit="return false" ation="/servlet/JSA">
             <div id ="exportOperation">
                 <div>
                     <div>
-	                    <input name="level" value="0" type="radio" />直接合并
-	                    <input name="level" checked="true" value="1" type="radio" title="导出后需要使用JSA处理成单个压缩文件,实现隔离冲突" />合并为XML
-
-	                    <input name="level" value="2" type="radio" disabled="true" />隔离内部冲突
-	                    <input name="level" value="3" type="radio" disabled="true" />隔离全部冲突
+	                    <!--<input name="level" value="1" type="radio" disabled2="true" />隔离内部冲突-->
+	                    <input name="level" value="2" type="radio" checked="true" />隔离冲突
+	                    <input name="level" checked="true" value="-1" type="radio" title="导出后需要使用JSA处理成单个压缩文件,实现隔离冲突" />合并为XML
+                        <input name="level" value="0" type="radio" />直接合并
                     </div>
-                    <button id="exportButton" disabled="true" onclick="ExportUI.doExport(this.form);return false;">导出</button>
+                    <div>
+                        内部变量前缀:<input size="4" name="prefix" value="_$" type="text" />
+                        <button id="exportButton" disabled="true" onclick="ExportUI.doExport(this.form);return false;">导出</button>
+                    </div>
                 </div>
                 <ul>
                     <li>脱离JSI后,直接合并可能有命名冲突的危险.不推荐.</li>

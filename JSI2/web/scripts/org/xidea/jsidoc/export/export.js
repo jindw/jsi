@@ -30,7 +30,7 @@ Exporter.prototype = {
         return content.join('\n')
     },
     getFileMap : function(){
-        var content = ["<script-map import='",this.imports.join(','),"'>\n"];
+        var content = ["<script-map export='",this.imports.join(','),"'>\n"];
         var packageFileMap = {};
         for(var i = 0;i<this.result.length;i++){
             var path = this.result[i];

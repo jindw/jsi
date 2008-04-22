@@ -1,7 +1,5 @@
 package org.xidea.jsi.servlet;
 
-import java.util.Enumeration;
-
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 

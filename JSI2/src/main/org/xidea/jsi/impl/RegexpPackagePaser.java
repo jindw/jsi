@@ -1,7 +1,6 @@
-package org.xidea.jsi.parser;
+package org.xidea.jsi.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.PackageParser;
 import org.xidea.jsi.UnsupportedSyntaxException;
 
 
@@ -62,7 +60,7 @@ public class RegexpPackagePaser implements PackageParser {
 				} else if (ADD_DEPENDENCE.equals(method)) {
 					switch (arguments.size()) {
 					case 2:
-						arguments.add(Boolean.TRUE);
+						arguments.add(Boolean.FALSE);
 					case 3:
 						break;
 					default:
@@ -86,13 +84,13 @@ public class RegexpPackagePaser implements PackageParser {
 		}
 		for (Iterator<List<Object>> it = addScriptCall.iterator(); it.hasNext();) {
 			List<Object> item = it.next();
-			pkg.addScript((String) item.get(0), item.get(1), item.get(2), item
+			((DefaultJSIPackage)pkg).addScript((String) item.get(0), item.get(1), item.get(2), item
 					.get(3));
 		}
 		for (Iterator<List<Object>> it = addDependenceCall.iterator(); it
 				.hasNext();) {
 			List<Object> item = it.next();
-			pkg.addDependence((String) item.get(0), item.get(1), (Boolean) item
+			((DefaultJSIPackage)pkg).addDependence((String) item.get(0), item.get(1), (Boolean) item
 					.get(2));
 		}
 	}
