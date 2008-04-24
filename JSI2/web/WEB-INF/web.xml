@@ -3,24 +3,20 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
   version="2.4">
-  <display-name>JSDoc In Tomcat</display-name>
-  <description>JSDoc In Tomcat</description>
-
-
+  <display-name>JSI</display-name>
+  <description>JSI Site</description>
   <filter>
     <filter-name>PreloadFilter</filter-name>
-    <filter-class>org.xidea.jsi.servlet.PreloadFilter</filter-class>
+    <filter-class>org.xidea.jsi.servlet.JSIClassPathResourceFilter</filter-class>
     <init-param>
       <param-name>scriptBase</param-name>
       <param-value>/scripts/</param-value>
     </init-param>
   </filter>
-
   <filter-mapping>
     <filter-name>PreloadFilter</filter-name>
     <url-pattern>/scripts/*</url-pattern>
   </filter-mapping>
-
   <!-- JSP config -->
   <jsp-config>
     <!-- el config -->
@@ -36,32 +32,7 @@
       <include-coda />
     </jsp-property-group>
   </jsp-config>
-  <mime-mapping>
-    <extension>wsdl</extension>
-    <mime-type>text/xml</mime-type>
-  </mime-mapping>
-  <mime-mapping>
-    <extension>jar</extension>
-    <mime-type>application/x-java-archive</mime-type>
-  </mime-mapping>
-  <mime-mapping>
-    <extension>jardiff</extension>
-    <mime-type>application/x-java-archive-diff</mime-type>
-  </mime-mapping>
-  <mime-mapping>
-    <extension>jnlp</extension>
-    <mime-type>application/x-java-jnlp-file</mime-type>
-  </mime-mapping>
-  <mime-mapping>
-    <extension>xls</extension>
-    <mime-type>application/xls</mime-type>
-  </mime-mapping>
-  <mime-mapping>
-    <extension>redirect</extension>
-    <mime-type>application/redirect</mime-type>
-  </mime-mapping>
   <welcome-file-list>
-    <welcome-file>index.action</welcome-file>
     <welcome-file>index.jsp</welcome-file>
     <welcome-file>index.html</welcome-file>
     <welcome-file>index.htm</welcome-file>
