@@ -34,7 +34,7 @@ public class JSIClassPathResourceFilter extends PreloadFilter {
 	protected InputStream getResourceStream(String path) {
 		InputStream in = context.getResourceAsStream(scriptBase + path);
 		if (in == null) {
-			in = scriptLibs.getResourceAsStream('/' + path);
+			in = scriptLibs.getResourceAsStream(path);
 		}
 		return in;
 	}

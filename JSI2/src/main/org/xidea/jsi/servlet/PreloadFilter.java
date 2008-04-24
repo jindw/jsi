@@ -65,12 +65,12 @@ public class PreloadFilter implements Filter {
 				return;
 			}
 			String resourcePath = getResourcePath(req, path);
-			InputStream in = getResourceStream(resourcePath);
+			// 容错设计
+			if (path.equals(resourcePath)) {
+				resourcePath = null;
+			}
+			InputStream in = getResourceStream(resourcePath != null?resourcePath:path);
 			if (in != null) {
-				// 容错设计
-				if (resourcePath.equals(path)) {
-					resourcePath = null;
-				}
 				ServletOutputStream out = resp.getOutputStream();
 				processResourceStream(in, out, resourcePath);
 				return;
