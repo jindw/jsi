@@ -14,11 +14,12 @@ function URI(){
         var name = decodeURIComponent(match[1]);
         var value = decodeURIComponent(match[2]);
         if(param[name] instanceof String){
+            //param[name] = value; sevlet api 中规定的是取第一个值
             params[name].push(value);
         }else{
+            param[name] = value;
             params[name] = [value];
         }
-        param[name] = value;
     }
     this.param = param;
     this.params = params;
