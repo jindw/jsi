@@ -19,6 +19,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * 该类为方便调试开发，发布时可编译脚本，能后去掉此类。
+ * 
+ * @author jindw
+ */
 public class JSIClassPathResourceFilter extends PreloadFilter {
 
 	private ClassLoader scriptLibs = this.getClass().getClassLoader();
@@ -33,40 +38,35 @@ public class JSIClassPathResourceFilter extends PreloadFilter {
 		}
 		return in;
 	}
+
 	@Override
 	public void init(FilterConfig config) throws ServletException {
 		super.init(config);
-		try {
-			File dir = new File(context.getResource(scriptBase).getFile());
-			final List<URL> result = new ArrayList<URL>();
-			FileFilter filter = new FileFilter() {
-				public boolean accept(File file) {
-					String name = file.getName().toLowerCase();
-					if (name.endsWith(".jar") || name.endsWith(".zip")) {
-						try {
-							result.add(file.toURI().toURL());
-						} catch (MalformedURLException e) {
-							e.printStackTrace();
-						}
+		File dir = new File(context.getRealPath(scriptBase));
+		final List<URL> result = new ArrayList<URL>();
+		FileFilter filter = new FileFilter() {
+			public boolean accept(File file) {
+				String name = file.getName().toLowerCase();
+				if (name.endsWith(".jar") || name.endsWith(".zip")) {
+					try {
+						result.add(file.toURI().toURL());
+					} catch (MalformedURLException e) {
+						e.printStackTrace();
 					}
-					return false;
 				}
+				return false;
+			}
 
-			};
+		};
+		if (dir.exists() && dir.isDirectory()) {
+			dir.listFiles(filter);
+			dir = new File(dir, "lib");
 			if (dir.exists() && dir.isDirectory()) {
 				dir.listFiles(filter);
-				dir = new File(dir, "lib");
-				if (dir.exists() && dir.isDirectory()) {
-					dir.listFiles(filter);
-				}
 			}
-			URL[] urls = result.toArray(new URL[result.size()]);
-			scriptLibs = new URLClassLoader(urls, this.getClass()
-					.getClassLoader());
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+		URL[] urls = result.toArray(new URL[result.size()]);
+		scriptLibs = new URLClassLoader(urls, this.getClass().getClassLoader());
 	}
 
 }
