@@ -124,7 +124,11 @@ function collapse(el){
         el.className = el.className.replace(/\bclosed\b/,'open');
     }
 }
-ExportUI.initialize(parent.JSIDoc.packageNames,
+var packageNames = [];
+for(var name in parent.JSIDoc.packageInfoMap){
+    packageNames.push(name);
+}
+ExportUI.initialize(packageNames,
              document.getElementsByTagName("textarea")[0].value);
 
 

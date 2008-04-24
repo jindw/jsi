@@ -18,16 +18,31 @@ var JSIDoc = {
      * @param packages 包含那些包
      * @param findDependence 是否查找依赖，来收集其他包
      */
-    initialize : function(bootScripts,packages,findDependence){
-        this.rootInfo = PackageInfo.requireRoot(bootScripts);
-        var packages = findPackages(packages,!findDependence);
-        this.packageInfos = [];
-        this.packageNames = [].concat(packages);
-        for(var i = 0;i<packages.length;i++){
-            var pi = PackageInfo.require(packages[i])
-            this.packageInfos.push(pi);
-            this.packageInfos[pi.name] = pi;
+    initialize : function(packageMap,findDependence){
+        this.rootInfo = PackageInfo.requireRoot();
+        this.packageInfoGroupMap = [];
+        this.packageInfoMap = {};
+        if(!(packageMap instanceof Array)){
+            var packageMap2 = [];
+            for(var key in packageMap){
+                packageMap2.push(key);
+                packageMap2[key] = packageMap[key];
+            }
+            packageMap = packageMap2;
         }
+        for(var i = 0;i<packageMap.length;i++){
+            var key = packageMap[i]
+            var packages = packageMap[key];
+            var packages = findPackages(packages,findDependence);
+            var packageInfos = this.packageInfoGroupMap[key] = [];
+            this.packageInfoGroupMap.push(key);
+            for(var j = 0;j<packages.length;j++){
+                var packageInfo = PackageInfo.require(packages[j])
+                packageInfos.push(packageInfo);
+                this.packageInfoMap[packageInfo.name] = packageInfo;
+            }
+        }
+
     },
     /**
      * 获取文档源代码
@@ -75,7 +90,7 @@ var JSIDoc = {
         {
             JSIDoc:JSIDoc,
             rootInfo:JSIDoc.rootInfo,
-            packageInfos:JSIDoc.packageInfos
+            packageInfoGroupMap:JSIDoc.packageInfoGroupMap
         });
         //out.close();
     },

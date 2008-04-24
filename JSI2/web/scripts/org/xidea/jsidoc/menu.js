@@ -12,7 +12,7 @@ var MenuUI = {
         if(ul.getAttribute('title') == "loading"){
             ul.setAttribute('title','loaded');
             var nextSibling = ul.firstChild;
-            var packageInfo = parent.JSIDoc.packageInfos[name];
+            var packageInfo = parent.JSIDoc.packageInfoMap[name];
             var tasks = packageInfo.getInitializers();
             var i = 0;
             tasks.push(function(){

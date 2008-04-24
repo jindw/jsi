@@ -1,5 +1,4 @@
 this.addScript("helloworld.js","sayHello");
-
 ///*
 // * 重用aculo effect 脚本实例
 // */

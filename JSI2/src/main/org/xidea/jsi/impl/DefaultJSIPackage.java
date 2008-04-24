@@ -1,5 +1,6 @@
 package org.xidea.jsi.impl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -227,7 +228,7 @@ public class DefaultJSIPackage implements JSIPackage {
 		}
 		depList.add(dep.instanceFor(thisObject));
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.xidea.jsi.impl.JSIPackage2#setImplementation(java.lang.String)
 	 */

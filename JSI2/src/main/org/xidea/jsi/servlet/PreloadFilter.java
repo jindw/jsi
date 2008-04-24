@@ -1,14 +1,22 @@
 package org.xidea.jsi.servlet;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
@@ -17,11 +25,16 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.xidea.jsi.JSIPackage;
+import org.xidea.jsi.impl.DefaultJSIPackage;
+import org.xidea.jsi.impl.FileJSIRoot;
+
 public class PreloadFilter implements Filter {
 
 	protected String scriptBase;
 
-	private String contentType = "text/html;charset=utf-8";
+	protected ServletContext context;
+	protected String contentType = "text/html;charset=utf-8";
 
 	public static final String JS_FILE_POSTFIX = ".js";
 	public static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
@@ -36,24 +49,91 @@ public class PreloadFilter implements Filter {
 	public void doFilter(ServletRequest req, final ServletResponse resp,
 			FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
-		final String uri = request.getRequestURI().substring(
+		String path = request.getRequestURI().substring(
 				request.getContextPath().length());
-		if (uri.startsWith(scriptBase)) {
-			if (uri.equals(scriptBase) || uri.endsWith("index.jsp")) {
-				resp.setContentType(contentType);
-				outputPreload(req, resp, uri+request.getParameter("path"));
+		if (path.startsWith(scriptBase)) {
+			path = path.substring(scriptBase.length());
+			if (this.processAttachedAction(request,(HttpServletResponse) resp, path)) {
 				return;
 			}
-			if (uri.endsWith(JS_FILE_POSTFIX)) {
-				resp.setContentType(contentType);
-				if (uri.endsWith(PRELOAD_FILE_POSTFIX)) {
-					outputPreload(req, resp, uri);
-					return;
+			String resourcePath = getResourcePath(req, path);
+			InputStream in = getResourceStream(resourcePath);
+			if (in != null) {
+				//容错设计
+				if(resourcePath.equals(path)){
+					resourcePath = null;
 				}
+				ServletOutputStream out = resp.getOutputStream();
+				processResourceStream(in, out, resourcePath);
+				return;
 			}
+
 		}
 		chain.doFilter(req, resp);
+	}
 
+	/**
+	 * 响应附加行为
+	 * @param request 
+	 * @param 
+	 * @param path
+	 * @return
+	 */
+	public boolean processAttachedAction(HttpServletRequest request, HttpServletResponse response, String path) {
+		if(path.endsWith("/")){
+			path = path.substring(0,path.length()-1);
+		}
+		if("jsidoc".equals(path)){
+			
+			return true;
+		}
+		return false;
+	}
+
+	protected List<String> getPackageList(){
+		try {
+			final File dir = new File(context.getResource(scriptBase).getFile());
+			final List<String> result = FileJSIRoot.findPackageList(dir);
+			return result;
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+
+
+	/**
+	 * 获取资源路径
+	 * @param req
+	 * @param path
+	 * @return 原始资源路径
+	 */
+	public String getResourcePath(ServletRequest req, String path) {
+		if (path.endsWith(PRELOAD_FILE_POSTFIX)) {
+			return path.replaceFirst(PRELOAD_FILE_POSTFIX + "$", ".js");
+		} else if (path.length() == 0 || path.equals("index.jsp")) {
+			return req.getParameter("path");
+		} else {
+			return null;
+		}
+	}
+
+	protected InputStream getResourceStream(String path) {
+		InputStream in = context.getResourceAsStream(scriptBase + path);
+		return in;
+	}
+
+	protected void processResourceStream(InputStream in,
+			ServletOutputStream out, String preloadPath) throws IOException {
+		if (preloadPath != null) {
+			out.print(this.buildPreloadPerfix(preloadPath));
+			output(in, out);
+			out.print(PRELOAD_CONTENT_POSTFIX);
+			out.print(PRELOAD_POSTFIX);
+		} else {
+			output(in, out);
+		}
+		in.close();
 	}
 
 	protected void output(InputStream in, ServletOutputStream out)
@@ -131,6 +211,7 @@ public class PreloadFilter implements Filter {
 	}
 
 	public void init(FilterConfig config) throws ServletException {
+		this.context = config.getServletContext();
 		String scriptBase = config.getInitParameter("scriptBase");
 		String contentType = config.getInitParameter("contentType");
 

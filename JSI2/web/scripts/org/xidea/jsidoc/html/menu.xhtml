@@ -66,9 +66,10 @@ function closeMenu(li){
 </div>
 <div id="content">
 
-<h4>托管脚本</h4>
-<ul class="package-pane">
-	<c:forEach var="packageInfo" items="${packageInfos}">
+<c:forEach var="key" items="${packageInfoGroupMap}">
+    <h4>${key}</h4>
+    <ul class="package-pane">
+	<c:forEach var="packageInfo" items="${packageInfoGroupMap[key]}">
 		<c:if test="${packageInfo.implementation}">
 			<li class="closed">
 			<table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -113,8 +114,9 @@ function closeMenu(li){
 			</table>
 			</li>
 		</c:else>
-	</c:forEach>
-</ul>
+    </c:forEach>
+    </ul>
+</c:forEach>
 </div>
 </body>
 </html>
