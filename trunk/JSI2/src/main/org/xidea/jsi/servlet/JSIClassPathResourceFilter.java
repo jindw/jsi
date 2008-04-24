@@ -21,56 +21,20 @@ import javax.servlet.http.HttpServletRequest;
 
 public class JSIClassPathResourceFilter extends PreloadFilter {
 
-	private ServletContext context;
 	private ClassLoader scriptLibs = this.getClass().getClassLoader();
 
 	public void destroy() {
 	}
 
-	public void doFilter(ServletRequest req, final ServletResponse resp,
-			FilterChain chain) throws IOException, ServletException {
-		HttpServletRequest request = (HttpServletRequest) req;
-		String path = request.getRequestURI().substring(
-				request.getContextPath().length());
-		if (path.startsWith(scriptBase)) {
-			path = path.substring(scriptBase.length());
-			boolean preload = false;
-			if (path.endsWith(PRELOAD_FILE_POSTFIX)) {
-				preload = true;
-				path = path.replaceFirst(PRELOAD_FILE_POSTFIX + "$", ".js");
-			}
-			if (path.length() == 0 || path.equals("index.jsp")) {
-				preload = true;
-				path = req.getParameter("path");
-			}
-			ServletOutputStream out = resp.getOutputStream();
-
-			InputStream in = context.getResourceAsStream(scriptBase + path);
-
-			if (in == null) {
-				in = scriptLibs.getResourceAsStream('/' + path);
-			}
-			if (in == null) {
-				chain.doFilter(req, resp);
-				return;
-			}
-			if (preload) {
-				out.print(this.buildPreloadPerfix(path));
-				output(in, out);
-				out.print(PRELOAD_CONTENT_POSTFIX);
-				out.print(PRELOAD_POSTFIX);
-			} else {
-				output(in, out);
-			}
-			in.close();
-			return;
+	protected InputStream getResourceStream(String path) {
+		InputStream in = context.getResourceAsStream(scriptBase + path);
+		if (in == null) {
+			in = scriptLibs.getResourceAsStream('/' + path);
 		}
-		chain.doFilter(req, resp);
+		return in;
 	}
-
 	@Override
 	public void init(FilterConfig config) throws ServletException {
-		this.context = config.getServletContext();
 		super.init(config);
 		try {
 			File dir = new File(context.getResource(scriptBase).getFile());

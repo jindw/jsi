@@ -51,7 +51,7 @@ PackageInfo.requireRoot = function(files){
     if(this.rootInfo){
         return this.rootInfo;
     }else{
-        return this.rootInfo = new RootInfo(files);
+        return this.rootInfo = new RootInfo(files || ['boot.js']);
     }
 };
 

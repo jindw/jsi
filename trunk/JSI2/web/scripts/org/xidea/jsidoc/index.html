@@ -13,8 +13,9 @@ frame,frameset{
 }
 </style>
 <script>
-var link = window.location.hash;
+var link = window.location.hash || top.location.hash;
 var search = window.location.search;
+var packageGroup = [];
 window.onload = function(){
     if(link && link.length>2){
         var content = document.getElementById("content");
@@ -23,18 +24,44 @@ window.onload = function(){
     }
 }
 function contentLoad(frame){
-    if(document.all){
-        document.location.replace("#"+encodeURIComponent(frame.contentWindow.location.href));
+    if(top.document.all){
+        top.location.replace("#"+encodeURIComponent(frame.contentWindow.location.href));
     }
 }
-
 if(search && search.length>2){
-    var extpath = decodeURIComponent(search.substr(1));
-    document.write("<script src='"+extpath+"'><\/script>")
+    var exp = /([^\?=&]*)=([^=&]*)/g;
+    var localScript;
+    var match;
+    while(match = exp.exec(search)){
+        var name = decodeURIComponent(match[1]);
+        var value = decodeURIComponent(match[2]);
+        if("localScript" == name){
+            localScript = value;
+        }else{
+	        packageGroup.push(name)
+	        packageGroup[name] = value;
+        }
+    }
+    if(localScript){
+        document.write("<script src='"+localScript+"'><\/script>")
+    }
+}
+</script>
+<script>
+for(var i=0;i<packageGroup.length;i++){
+     var n = packageGroup[i];
+     packageGroup[n] = packageGroup[n].split(',')
+}
+if(packageGroup.length){
+    JSIDoc.initialize(packageGroup);
+    JSIDoc.initialize({
+        "托管脚本示例3" : ["example","org.xidea.jsidoc.export"],
+        "托管脚本示例2" : ["example","org.xidea.jsidoc.export"]
+    });
 }else{
-    JSIDoc.initialize(
-        ["boot.js"],
-        ["org.xidea.sandbox.xml","example","org.xidea.test.loader","org.xidea.jsidoc"]);
+    JSIDoc.initialize({
+        "托管脚本示例" : ["example","org.xidea.jsidoc.export"]
+    });
 }
 </script>
 
