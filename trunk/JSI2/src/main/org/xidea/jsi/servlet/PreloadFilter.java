@@ -9,7 +9,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.Filter;
@@ -29,6 +31,11 @@ import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.impl.DefaultJSIPackage;
 import org.xidea.jsi.impl.FileJSIRoot;
 
+/**
+ * 该类为方便调试开发，发布时可编译脚本，能后去掉此类。
+ * 
+ * @author jindw
+ */
 public class PreloadFilter implements Filter {
 
 	protected String scriptBase;
@@ -53,14 +60,15 @@ public class PreloadFilter implements Filter {
 				request.getContextPath().length());
 		if (path.startsWith(scriptBase)) {
 			path = path.substring(scriptBase.length());
-			if (this.processAttachedAction(request,(HttpServletResponse) resp, path)) {
+			if (this.processAttachedAction(request, (HttpServletResponse) resp,
+					path)) {
 				return;
 			}
 			String resourcePath = getResourcePath(req, path);
 			InputStream in = getResourceStream(resourcePath);
 			if (in != null) {
-				//容错设计
-				if(resourcePath.equals(path)){
+				// 容错设计
+				if (resourcePath.equals(path)) {
 					resourcePath = null;
 				}
 				ServletOutputStream out = resp.getOutputStream();
@@ -74,36 +82,54 @@ public class PreloadFilter implements Filter {
 
 	/**
 	 * 响应附加行为
-	 * @param request 
-	 * @param 
+	 * 
+	 * @param request
+	 * @param
 	 * @param path
 	 * @return
 	 */
-	public boolean processAttachedAction(HttpServletRequest request, HttpServletResponse response, String path) {
-		if(path.endsWith("/")){
-			path = path.substring(0,path.length()-1);
+	public boolean processAttachedAction(HttpServletRequest request,
+			HttpServletResponse response, String path) {
+		if (path.endsWith("/")) {
+			path = path.substring(0, path.length() - 1);
 		}
-		if("jsidoc".equals(path)){
-			
-			return true;
+		if ("jsidoc".equals(path)) {
+			try {
+				PrintWriter out = response.getWriter();
+				List<String> packageList = getPackageList();
+
+				out
+						.print("<html><frameset rows='100%'><frame src='org/xidea/jsidoc/index.html?");
+				out.print(URLEncoder.encode("全部托管类库", "utf-8"));
+				out.print("=");
+				boolean isFirst = true;
+				for (String packageName : packageList) {
+					if (isFirst) {
+						isFirst = false;
+					} else {
+						out.print(",");
+					}
+					out.print(packageName);
+
+				}
+				out.print("'> </frameset></html>");
+				return true;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 		return false;
 	}
 
-	protected List<String> getPackageList(){
-		try {
-			final File dir = new File(context.getResource(scriptBase).getFile());
-			final List<String> result = FileJSIRoot.findPackageList(dir);
-			return result;
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(e);
-		}
+	protected List<String> getPackageList() {
+		final File dir = new File(context.getRealPath(scriptBase));
+		final List<String> result = FileJSIRoot.findPackageList(dir);
+		return result;
 	}
-
-
 
 	/**
 	 * 获取资源路径
+	 * 
 	 * @param req
 	 * @param path
 	 * @return 原始资源路径
