@@ -495,8 +495,9 @@ var $import = function(freeEval,cachedScripts){
             }
         }catch(e){
             if(":debug"){
+                //packageMap[name] = null;
                 if("org.xidea.jsi.boot:$log"){
-                    $log.error("Package Syntax Error:"+name+"\n\nException:"+e);
+                    $log.error("Package Syntax Error:["+name+"]\n\nException:"+e);
                 }
             }
             throw e;

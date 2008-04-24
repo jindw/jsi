@@ -23,7 +23,7 @@ window.onload = function(){
     }
 }
 function contentLoad(frame){
-    if(window.all){
+    if(document.all){
         document.location.replace("#"+encodeURIComponent(frame.contentWindow.location.href));
     }
 }
@@ -34,7 +34,7 @@ if(search && search.length>2){
 }else{
     JSIDoc.initialize(
         ["boot.js"],
-        ["org.xidea.jsidoc"]);
+        ["org.xidea.sandbox.xml","example","org.xidea.test.loader","org.xidea.jsidoc"]);
 }
 </script>
 
