@@ -29,12 +29,21 @@ var JSIDoc = {
             this.packageInfos[pi.name] = pi;
         }
     },
+    /**
+     * 获取文档源代码
+     * @param packageName
+     * @param fileName
+     */
     getSource:function(packageName,fileName){
         var xhr = new XMLHttpRequest();
         xhr.open('GET',$JSI.scriptBase + (packageName?packageName.replace(/\.|$/g,'/'):'')+fileName,false);
         xhr.send('')
         return xhr.responseText;
     },
+    /**
+     * 渲染文档，输出页面
+     * @param document
+     */
     render:function(document){
         var path = document.location.href;
         path = path.replace(/^([^#\?]+[#\?])([^#]+)(#.*)?$/g,"$2");
