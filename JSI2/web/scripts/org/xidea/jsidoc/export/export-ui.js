@@ -10,14 +10,25 @@ var packageNodes = [];
 var nodeMap = {};
 var checkMap = {};
 var TREE_CONTAINER_ID = "treeContainer";
-var FILE_LIST_OUTPUT_ID = "fileListOutput";
-var OBJECT_LIST_OUTPUT_ID = "objectListOutput";
+var FILE_OUTPUT_ID = "fileOutput";
+var OBJECT_OUTPUT_ID = "objectOutput";
 var EXPORT_BUTTON = "exportButton";
+var PREFIX_CONTAINER_ID = "prefixContainer";
+var JSIDOC_URL_CONTAINER_ID = "jsidocURLContainer";
+
+
 
 var inc = 0;
 //var PACKAGE_TEMPLATE = "<li></li>"
 var ExportUI = {
     initialize:function(sourcePackage,treeTemplateText){
+        var levels = document.forms[0].level;
+        for(var i=0; i<levels.length; i++) {
+            if(levels[i].checked){
+                levels[i].click();
+                break;
+            }
+        }
         var nameList = findPackages(sourcePackage,true);
         var treeTemplate = new Template(treeTemplateText);
         for(var i=0; i<nameList.length; i++) {
@@ -55,6 +66,18 @@ var ExportUI = {
         }
         update();
     },
+    checkLevel:function(levelInput){
+        var level = levelInput.value;
+        var prefix = document.getElementById(PREFIX_CONTAINER_ID);
+        var jsidoc = document.getElementById(JSIDOC_URL_CONTAINER_ID);
+        prefix.style.display = (level == 1 || level ==2) ? 'block':'none';
+        jsidoc.style.display = (level == -2) ? 'block':'none';
+        var lis = levelInput.form.getElementsByTagName("li");
+        for(var i=0;i<lis.length;i++){
+            lis[i].style.display = (i-2 == level)?'block':'none';
+        }
+        
+    },
     doExport : function(form){
         var level = form.level;
         var i=level.length;
@@ -70,18 +93,21 @@ var ExportUI = {
             exporter.addImport(path);
         }
         switch(level*1){
+        case -2:
+            showResult(exporter.getDocumentContent(form.jsidocURL.value));
+            break;
         case -1:
-            showResult(exporter.getFileMap());
+            showResult(exporter.getXMLContent());
             break;
         case 0:
-            showResult(exporter.getContent());
+            showResult(exporter.getTextContent());
             break;
         
         case 1:
             //按2处理
         case 2:
             //submit to JSA
-            var xmlContent = exporter.getFileMap();
+            var xmlContent = exporter.getXMLContent();
             var compressServiceURL = form.action;
             if(compressServiceURL != window.location.href){
                 showResult("数据装在中.....");
@@ -95,7 +121,7 @@ var ExportUI = {
             showResult("数据装在中.....");
         default:
             $log.error("不支持导出级别["+level+"],将导出xml格式打包文件");
-            showResult(exporter.getFileMap());
+            showResult(exporter.getXMLContent());
             break;
         }
     }
@@ -109,7 +135,7 @@ function showResult(content,reuse){
     dialog = dialog || window.open('about:blank','source','modal=yes,left=200,top=100,width=600px,height=600px');
     var document = dialog.document;
     document.open();
-    document.write("<html><style>*{width:100%;height:100%;padding:0px;margin:0px;}</style><body><textarea>");
+    document.write("<html><style>*{width:100%;height:100%;padding:0px;margin:0px;}</style><body><textarea readonly='true' wrap='off'>");
     document.write(content.replace(/[<>&]/g,xmlReplacer));
     document.write("</textarea></body></html>");
     document.close();
@@ -175,8 +201,8 @@ function updateNode(node,state){
     document.getElementById(node.htmlId).className = "checkbox"+state;
 }
 function updateOutput(){
-    var fileListOutput = document.getElementById(FILE_LIST_OUTPUT_ID);
-    var objectListOutput = document.getElementById(OBJECT_LIST_OUTPUT_ID);
+    var fileListOutput = document.getElementById(FILE_OUTPUT_ID);
+    var objectListOutput = document.getElementById(OBJECT_OUTPUT_ID);
     var objectNames = [];
     var exporter = new Exporter();
     for(var path in checkMap){

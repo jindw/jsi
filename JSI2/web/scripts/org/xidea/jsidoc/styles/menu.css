@@ -6,36 +6,21 @@ html,body{
     overflow:hidden;
     background:#CCF;
 }
-#header{
+#toolbar{
     z-index:2;
     position:absolute;
-    top:0px;
+    bottom:0px;
 	background-color:#CCF;
 	text-align: right;
     width:100%;
     height:25px;
 }
-#content{
-    position:absolute;
-    overflow-x:hidden;
-    overflow:auto;
-    top:25px;
-    border:5px solid #CCF;
-    height:98%;
-    background:#FFF;
-    /*height:expression((this.parentNode.clientHeight-40)+'px');*/
-    /*width:expression((this.parentNode.clientWidth-10)+'px');*/
-}
-
-
-
-
 .menu-box{
+    display:inline;
     border: 1px solid #000000;
     margin: 2px;
     padding: 2px;
     height:18px;
-    line-height:90%;
     float:right;
     overflow:visible;
     position:relative;
@@ -45,42 +30,62 @@ html,body{
 
 .menu-box *{
     font-size:14px;
-    line-height:14px;
+    line-height:16px;
     color:#333333;
     text-align:left;
     text-decoration:none;
 }
-li,ul{
+#toolbar li,#toolbar ul{
     list-style-type: none;
-    margin:0px;
-    padding:0px;
+    margin:2px;
+    padding:1px;
 }
-.menu-box ul{
-    padding-left:0px;
+#toolbar ul{
+    padding:0px;
+    margin:0px;
     text-indent:0px;
     position:absolute;
     border: 1px solid #000;
     border-bottom: 0px;
     background:#DDF;
     display:none;
-    width:95px;
-    top:20px;
+    width:120px;
+    bottom:15px;
     right:0px;
 }
-li.open{
+#toolbar li.open{
     z-index:2;
 }
-li.open ul{
+#toolbar li.open ul{
     display:inline;
 }
+/* fix ie bug  (not work)*/
+#toolbar li.open ul a{
+    position:relation;
+    height:18px;
+    left:0px;
+}
 
-li.menu-item{
+#toolbar li.menu-item{
     padding:6px;
     margin:0px;
     padding-left:0px;
     text-indent:10px;
     border-bottom: 1px solid #000;
 }
+
+#content{
+    position:absolute;
+    overflow-x:hidden;
+    overflow:auto;
+    top:0px;
+    border:5px solid #CCF;
+    height:98%;
+    background:#FFF;
+    /*height:expression((this.parentNode.clientHeight-40)+'px');*/
+    /*width:expression((this.parentNode.clientWidth-10)+'px');*/
+}
+
 
 h2,h3,h4,h5{
     width:100%;

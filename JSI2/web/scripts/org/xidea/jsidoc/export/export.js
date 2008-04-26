@@ -5,6 +5,7 @@
  * @author jindw
  * @version $Id: export.js,v 1.8 2008/02/24 08:58:15 jindw Exp $
  */
+var parentJSIDoc = parent.JSIDoc;
 
 function Exporter(){
     this.imports = [];
@@ -22,41 +23,77 @@ Exporter.prototype = {
 //    isLoaded : function(path){
 //        var packageFileObject = parsePath(path);
 //    },
-    getContent : function(){
+    getTextContent : function(){
         var content = [];
         for(var i = 0;i<this.result.length;i++){
             content[i] = this.getSource(this.result[i]);
         }
         return content.join('\n')
     },
-    getFileMap : function(){
+    getXMLContent : function(){
         var content = ["<script-map export='",this.imports.join(','),"'>\n"];
-        var packageFileMap = {};
+        var packageMap = {};
+        var packageList = [];
         for(var i = 0;i<this.result.length;i++){
             var path = this.result[i];
-            var packagePath = path.replace(/[^\/\/]+$/,"__package__.js");
-            if(packageFileMap[packagePath]){
-                packagePath = null;
-            }else{
-                packageFileMap[packagePath] = true;
+            var packageName = path.replace(/\/[^\/\/]+$/,"").replace(/\//g,'.');
+            if(!packageMap[packageName]){
+                packageMap[packageName] = true;
+                packageList.push(packageName)
             }
-            do{
-                var txt = this.getSource(path);
-                content.push("<script path='",path,"'>") ;
-                content.push(txt.replace(/[<>&]/g,xmlReplacer));
-                content.push("</script>\n");
-            }while(path != packagePath && (path = packagePath))
+            var txt = this.getSource(path);
+            content.push("<script path='",path,"'>") ;
+            content.push(txt.replace(/[<>&]/g,xmlReplacer));
+            content.push("</script>\n");
+        }
+        packageList = findPackages(packageList,true);
+        for(var i = 0;i<packageList.length;i++){
+            var path = packageList[i].replace(/\./g,'/')+"/__package__.js";
+            var txt = this.getSource(path);
+            content.push("<script path='",path,"'>") ;
+            content.push(txt.replace(/[<>&]/g,xmlReplacer));
+            content.push("</script>\n");
         }
         content.push("</script-map>\n");
         return content.join('')
     },
+    getDocumentContent : function(jsiDocURL){
+        var packageMap = {};
+        var packageList = [];
+        for(var i = 0;i<this.result.length;i++){
+            var path = this.result[i];
+            var packageName = path.replace(/\/[^\/\/]+$/,"").replace(/\//g,'.');
+            if(!packageMap[packageName]){
+                packageMap[packageName] = {};
+                packageList.push(packageName)
+            }
+        }
+        packageList = findPackages(packageList,true);
+        for(var i = 0;i<packageList.length;i++){
+            var packageName = packageList[i];
+            var base = packageName.replace(/\.|$/g,'/')
+            var packageObject = $import(packageName + ':');
+            packageMap[packageName] = {'':this.getSource(base+"__package__.js")}
+            for(var file in packageObject.scriptObjectMap){
+                var txt = this.getSource(base + file);
+                packageMap[packageName][file] = txt;
+            }
+        }
+        var content = ["<!--\n// --><script>"];
+        content.push("document.location = '",jsiDocURL,"?localScript='+encodeURIComponent(location.href)");
+        content.push("</script>\r\n");
+        content.push("JSIDoc.cacheScript(");
+        content.push(JSON.serialize(packageMap));
+        content.push(")\r\n");
+        content.push("//<!-- -->");
+        return content.join('')
+    },
     getSource:function(path){
         if(parentJSIDoc && parentJSIDoc.getSource){
-            var packageName = path.substr(0,path.lastIndexOf('/')).replace(/\//g,'.');
             //$log.info(packageName,path.substr(packageName.length+1));
-            var rtv = parentJSIDoc.getSource(packageName,path.substr(packageName.length+1));
+            var rtv = parentJSIDoc.getSource(path);
         }else{
-            var rtv = loadTextByURL($JSI.scriptBase +path);
+            var rtv = JSIDoc.loadTextByURL($JSI.scriptBase +path);
         }
         if(rtv == null){
             $log.error("装载源代码失败:",path);
@@ -65,18 +102,7 @@ Exporter.prototype = {
     }
 }
 
-var parentJSIDoc = parent.JSIDoc;
 
-
-/*
-
-    getResource : function(packageName,path){
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET',$JSI.scriptBase + (packageName?packageName.replace(/\.|$/g,'/'):'')+path,false);
-        xhr.send('')
-        return xhr.responseText;
-    }
- */
 function addDependenceInfo(dependenceInfo,result,cachedInfos){
     var befores = dependenceInfo.getBeforeInfos();
     var i = befores.length;
@@ -123,22 +149,3 @@ function addDependenceInfo(dependenceInfo,result,cachedInfos){
     
 }
 
-function loadTextByURL(url){
-    //$log.info(url);
-    var req = new XMLHttpRequest();
-    req.open("GET",url,false);
-    try{
-        //for ie file 404 will throw exception 
-        req.send(null);
-        if(req.status >= 200 && req.status < 300 || req.status == 304 || !req.status){
-            //return  req.responseText;
-            return req.responseText;
-        }else{
-            $log.debug("load faild:",url,"status:",req.status);
-        }
-    }catch(e){
-        $log.debug(e);
-    }finally{
-        req.abort();
-    }
-};

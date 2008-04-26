@@ -1,6 +1,6 @@
 <html>
   <head>
-      <title>Test $Request</title>
+      <title>自动装载工具</title>
       <meta http-equiv="content-type" content="text/html; charset=UTF-8">
       <script src="../../../../boot.js"></script>
       <style>
@@ -26,15 +26,25 @@
       $import("org.xidea.test.loader.LoadSuite",true);
     </script>
     <script>
-      var testSuite = new LoadSuite([
-"example","example.cat",
-"org.xidea.sandbox.syntax"
-
-//"org.xidea.jsidoc",
-//"org.xidea.sandbox.util",
-//"org.xidea.sandbox.xml"
-]);
-      testSuite.startTest();
+         var jsidoc = parent.JSIDoc;
+         var packageInfoMap = jsidoc&&jsidoc.packageInfoMap
+         if(packageInfoMap){
+             var testPackage = [];
+             for(var name in packageInfoMap){
+                 testPackage.push(name);
+             }
+         }else{
+	         var testPackage = [
+                "example",
+			    "org.xidea.sandbox.syntax"
+			
+			    //"org.xidea.jsidoc",
+			    //"org.xidea.sandbox.util",
+			    //"org.xidea.sandbox.xml"
+		     ]
+	     }
+         var testSuite = new LoadSuite(testPackage);
+         testSuite.startTest();
     </script>
   </body>
 </html>

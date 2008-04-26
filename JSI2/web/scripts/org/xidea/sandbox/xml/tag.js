@@ -345,7 +345,7 @@ CoreTag.prototype.include = function(context,node){
         if(path == null){
             var doc = node.ownerDocument;
         }else{
-            var doc = context.template.load(node.ownerDocument.documentURI,path);//BUG document base....
+            var doc = context.template.load(path,node.ownerDocument.documentURI);//BUG document base....
             
         }
         if(xpath != null){

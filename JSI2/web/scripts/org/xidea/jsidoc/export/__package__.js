@@ -6,11 +6,13 @@
 this.addScript("dependence-info.js",'DependenceInfo');
 
 this.addScript("export.js",['Exporter']
-              ,'DependenceInfo');
+              ,['DependenceInfo','JSON','org.xidea.jsidoc:JSIDoc']);
 this.addScript("export-ui.js",['ExportUI']
               ,['DependenceInfo','org.xidea.sandbox.xml:Template',"org.xidea.sandbox.io:Request"]);
 
 this.addScript("fn.js",['findPackages','xmlReplacer']);
+
+this.addScript("json.js",['JSON']);
               
 this.addDependence("*","*",true);
               

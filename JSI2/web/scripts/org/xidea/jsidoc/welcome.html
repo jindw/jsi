@@ -1,42 +1,7 @@
 ﻿<html>
 <head>
 <meta http-equiv="Content-Type" content="text/html;utf-8" />
-<style>
-h2{
-  font-size: 24px;
-  text-align: center;
-  color: #00008B;
-  font-family: serif;
-  font-weight: bolder;
-}
-body{
-  padding-top: 30px;
-}
-p{
-  font-size: 14px;
-  text-indent: 2em;
-}
-li{
-  font-size: 14px;
-}
-.block{
-    border-top:1px solid #888;
-}
-.item-title{
-  color: #00008B;
-  font-weight: bolder;
-}
-.more-,.less-{
-    font-size: 12px;
-    text-align: left;
-    color: #00008B;
-    font-style: italic;
-}
-.more- .less-,.less- .more-{
-    display:none;
-}
-
-</style>
+<link rel="stylesheet" type="text/css" href="styles/welcome.css" />
 <script>
 function more2less(el){
     var nc = switchClass(el,'more-','less-');
@@ -53,7 +18,7 @@ function switchClass(el,cls1,cls2){
 </script>
 </head>
 <body>
-<h2>JavaScript Integration API Document Tool && Export Tool.</h2>
+<h2>JSI API Tool && Export Tool.</h2>
 <div>
 <h3>基本功能</h3>
 <ul>
@@ -109,7 +74,7 @@ function switchClass(el,cls1,cls2){
 
 <h3>常用标签参考</h3>
 <ul>
-	<h3>访问修饰(只是文档作用,没有语法限制)</h3>
+	<h4>访问修饰(只是文档作用,没有语法限制)</h4>
 	<ul>
 	  <li><span class='item-title'>@public</span>: 公开元素，任何地方可以使用该元素</li>
 	  <li><span class='item-title'>@private</span>: 私有元素，装载单元（文件）内部使用</li>
@@ -127,8 +92,8 @@ function switchClass(el,cls1,cls2){
     <ul>
       <li><span class='item-title'>@param</span>: 函数参数信息,如示例</li>
       <li><span class='item-title'>@return</span>: 函数返回类型信息，与@param 不同的是，无需名称</li>
-      <div>
-          <pre style="display:none" class="block">
+    </ul><ul style="display:none" class="block">
+          <pre>
   /**
    * 这里是元素、属性的描述信息.
    * 更多描述信息
@@ -142,10 +107,9 @@ function switchClass(el,cls1,cls2){
        return arg1>arg2?arg1:arg2;
    }
           </pre>
-          <div onclick="more2less(this)" class="more-">
-              <a href="#null" class="more-">实例...</a><a href="#null" class="less-" >↑收起</a>
-          </div>
-      </div>
+    </ul>
+    <ul onclick="more2less(this)" class="more-">
+          <a href="#null" class="more-">实例...</a><a href="#null" class="less-" >↑收起</a>
     </ul>
 
     <h4>类型暗示</h4>
@@ -153,8 +117,8 @@ function switchClass(el,cls1,cls2){
       <li><span class='item-title'>@constructor</span>: 标识该元素为类（JS中叫构造器）</li>
       <li><span class='item-title'>@typeof</span>: 指定原始类型信息，类比javascript typeof 运算符</li>
       <li><span class='item-title'>@instanceof</span>: 指定类信息，类比javascript instanceof 运算符</li>
-      <div>
-          <pre style="display:none" class="block">
+    </ul><ul style="display:none" class="block">
+          <pre>
   /**
    * 这里是元素、属性的描述信息.
    * 更多描述信息
@@ -168,18 +132,16 @@ function switchClass(el,cls1,cls2){
        return arg1>arg2?arg1:arg2;
    }
           </pre>
-          <div onclick="more2less(this)" class="more-">
-              <a href="#null" class="more-">实例...</a><a href="#null" class="less-" >↑收起</a>
-          </div>
-      </div>
     </ul>
-   
+    <ul onclick="more2less(this)" class="more-">
+        <a href="#null" class="more-">实例...</a><a href="#null" class="less-" >↑收起</a>
+    </ul>
     <h4>ID暗示</h4>
     <ul>
       <li><span class='item-title'>@owner</span>: 指定某个属性的归属对象【常用于一些动态代码导致自动查找归属失败时】</li>
       <li><span class='item-title'>@id</span>: 直接指定文档对应的脚本元素id，用于没有确定代码的脚本元素，支持*匹配</li>
-      <div>
-          <pre style="display:none" class="block">
+    </ul><ul style="display:none" class="block">
+          <pre>
     /** 
      * 输出&lt;b&gt;[$1]&lt;/b&gt;级别的日志信息
      * 这是JSI $log对象的文档
@@ -191,10 +153,9 @@ function switchClass(el,cls1,cls2){
      * @id $log.*
      */
           </pre>
-          <div onclick="more2less(this)" class="more-">
-              <a href="#null" class="more-">实例...</a><a href="#null" class="less-" >↑收起</a>
-          </div>
-      </div>
+   </ul>
+   <ul onclick="more2less(this)" class="more-">
+      <a href="#null" class="more-">实例...</a><a href="#null" class="less-" >↑收起</a>
    </ul>
 </ul>
 </div>
@@ -203,13 +164,13 @@ function switchClass(el,cls1,cls2){
 <br/>
 <hr/>
 <br/>
-<a href="export.html">&gt;&gt;转至脚本导出页</a>
+<a href="export/index.html">&gt;&gt;转至脚本导出页</a>
 <script>
 //2分钟后页面将跳转至脚本导出页面
 //setTimeout("window.location = 'export.html'",2*60*1000)
 </script>
 </div>
-<div id = 'footer' style="display:none">
+<div id='footer' style="display:none">
 页面通过客户端XML模板引擎自动生成(org/xidea/xml/template.js)。
 该模板引擎实现简单，但一直没有做优化工作，效率不高；所以JSIDoc对于大文件的源码高亮显示有点慢。
 如果您对这种实时解析的脚本API文档工具感兴趣，欢迎参与开发、完善，或者认领(管理)这个项目。

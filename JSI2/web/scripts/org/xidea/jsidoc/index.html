@@ -5,7 +5,6 @@
 <script src="../../../boot.js"></script>
 <script>
 $import("org.xidea.jsidoc.JSIDoc",true);
-$import("org.xidea.jsidoc.MenuUI",true);
 </script>
 <style>
 frame,frameset{
@@ -13,58 +12,32 @@ frame,frameset{
 }
 </style>
 <script>
-var link = window.location.hash || top.location.hash;
-var search = window.location.search;
-var packageGroup = [];
-window.onload = function(){
-    if(link && link.length>2){
-        var content = document.getElementById("content");
-        content.src = decodeURIComponent(link.substr(1));
-        link = '';
-    }
-}
-function contentLoad(frame){
-    if(top.document.all){
-        top.location.replace("#"+encodeURIComponent(frame.contentWindow.location.href));
-    }
-}
-if(search && search.length>2){
-    var exp = /([^\?=&]*)=([^=&]*)/g;
-    var localScript;
-    var match;
-    while(match = exp.exec(search)){
-        var name = decodeURIComponent(match[1]);
-        var value = decodeURIComponent(match[2]);
-        if("localScript" == name){
-            localScript = value;
-        }else{
-	        packageGroup.push(name)
-	        packageGroup[name] = value;
-        }
-    }
-    if(localScript){
-        document.write("<script src='"+localScript+"'><\/script>")
-    }
-}
+var prepareResult = JSIDoc.prepare();
 </script>
 <script>
-for(var i=0;i<packageGroup.length;i++){
-     var n = packageGroup[i];
-     packageGroup[n] = packageGroup[n].split(',')
+var packageGroupMap = {
+        "托管脚本示例" : ["example","example.internal","org.xidea.jsidoc"]
+    }
+if(prepareResult){
+    if(prepareResult == true){//可能是本地全线问题导致，无法加载脚本数据
+        if(JSIDoc.packageGroupMap){
+            var packageGroupMap = JSIDoc.packageGroupMap;
+        }else{
+            alert(["加载本机文档数据失败:",
+                "您需要把您的外部文件放在一个Web服务器上察看;",
+                "如果您使用的是Firefox，您也可以为当前站点添加本地文件访问权限"].join('\n'));
+        }
+    }else{
+        packageGroupMap = prepareResult;
+    }
 }
-if(packageGroup.length){
-    JSIDoc.initialize(packageGroup);
-}else{
-    JSIDoc.initialize({
-        "托管脚本示例" : ["example","org.xidea.jsidoc.export"]
-    });
-}
+JSIDoc.resetPackageMap(packageGroupMap);
 </script>
 
 </head>
 <frameset cols="216,*"
  border="1" frameborder="1" bordercolor="#CCF" framespacing="0" margin="0">
 <frame id="menu" name="menu"  src="html/controller.html?@menu"></frame>
-<frame id="content" name="content" onload="contentLoad(this)" src="welcome.html"></frame>
+<frame id="content" name="content" src="welcome.html"></frame>
 </frameset>
 </html>
