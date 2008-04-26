@@ -86,7 +86,7 @@ var ExportUI = {
             if(compressServiceURL != window.location.href){
                 showResult("数据装在中.....");
                 var request = new Request(compressServiceURL,"post",function(){
-                    showResult(this.getText())
+                    showResult(this.getText(),true)
                 });
                 var prefix = form.prefix.value;//PARAM_PREFIX
                 request.send("type=xml&prefix="+prefix+"&source="+encodeURIComponent(xmlContent));
@@ -101,11 +101,12 @@ var ExportUI = {
     }
 }
 var dialog;
-function showResult(content){
-    if(dialog){
+function showResult(content,reuse){
+    if(!reuse && dialog){
         dialog.close();
+        dialog = null;
     }
-    dialog = window.open('about:blank','source','modal=yes,left=200,top=100,width=600px,height=600px');
+    dialog = dialog || window.open('about:blank','source','modal=yes,left=200,top=100,width=600px,height=600px');
     var document = dialog.document;
     document.open();
     document.write("<html><style>*{width:100%;height:100%;padding:0px;margin:0px;}</style><body><textarea>");
