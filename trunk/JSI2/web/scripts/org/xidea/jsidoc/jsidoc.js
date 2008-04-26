@@ -5,34 +5,80 @@
  * @author jindw
  * @version $Id: jsidoc.js,v 1.9 2008/02/28 14:39:09 jindw Exp $
  */
+var templateMap = {};
+var documentMap = {};
+var documentBase = (this.scriptBase + 'html/').substr($JSI.scriptBase.length);
+var jsiCacher = $JSI.preload;
+var cachedScripts = {};
 
-var loadingHTML = '<img style="margin:40%" src="../styles/loading2.gif"/>';
+var MENU_FRAME_ID = "menu";
+var CONTENT_FRAME_ID = "content";
+//var loadingHTML = '<img style="margin:40%" src="../styles/loading2.gif"/>';
 
 /**
  * @public
  */
 var JSIDoc = {
     /**
+     * @return packageGroupMap 或者 false(发现有外部脚本文件)
+     */
+    prepare:function(){
+        var link = window.location.hash || top.location.hash;
+        var search = window.location.search;
+        var packageGroup = [];
+        window.onload = function(){
+            if(link && link.length>2){
+                var content = document.getElementById("content");
+                content.src = decodeURIComponent(link.substr(1));
+                content.onload = contentLoad;
+                link = '';
+            }
+        }
+        function contentLoad(){
+            if(top.document.all){
+                top.location.replace("#"+encodeURIComponent(this.contentWindow.location.href));
+            }
+        }
+        if(search && search.length>2){
+            var exp = /([^\?=&]*)=([^=&]*)/g;
+            var localScript;
+            var match;
+            while(match = exp.exec(search)){
+                var name = decodeURIComponent(match[1]);
+                var value = decodeURIComponent(match[2]);
+                if("localScript" == name){
+                    localScript = value;
+                }else{
+                    packageGroup.push(name)
+                    packageGroup[name] = value.split(',');
+                }
+            }
+            if(localScript){
+                document.write("<script src='"+localScript+"'><\/script>")
+            }
+        }
+        return localScript?true:packageGroup;
+    },
+    /**
      * @public
-     * @param bootScripts 包含那些启动文件
-     * @param packages 包含那些包
+     * @param packageGroupMap 包含那些包组
      * @param findDependence 是否查找依赖，来收集其他包
      */
-    initialize : function(packageMap,findDependence){
+    resetPackageMap : function(packageGroupMap,findDependence){
         this.rootInfo = PackageInfo.requireRoot();
         this.packageInfoGroupMap = [];
         this.packageInfoMap = {};
-        if(!(packageMap instanceof Array)){
-            var packageMap2 = [];
-            for(var key in packageMap){
-                packageMap2.push(key);
-                packageMap2[key] = packageMap[key];
+        if(!(packageGroupMap instanceof Array)){
+            var packageGroupMap2 = [];
+            for(var key in packageGroupMap){
+                packageGroupMap2.push(key);
+                packageGroupMap2[key] = packageGroupMap[key];
             }
-            packageMap = packageMap2;
+            packageGroupMap = packageGroupMap2;
         }
-        for(var i = 0;i<packageMap.length;i++){
-            var key = packageMap[i]
-            var packages = packageMap[key];
+        for(var i = 0;i<packageGroupMap.length;i++){
+            var key = packageGroupMap[i]
+            var packages = packageGroupMap[key];
             var packages = findPackages(packages,findDependence);
             var packageInfos = this.packageInfoGroupMap[key] = [];
             this.packageInfoGroupMap.push(key);
@@ -42,22 +88,57 @@ var JSIDoc = {
                 this.packageInfoMap[packageInfo.name] = packageInfo;
             }
         }
-
+    },
+    /**
+     * 折叠packageMenu的函数
+     */
+    collapsePackage:function(name){
+        var menuDocument = document.getElementById(MENU_FRAME_ID).contentWindow.document;
+        MenuUI.loadPackage(menuDocument,name);
     },
     /**
      * 获取文档源代码
      * @param packageName
      * @param fileName
      */
-    getSource:function(packageName,fileName){
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET',$JSI.scriptBase + (packageName?packageName.replace(/\.|$/g,'/'):'')+fileName,false);
-        xhr.send('')
-        return xhr.responseText;
+    getSource:function(fileName){
+        var cache = cachedScripts[fileName];
+        if(cache && cache.constructor == String){
+            return cache;
+        }else{
+            var result = this.loadTextByURL($JSI.scriptBase + fileName);
+            if(result !=null){
+                return result;
+            }else if(cache){
+                return cache.toString();
+            }
+        }
+    },
+    /**
+     * 
+     */
+    loadTextByURL : function(url){
+        //$log.info(url);
+        var req = new XMLHttpRequest();
+        req.open("GET",url,false);
+        try{
+            //for ie file 404 will throw exception 
+            req.send(null);
+            if(req.status >= 200 && req.status < 300 || req.status == 304 || !req.status){
+                //return  req.responseText;
+                return req.responseText;
+            }else{
+                $log.debug("load faild:",url,"status:",req.status);
+            }
+        }catch(e){
+            $log.debug(e);
+        }finally{
+            req.abort();
+        }
     },
     /**
      * 渲染文档，输出页面
-     * @param document
+     * @param document 目标文档,menu 或content frame 的文档
      */
     render:function(document){
         var path = document.location.href;
@@ -205,45 +286,34 @@ var JSIDoc = {
             JSIDoc:JSIDoc,
             lines:lines
         });
+    },
+    cacheScript:function(packageMap,groupName){
+        if(!this.packageGroupMap){
+            this.packageGroupMap = {};
+        }
+        groupName = groupName||"未命名分组";
+        var groupPackages = this.packageGroupMap[groupName];
+        if(!groupPackages){
+            groupPackages = this.packageGroupMap[groupName] = [];
+        }
+        for(var packageName in packageMap){
+            groupPackages.push(packageName);
+            preload(packageName,packageMap[packageName]);
+        }
+    }
+}
+
+function preload(pkg,file2dataMap,value){
+    jsiCacher.apply($JSI,arguments);
+    var base = pkg.replace(/\.|(.)$/g,'$1/');
+    if(value == null){//null避免空串影响
+        for(var n in file2dataMap){
+            cachedScripts[base + (n || "__package__.js")] = file2dataMap[n];
+        }
+    }else{
+        cachedScripts[base + (file2dataMap || "__package__.js")] = value;
     }
 
-        
-}
-var templateMap = {};
-var documentMap = {};
-var scriptBase = this.scriptBase;
-var resourceBase = scriptBase + 'html/';
-var packageName = scriptBase.substr($JSI.scriptBase.length).replace(/\//g,'.').replace(/\.$/,'');
-var resourcePackageName = packageName + '.html';
-var jsiCacher = $JSI.preload;
-var cachedScripts = {};
-$JSI.preload = function(pkg,file2dataMap,value){
-    if(cachedScripts[pkg]){ //比较少见
-        pkg = cachedScripts[pkg];
-        if(value == null){//null避免空串影响
-            for(var n in file2dataMap){
-                pkg[n] = file2dataMap[n];
-            }
-        }else{
-            pkg[file2dataMap] = value;
-        }
-    }else {
-        if(value == null){//null避免空串影响
-            cachedScripts[pkg] = file2dataMap;
-        }else{
-            (cachedScripts[pkg] = {})[file2dataMap] = value;
-        }
-    }
-};
-/*
- * 获取脚本缓存。
- * @private
- * @param <string>packageName 包名
- * @param <string>fileName 文件名
- */
-function getCacheScript(pkg,fileName){
-    pkg = cachedScripts[pkg];
-    return pkg && pkg[fileName];
 };
 /**
  * @internal
@@ -252,15 +322,15 @@ function getTemplate(path){
     if(templateMap[path]){
         return templateMap[path]
     }
-    var template = new Template(loadDocument(null,path));
+    var template = new Template(loadDocument(path));
     template.load  = loadDocument;
     return templateMap[path] = template;
 }
-function loadDocument(base,path){
+function loadDocument(path){
     if(documentMap[path]){
         return documentMap[path]
     }
-    var cache = JSIDoc.getSource(resourcePackageName,path)
+    var cache = JSIDoc.getSource(documentBase+path)
     return documentMap[path] = parseDocument(cache);
 }
 function parseDocument(value){

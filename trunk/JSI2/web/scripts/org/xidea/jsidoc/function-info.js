@@ -8,8 +8,11 @@
 
 /**
  * 函数信息类
+ * @param <FileInfo> fileInfo
+ * @param <String> name
+ * @param <Object> object
+ * @param <DocEntry> docEntry
  * @public
- * @extend ObjectInfo
  */
 function FunctionInfo(fileInfo,name,object,docEntry){
     this.fileInfo = fileInfo;
@@ -86,7 +89,11 @@ FunctionInfo.prototype.getReturnInfo = function(){
 
 FunctionInfo.prototype.type = 'function';
 /**
- * @extend FunctionInfo
+ * @public
+ * @param <FileInfo> fileInfo
+ * @param <String> name
+ * @param <Object> object
+ * @param <DocEntry> docEntry
  */
 function ConstructorInfo(fileInfo,name,object,docEntry){
     this.fileInfo = fileInfo;

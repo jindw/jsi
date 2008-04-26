@@ -6,6 +6,10 @@
  * @version $Id: menu.js,v 1.4 2008/02/24 08:58:15 jindw Exp $
  */
 
+/**
+ * 交给JSIDoc调用
+ * @private
+ */
 var MenuUI = {
     loadPackage:function(document,name){
         var ul = document.getElementById('package_'+name);

@@ -11,6 +11,11 @@
 /**
  * 对象信息类
  * @public
+ * @param <FileInfo> fileInfo
+ * @param <String> name
+ * @param <Object> object
+ * @param <DocEntry> docEntry
+ * @public
  */
 function ObjectInfo(fileInfo,name,object,docEntry){
     this.name = name;

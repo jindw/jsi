@@ -42,18 +42,12 @@ function SourceEntry(source){
 var sourceEntryMap = {};
 SourceEntry.require = function(file,packageName){
     if(packageName){
-        var packageObject = $import(packageName+':');
-    }else{
-        var packageObject = {
-            scriptBase:$JSI.scriptBase,
-            name :''
-        };
+        var file = packageName.replace(/\.|$/g,"/")+file;
     }
-    var path = packageObject.scriptBase+file;
-    var source = sourceEntryMap[path];
+    var source = sourceEntryMap[file];
     if(!source){
-        var text = JSIDoc.getSource(packageObject.name,file);
-        source = sourceEntryMap[path] = new SourceEntry(text||'/* empty */');
+        var text = JSIDoc.getSource(file);
+        source = sourceEntryMap[file] = new SourceEntry(text||'/* empty */');
     }
     return source;
 }

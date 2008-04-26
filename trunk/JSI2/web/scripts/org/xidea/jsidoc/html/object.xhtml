@@ -68,12 +68,14 @@
     <br />
     <br />
 </c:if>
+
 <c:set var="memberInfos" value="${objectInfo.getDeclaredStaticInfos()}" />
 <c:if test="${memberInfos.length>0}">
     <h2>对象属性详细信息</h2>
     <c:include path="member-info.xhtml" xpath="//*[@class='memberDetail']"/>
     <br />
 </c:if>
+
 
 </body>
 </html>
