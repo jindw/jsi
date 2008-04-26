@@ -65,11 +65,13 @@ public class PreloadFilter implements Filter {
 				return;
 			}
 			String resourcePath = getResourcePath(req, path);
+
 			// 容错设计
 			if (path.equals(resourcePath)) {
 				resourcePath = null;
 			}
-			InputStream in = getResourceStream(resourcePath != null?resourcePath:path);
+			InputStream in = getResourceStream(resourcePath != null ? resourcePath
+					: path);
 			if (in != null) {
 				ServletOutputStream out = resp.getOutputStream();
 				processResourceStream(in, out, resourcePath);
@@ -90,35 +92,38 @@ public class PreloadFilter implements Filter {
 	 */
 	public boolean processAttachedAction(HttpServletRequest request,
 			HttpServletResponse response, String path) {
-		if (path.endsWith("/")) {
-			path = path.substring(0, path.length() - 1);
-		}
-		if ("jsidoc".equals(path)) {
-			try {
-				PrintWriter out = response.getWriter();
-				List<String> packageList = getPackageList();
+		if ("jsidoc.action".equals(path) || isIndex(path) && request.getParameter("path") == null) {
+			printDocument(response);
+			return true;
+		} else {
 
-				out
-						.print("<html><frameset rows='100%'><frame src='org/xidea/jsidoc/index.html?");
-				out.print(URLEncoder.encode("全部托管类库", "utf-8"));
-				out.print("=");
-				boolean isFirst = true;
-				for (String packageName : packageList) {
-					if (isFirst) {
-						isFirst = false;
-					} else {
-						out.print(",");
-					}
-					out.print(packageName);
-
-				}
-				out.print("'> </frameset></html>");
-				return true;
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
 		}
 		return false;
+	}
+
+	private void printDocument(HttpServletResponse response) {
+		try {
+			PrintWriter out = response.getWriter();
+			List<String> packageList = getPackageList();
+
+			out
+					.print("<html><frameset rows='100%'><frame src='org/xidea/jsidoc/index.html?");
+			out.print(URLEncoder.encode("全部托管类库", "utf-8"));
+			out.print("=");
+			boolean isFirst = true;
+			for (String packageName : packageList) {
+				if (isFirst) {
+					isFirst = false;
+				} else {
+					out.print(",");
+				}
+				out.print(packageName);
+
+			}
+			out.print("'> </frameset></html>");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	protected List<String> getPackageList() {
@@ -137,11 +142,16 @@ public class PreloadFilter implements Filter {
 	public String getResourcePath(ServletRequest req, String path) {
 		if (path.endsWith(PRELOAD_FILE_POSTFIX)) {
 			return path.replaceFirst(PRELOAD_FILE_POSTFIX + "$", ".js");
-		} else if (path.length() == 0 || path.equals("index.jsp")) {
+		} else if (isIndex(path)) {
 			return req.getParameter("path");
 		} else {
 			return null;
 		}
+	}
+
+	private boolean isIndex(String path) {
+		return path.length() == 0 || path.equals("index.jsp")
+				|| path.equals("index.php");
 	}
 
 	protected InputStream getResourceStream(String path) {

@@ -172,7 +172,7 @@ public class RegexpPackagePaser implements PackageParser {
 				list.add(null);
 				break;
 			default:
-				if (" \r\n".indexOf(c) < 0) {
+				if (Character.isWhitespace(c)) {
 					throw new IllegalStateException();
 				}
 				break;

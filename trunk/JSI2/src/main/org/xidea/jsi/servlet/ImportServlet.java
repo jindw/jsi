@@ -13,9 +13,10 @@ public class ImportServlet extends GenericServlet {
 	@Override
 	public void service(ServletRequest req, ServletResponse resp)
 			throws ServletException, IOException {
-		String imports = req.getParameter("import");
+		String[] imports = req.getParameterValues("import");
 		HttpServletResponse response = (HttpServletResponse) resp;
-		response.reset();response.resetBuffer();
+		response.reset();
+		response.resetBuffer();
 	}
 
 }
