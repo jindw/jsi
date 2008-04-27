@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="GBK"?>
-<project name="JSIntegration" default="build" basedir="../">
-	<property name="version" value="2.0-preview-2007-05-11" />
+<project name="JSI" default="build" basedir="../">
+	<property name="version" value="2.5-preview-2007-05-11" />
 	<taskdef resource="jst-task.properties" classpath="build/lib/JSA.jar" />
 	<target name="init">
 		<delete dir="build/temp">
@@ -8,29 +8,45 @@
 		<mkdir dir="build/temp/scripts" />
 		<mkdir dir="build/dest" />
 	</target>
-	<target name="build-static">
-		<unzip src="build/dest/JSI-${version}.zip" dest="build/temp/server">
-		</unzip>
-		<move todir="build/temp/server-dyn" includeemptydirs="false">
-			<fileset dir="build/temp/server" defaultexcludes="false">
-				<exclude name="**/*.xml" />
-				<exclude name="**/*.xsl" />
-				<exclude name="**/*.htm" />
-				<exclude name="**/*.html" />
-				<exclude name="**/*.xhtml" />
-				<exclude name="**/*.css" />
-				<exclude name="**/*.doc" />
-				<exclude name="**/*.js" />
-				<exclude name="**/*.htc" />
-				<exclude name="**/*.hta" />
-				<exclude name="**/*.txt" />
-				<exclude name="**/*.jpeg" />
-				<exclude name="**/*.jpg" />
-				<exclude name="**/*.png" />
-				<exclude name="**/*.gif" />
-				<exclude name="**/*.swf" />
+	<target name="buildExample">
+		<jar destfile="build/dest/jsi.jar">
+			<fileset dir="web/WEB-INF/classes">
+				<include name="**/*.*" />
 			</fileset>
-		</move>
+		</jar>
+		<war destfile="build/dest/JSI-empty-${version}.war" webxml="web/WEB-INF/web.xml">
+			<zipfileset file="jsi.jar" dir="build/dest" prefix="WEB-INF/lib/" />
+		</war>
+		<war destfile="build/dest/JSI-example-${version}.war" webxml="web/WEB-INF/web.xml" description="http://localhost/JSI-example-${version}/scripts/jsidoc">
+			<zipfileset file="jsi.jar" dir="build/dest" prefix="WEB-INF/lib/" />
+			<zipfileset dir="web">
+				<include name="scripts/example/**/*.*" />
+			</zipfileset>
+		</war>
+	</target>
+	<target name="buildJSIDoc" depends="init">
+		<delete file="build/dest/JSI-JSIDoc-${version}.zip">
+		</delete>
+		<java classpath="web/WEB-INF/classes/" classname="org.xidea.jsi.doc.SimpleCacheBuilder">
+			<arg value="${basedir}/web/scripts" />
+			<arg value="${basedir}/build/temp/" />
+		</java>
+		<zip destfile="build/dest/JSI-JSIDoc-${version}.zip" compress="true">
+			<zipfileset dir="web/scripts">
+				<include name="**/*.*" />
+				<exclude name="**/*.db" />
+				<exclude name="*/**/*.js" />
+				<exclude name="*/**/*.xhtml" />
+				<exclude name="*/**/*test*.html" />
+				<exclude name="*/**/root-frame.html" />
+			</zipfileset>
+			<zipfileset dir="web/scripts/org/xidea/jsidoc/">
+				<include name="root-frame.html" />
+			</zipfileset>
+			<zipfileset dir="build/temp/">
+				<include name="jsidoc-source.js" />
+			</zipfileset>
+		</zip>
 	</target>
 	<target name="build" depends="compress">
 		<delete file="build/dest/JSI-${version}.tar">
