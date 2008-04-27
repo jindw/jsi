@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -41,7 +42,7 @@ public class PreloadFilter implements Filter {
 	protected String scriptBase;
 
 	protected ServletContext context;
-	protected String contentType = "text/html;charset=utf-8";
+	protected String contentType = null;//"text/html;charset=utf-8";
 
 	public static final String JS_FILE_POSTFIX = ".js";
 	public static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
@@ -73,6 +74,9 @@ public class PreloadFilter implements Filter {
 			InputStream in = getResourceStream(resourcePath != null ? resourcePath
 					: path);
 			if (in != null) {
+				if (!path.toLowerCase().endsWith(".js")) {
+					resp.setContentType(context.getMimeType(path));
+				}
 				ServletOutputStream out = resp.getOutputStream();
 				processResourceStream(in, out, resourcePath);
 				return;
@@ -92,8 +96,18 @@ public class PreloadFilter implements Filter {
 	 */
 	public boolean processAttachedAction(HttpServletRequest request,
 			HttpServletResponse response, String path) {
-		if ("jsidoc.action".equals(path) || isIndex(path) && request.getParameter("path") == null) {
-			printDocument(response);
+		if ("jsidoc.action".equals(path) || isIndex(path)
+				&& request.getParameter("path") == null) {
+			String externalScript = request.getParameter("externalScript");
+			if(externalScript == null){
+				printDocument(response);
+			}else{
+				try {
+					response.sendRedirect("org/xidea/jsidoc/index.html?externalScript="+URLEncoder.encode(externalScript, "utf-8"));
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
 			return true;
 		} else {
 
@@ -108,7 +122,7 @@ public class PreloadFilter implements Filter {
 
 			out
 					.print("<html><frameset rows='100%'><frame src='org/xidea/jsidoc/index.html?");
-			out.print(URLEncoder.encode("全部托管类库", "utf-8"));
+			out.print(URLEncoder.encode("group.全部托管类库", "utf-8"));
 			out.print("=");
 			boolean isFirst = true;
 			for (String packageName : packageList) {

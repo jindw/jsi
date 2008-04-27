@@ -6,31 +6,31 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.List;
 
-public class GenDocSimple {
-	static String packageBase = "D:/workspace/JSI2/web/scripts";
-	static String destBase = "D:/workspace/JSI2/build";
-	static String packages[] = { "","org.xidea.jsidoc", "org.xidea.jsidoc.export",
-			"org.xidea.jsidoc.html", "org.xidea.jsidoc.styles",
-			"org.xidea.sandbox.io", "org.xidea.sandbox.util",
-			"org.xidea.sandbox.xml", "org.xidea.syntax",
-			"org.xidea.test.loader" };
+import org.xidea.jsi.impl.FileJSIRoot;
+
+public class SimpleCacheBuilder {
+	private static String packageBase = "D:/workspace/JSI2/web/scripts";
+	private static String destBase = "D:/workspace/JSI2/build";
 
 	public static void main(String[] args) throws IOException {
-		genPackageCache(new PrintStream(new File(destBase,"source.js"),"utf-8"));
-		genBoot(new PrintStream(new File(destBase,"boot.js"),"utf-8"));
-
+		if(args!=null && args.length>=2){
+			packageBase = args[0];
+			destBase = args[1];
+		}
+		List<String> packages = FileJSIRoot.findPackageList(new File(packageBase));
+		packages.add("org.xidea.jsidoc.html");
+		packages.add("org.xidea.jsidoc.styles");
+		packages.add("");
+		
+		genPackageCache(new PrintStream(new File(destBase,"jsidoc-source.js"),"utf-8"),packages);
 	}
 
-	private static void genBoot(PrintStream out) throws IOException {
-		out.println(getFileContent( new File(packageBase, "boot.js")));
-		out.println(getFileContent( new File(packageBase, "boot-core.js")));
-		out.println(getFileContent( new File(packageBase, "boot-log.js")));
-	}
-
-	private static void genPackageCache(PrintStream out) throws IOException {
-		for (int i = 0; i < packages.length; i++) {
-			String pkg = packages[i];
+	private static void genPackageCache(PrintStream out,List<String> packages) throws IOException {
+		out.println("JSIDoc.cacheScript({");
+		boolean firstPackage = true;
+		for (String pkg : packages) {
 			File dir = new File(packageBase, pkg.replace('.', '/'));
 			//System.out.println(dir);
 			File[] files = dir.listFiles(new FilenameFilter() {
@@ -40,7 +40,12 @@ public class GenDocSimple {
 			});
 			if (files!=null && files.length > 0) {
 				//System.out.println(pkg);
-				out.println("$JSI.preload('" + pkg + "',{");
+				if(firstPackage){
+					firstPackage = false;
+				}else{
+					out.print(",");
+				}
+				out.println("'" + pkg + "':{");
 				for (int j = 0; j < files.length; j++) {
 					File file = files[j];
 					String fileName = file.getName();
@@ -54,9 +59,10 @@ public class GenDocSimple {
 
 					out.print("'");
 				}
-				out.println("})");
+				out.println("}");
 			}
 		}
+		out.println("})");
 		out.flush();
 		out.close();
 	}
