@@ -5,7 +5,6 @@
  * @author jindw
  * @version $Id: export.js,v 1.8 2008/02/24 08:58:15 jindw Exp $
  */
-var parentJSIDoc = parent.JSIDoc;
 
 function Exporter(){
     this.imports = [];
@@ -79,13 +78,35 @@ Exporter.prototype = {
                 packageMap[packageName][file] = txt;
             }
         }
-        var content = ["<!--\n// --><script>"];
-        content.push("document.location = '",jsiDocURL,"?localScript='+encodeURIComponent(location.href)");
-        content.push("</script>\r\n");
+        var content = ["/*<meta http-equiv='Content-Type' content='text/html;utf-8' />"];
+        content.push("<meta http-equiv='X-JSIDoc-Version' content='1.0' />");
+        content.push("<script>document.onkeydown = function(){text.focus();text.select();};");
+        content.push("var documentURL = '",jsiDocURL,"?externalScript='+encodeURIComponent(location.href);");
+        content.push("function printDocument(){document.open();");
+        content.push("document.write(\"<html><frameset rows='100%'><frame src='\"+documentURL+\"'></frame></frameset></html>\");");
+        content.push("document.close();}");
+        
+        content.push("if(location.protocol!='file:'){");
+        content.push("printDocument();setTimeout(printDocument,10);}else{");
+        content.push("var script = document.getElementsByTagName('script')[0];");
+        content.push("var preText = script.previousSibling;");
+        content.push("preText.parentNode.removeChild(preText);");
+        content.push("}</script><textarea onfocus='this.select()' onclick='this.select()' wrap='off' style='position:absolute;top:100px;width:100%;height:60px;'>/* */");
         content.push("JSIDoc.cacheScript(");
-        content.push(JSON.serialize(packageMap));
+        content.push(JSON.serialize(packageMap).replace(/[<&>]|--/g,encodeReplacer));
         content.push(")\r\n");
-        content.push("//<!-- -->");
+        content.push("//</textarea>");
+        
+        content.push("<script>");
+        content.push("var text = document.getElementsByTagName('textarea')[0];");
+        content.push("if(window.clipboardData){");
+        content.push("clipboardData.setData('Text',text.value);");
+        content.push("printDocument();setTimeout(printDocument,10);");
+        content.push("}</script>");
+        content.push("<div style='position:absolute;top:0px;height:100px;'><h3>您的浏览器可能不支持本地脚本读取</h3>")
+        content.push("<p>您需要拷贝(Ctrl+C)文本筐中的脚本数据,确认后在提示筐中输入拷贝脚本<button onclick='printDocument();'>确认</button></p>");
+        content.push("</div>");
+        content.push("");
         return content.join('')
     },
     getSource:function(path){
@@ -101,7 +122,19 @@ Exporter.prototype = {
         return rtv;
     }
 }
-
+function encodeReplacer(c){
+    return encodeMap[c];
+}
+var encodeMap = {
+    '--':'\\u002d-',
+    '<':'\\u003c',
+    '&':'\\u0026',
+    '>':'\\u003e'
+}
+try{
+   var parentJSIDoc = parent.JSIDoc;
+}catch(e){
+}
 
 function addDependenceInfo(dependenceInfo,result,cachedInfos){
     var befores = dependenceInfo.getBeforeInfos();

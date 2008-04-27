@@ -15,17 +15,26 @@ frame,frameset{
 var prepareResult = JSIDoc.prepare();
 </script>
 <script>
+//
+//                "您需要把您的外部文件放在一个Web服务器上察看;",
+//                "如果您使用的是Firefox，请奖您也可以为当前站点添加本地文件访问权限"
 var packageGroupMap = {
         "托管脚本示例" : ["example","example.internal","org.xidea.jsidoc"]
     }
 if(prepareResult){
-    if(prepareResult == true){//可能是本地全线问题导致，无法加载脚本数据
+    if(prepareResult.constructor == String){//可能是本地全线问题导致，无法加载脚本数据
         if(JSIDoc.packageGroupMap){
             var packageGroupMap = JSIDoc.packageGroupMap;
         }else{
-            alert(["加载本机文档数据失败:",
-                "您需要把您的外部文件放在一个Web服务器上察看;",
-                "如果您使用的是Firefox，您也可以为当前站点添加本地文件访问权限"].join('\n'));
+            if(!text){
+	            var message = ["加载本机文档数据失败:","请直接输入本级文档源代码!!"].join('\n');
+	            //var text = window.showModalDialog("javascript:document.write('<html><body><form><textarea id=text style=\"width:100%;height:120px;\"></textarea><br><button onclick=\"alert(window.returnValue = this.form.text.value);window.close();\">确定</button></form></body></html>')",window, "dialogHeight:225px;dialogwidth:250px;resizable:no")
+	            var text = prompt(message);
+            }
+            window.eval(text);
+            if(JSIDoc.packageGroupMap){
+                var packageGroupMap = JSIDoc.packageGroupMap;
+            }
         }
     }else{
         packageGroupMap = prepareResult;

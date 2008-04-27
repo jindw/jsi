@@ -23,7 +23,9 @@ var JSIDoc = {
      * @return packageGroupMap 或者 false(发现有外部脚本文件)
      */
     prepare:function(){
-        var link = window.location.hash || top.location.hash;
+        try{
+            var link = window.location.hash || top.location.hash;
+        }catch(e){}
         var search = window.location.search;
         var packageGroup = [];
         window.onload = function(){
@@ -35,29 +37,39 @@ var JSIDoc = {
             }
         }
         function contentLoad(){
-            if(top.document.all){
-                top.location.replace("#"+encodeURIComponent(this.contentWindow.location.href));
+            if(document.all){
+                try{
+                    var location = top.location;
+                }catch(e){
+                    var location = window.location;
+                }
+            }
+            
+            if(location){
+                location.replace("#"+encodeURIComponent(this.contentWindow.location.href));
             }
         }
         if(search && search.length>2){
             var exp = /([^\?=&]*)=([^=&]*)/g;
-            var localScript;
             var match;
             while(match = exp.exec(search)){
                 var name = decodeURIComponent(match[1]);
                 var value = decodeURIComponent(match[2]);
-                if("localScript" == name){
-                    localScript = value;
-                }else{
+                if("externalScript" == name){
+                    if(window.clipboardData && value.indexOf("file://") == 0){
+                        var text = window.clipboardData.getData("Text");
+                        document.write("<script>"+text+"<\/script>")
+                    }else{
+                        document.write("<script src='"+value+"'><\/script>")
+                    }
+                    return value
+                }else if(name = name.replace(/^group\.(.*)|.*/,'$1')){//group
                     packageGroup.push(name)
                     packageGroup[name] = value.split(',');
                 }
             }
-            if(localScript){
-                document.write("<script src='"+localScript+"'><\/script>")
-            }
         }
-        return localScript?true:packageGroup;
+        return packageGroup;
     },
     /**
      * @public
@@ -299,6 +311,14 @@ var JSIDoc = {
         for(var packageName in packageMap){
             groupPackages.push(packageName);
             preload(packageName,packageMap[packageName]);
+        }
+    },
+    exportToJSI:function(newJSI){
+        for(var path in cachedScripts){
+            var items = path.split('/');
+            var file = items.pop();
+            var packageName = items.join('.');
+            newJSI.preload(packageName,file == "__package__.js"?'':file,cachedScripts[path]);
         }
     }
 }

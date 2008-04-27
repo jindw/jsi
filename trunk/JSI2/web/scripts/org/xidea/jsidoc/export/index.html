@@ -16,6 +16,12 @@
     }
 </script>
 <script>
+    try{
+	    if(parent.JSIDoc&&parent.JSIDoc.exportToJSI){
+	        parent.JSIDoc.exportToJSI($JSI);
+	    }
+    }catch(e){
+    }
     $import("org.xidea.jsidoc.export.ExportUI");
 </script>
 </head>
