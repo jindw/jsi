@@ -103,11 +103,12 @@ Exporter.prototype = {
         content.push("clipboardData.setData('Text',text.value);");
         content.push("printDocument();setTimeout(printDocument,10);");
         content.push("}</script>");
-        content.push("<div style='position:absolute;top:3px;height:100px;width:40%;'><h3>您的浏览器可能不支持本地脚本读取,请选择如下解决办法</h3>")
+        content.push("<div style='position:absolute;top:3px;height:100px;width:40%;'>");
+        content.push("<p>如果您看到该页,说明您的浏览器不支持本地脚本读取,请在下列下解决办法中任选其一:</p>")
         content.push("<ul>");
-        content.push("<li><b>将网页部署到Web服务器上查看</b></li>");
+        content.push("<li><b>上传:</b>将网页部署到Web服务器上查看</li>");
         content.push("<li><b>拷贝:</b> 您需要拷贝(Ctrl+C)文本筐中的脚本数据,点击右边按钮,然后在提示筐中输入拷贝脚本<button onclick='printDocument();'>确认拷贝</button></li>");
-        content.push("<li><b>本地文件系统部署</b></li>");
+        content.push("<li><b>部署:</b>在本地文件系统上部署JSIDoc程序</li>");
         content.push("</ul></div>");
         content.push("");
         return content.join('')

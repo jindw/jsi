@@ -287,11 +287,6 @@ var JSIDoc = {
         if(cache && cache.constructor == String){
             return cache;
         }else{
-            var buf = [filePath,cache];
-            for(var n in cachedScripts){
-                buf.push(n);
-            }
-            alert(buf.join('\n'));
             var result = this.loadTextByURL($JSI.scriptBase + filePath);
             if(result !=null){
                 return result;
