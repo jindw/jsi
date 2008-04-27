@@ -27,7 +27,7 @@ if(prepareResult){
             var packageGroupMap = JSIDoc.packageGroupMap;
         }else{
             if(!text){
-	            var message = ["加载本机文档数据失败:","请直接输入本级文档源代码!!"].join('\n');
+	            var message = ["加载本机文档数据失败:","请直接输入文档源代码!!"].join('\n');
 	            //var text = window.showModalDialog("javascript:document.write('<html><body><form><textarea id=text style=\"width:100%;height:120px;\"></textarea><br><button onclick=\"alert(window.returnValue = this.form.text.value);window.close();\">确定</button></form></body></html>')",window, "dialogHeight:225px;dialogwidth:250px;resizable:no")
 	            var text = prompt(message);
             }
