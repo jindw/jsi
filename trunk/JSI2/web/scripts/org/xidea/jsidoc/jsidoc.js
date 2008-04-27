@@ -14,6 +14,7 @@ var cachedScripts = {};
 var MENU_FRAME_ID = "menu";
 var CONTENT_FRAME_ID = "content";
 //var loadingHTML = '<img style="margin:40%" src="../styles/loading2.gif"/>';
+var cachedSourceMap = window.JSIDoc && window.JSIDoc.cachedSourceMap;
 
 /**
  * @public
@@ -48,6 +49,9 @@ var JSIDoc = {
             if(location){
                 location.replace("#"+encodeURIComponent(this.contentWindow.location.href));
             }
+        }
+        for(var packageName in cachedSourceMap){
+            preload(packageName,cachedSourceMap[packageName]);
         }
         if(search && search.length>2){
             var exp = /([^\?=&]*)=([^=&]*)/g;
@@ -107,46 +111,6 @@ var JSIDoc = {
     collapsePackage:function(name){
         var menuDocument = document.getElementById(MENU_FRAME_ID).contentWindow.document;
         MenuUI.loadPackage(menuDocument,name);
-    },
-    /**
-     * 获取文档源代码
-     * @param packageName
-     * @param fileName
-     */
-    getSource:function(fileName){
-        var cache = cachedScripts[fileName];
-        if(cache && cache.constructor == String){
-            return cache;
-        }else{
-            var result = this.loadTextByURL($JSI.scriptBase + fileName);
-            if(result !=null){
-                return result;
-            }else if(cache){
-                return cache.toString();
-            }
-        }
-    },
-    /**
-     * 
-     */
-    loadTextByURL : function(url){
-        //$log.info(url);
-        var req = new XMLHttpRequest();
-        req.open("GET",url,false);
-        try{
-            //for ie file 404 will throw exception 
-            req.send(null);
-            if(req.status >= 200 && req.status < 300 || req.status == 304 || !req.status){
-                //return  req.responseText;
-                return req.responseText;
-            }else{
-                $log.debug("load faild:",url,"status:",req.status);
-            }
-        }catch(e){
-            $log.debug(e);
-        }finally{
-            req.abort();
-        }
     },
     /**
      * 渲染文档，输出页面
@@ -311,6 +275,51 @@ var JSIDoc = {
         for(var packageName in packageMap){
             groupPackages.push(packageName);
             preload(packageName,packageMap[packageName]);
+        }
+    },
+    /**
+     * 获取文档源代码
+     * @param packageName
+     * @param fileName
+     */
+    getSource:function(filePath){
+        var cache = cachedScripts[filePath];
+        if(cache && cache.constructor == String){
+            return cache;
+        }else{
+            var buf = [filePath,cache];
+            for(var n in cachedScripts){
+                buf.push(n);
+            }
+            alert(buf.join('\n'));
+            var result = this.loadTextByURL($JSI.scriptBase + filePath);
+            if(result !=null){
+                return result;
+            }else if(cache){
+                return cache.toString();
+            }
+        }
+    },
+    /**
+     * 
+     */
+    loadTextByURL : function(url){
+        //$log.info(url);
+        var req = new XMLHttpRequest();
+        req.open("GET",url,false);
+        try{
+            //for ie file 404 will throw exception 
+            req.send(null);
+            if(req.status >= 200 && req.status < 300 || req.status == 304 || !req.status){
+                //return  req.responseText;
+                return req.responseText;
+            }else{
+                $log.debug("load faild:",url,"status:",req.status);
+            }
+        }catch(e){
+            $log.debug(e);
+        }finally{
+            req.abort();
         }
     },
     exportToJSI:function(newJSI){

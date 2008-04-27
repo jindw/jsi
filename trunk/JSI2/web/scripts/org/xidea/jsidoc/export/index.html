@@ -7,7 +7,7 @@
     var parentScripts = parent.document.getElementsByTagName("script");
     for(var i=0;i<parentScripts.length;i++){
         var src = parentScripts[i].src;
-        if(src && !/^data:|(?:__preload__|lazy-trigger).js$/.test(src)){
+        if(src && /boot(-.*)?.js$/.test(src)){
             if(!/^[\w\d]{3,8}:\/\/|^\//.test(src)){//绝对地址
                 src = "../"+src
             }
