@@ -2,7 +2,6 @@ package org.xidea.jsi.servlet;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -10,14 +9,8 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * 该类为方便调试开发，发布时可编译脚本，能后去掉此类。
