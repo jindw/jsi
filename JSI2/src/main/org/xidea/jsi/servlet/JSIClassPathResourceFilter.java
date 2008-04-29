@@ -19,7 +19,7 @@ import javax.servlet.ServletException;
  */
 public class JSIClassPathResourceFilter extends PreloadFilter {
 
-	private ClassLoader scriptLibs = this.getClass().getClassLoader();
+	protected ClassLoader scriptLibs = this.getClass().getClassLoader();
 
 	public void destroy() {
 	}
