@@ -80,17 +80,19 @@ Exporter.prototype = {
         }
         var content = ["/*<meta http-equiv='Content-Type' content='text/html;utf-8' />"];
         content.push("<meta http-equiv='X-JSIDoc-Version' content='1.0' />");
-        content.push("<script>document.onkeydown = function(){text.focus();text.select();};");
+        content.push("<HTA:APPLICATION ID='jdidoc' WINDOWSTATE='maximize'/>");
+        content.push("<script>");
         content.push("var documentURL = '",jsiDocURL,"?externalScript='+encodeURIComponent(location.href);");
+        content.push("document.onkeydown = function(){text.focus();text.select();};");
         content.push("function printDocument(){document.open();");
         content.push("document.write(\"<html><frameset rows='100%'><frame src='\"+documentURL+\"'></frame></frameset></html>\");");
         content.push("document.close();}");
         
-        content.push("if(location.protocol!='file:'){");
+        content.push("if(location.protocol!='file:' || /^file:\\/\\/|^[A-Z]:[/\\\\]/.test(documentURL)){");
         content.push("printDocument();setTimeout(printDocument,10);}else{");
-        content.push("var script = document.getElementsByTagName('script')[0];");
+        content.push("var script = document.getElementsByTagName('meta')[0];");
         content.push("var preText = script.previousSibling;");
-        content.push("preText.parentNode.removeChild(preText);");
+        content.push("preText && preText.parentNode.removeChild(preText);");
         content.push("}</script><textarea onfocus='this.select()' onclick='this.select()' wrap='off' readonly='true' style='position:absolute;top:10px;right:3%;width:40%;height:60px;overflow:hidden;'>/* */");
         content.push("JSIDoc.cacheScript(");
         content.push(JSON.serialize(packageMap).replace(/[<&>]|--/g,encodeReplacer));

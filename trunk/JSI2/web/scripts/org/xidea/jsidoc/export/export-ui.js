@@ -129,13 +129,15 @@ var ExportUI = {
 var dialog;
 function showResult(content,reuse){
     if(!reuse && dialog){
-        dialog.close();
+        try{
+            dialog.close();
+        }catch(e){}
         dialog = null;
     }
     dialog = dialog || window.open('about:blank','source','modal=yes,left=200,top=100,width=600px,height=600px');
     var document = dialog.document;
     document.open();
-    document.write("<html><style>*{width:100%;height:100%;padding:0px;margin:0px;}</style><body><textarea readonly='true' wrap='off'>");
+    document.write("<html><title>==请将文本筐中的内容拷贝到目标文件(js,xml,html,hta)==</title><style>*{width:100%;height:100%;padding:0px;margin:0px;}</style><body><textarea readonly='true' wrap='off'>");
     document.write(content.replace(/[<>&]/g,xmlReplacer));
     document.write("</textarea></body></html>");
     document.close();
@@ -177,8 +179,6 @@ function update(){
                 }else{
                     packageState13 = 1;
                 }
-                
-                
             }
             updateNode(child,state);
             selectCount +=state;
