@@ -20,15 +20,19 @@ public class DefaultJSILoadContext implements JSILoadContext {
 	private Map<String, ScriptLoader> loadMap = new HashMap<String, ScriptLoader>();
 	private Map<String, String> exportMap = new HashMap<String, String>();
 
-	/* (non-Javadoc)
-	 * @see org.xidea.jsi.JSILoadContext#loadScript(org.xidea.jsi.JSIPackage, java.lang.String, java.lang.String, boolean)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xidea.jsi.JSILoadContext#loadScript(org.xidea.jsi.JSIPackage,
+	 *      java.lang.String, java.lang.String, boolean)
 	 */
 	public void loadScript(JSIPackage pkg, final String path,
 			final String object, final boolean export) {
 		String id = pkg.getName().replace('.', '/') + "/" + path;
 		if (export) {
 			if (object == null) {
-				org.xidea.jsi.ScriptLoader loader = pkg.getLoaderMap().get(path);
+				org.xidea.jsi.ScriptLoader loader = pkg.getLoaderMap()
+						.get(path);
 				for (String var : loader.getLocalVars()) {
 					exportMap.put(var, pkg.getName());
 				}
@@ -48,7 +52,8 @@ public class DefaultJSILoadContext implements JSILoadContext {
 			return;
 		}
 		pkg.initialize();
-		List<JSIDependence> list = ((DefaultJSIPackage)pkg).getDependenceMap().get(path);
+		List<JSIDependence> list = ((DefaultJSIPackage) pkg).getDependenceMap()
+				.get(path);
 		if (list == null) {
 			if (!loadList.contains(id)) {
 				loadList.add(id);
@@ -59,7 +64,7 @@ public class DefaultJSILoadContext implements JSILoadContext {
 				if (!dependence.isAfterLoad()
 						&& (dependenceObjectName == null || object == null || object
 								.equals(dependenceObjectName))) {
-					((DefaultJSIDependence)dependence).load(this);
+					((DefaultJSIDependence) dependence).load(this);
 				}
 			}
 			if (!loadList.contains(id)) {
@@ -70,18 +75,32 @@ public class DefaultJSILoadContext implements JSILoadContext {
 				if (dependence.isAfterLoad()
 						&& (dependenceObjectName == null || object == null || object
 								.equals(dependence.getTargetObjectName()))) {
-					((DefaultJSIDependence)dependence).load(this);
+					((DefaultJSIDependence) dependence).load(this);
 				}
 			}
 		}
 	}
 
+	public boolean isLevelSupported(int joinLevel) {
+		switch (joinLevel) {
+		case JOIN_DIRECT:
+		case JOIN_AS_XML:
+			return true;
+		case JOIN_AS_JSIDOC:
+		case JOIN_WITHOUT_ALL_CONFLICTION:
+		case JOIN_WITHOUT_INNER_CONFLICTION:
+			return false;
+		}
+		return false;
+	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.JSILoadContext#export(int)
 	 */
 	public String export(int joinLevel) {
-		if (joinLevel == -1) {
+		if (joinLevel == JOIN_AS_XML) {
 			StringBuilder content = new StringBuilder("<script-map export='");
 			boolean first = true;
 			for (String object : exportMap.keySet()) {
@@ -134,15 +153,23 @@ public class DefaultJSILoadContext implements JSILoadContext {
 		content.append(source);
 		content.append("</script>\n");
 	}
-
-	/* (non-Javadoc)
+	public void setPerfix(String prefix){
+		;
+	}
+	// loadContext.setBegin(0);
+	//loadContext.setLineSeparator("\r\n\r\n");
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.JSILoadContext#getExportMap()
 	 */
 	public Map<String, String> getExportMap() {
 		return exportMap;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.JSILoadContext#getScriptEntryList()
 	 */
 	public List<ScriptLoader> getScriptList() {
@@ -153,4 +180,5 @@ public class DefaultJSILoadContext implements JSILoadContext {
 		}
 		return result;
 	}
+
 }
