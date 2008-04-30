@@ -108,14 +108,14 @@ var ExportUI = {
         case 2:
             //submit to JSA
             var xmlContent = exporter.getXMLContent();
-            var compressServiceURL = form.action;
-            if(compressServiceURL != window.location.href){
+            var compressServiceURL = $JSI.scriptBase + "export.action";
+            if(true){
                 showResult("数据装在中.....");
                 var request = new Request(compressServiceURL,"post",function(){
                     showResult(this.getText(),true)
                 });
                 var prefix = form.prefix.value;//PARAM_PREFIX
-                request.send("type=xml&prefix="+prefix+"&source="+encodeURIComponent(xmlContent));
+                request.send("level="+level+"&prefix="+prefix+"&content="+encodeURIComponent(xmlContent));
                 break;
             }
             showResult("数据装在中.....");

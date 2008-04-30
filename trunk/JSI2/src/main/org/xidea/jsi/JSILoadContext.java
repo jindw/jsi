@@ -7,6 +7,14 @@ import java.util.Map;
 public interface JSILoadContext {
 
 	/**
+	 * 合并成JSIDoc
+	 */
+	public static final int JOIN_AS_JSIDOC = -2;
+	/**
+	 * 合并成XML
+	 */
+	public static final int JOIN_AS_XML = -1;
+	/**
 	 * 直接合并
 	 */
 	public static final int JOIN_DIRECT = 0;
@@ -34,6 +42,13 @@ public interface JSILoadContext {
 	 * @return
 	 */
 	public abstract String export(int joinLevel);
+	
+	/**
+	 * 测试是否支持某导出级别
+	 * @param joinLevel
+	 * @return
+	 */
+	public abstract boolean isLevelSupported(int joinLevel);
 
 	/**
 	 * 获取导出对象列表

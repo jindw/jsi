@@ -28,7 +28,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 
+import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIPackage;
+import org.xidea.jsi.JSIRoot;
+import org.xidea.jsi.impl.DataJSIRoot;
+import org.xidea.jsi.impl.DefaultJSILoadContext;
 import org.xidea.jsi.impl.DefaultJSIPackage;
 import org.xidea.jsi.impl.FileJSIRoot;
 
@@ -37,12 +41,12 @@ import org.xidea.jsi.impl.FileJSIRoot;
  * 
  * @author jindw
  */
-public class PreloadFilter implements Filter {
+public class JSIFilter implements Filter {
 
 	protected String scriptBase;
-
 	protected ServletContext context;
-	protected String contentType = null;//"text/html;charset=utf-8";
+	protected String contentType = null;// "text/html;charset=utf-8";
+	protected String loadContextImpl = "org.xidea.jsi.tools.JSILoadContextImpl";
 
 	public static final String JS_FILE_POSTFIX = ".js";
 	public static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
@@ -50,6 +54,8 @@ public class PreloadFilter implements Filter {
 	public static final String PRELOAD_CONTENT_PREFIX = "function(){eval(this.varText);";
 	public static final String PRELOAD_CONTENT_POSTFIX = "\n}";
 	public static final String PRELOAD_POSTFIX = ")";
+
+	public static Class<? extends JSILoadContext> loadContextClass;
 
 	public void destroy() {
 	}
@@ -93,26 +99,67 @@ public class PreloadFilter implements Filter {
 	 * @param
 	 * @param path
 	 * @return
+	 * @throws IOException
 	 */
 	public boolean processAttachedAction(HttpServletRequest request,
-			HttpServletResponse response, String path) {
+			HttpServletResponse response, String path) throws IOException {
 		if ("jsidoc.action".equals(path) || isIndex(path)
 				&& request.getParameter("path") == null) {
 			String externalScript = request.getParameter("externalScript");
-			if(externalScript == null){
+			if (externalScript == null) {
 				printDocument(response);
-			}else{
-				try {
-					response.sendRedirect("org/xidea/jsidoc/index.html?externalScript="+URLEncoder.encode(externalScript, "utf-8"));
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
+			} else {
+				response
+						.sendRedirect("org/xidea/jsidoc/index.html?externalScript="
+								+ URLEncoder.encode(externalScript, "utf-8"));
+
 			}
 			return true;
-		} else {
-
+		} else if ("export.action".equals(path)) {
+			//if(request.getCharacterEncoding() == null){
+				request.setCharacterEncoding("utf-8");
+			//}
+			String level = request.getParameter("level");
+			String content = request.getParameter("content");
+			JSILoadContext context = this.creatJSILoadContext();
+			response.addHeader("X-JSI-EXPORT-SUPPORTS", "");
+			if (content != null) {
+				JSIRoot root = this.creatJSIRoot(content);
+				String exports = root.loadText("", "export");
+				String[] imports = exports.split("[,\\s]+");
+				for (String item : imports) {
+					root.$import(item, context);
+				}
+				// loadContext.setPerfix(prefix);
+				// loadContext.setBegin(0);
+				// loadContext.setLineSeparator("\r\n\r\n");
+				PrintWriter out = response.getWriter();
+				out.print(context.export(Integer.parseInt(level)));
+			}
+			return true;
 		}
 		return false;
+	}
+
+	protected JSIRoot creatJSIRoot(String xmlContent) {
+		return new DataJSIRoot(xmlContent);
+	}
+
+	protected JSILoadContext creatJSILoadContext() {
+		if (loadContextClass == null) {
+			try {
+				loadContextClass = (Class<? extends JSILoadContext>) Class
+						.forName(loadContextImpl);
+			} catch (Exception e) {
+				loadContextClass = DefaultJSILoadContext.class;
+			}
+		}
+		try {
+			return loadContextClass.newInstance();
+		} catch (Exception e) {
+			loadContextClass = DefaultJSILoadContext.class;
+			throw new RuntimeException(e);
+		}
 	}
 
 	private void printDocument(HttpServletResponse response) {
@@ -264,6 +311,10 @@ public class PreloadFilter implements Filter {
 		this.context = config.getServletContext();
 		String scriptBase = config.getInitParameter("scriptBase");
 		String contentType = config.getInitParameter("contentType");
+		String loadContextImpl = config.getInitParameter("loadContextImpl");
+		if (loadContextImpl != null) {
+			this.loadContextImpl = loadContextImpl;
+		}
 
 		if (scriptBase != null && (scriptBase = scriptBase.trim()).length() > 0) {
 			if (!scriptBase.endsWith("/")) {

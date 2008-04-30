@@ -1,7 +1,11 @@
 package org.xidea.jsi.impl;
 
 import java.io.ByteArrayInputStream;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -17,8 +21,9 @@ public class DataJSIRoot extends AbstractJSIRoot implements JSIRoot {
 	public DataJSIRoot(String source) {
 		source = source.replaceAll("$\\s*<\\?[^>]\\?>", "");
 		try {
-			Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-					.parse(new ByteArrayInputStream(source.getBytes("utf-8")));
+			Document doc = DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder().parse(
+							new ByteArrayInputStream(source.getBytes("utf-8")));
 			String imports = doc.getDocumentElement().getAttribute("export");
 			NodeList nodes = doc.getElementsByTagName("script");
 			HashMap<String, String> dataMap = new HashMap<String, String>();
@@ -36,9 +41,14 @@ public class DataJSIRoot extends AbstractJSIRoot implements JSIRoot {
 		}
 	}
 
+//	public List<String> getImports() {
+//		return Arrays.asList(dataMap.get("/export").split("[,\\s]"));
+//	}
+
 	public DataJSIRoot(Map<String, String> dataMap) {
 		this.dataMap = dataMap;
 	}
+
 	public String loadText(String pkgName, String scriptName) {
 		pkgName = pkgName.replace('.', '/');
 		return dataMap.get(pkgName + '/' + scriptName);
