@@ -15,20 +15,12 @@ var OBJECT_OUTPUT_ID = "objectOutput";
 var EXPORT_BUTTON = "exportButton";
 var PREFIX_CONTAINER_ID = "prefixContainer";
 var JSIDOC_URL_CONTAINER_ID = "jsidocURLContainer";
-
-
+var compressServiceURL = $JSI.scriptBase + "export.action";
 
 var inc = 0;
 //var PACKAGE_TEMPLATE = "<li></li>"
 var ExportUI = {
     initialize:function(sourcePackage,treeTemplateText){
-        var levels = document.forms[0].level;
-        for(var i=0; i<levels.length; i++) {
-            if(levels[i].checked){
-                levels[i].click();
-                break;
-            }
-        }
         var nameList = findPackages(sourcePackage,true);
         var treeTemplate = new Template(treeTemplateText);
         for(var i=0; i<nameList.length; i++) {
@@ -40,6 +32,13 @@ var ExportUI = {
         	}
         }
         document.getElementById(TREE_CONTAINER_ID).innerHTML = treeTemplate.render({packageNodes:packageNodes});
+        updateForm();
+        var request = new Request(compressServiceURL,"post",function(success){
+            if(success){
+                updateForm(true);
+            }
+        });
+        request.send();
     },
     clickScript : function(objectId){
         var checked = checkMap[objectId];
@@ -48,7 +47,7 @@ var ExportUI = {
         }else{
             checkMap[objectId] = true;
         }
-        update();
+        updateTree();
     },
     clickPackage : function(packageId){
         var packageNode = nodeMap[packageId];
@@ -64,7 +63,7 @@ var ExportUI = {
                 delete checkMap[childNodes[childNodes[i]].id];
             }
         }
-        update();
+        updateTree();
     },
     checkLevel:function(levelInput){
         var level = levelInput.value;
@@ -108,17 +107,13 @@ var ExportUI = {
         case 2:
             //submit to JSA
             var xmlContent = exporter.getXMLContent();
-            var compressServiceURL = $JSI.scriptBase + "export.action";
-            if(true){
-                showResult("数据装在中.....");
-                var request = new Request(compressServiceURL,"post",function(){
-                    showResult(this.getText(),true)
-                });
-                var prefix = form.prefix.value;//PARAM_PREFIX
-                request.send("level="+level+"&prefix="+prefix+"&content="+encodeURIComponent(xmlContent));
-                break;
-            }
             showResult("数据装在中.....");
+            var request = new Request(compressServiceURL,"post",function(){
+                showResult(this.getText(),true)
+            });
+            var prefix = form.prefix.value;//PARAM_PREFIX
+            request.send("level="+level+"&prefix="+prefix+"&content="+encodeURIComponent(xmlContent));
+            break;
         default:
             $log.error("不支持导出级别["+level+"],将导出xml格式打包文件");
             showResult(exporter.getXMLContent());
@@ -142,7 +137,25 @@ function showResult(content,reuse){
     document.write("</textarea></body></html>");
     document.close();
 }
-function update(){
+function updateForm(avaliable){
+    var levels = document.forms[0].level;
+    for(var i=0; i<levels.length; i++) {
+        var input = levels[i];
+        if(avaliable){
+            if(input.disabled){
+                input.disabled = false;
+                if(input.checked){
+                    input.click(); 
+                }
+            }
+        }else{
+            if(!input.disabled && input.checked ){
+                input.click();
+            }
+        }
+    }
+}
+function updateTree(){
     var i = packageNodes.length;
     var resultMap = updateOutput();
     while(i--){

@@ -22,7 +22,7 @@
 	    }
     }catch(e){
     }
-    $import("org.xidea.jsidoc.export.ExportUI");
+    $import("org.xidea.jsidoc.export.ExportUI",true);
 </script>
 </head>
 <body style="filter: expression(document.execCommand('BackgroundImageCache', false, true))">
@@ -75,12 +75,12 @@
             <form onsubmit="return false" ation="/servlet/JSA">
             <div>
                 <div>
-                    <input name="level" onclick="ExportUI.checkLevel(this)" value="2" type="radio" checked="true" />隔离全部冲突
-                    <input name="level" onclick="ExportUI.checkLevel(this)" value="1" type="radio" />隔离内部冲突
+                    <input name="level" onclick="ExportUI.checkLevel(this)" value="2" type="radio" disabled="true"  checked="true" />隔离全部冲突
+                    <input name="level" onclick="ExportUI.checkLevel(this)" value="1" type="radio" disabled="true" />隔离内部冲突
                     <input name="level" onclick="ExportUI.checkLevel(this)" value="0" type="radio" />直接合并
                     <br/>
                     <input name="level" onclick="ExportUI.checkLevel(this)" value="-1" type="radio" title="导出后需要使用JSA处理成单个压缩文件,实现隔离冲突" />导出为XML
-                    <input name="level" onclick="ExportUI.checkLevel(this)" value="-2" type="radio" title="导出JSIDoc文档" />导出文档
+                    <input name="level" onclick="ExportUI.checkLevel(this)" value="-2" type="radio" checked="true"  title="导出JSIDoc文档" />导出文档
                 </div>
                 <ul>
                     <li>将导出的数据保存于hta或者html中,查看时需要连接到网络,才能正确解析,您也可以指定一个本地的文档服务器.</li>

@@ -3,7 +3,7 @@
  */
 this.addScript("jsidoc.js",['JSIDoc']
                 ,["org.xidea.sandbox.xml:Template","org.xidea.sandbox.io:Request","PackageInfo","SourceEntry"]
-                ,"org.xidea.jsidoc.export:findPackages");
+                ,["org.xidea.jsidoc.export:findPackages","org.xidea.jsidoc.export:loadTextByURL"]);
 
 this.addScript('package-info.js','PackageInfo'
                 ,'FileInfo')
