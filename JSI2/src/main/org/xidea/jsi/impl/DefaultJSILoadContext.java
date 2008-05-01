@@ -37,9 +37,10 @@ public class DefaultJSILoadContext implements JSILoadContext {
 					exportMap.put(var, pkg.getName());
 				}
 			} else {
-				if (object.indexOf(".") < 0) {
-					exportMap.put(object, pkg.getName());
-				}
+				int pos = object.indexOf(".");
+				//命名空间也算
+				exportMap.put(pos < 0 ? object : object.substring(0, pos), pkg
+						.getName());
 			}
 		}
 
@@ -81,83 +82,20 @@ public class DefaultJSILoadContext implements JSILoadContext {
 		}
 	}
 
-	public boolean isLevelSupported(int joinLevel) {
-		switch (joinLevel) {
-		case JOIN_DIRECT:
-		case JOIN_AS_XML:
-			return true;
-		case JOIN_AS_JSIDOC:
-		case JOIN_WITHOUT_ALL_CONFLICTION:
-		case JOIN_WITHOUT_INNER_CONFLICTION:
-			return false;
-		}
-		return false;
-	}
+//	public boolean isLevelSupported(int joinLevel) {
+//		switch (joinLevel) {
+//		case JOIN_DIRECT:
+//		case JOIN_AS_XML:
+//			return true;
+//		case JOIN_AS_JSIDOC:
+//		case JOIN_WITHOUT_ALL_CONFLICTION:
+//		case JOIN_WITHOUT_INNER_CONFLICTION:
+//			return false;
+//		}
+//		return false;
+//	}
+//
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xidea.jsi.JSILoadContext#export(int)
-	 */
-	public String export(int joinLevel) {
-		if (joinLevel == JOIN_AS_XML) {
-			StringBuilder content = new StringBuilder("<script-map export='");
-			boolean first = true;
-			for (String object : exportMap.keySet()) {
-				if (first) {
-					first = false;
-				} else {
-					content.append(',');
-				}
-				content.append(exportMap.get(object));
-				content.append(':');
-				content.append(object);
-			}
-			;
-			content.append("'>\n");
-			HashMap<String, Object> packageFileMap = new HashMap<String, Object>();
-			for (String file : loadList) {
-				org.xidea.jsi.ScriptLoader entry = loadMap.get(file);
-				appendEntry(content, file, entry.getSource());
-				String packageName = entry.getPackageName();
-				if (packageFileMap.get(packageName) == null) {
-					packageFileMap.put(packageName, "");
-					JSIPackage jsiPackage = entry.getPackage();
-					String source = jsiPackage
-							.loadText(JSIPackage.PACKAGE_FILE_NAME);
-					appendEntry(content, jsiPackage.getName().replace('.', '/')
-							+ '/' + JSIPackage.PACKAGE_FILE_NAME, source);
-				}
-			}
-			content.append("</script-map>\n");
-			return content.toString();
-		} else if (joinLevel == 0) {
-			StringBuilder result = new StringBuilder();
-			for (String file : loadList) {
-				org.xidea.jsi.ScriptLoader entry = loadMap.get(file);
-				result.append(entry.getSource());
-				result.append("\r\n;\r\n");
-			}
-			return result.toString();
-		} else {
-			throw new UnsupportedOperationException("不支持导出级别");
-		}
-	}
-
-	private void appendEntry(StringBuilder content, String file, String source) {
-		content.append("<script path='");
-		content.append(file);
-		content.append("'>");
-		source = source.replaceAll("&", "&amp;").replaceAll(">", "&gt;")
-				.replaceAll("<", "&lt;");
-		content.append(source);
-		content.append("</script>\n");
-	}
-	public void setPerfix(String prefix){
-		;
-	}
-	// loadContext.setBegin(0);
-	//loadContext.setLineSeparator("\r\n\r\n");
 	/*
 	 * (non-Javadoc)
 	 * 
