@@ -287,7 +287,7 @@ var JSIDoc = {
         if(cache && cache.constructor == String){
             return cache;
         }else{
-            var result = this.loadTextByURL($JSI.scriptBase + filePath);
+            var result = loadTextByURL($JSI.scriptBase + filePath);
             if(result !=null){
                 return result;
             }else if(cache){
@@ -298,25 +298,7 @@ var JSIDoc = {
     /**
      * 
      */
-    loadTextByURL : function(url){
-        //$log.info(url);
-        var req = new XMLHttpRequest();
-        req.open("GET",url,false);
-        try{
-            //for ie file 404 will throw exception 
-            req.send(null);
-            if(req.status >= 200 && req.status < 300 || req.status == 304 || !req.status){
-                //return  req.responseText;
-                return req.responseText;
-            }else{
-                $log.debug("load faild:",url,"status:",req.status);
-            }
-        }catch(e){
-            $log.debug(e);
-        }finally{
-            req.abort();
-        }
-    },
+
     exportToJSI:function(newJSI){
         for(var path in cachedScripts){
             var items = path.split('/');

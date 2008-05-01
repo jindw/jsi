@@ -116,7 +116,7 @@ Request.prototype = {
     getStatus:function(){
         var xhr = this.xhr;
         //xml 呢？
-        return xhr.readyState  == 4 &&((xhr.responseText || xhr.responseXML) && xhr.status);
+        return xhr.readyState  == 4 &&((xhr.responseText!=null || xhr.responseXML) && xhr.status);
     },
     /**
      * 设置请求http头。（在每次send调用之前有效）
