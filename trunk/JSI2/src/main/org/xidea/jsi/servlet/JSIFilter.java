@@ -2,17 +2,14 @@ package org.xidea.jsi.servlet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.Filter;
@@ -31,34 +28,24 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSIExportorFactory;
 import org.xidea.jsi.JSILoadContext;
-import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRoot;
+import org.xidea.jsi.impl.AbstractJSIRoot;
 import org.xidea.jsi.impl.DataJSIRoot;
 import org.xidea.jsi.impl.DefaultJSIExportorFactory;
 import org.xidea.jsi.impl.DefaultJSILoadContext;
-import org.xidea.jsi.impl.DefaultJSIPackage;
 import org.xidea.jsi.impl.FileJSIRoot;
 import org.xidea.jsi.impl.JSIUtil;
 
 /**
- * 该类为方便调试开发，发布时可编译脚本，能后去掉此类。
+ * 该类为方便调试开发，发布时可编译脚本，能后去掉此类。 Servlet 2.4 +
  * 
  * @author jindw
  */
 public class JSIFilter implements Filter {
+	public static final String GLOBAL_JSI_ROOT_KEY = JSIFilter.class.getName()
+			.concat(".GLOBAL_JSIROOT_KEY");
 
-	/**
-	 * 合并成JSIDoc
-	 * 
-	 * @deprecated
-	 */
-	private static final int JOIN_AS_JSIDOC = -2;
-	/**
-	 * 合并成XML
-	 * 
-	 * @deprecated
-	 */
-	private static final int JOIN_AS_XML = -1;
+	private static final String UTF8_INCODING = "utf-8";
 	/**
 	 * 直接合并
 	 * 
@@ -80,9 +67,12 @@ public class JSIFilter implements Filter {
 
 	protected String scriptBase;
 	protected ServletContext context;
+	/**
+	 * 只有默认的encoding没有设置的时候，才会设置
+	 */
 	protected String encoding = null;
-	protected String contentType = null;// "text/html;charset=utf-8";
 	protected String exportorFactoryClass = JSIUtil.JSI_EXPORTOR_FACTORY_CLASS;
+	private JSIRoot jsiRoot;
 	private static JSIExportorFactory exportorFactory;
 
 	public void destroy() {
@@ -108,8 +98,25 @@ public class JSIFilter implements Filter {
 			InputStream in = getResourceStream(resourcePath != null ? resourcePath
 					: path);
 			if (in != null) {
-				if (!path.toLowerCase().endsWith(".js")) {
-					resp.setContentType(context.getMimeType(path));
+				// 经测试，metaType是不会自动设置的;
+				// 对于静态文件的设置，我估计是提供静态文件服务的servlet内做的事情。
+
+				// setContentType 和 setCharacterEncoding.在encoding上相互影响
+				// response.getCharacterEncoding 默认是ISO-8895-1
+				// request.getCharacterEncoding 默认是null
+				String metatype = context.getMimeType(path);
+				boolean notSet = request.getCharacterEncoding() == null;
+				if (encoding != null && notSet) {
+					resp.setCharacterEncoding(encoding);
+				}
+				if (metatype != null) {
+					if (encoding != null && notSet) {
+						metatype = metatype + ";charset=" + encoding;
+					}
+					if (metatype.startsWith("text/")
+							|| !path.toLowerCase().endsWith(".js")) {
+						resp.setContentType(metatype);
+					}
 				}
 				ServletOutputStream out = resp.getOutputStream();
 				processResourceStream(in, out, resourcePath);
@@ -117,6 +124,7 @@ public class JSIFilter implements Filter {
 			}
 
 		}
+		// 走这条分支的情况：1、无法找到资源，2、根本不在脚本目录下
 		chain.doFilter(req, resp);
 	}
 
@@ -139,56 +147,88 @@ public class JSIFilter implements Filter {
 			} else {
 				response
 						.sendRedirect("org/xidea/jsidoc/index.html?externalScript="
-								+ URLEncoder.encode(externalScript, "utf-8"));
+								+ URLEncoder.encode(externalScript,
+										UTF8_INCODING));
 
 			}
 			return true;
 		} else if ("export.action".equals(path)) {
-			// if(request.getCharacterEncoding() == null){
-			request.setCharacterEncoding("utf-8");
-			// }
+			if (request.getCharacterEncoding() == null) {
+				// request 默认情况下是null
+				request.setCharacterEncoding(requireEncoding());
+			}
+			int level = 0;
+			{
+				String levelParam = request.getParameter("level");
+				if (levelParam != null) {
+					try {
+						level = Integer.parseInt(levelParam);
+					} catch (Exception e) {
+					}
+				}
+			}
 			JSIExportorFactory factory = getExportorFactory();
-			if (factory == null) {
-				// 不支持
+			if (level != 0
+					&& factory.getClass() == DefaultJSIExportorFactory.class) {
+				// 不支持导出方式
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			} else {
-				String level = request.getParameter("level");
-				String prefix = request.getParameter("prefix");
-				String content = request.getParameter("content");
 				JSILoadContext context = new DefaultJSILoadContext();
+				String content = request.getParameter("content");
+				String[] imports = request.getParameterValues("imports");
+				JSIRoot root;
+				JSIExportor exportor;
 				if (content != null) {
-					JSIRoot root = this.creatJSIRoot(content);
-					// TODO:只有Data Root 才能支持这种方式
+					root = this.creatJSIRootByXMLContent(content);
+				} else {
+					root = this.jsiRoot;
+				}
+				if (level == 0) {
+					exportor = factory.createSimpleExplorter();
+				} else {
+					String prefix = request.getParameter("prefix");
+					exportor = factory.createExplorter(prefix, 0, "\r\n\r\n",
+							level == 1);
+				}
+				if (imports == null) {
+					// 只有Data Root 才能支持这种方式
 					String exports = root.loadText("", "export");
-					String[] imports = exports.split("[,\\s]+");
+					imports = exports.split("[,\\s]+");
 					for (String item : imports) {
 						root.$import(item, context);
 					}
-					boolean preservedUnimported = "1".equals(level);
-
-					JSIExportor exportor = factory.createExplorter(prefix, 0,
-							"\r\n\r\n", preservedUnimported);
-					PrintWriter out = response.getWriter();
-					out.print(exportor.export(context));
+				} else {
+					ArrayList<String> list = new ArrayList<String>();
+					for (String param : imports) {
+						String[] items = param.split("[,\\s]+");
+						for (String item : items) {
+							root.$import(item, context);
+						}
+					}
 				}
+				PrintWriter out = response.getWriter();
+				out.print(exportor.export(context));
 			}
 			return true;
 		}
 		return false;
 	}
 
-	protected JSIRoot creatJSIRoot(String xmlContent) {
+	private String requireEncoding() {
+		return encoding == null ? UTF8_INCODING : encoding;
+	}
+
+	protected JSIRoot creatJSIRootByXMLContent(String xmlContent) {
 		return new DataJSIRoot(xmlContent);
 	}
 
 	protected JSIExportorFactory getExportorFactory() {
 		if (exportorFactory == null) {
 			try {
-				JSIUtil.getExportorFactory();
 				exportorFactory = (JSIExportorFactory) Class.forName(
 						exportorFactoryClass).newInstance();
 			} catch (Exception e) {
-				e.printStackTrace();
+				exportorFactory = JSIUtil.getExportorFactory();
 			}
 		}
 		return exportorFactory;
@@ -201,7 +241,7 @@ public class JSIFilter implements Filter {
 
 			out
 					.print("<html><frameset rows='100%'><frame src='org/xidea/jsidoc/index.html?");
-			out.print(URLEncoder.encode("group.全部托管类库", "utf-8"));
+			out.print(URLEncoder.encode("group.全部托管类库", UTF8_INCODING));
 			out.print("=");
 			boolean isFirst = true;
 			for (String packageName : packageList) {
@@ -248,8 +288,7 @@ public class JSIFilter implements Filter {
 	}
 
 	protected InputStream getResourceStream(String path) {
-		InputStream in = context.getResourceAsStream(scriptBase + path);
-		return in;
+		return context.getResourceAsStream(scriptBase + path);
 	}
 
 	protected void processResourceStream(InputStream in,
@@ -328,7 +367,6 @@ public class JSIFilter implements Filter {
 	public void init(FilterConfig config) throws ServletException {
 		this.context = config.getServletContext();
 		String scriptBase = config.getInitParameter("scriptBase");
-		String contentType = config.getInitParameter("contentType");
 		String encoding = config.getInitParameter("encoding");
 		String exportorFactoryClass = config
 				.getInitParameter("exportorFactoryClass");
@@ -346,12 +384,34 @@ public class JSIFilter implements Filter {
 		} else {
 			scriptBase = "/scripts/";
 		}
-		if (contentType != null) {
-			this.contentType = contentType;
-		}
 		// this.contextPath = config.getServletContext().getContextPath();
 		// this.contextLength = this.contextPath.length();
 		this.scriptBase = scriptBase;
+		this.jsiRoot = new JSIRootImpl();
+		config.getServletContext().setAttribute(GLOBAL_JSI_ROOT_KEY,
+				this.jsiRoot);
+	}
+
+	private class JSIRootImpl extends AbstractJSIRoot {
+		@Override
+		public String loadText(String pkgName, String scriptName) {
+			try {
+				InputStream in = getResourceStream('/'
+						+ pkgName.replace('.', '/') + '/' + scriptName);
+				Reader reader = new InputStreamReader(in,
+						encoding == null ? UTF8_INCODING : encoding);
+
+				StringBuilder buf = new StringBuilder();
+				char[] cbuf = new char[1024];
+				for (int len = reader.read(cbuf); len > 0; len = reader
+						.read(cbuf)) {
+					buf.append(cbuf, 0, len);
+				}
+				return buf.toString();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 }

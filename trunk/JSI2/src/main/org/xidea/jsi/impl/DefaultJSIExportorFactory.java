@@ -40,7 +40,7 @@ public class DefaultJSIExportorFactory implements JSIExportorFactory {
 	 * @see org.xidea.jsi.JSIExportorFactory#createExplorter(java.lang.String, int, java.lang.String, boolean)
 	 */
 	public JSIExportor createExplorter(String internalPrefix, int startIndex,
-			String lineSeparator, boolean preserveUnimported) {
+			String lineSeparator, boolean confuseUnimported) {
 		throw new UnsupportedOperationException("不支持导出方式");
 	}
 }

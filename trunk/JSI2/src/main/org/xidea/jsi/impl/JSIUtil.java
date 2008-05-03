@@ -3,7 +3,7 @@ package org.xidea.jsi.impl;
 import org.xidea.jsi.JSIExportorFactory;
 
 public abstract class JSIUtil {
-
+	
 	public static final String PRELOAD_CONTENT_POSTFIX = "\n}";
 	public static final String PRELOAD_CONTENT_PREFIX = "function(){eval(this.varText);";
 	public static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
