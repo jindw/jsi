@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="GBK"?>
 <project name="JSI" default="build" basedir="../">
-	<property name="version" value="2.5-preview-2007-05-11" />
+	<property name="version" value="2.5-preview-2008-04-30" />
 	<taskdef resource="jst-task.properties" classpath="build/lib/JSA.jar" />
 	<target name="init">
 		<delete dir="build/temp">
@@ -9,18 +9,22 @@
 		<mkdir dir="build/dest" />
 	</target>
 	<target name="buildExample">
-		<jar destfile="build/dest/jsi.jar">
+		<jar destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
 			</fileset>
 		</jar>
 		<war destfile="build/dest/JSI-empty-${version}.war" webxml="web/WEB-INF/web.xml">
-			<zipfileset file="jsi.jar" dir="build/dest" prefix="WEB-INF/lib/" />
+			<zipfileset file="JSI.jar" dir="build/dest" prefix="WEB-INF/lib/" />
+			<zipfileset dir="web">
+				<include name="WEB-INF/lib/**/*.*" />
+			</zipfileset>
 		</war>
 		<war destfile="build/dest/JSI-example-${version}.war" webxml="web/WEB-INF/web.xml" description="http://localhost/JSI-example-${version}/scripts/jsidoc">
-			<zipfileset file="jsi.jar" dir="build/dest" prefix="WEB-INF/lib/" />
+			<zipfileset file="JSI.jar" dir="build/dest" prefix="WEB-INF/lib/" />
 			<zipfileset dir="web">
 				<include name="scripts/example/**/*.*" />
+				<include name="WEB-INF/lib/**/*.*" />
 			</zipfileset>
 		</war>
 	</target>
@@ -130,52 +134,5 @@
 			</preloadgroup>
 		</jsicompile>
 	</target>
-	<target name="compressForBaidu">
-		<delete dir="build/temp/scripts2" />
-		<mkdir dir="build/temp/scripts2" />
-		<jsicompile syntaxcompression="false" textcompression="false" destDir="build/temp/scripts2" charset="utf-8">
-			<fileset dir="web/scripts">
-				<include name="js/**/*.js" />
-				<include name="org/xidea/syntax/**/*.js" />
-				<include name="org/xidea/xml/**/*.js" />
-				<include name="org/xidea/util/**/*.js" />
-				<include name="*.*" />
-				<exclude name="*rhino*" />
-			</fileset>
-			<preloadgroup>
-				<fileset dir="web/scripts">
-					<include name="js/**/*.js" />
-					<include name="org/xidea/syntax/**/*.js" />
-					<include name="org/xidea/xml/**/*.js" />
-					<include name="org/xidea/util/**/*.js" />
-					<include name="*.*" />
-					<exclude name="*rhino*" />
-				</fileset>
-			</preloadgroup>
-		</jsicompile>
-	</target>
-	<target name="compressSimple">
-		<delete dir="build/temp/scripts2" />
-		<mkdir dir="build/temp/scripts2" />
-		<jsicompile syntaxcompression="false" textcompression="false" destDir="build/temp/scripts2" charset="utf-8">
-			<fileset dir="web/scripts">
-				<include name="*.*" />
-				<include name="**/*.*" />
-				<include name="js/lang/*.*" />
-				<include name="js/html/*.*" />
-				<include name="js/util/*.*" />
-				<exclude name="*rhino*" />
-			</fileset>
-			<preloadgroup>
-				<fileset dir="web/scripts">
-					<include name="*.*" />
-					<include name="**/*.*" />
-					<include name="js/lang/__package__.js" />
-					<include name="js/html/*.*" />
-					<include name="js/util/*.*" />
-					<exclude name="*rhino*" />
-				</fileset>
-			</preloadgroup>
-		</jsicompile>
-	</target>
+
 </project>
