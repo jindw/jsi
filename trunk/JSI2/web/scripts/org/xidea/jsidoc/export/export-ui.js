@@ -38,7 +38,7 @@ var ExportUI = {
                 updateForm(true);
             }
         });
-        request.send();
+        request.send("level=2");
     },
     clickScript : function(objectId){
         var checked = checkMap[objectId];
