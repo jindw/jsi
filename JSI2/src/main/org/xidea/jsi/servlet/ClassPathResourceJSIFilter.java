@@ -17,7 +17,7 @@ import javax.servlet.ServletException;
  * 
  * @author jindw
  */
-public class JSIClassPathResourceFilter extends JSIFilter {
+public class ClassPathResourceJSIFilter extends JSIFilter {
 
 	protected ClassLoader scriptLibs = this.getClass().getClassLoader();
 
