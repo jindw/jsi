@@ -193,9 +193,11 @@ public class JSIFilter implements Filter {
 				if (imports == null) {
 					// 只有Data Root 才能支持这种方式
 					String exports = root.loadText("", "export");
-					imports = exports.split("[,\\s]+");
-					for (String item : imports) {
-						root.$import(item, context);
+					if (exports != null) {
+						imports = exports.split("[,\\s]+");
+						for (String item : imports) {
+							root.$import(item, context);
+						}
 					}
 				} else {
 					ArrayList<String> list = new ArrayList<String>();
@@ -398,16 +400,21 @@ public class JSIFilter implements Filter {
 			try {
 				InputStream in = getResourceStream('/'
 						+ pkgName.replace('.', '/') + '/' + scriptName);
-				Reader reader = new InputStreamReader(in,
-						encoding == null ? UTF8_INCODING : encoding);
+				if (in != null) {
+					Reader reader = new InputStreamReader(in,
+							encoding == null ? UTF8_INCODING : encoding);
 
-				StringBuilder buf = new StringBuilder();
-				char[] cbuf = new char[1024];
-				for (int len = reader.read(cbuf); len > 0; len = reader
-						.read(cbuf)) {
-					buf.append(cbuf, 0, len);
+					StringBuilder buf = new StringBuilder();
+					char[] cbuf = new char[1024];
+					for (int len = reader.read(cbuf); len > 0; len = reader
+							.read(cbuf)) {
+						buf.append(cbuf, 0, len);
+					}
+
+					return buf.toString();
+				} else {
+					return null;
 				}
-				return buf.toString();
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
