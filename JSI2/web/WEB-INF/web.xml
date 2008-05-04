@@ -6,15 +6,15 @@
   <display-name>JSI</display-name>
   <description>JSI Site</description>
   <filter>
-    <filter-name>PreloadFilter</filter-name>
-    <filter-class>org.xidea.jsi.servlet.JSIClassPathResourceFilter</filter-class>
+    <filter-name>JSIFilter</filter-name>
+    <filter-class>org.xidea.jsi.servlet.ClassPathResourceJSIFilter</filter-class>
     <init-param>
       <param-name>scriptBase</param-name>
       <param-value>/scripts/</param-value>
     </init-param>
   </filter>
   <filter-mapping>
-    <filter-name>PreloadFilter</filter-name>
+    <filter-name>JSIFilter</filter-name>
     <url-pattern>/scripts/*</url-pattern>
   </filter-mapping>
   <!-- JSP config -->
