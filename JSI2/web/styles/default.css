@@ -1,34 +1,29 @@
-body{
+html{
 	text-align:center;
 	font-size:12px;
 	background:#333;
-}
-td{
-	font-size:12px;
-}
-ul{
-	padding-left: 20px;
-}
-ul,li{
+	padding:20px;
 	margin:0px;
-	text-align:left;
-	list-style-position: inside;
-	list-style-type: disc;
+}
+body{
+    width:650px;
+    text-align:left;
+    margin:auto;
+    padding:8px;
+    background:#fefefe;
+    border:3px double #DDD;
 }
 p,h3{
 	text-align:left;
 }
-#main{
-	width:600px;
-	text-align:left;
-	margin:auto;
-	padding:8px;
-	background:#fefefe;
-	border:3px double #DDD;
+ul{
+    padding-left: 20px;
 }
-.menu,#menu{
-	width:150px;
-	margin:auto;
+ul,li{
+    margin:0px;
+    text-align:left;
+    list-style-position: inside;
+    list-style-type: disc;
 }
 .block-row{
 	clear: both;
