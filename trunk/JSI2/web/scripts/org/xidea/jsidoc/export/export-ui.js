@@ -32,13 +32,19 @@ var ExportUI = {
         	}
         }
         document.getElementById(TREE_CONTAINER_ID).innerHTML = treeTemplate.render({packageNodes:packageNodes});
-        updateForm();
-        var request = new Request(compressServiceURL,"post",function(success){
+        initializeForm();
+        var request1 = new Request(compressServiceURL,"post",function(success){
             if(success){
-                updateForm(true);
+                updateDisabledForm('1');
             }
         });
-        request.send("level=2");
+        request1.send("level=2");
+        var request2 = new Request(compressServiceURL,"post",function(success){
+            if(success){
+                updateDisabledForm('2');
+            }
+        });
+        request2.send("level=2");
     },
     clickScript : function(objectId){
         var checked = checkMap[objectId];
@@ -137,23 +143,30 @@ function showResult(content,reuse){
     document.write("</textarea></body></html>");
     document.close();
 }
-function updateForm(avaliable){
+function initializeForm(){
     var levels = document.forms[0].level;
     for(var i=0; i<levels.length; i++) {
         var input = levels[i];
-        if(avaliable){
-            if(input.disabled){
-                input.disabled = false;
-                if(input.checked){
-                    input.click(); 
-                }
-            }
-        }else{
-            if(!input.disabled && input.checked ){
-                input.click();
+        if(input.value ==1 ||input.value ==2){
+            input.disabled = true;
+        }else if(!input.disabled && input.checked ){
+            input.click();
+        }
+    }
+}
+function updateDisabledForm(value){
+    var levels = document.forms[0].level;
+    for(var i=0; i<levels.length; i++) {
+        var input = levels[i];
+        if(input.disabled && input.value == value){
+            input.disabled = false;
+            if(input.getAttribute('checked')){
+                input.checked = true;
+                input.click(); 
             }
         }
     }
+
 }
 function updateTree(){
     var i = packageNodes.length;
