@@ -7,12 +7,48 @@
   content="JSI,JSIntegration,JavaScript Integration,脚本管理,按需装载,网页组件模型" />
 <title>JSI 主页</title>
 <link rel="stylesheet" type="text/css" href="styles/default.css" />
+<style>
+a .tooltip{
+    display:none;
+    width:280px;
+    color:#666;
+    background:#CCC; 
+    opacity:0.8;
+    z-index:2;
+    position:absolute;
+    filter:expression(fixIE(this));
+}
+
+a:hover .tooltip,a.iehover .tooltip{
+    display:block;
+}
+#logo{
+    float:right;
+    width:30%;
+    padding:24px;
+}
+#logo p{
+    margin:0px;
+    padding:2px;
+    /*text-indent:20px;*/
+}
+</style>
+<script>
+function fixIE(a){
+    a.attachEvent('onmouseover',function(){a.className='iehover'})
+}
+//this.onmouseover='this.className=\'iehover\'';this.onmouseout='this.className=\'\'';
+</script>
 </head>
 <body>
-<div id="main">
-<h3>JSI 简介：
-<div style="float: right;width:40%;color:red;background: yellow;">预览版本,仅在Firefox2上进行测试</div>
-</h3>
+<div id="logo">
+<img src="images/logo.gif"/>
+<p>上善若水。水善利万物而不争，处众人之所恶，故几于道。</p>
+<p>居善地，心善渊，与善仁，言善信，政善治，事善能，动善时。</p>
+<p>夫唯不争，故无尤。</p>
+</div>
+
+<h3>JSI 简介：</h3>
 <p>JSI项目分两部分：框架内核、基于这个内核开发的系列子项目。</p>
 <p>框架内核旨在提供一个 <strong>开放的、无侵入的</strong> 脚本库管理解决方案，
 让类库编写者能够自己管理好自己编写的类库的相关依赖，提高类库的易用性，
@@ -27,40 +63,49 @@ UI...）。</p>
 <h3>内核功能：</h3>
 <ul>
   <li><a
-    href='http://groups.google.com/group/jsier/web/%E8%84%9A%E6%9C%AC%E5%AE%89%E9%9C%80%E5%AF%BC%E5%85%A5%28%E8%A3%85%E8%BD%BD%29%E7%9A%84%E4%B8%89%E7%A7%8D%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%AF%B9%E6%AF%94'>按需装载</a>
-  <d:tooltip width='280px'>
-    <span> 除常见的阻塞式装载方式，JSI还提供了无阻塞的按需装载方式（延迟同步装载，异步装载，JSI2.0+） </span>
-  </d:tooltip></li>
-  <li><a href='http://www.javaeye.com/article/71282'>管理依赖，避免其保露、扩散，提高类库的易用性</a>
-  <d:tooltip width='280px'>
-  脚本依赖的暴露、扩散是复杂度陡增的最大祸根。<br />
-  JSI提供了完善的依赖管理方案，将依赖终结在类库开发者手中。提高类库的易用性</d:tooltip></li>
-  <li><a href='http://www.javaeye.com/article/71280'>隔离脚本执行环境</a> <d:tooltip
-    width='280px'>
-  传统方式使用类库，将其直接导入进来，在全局上下文执行，这带来一个名称冲突的隐患；<br />
-  JSI中，每个脚本都有单独的执行上下文，不必担心不同脚本的命名冲突。</d:tooltip></li>
+    href='http://groups.google.com/group/jsier/web/%E8%84%9A%E6%9C%AC%E5%AE%89%E9%9C%80%E5%AF%BC%E5%85%A5%28%E8%A3%85%E8%BD%BD%29%E7%9A%84%E4%B8%89%E7%A7%8D%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%AF%B9%E6%AF%94'>
+    按需装载
+    <span class="tooltip"> 除常见的阻塞式装载方式，JSI还提供了无阻塞的按需装载方式（延迟同步装载，异步装载，JSI2.0+） </span>
+    </a>
+  </li>
+  <li><a
+   href='http://www.javaeye.com/article/71282'>
+   管理依赖，避免其保露、扩散，提高类库的易用性
+   <span class="tooltip">
+    脚本依赖的暴露、扩散是复杂度陡增的最大祸根。<br />
+    JSI提供了完善的依赖管理方案，将依赖终结在类库开发者手中。提高类库的易用性</span></a></li>
+  <li><a href='http://www.javaeye.com/article/71280'>
+    隔离脚本执行环境
+    <span class="tooltip">
+    传统方式使用类库，将其直接导入进来，在全局上下文执行，这带来一个名称冲突的隐患；<br />
+    JSI中，每个脚本都有单独的执行上下文，不必担心不同脚本的命名冲突。</span></a> </li>
 
 </ul>
 </div>
 <div class='half-block'>
 <h3>功能子项目：</h3>
 <ul>
-  <li><a href="decorator/index.html"><strong>网页装饰框架(JSI的默认页面组件模型)</strong></a>
-  <d:tooltip width='280px'>
+  <li><a
+   href="decorator/index.html">
+   <strong>网页装饰框架(JSI的默认页面组件模型)</strong>
+   <span class="tooltip">
     JSI组件模型是一种用来装饰简单html元素的框架，使用简单的xml标记，标识其装饰行为，比如将一个普通的input装饰成一个日期输入控件，将一个html
 	ul标记装饰成菜单或树，将一个textarea装饰成一个代码语法高亮显示区域，或一个wysiwyg html编辑器。
 	<br />
     <br />
 	JSI启动后将自动检查decorator标记，构建层次结构，自动做相关类的寻找、导入和装饰操作；实现零脚本代码的web富客户端编程。
-	</d:tooltip></li>
-  <li><a href="jsdoc/index.html">自解析API文档（读取脚本源代码实时解析） </a> <d:tooltip
-    width='280px'>
+	</span>
+   </a>
+   </li>
+  <li><a
+   href="jsdoc/index.html">自解析API文档（读取脚本源代码实时解析）<span class="tooltip">
     通过对项目脚本的实时解析，生成API文档；<br />
-	简单方便，保持文档与代码的同步。</d:tooltip></li>
-  <li><a href="template/index.html">XML模板引擎JS版</a> <d:tooltip
-    width='280px'>
+	简单方便，保持文档与代码的同步。</span> </a> </li>
+  <li><a href="template/index.html">
+    XML模板引擎JS版
+    <span class="tooltip">
 	一个简洁高效的模板引擎。<br />
-    JSDoc 及一些示例装饰器都基于此。</d:tooltip></li>
+    JSDoc 及一些示例装饰器都基于此。</span></a></li>
 </ul>
 </div>
 </div>
@@ -78,8 +123,8 @@ UI...）。</p>
 </div>
 <div class='half-block'>
 <div>
-<h3>兼容浏览器(内核)：</h3>
-<d:tooltip width='280px'>
+<a><h3>兼容浏览器(内核)：</h3>
+<span class="tooltip">
   所有的产品都可在Mozilla，IE新版本上运行：
   <br />
   <br />
@@ -95,7 +140,7 @@ UI...）。</p>
   JSDoc工具的兼容性最低，只保证新版本浏览器可行(IE5.5+、FF)。
   <br />
   <br />
-</d:tooltip></div>
+</span></a></div>
 <ul>
   <li style="list-style-image:url('images/browser/ie-ico.gif');"><a
     href="http://www.microsoft.com/windows/downloads/ie/getitnow.mspx">
@@ -146,18 +191,18 @@ UI...）。</p>
 <div class='half-block'>
 <h3>支持JSI：</h3>
 <ul>
-  <li><a href="#">帮助宣传、推广</a> <d:tooltip>好酒也怕巷子深。<br />
+  <li><a href="#">帮助宣传、推广 <span class="tooltip">好酒也怕巷子深。<br />
     为了JSI开源项目的发展，可以在自己的blog，网站上提供JSI项目的链接；<br />
     协助JSI的推广。
-  </d:tooltip></li>
-  <li><a href="http://www.javaeye.com/article/77597">组织开发第三方装饰器集</a>
-  <d:tooltip>一个优秀的组件集合，对于JSI的发展将非常有利；<br />
+  </span></a></li>
+  <li><a href="http://www.javaeye.com/article/77597">组织开发第三方装饰器集
+  <span class="tooltip">一个优秀的组件集合，对于JSI的发展将非常有利；<br />
   您可以和我们一道，丰富JSI自带的装饰器集合；<br />
   也可以开发自己的第三方装饰器；<br />
-  详情可见我们的邀请信。</d:tooltip></li>
-  <li><a href="#">bug报告提交改进</a> <d:tooltip>有何bug报告或改进建议，可以直接邮件和我联系。</d:tooltip>
+  详情可见我们的邀请信。</dspan></a></li>
+  <li><a href="#">bug报告提交改进<span class="tooltip">有何bug报告或改进建议，可以直接邮件和我联系。</span></a> 
   </li>
-  <li><a href="#">参与JSI开发</a> <d:tooltip>如果你有兴趣参与JSI的开发，请直接和我联系。</d:tooltip>
+  <li><a href="#">参与JSI开发<span class="tooltip">如果你有兴趣参与JSI的开发，请直接和我联系。</span></a> 
   </li>
 </ul>
 </div>
@@ -167,9 +212,11 @@ UI...）。</p>
 <ul>
   <li><a href="http://www.redsaga.com/" title="感谢满江红开源组织为JSI项目提供网站空间">满江红开源组织</a>
   </li>
-  <li><a href="http://www.javascud.org/">JAVASCUD</a> <d:tooltip>感谢JAVASCUD为JSI项目提供Wiki与JIRA缺陷管理系统。</d:tooltip>
+  <li><a href="http://www.javascud.org/">JAVASCUD
+  <span class="tooltip">感谢JAVASCUD为JSI项目提供Wiki与JIRA缺陷管理系统。</span></a> 
   </li>
-  <li><a href="http://www.sourceforge.net/">SourceForge</a> <d:tooltip>感谢SourceForge为JSI项目提供CVS及文件下载服务。</d:tooltip>
+  <li><a href="http://www.sourceforge.net/">SourceForge
+  <span class="tooltip">感谢SourceForge为JSI项目提供CVS及文件下载服务。</span></a> 
   </li>
 </ul>
 </div>
@@ -185,7 +232,6 @@ UI...）。</p>
 </form>
 <p>About us:Email: jindw◎xidea.org , jinyun.jin◎gmail.com&nbsp;
 &nbsp;QQ Group: 23180506</p>
-</div>
 </div>
 </body>
 </html>
