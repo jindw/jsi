@@ -8,14 +8,23 @@
 		<mkdir dir="build/temp/scripts" />
 		<mkdir dir="build/dest" />
 	</target>
-	<target name="buildExample">
+	<target name="jar">
 		<jar destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
 			</fileset>
+			<fileset dir="src/main">
+				<include name="**/*.java" />
+			</fileset>
 		</jar>
+	</target>
+	<target name="buildExample" depends="jar">
 		<war destfile="build/dest/JSI-empty-${version}.war" webxml="web/WEB-INF/web.xml">
 			<zipfileset file="JSI.jar" dir="build/dest" prefix="WEB-INF/lib/" />
+			<zipfileset dir="web" prefix="scripts">
+				<exclude name="*.*" />
+				<exclude name="*/**" />
+			</zipfileset>
 			<zipfileset dir="web">
 				<include name="WEB-INF/lib/**/*.*" />
 			</zipfileset>
@@ -27,6 +36,21 @@
 				<include name="WEB-INF/lib/**/*.*" />
 			</zipfileset>
 		</war>
+	</target>
+	<target name="ftp">
+		<ftp password="jindw@163.com" server="upload.sourceforge.net" userid="anonymous" action="put"  remotedir="/incoming">
+			<fileset file="build/dest/">
+                <include name="*${version}.war"/>
+                <include name="JSI.jar"/>
+			</fileset>
+		</ftp>
+	</target>
+	<target name="packageDoc" depends="init">
+		<zip destfile="build/dest/JSI-doc-${version}.zip">
+			<zipfileset dir="web/doc">
+				<include name="**/*.*" />
+			</zipfileset>
+		</zip>
 	</target>
 	<target name="buildJSIDoc" depends="init">
 		<delete file="build/dest/JSI-JSIDoc-${version}.zip">

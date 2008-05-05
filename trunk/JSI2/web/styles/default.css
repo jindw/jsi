@@ -28,7 +28,7 @@ ul,li{
 .block-row{
 	clear: both;
 }
-.half-block{
+.block-item{
 	width:50%;
 	float:left;
 	margin-bottom: 20px;
