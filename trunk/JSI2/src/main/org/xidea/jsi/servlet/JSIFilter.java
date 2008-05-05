@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,19 +105,10 @@ public class JSIFilter implements Filter {
 				// setContentType 和 setCharacterEncoding.在encoding上相互影响
 				// response.getCharacterEncoding 默认是ISO-8895-1
 				// request.getCharacterEncoding 默认是null
+				initializeEncodingIfNotSet(request, resp);
 				String metatype = context.getMimeType(path);
-				boolean notSet = request.getCharacterEncoding() == null;
-				if (encoding != null && notSet) {
-					resp.setCharacterEncoding(encoding);
-				}
 				if (metatype != null) {
-					if (encoding != null && notSet) {
-						metatype = metatype + ";charset=" + encoding;
-					}
-					if (metatype.startsWith("text/")
-							|| !path.toLowerCase().endsWith(".js")) {
-						resp.setContentType(metatype);
-					}
+					resp.setContentType(metatype);
 				}
 				ServletOutputStream out = resp.getOutputStream();
 				processResourceStream(in, out, resourcePath);
@@ -141,6 +133,7 @@ public class JSIFilter implements Filter {
 			HttpServletResponse response, String path) throws IOException {
 		if ("jsidoc.action".equals(path) || isIndex(path)
 				&& request.getParameter("path") == null) {
+			initializeEncodingIfNotSet(request, response);
 			String externalScript = request.getParameter("externalScript");
 			if (externalScript == null) {
 				printDocument(response);
@@ -153,10 +146,7 @@ public class JSIFilter implements Filter {
 			}
 			return true;
 		} else if ("export.action".equals(path)) {
-			if (request.getCharacterEncoding() == null) {
-				// request 默认情况下是null
-				request.setCharacterEncoding(requireEncoding());
-			}
+			initializeEncodingIfNotSet(request, response);
 			int level = 0;
 			{
 				String levelParam = request.getParameter("level");
@@ -216,8 +206,18 @@ public class JSIFilter implements Filter {
 		return false;
 	}
 
+	private void initializeEncodingIfNotSet(ServletRequest request,
+			ServletResponse response) throws UnsupportedEncodingException {
+		if (request.getCharacterEncoding() == null) {
+			// request 默认情况下是null
+			String encoding = requireEncoding();
+			request.setCharacterEncoding(encoding);
+			response.setCharacterEncoding(encoding);
+		}
+	}
+
 	private String requireEncoding() {
-		return encoding == null ? UTF8_INCODING : encoding;
+		return this.encoding == null ? UTF8_INCODING : this.encoding;
 	}
 
 	protected JSIRoot creatJSIRootByXMLContent(String xmlContent) {
@@ -241,21 +241,27 @@ public class JSIFilter implements Filter {
 			PrintWriter out = response.getWriter();
 			List<String> packageList = getPackageList();
 
-			out
-					.print("<html><frameset rows='100%'><frame src='org/xidea/jsidoc/index.html?");
-			out.print(URLEncoder.encode("group.全部托管类库", UTF8_INCODING));
-			out.print("=");
-			boolean isFirst = true;
-			for (String packageName : packageList) {
-				if (isFirst) {
-					isFirst = false;
-				} else {
-					out.print(",");
-				}
-				out.print(packageName);
+			if (packageList.isEmpty()) {
+				out
+						.print("<html><body> 未发现任何托管脚本包，无法显示JSIDoc。<br /> 请添加脚本包，并在包目录下正确添加相应的包定义文件 。</body><html>");
+			} else {
 
+				out
+						.print("<html><frameset rows='100%'><frame src='org/xidea/jsidoc/index.html?");
+				out.print(URLEncoder.encode("group.全部托管类库", UTF8_INCODING));
+				out.print("=");
+				boolean isFirst = true;
+				for (String packageName : packageList) {
+					if (isFirst) {
+						isFirst = false;
+					} else {
+						out.print(",");
+					}
+					out.print(packageName);
+
+				}
+				out.print("'> </frameset></html>");
 			}
-			out.print("'> </frameset></html>");
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
