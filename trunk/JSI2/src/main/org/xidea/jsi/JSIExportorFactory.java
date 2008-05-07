@@ -9,7 +9,6 @@ public interface JSIExportorFactory {
 
 	public abstract JSIExportor createSimpleExplorter();
 
-	public abstract JSIExportor createExplorter(String internalPrefix,
-			int startIndex, String lineSeparator, boolean confuseUnimported);
+	public abstract JSIExportor createExplorter(String internalPrefix,String lineSeparator, boolean confuseUnimported);
 
 }
