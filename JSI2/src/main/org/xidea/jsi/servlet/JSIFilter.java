@@ -177,7 +177,7 @@ public class JSIFilter implements Filter {
 					exportor = factory.createSimpleExplorter();
 				} else {
 					String prefix = request.getParameter("prefix");
-					exportor = factory.createExplorter(prefix, 0, "\r\n\r\n",
+					exportor = factory.createExplorter(prefix, "\r\n\r\n",
 							level == 1);
 				}
 				if (imports == null) {
