@@ -46,9 +46,9 @@ function Template(xmlDoc){
 
 Template.prototype.load = function(url,base){
     base = base || this.doc.documentURL || this.url;
-    if(base && !/^[\w]{3-8}\:\/\//.test(url)){
+    if(base && !/^[\w]{3,8}\:\/\//.test(url)){
         if(url.charAt() == '/'){
-            url = base.replace(/^(\w{3-8}\:\/\/[^\/\\]+).*$/,"$1"+url);
+            url = base.replace(/^(\w{3,8}\:\/\/[^\/\\]+).*$/,"$1"+url);
         }else{
             url = base.replace(/[^\/]*$/,'')+url;
             while(url != (url = url.replace(/\w+\.\.\//,'')));
