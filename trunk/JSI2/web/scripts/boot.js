@@ -1107,8 +1107,8 @@ var $import = function(freeEval,cachedScripts){
                 pkg = document.createElement("script");
                 (document.body||document.documentElement).appendChild(pkg);
                 pkg.src=scriptBase + filePath.replace(/\.js$/,'__preload__.js');
-                function onload(){
-                    if(callback && (this.readyState==null || this.readyState=="complete")){
+                function onload(){//complete
+                    if(callback && (this.readyState==null || /complete|loaded/.test(this.readyState))){
                         callback();
                         callback = null;
                     }
