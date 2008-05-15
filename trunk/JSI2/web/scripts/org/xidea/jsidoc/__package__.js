@@ -2,7 +2,7 @@
  * JavaScript Integration Doc Tool
  */
 this.addScript("jsidoc.js",['JSIDoc']
-                ,["org.xidea.sandbox.xml:Template","org.xidea.sandbox.io:Request","PackageInfo","SourceEntry"]
+                ,["org.xidea.jsidoc.util:Template","org.xidea.jsidoc.util:Request","PackageInfo","SourceEntry"]
                 ,["org.xidea.jsidoc.export:findPackages","org.xidea.jsidoc.export:loadTextByURL"]);
 
 this.addScript('package-info.js','PackageInfo'
@@ -13,9 +13,12 @@ this.addScript('globals-info.js','RootInfo'
                 ,["FileInfo","PackageInfo"])
 
 this.addScript("source-entry.js",'SourceEntry'
-                ,"org.xidea.sandbox.syntax.ECMAParser");
+                ,"ECMAParser");
 this.addScript("doc-entry.js",'DocEntry'
                 ,'SourceEntry');
+                
+this.addScript("syntax-parser.js",['SyntaxParser','ECMAParser','LineIterator']);
+
 
 this.addScript("tags.js",['accessTag','flagTag','valueTag','valuesTag']);
 
@@ -35,7 +38,6 @@ this.addScript('type-info.js',['TypeInfo','ParamInfo'])
 this.addScript("menu.js",'MenuUI');
 //createPrototypeStack
 this.addScript("fn.js",['createPrototypeStack','accessOrder','findSupperInfo','scrollOut']);
-
 
 this.addDependence("*","fn.js");
 this.addDependence("*","*",true);
