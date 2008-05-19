@@ -1126,6 +1126,10 @@ var $import = function(freeEval,cachedScripts){
             var list = [];
             var cacheFileMap = [];
             pkg = realPackage(pkg);
+            
+            if(":debug"){
+                var t1 = new Date();
+            }
             if(fileName == '*'){
                 for(var fileName in pkg.scriptObjectMap){
                     appendCacheFiles(cacheFileMap,pkg,fileName);
@@ -1137,6 +1141,9 @@ var $import = function(freeEval,cachedScripts){
                     appendCacheFiles(cacheFileMap,pkg,pkg.objectScriptMap[fileName],fileName);;
                 }
             }
+            if(":debug"){
+                var t2 = new Date();
+            }
             if(col instanceof Function){
                 for(var filePath in cacheFileMap){//path --> filePath
                     if(cacheFileMap[filePath][1]){
@@ -1147,7 +1154,12 @@ var $import = function(freeEval,cachedScripts){
                     if(filePath = list.pop()){
                         return appendCacheScript(filePath,next);
                     }
+                    if(":debug"){
+                        var t3 = new Date();
+                    }
                     col($import(path,target));
+                    $log.debug("异步装载：前期依赖计算时间、缓存时间、装载时间 分别为："
+                            ,t2-t1,t3-t2,new Date()-t3);
                 }
                 next();
             }else{
@@ -1180,7 +1192,12 @@ var $import = function(freeEval,cachedScripts){
                         while(filePath = list.pop()){
                             delete lazyCacheFileMap[filePath];//无需再记录了
                         }
+                        if(":debug"){
+                            var t3 = new Date();
+                        }
                         $import(path,target)
+                        $log.debug("延迟装载：前期依赖计算时间、缓存时间、装载时间 分别为："
+                            ,t2-t1,t3-t2,new Date()-t3);
                     });
                 document.write(lazyScript);
             }
