@@ -30,10 +30,25 @@ public class DefaultJSIPackage implements JSIPackage {
 		this.name = name;
 	}
 	/* (non-Javadoc)
+	 * @see org.xidea.jsi.impl.JSIPackage2#initialize()
+	 */
+	public void initialize() {
+		if (unparsedDependenceList != null) {
+			// parse unparsedDependenceList
+			parseDependence();
+			unparsedDependenceList = null;
+			this.scriptObjectMap = Collections.unmodifiableMap(this.scriptObjectMap);
+			this.objectScriptMap = Collections.unmodifiableMap(this.objectScriptMap);
+			this.loaderMap = Collections.unmodifiableMap(this.loaderMap);
+			this.dependenceMap = Collections.unmodifiableMap(this.dependenceMap);
+		}
+	}
+	/* (non-Javadoc)
 	 * @see org.xidea.jsi.impl.JSIPackage2#addScript(java.lang.String, java.lang.Object, java.lang.Object, java.lang.Object)
 	 */
 	public void addScript(String scriptName, Object objectNames,
 			Object beforeLoadDependences, Object afterLoadDependences) {
+		checkState();
 		loaderMap.put(scriptName, new DefaultScriptLoader(this,scriptName));
 		List<String> objects = new ArrayList<String>();
 		if (objectNames instanceof String) {
@@ -73,6 +88,7 @@ public class DefaultJSIPackage implements JSIPackage {
 	 */
 	public void addDependence(String thisPath, Object targetPath,
 			boolean afterLoad) {
+		checkState();
 		if (!afterLoad) {
 			String file = this.objectScriptMap.get(thisPath);
 			if (file != null) {
@@ -93,22 +109,29 @@ public class DefaultJSIPackage implements JSIPackage {
 			unparsedDependenceList.add(args);
 		}
 	}
-
 	/* (non-Javadoc)
-	 * @see org.xidea.jsi.impl.JSIPackage2#initialize()
+	 * @see org.xidea.jsi.impl.JSIPackage2#setImplementation(java.lang.String)
 	 */
-	public void initialize() {
-		if (unparsedDependenceList != null) {
-			// parse unparsedDependenceList
-			parseDependence();
-			unparsedDependenceList = null;
-			this.scriptObjectMap = Collections.unmodifiableMap(this.scriptObjectMap);
-			this.objectScriptMap = Collections.unmodifiableMap(this.objectScriptMap);
-			this.loaderMap = Collections.unmodifiableMap(this.loaderMap);
-			this.dependenceMap = Collections.unmodifiableMap(this.dependenceMap);
+	public void setImplementation(String implementation) {
+		checkState();
+		if (implementation.startsWith("..")) {
+			implementation = this.name + implementation;
+			do {
+				implementation = implementation.replace("(:?\\w+\\.\\.\\/?)*",
+						"");
+			} while (implementation.indexOf("..") > 0);
+		} else if (implementation.startsWith(".")) {
+			implementation = this.name + implementation;
 		}
+		this.implementation = implementation;
 	}
 
+
+	private void checkState(){
+		if(unparsedDependenceList == null){
+			throw new IllegalStateException("已初始化的包，不能再次修改");
+		}
+	}
 	private void parseDependence() {
 		if (unparsedDependenceList != null) {
 			for (Iterator<List<Object>> iterator = unparsedDependenceList
@@ -229,21 +252,7 @@ public class DefaultJSIPackage implements JSIPackage {
 		depList.add(dep.instanceFor(thisObject));
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.xidea.jsi.impl.JSIPackage2#setImplementation(java.lang.String)
-	 */
-	public void setImplementation(String implementation) {
-		if (implementation.startsWith("..")) {
-			implementation = this.name + implementation;
-			do {
-				implementation = implementation.replace("(:?\\w+\\.\\.\\/?)*",
-						"");
-			} while (implementation.indexOf("..") > 0);
-		} else if (implementation.startsWith(".")) {
-			implementation = this.name + implementation;
-		}
-		this.implementation = implementation;
-	}
+
 
 	/* (non-Javadoc)
 	 * @see org.xidea.jsi.impl.JSIPackage2#getName()

@@ -7,6 +7,7 @@ import java.util.Map;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRoot;
+import org.xidea.jsi.PackageParser;
 
 public abstract class AbstractJSIRoot implements JSIRoot {
 
@@ -94,11 +95,21 @@ public abstract class AbstractJSIRoot implements JSIRoot {
 			if (source != null) {
 				pkg = new DefaultJSIPackage(this, name);
 				//TODO:....
-				new RegexpPackagePaser().parse(source, pkg);
+				buildParser(source).setup( pkg);
 			}
 			packageMap.put(name, pkg);
 			return pkg;
 		} while ((name = name.replace("\\.?[^\\.]+$", "")).length() > 0);
+	}
+	private PackageParser buildParser(String source){
+		PackageParser parser = new RegexpPackagePaser();
+		try{
+			parser.parse(source);
+		}catch (Exception e) {
+			parser = new ScriptPackagePaser();
+			parser.parse(source);
+		}
+		return parser;
 	}
 
 }

@@ -9,14 +9,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.xidea.jsi.JSIPackage;
+import org.xidea.jsi.PackageParser;
 import org.xidea.jsi.UnsupportedSyntaxException;
-
 
 public class RegexpPackagePaser implements PackageParser {
 
 	private static final String COMMENT = "/\\*[\\s\\S]*?\\*/|//.*";
 	private static final String THIS_INVOKE = "this\\s*\\.\\s*(\\w+)\\(([^\\(\\)]*)\\)";
 	private static final String OTHER = "(\\w+)?";
+	private List<List<Object>> addDependenceCall;
+	private List<List<Object>> addScriptCall;
+	private String implementation;
 
 	/*
 	 * (non-Javadoc)
@@ -24,7 +27,7 @@ public class RegexpPackagePaser implements PackageParser {
 	 * @see org.xidea.jsi.PackageParser#parse(java.lang.String,
 	 *      org.xidea.jsi.JSIPackage)
 	 */
-	public void parse(String source, JSIPackage pkg) {
+	public void parse(String source) {
 		Pattern regexp = Pattern.compile(COMMENT + '|' + THIS_INVOKE + '|'
 				+ OTHER);
 		Matcher matcher = regexp.matcher(source);
@@ -82,16 +85,27 @@ public class RegexpPackagePaser implements PackageParser {
 				}
 			}
 		}
-		for (Iterator<List<Object>> it = addScriptCall.iterator(); it.hasNext();) {
-			List<Object> item = it.next();
-			((DefaultJSIPackage)pkg).addScript((String) item.get(0), item.get(1), item.get(2), item
-					.get(3));
-		}
-		for (Iterator<List<Object>> it = addDependenceCall.iterator(); it
-				.hasNext();) {
-			List<Object> item = it.next();
-			((DefaultJSIPackage)pkg).addDependence((String) item.get(0), item.get(1), (Boolean) item
-					.get(2));
+		this.implementation = implementation;
+		this.addScriptCall = addScriptCall;
+		this.addDependenceCall = addDependenceCall;
+	}
+
+	public void setup(JSIPackage pkg) {
+		if (this.implementation != null) {
+			pkg.setImplementation(implementation);
+		} else {
+			for (Iterator<List<Object>> it = addScriptCall.iterator(); it
+					.hasNext();) {
+				List<Object> item = it.next();
+				pkg.addScript((String) item.get(0), item.get(1), item.get(2),
+						item.get(3));
+			}
+			for (Iterator<List<Object>> it = addDependenceCall.iterator(); it
+					.hasNext();) {
+				List<Object> item = it.next();
+				pkg.addDependence((String) item.get(0), item.get(1),
+						(Boolean) item.get(2));
+			}
 		}
 	}
 
