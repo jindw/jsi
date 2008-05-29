@@ -77,13 +77,6 @@ public abstract class AbstractJSIRoot implements JSIRoot {
 	
 	}
 
-	public void debug(String info) {
-		System.err.println(info);
-	}
-
-	public void error(String info) {
-		System.err.println(info);
-	}
 
 	private synchronized JSIPackage findPackage(String name, boolean exact) {
 		do {
@@ -94,7 +87,6 @@ public abstract class AbstractJSIRoot implements JSIRoot {
 			JSIPackage pkg = null;
 			if (source != null) {
 				pkg = new DefaultJSIPackage(this, name);
-				//TODO:....
 				buildParser(source).setup( pkg);
 			}
 			packageMap.put(name, pkg);

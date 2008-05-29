@@ -20,10 +20,6 @@ public interface JSIRoot {
 
 	public abstract JSIPackage findPackageByPath(String path);
 
-	public abstract void debug(String info);
-
-	public abstract void error(String info);
-
 	public abstract String loadText(String name,
 			String scriptName);
 

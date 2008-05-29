@@ -67,7 +67,7 @@ public class DefaultJSIPackage implements JSIPackage {
 		for (Iterator<String> it2 = objects.iterator(); it2.hasNext();) {
 			String item = it2.next();
 			if (objectScriptMap.containsKey(item)) {
-				root.debug("重复的脚本元素定义");
+				System.out.println("重复的脚本元素定义:"+item);
 			}
 			objectScriptMap.put(item, scriptName);
 			item = item.replace("\\..*$", "");
