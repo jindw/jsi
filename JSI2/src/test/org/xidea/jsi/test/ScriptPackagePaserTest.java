@@ -2,6 +2,9 @@ package org.xidea.jsi.test;
 
 import static org.junit.Assert.fail;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +21,13 @@ public class ScriptPackagePaserTest extends AbstractFileJSIRootTest {
 	public void tearDown() throws Exception {
 	}
 
+	@Test
+	public void testScript() throws ScriptException{
+		//System.out.println(System.getProperty("java.endorsed.dirs"));
+		ScriptEngine engine = new javax.script.ScriptEngineManager()
+		.getEngineByExtension("js");
+		System.out.println(engine.eval("/[/]/.test('/')"));
+	}
 	@Test
 	public void testParse() {
 		ScriptPackagePaser paser = new ScriptPackagePaser();
