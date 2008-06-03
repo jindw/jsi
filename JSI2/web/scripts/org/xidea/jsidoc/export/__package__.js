@@ -10,7 +10,8 @@ this.addScript("export.js",['Exporter']
 this.addScript("export-ui.js",['ExportUI']
               ,['DependenceInfo','org.xidea.jsidoc.util:Template',"org.xidea.jsidoc.util:Request"]);
 
-this.addScript("fn.js",['findPackages','xmlReplacer','loadTextByURL']);
+this.addScript("fn.js",['findPackages','xmlReplacer','loadTextByURL','findGlobals']);
+
 
 this.addDependence("*","*",true);
               
