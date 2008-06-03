@@ -21,6 +21,9 @@
  */
 if(":debug"){
     var $JSI= {
+        debugAttribute:{
+            showTime:false
+        }
     };
     /**
      * 调试友好支持
@@ -225,6 +228,14 @@ var $import = function(freeEval,cachedScripts){
                     var msg = [bindLevel,bindName];
                     msg.push.apply(msg,arguments);
                     $log.apply($log,msg);
+                }
+                if(":debug"){
+                    if(window.console && console.log){
+                        var msg = [bindLevel,bindName];
+                        msg.push.apply(msg,arguments);
+                        console.log(msg.join(';'))
+                        
+                    }
                 }
             }
         }
@@ -652,6 +663,15 @@ var $import = function(freeEval,cachedScripts){
                 var previousObject = objects[objects.length-1];
             }else{
                 objects = (this.scriptObjectMap[scriptPath] = []);
+            }
+            if(":debug"){
+                if(objectNames == '*'){
+                    $log.trace("部署后不应出现的配置，需要压缩处理掉相关问题！！！");
+                    objectNames = doObjectImport(
+                        findPackage("org.xidea.jsidoc.export",
+                        true),"findGlobals")(loadTextByURL(this.scriptBase+scriptPath));
+                    
+                }
             }
             if(objectNames){
                 if(objectNames instanceof Array){
@@ -1106,7 +1126,11 @@ var $import = function(freeEval,cachedScripts){
             if(getCachedScript(pkg,filePath.substr(pkg.length+1))==null){//谨防 ''
                 pkg = document.createElement("script");
                 (document.body||document.documentElement).appendChild(pkg);
-                pkg.src=scriptBase + filePath.replace(/\.js$/,'__preload__.js');
+                if(":debug"){
+                    pkg.src=scriptBase +"?path="+ filePath;
+                }else{
+                    pkg.src=scriptBase + filePath.replace(/\.js$/,'__preload__.js');
+                }
                 function onload(){//complete
                     if(callback && (this.readyState==null || /complete|loaded/.test(this.readyState))){
                         callback();
@@ -1158,8 +1182,12 @@ var $import = function(freeEval,cachedScripts){
                         var t3 = new Date();
                     }
                     col($import(path,target));
-                    $log.debug("异步装载：前期依赖计算时间、缓存时间、装载时间 分别为："
-                            ,t2-t1,t3-t2,new Date()-t3);
+                    if(":debug"){
+                        if($JSI.debugAttribute.showTime){
+                            $log.debug("异步装载("+path+")：前期依赖计算时间、缓存时间、装载时间 分别为："
+                                ,t2-t1,t3-t2,new Date()-t3);
+                        }
+                    }
                 }
                 next();
             }else{
@@ -1196,8 +1224,12 @@ var $import = function(freeEval,cachedScripts){
                             var t3 = new Date();
                         }
                         $import(path,target)
-                        $log.debug("延迟装载：前期依赖计算时间、缓存时间、装载时间 分别为："
-                            ,t2-t1,t3-t2,new Date()-t3);
+                        if(":debug"){
+                            if($JSI.debugAttribute.showTime){
+                                $log.debug("延迟装载("+path+")：前期依赖计算时间、缓存时间、装载时间 分别为："
+                                    ,t2-t1,t3-t2,new Date()-t3);
+                            }
+                        }
                     });
                 document.write(lazyScript);
             }
