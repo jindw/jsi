@@ -26,7 +26,7 @@ public abstract class JSIUtil {
 	}
 
 	private static JSIExportorFactory exportorFactory;
-	public final static String JSI_EXPORTOR_FACTORY_CLASS = "org.jside.jsi.tools.JSAExportorFactory";
+	public final static String JSI_EXPORTOR_FACTORY_CLASS = "org.jside.jsi.tools.export.JSAExportorFactory";
 
 	public static JSIExportorFactory getExportorFactory() {
 		if (exportorFactory == null) {
@@ -39,7 +39,7 @@ public abstract class JSIUtil {
 		return exportorFactory;
 	}
 	public static void main(String args[]) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
-		System.out.println(getExportorFactory().createExplorter("__1", "\r\n", true));
+		System.out.println(getExportorFactory().createConfuseExplorter("__1", "\r\n", true));
 		System.out.println(exportorFactory = (JSIExportorFactory) Class.forName(JSI_EXPORTOR_FACTORY_CLASS).newInstance());
 	}
 

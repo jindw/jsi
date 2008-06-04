@@ -37,10 +37,14 @@ public class DefaultJSIExportorFactory implements JSIExportorFactory {
 	}
 
 	/**
-	 * @see org.xidea.jsi.JSIExportorFactory#createExplorter(java.lang.String, java.lang.String, boolean)
+	 * @see org.xidea.jsi.JSIExportorFactory#createConfuseExplorter(java.lang.String, java.lang.String, boolean)
 	 */
-	public JSIExportor createExplorter(String internalPrefix, 
+	public JSIExportor createConfuseExplorter(String internalPrefix, 
 			String lineSeparator, boolean confuseUnimported) {
+		throw new UnsupportedOperationException("不支持导出方式");
+	}
+
+	public JSIExportor createReportExplorter() {
 		throw new UnsupportedOperationException("不支持导出方式");
 	}
 }

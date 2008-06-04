@@ -49,22 +49,30 @@ public class JSIFilter implements Filter {
 	private static final String UTF8_INCODING = "utf-8";
 	/**
 	 * 直接合并
-	 * 
-	 * @deprecated
 	 */
 	private static final int JOIN_DIRECT = 0;
 	/**
 	 * 合并内部冲突
-	 * 
-	 * @deprecated
 	 */
 	private static final int JOIN_WITHOUT_INNER_CONFLICTION = 1;
 	/**
 	 * 合并全部冲突
-	 * 
-	 * @deprecated
 	 */
 	private static final int JOIN_WITHOUT_ALL_CONFLICTION = 2;
+	/**
+	 * 导出成XML
+	 */
+	private static final int EXPORT_AS_XML = -1;
+	/**
+	 * 导出成文档
+	 */
+	private static final int EXPORT_AS_JSIDOC = -2;
+	
+	/**
+	 * 导出成分析报告
+	 */
+	private static final int EXPORT_AS_REPORT = -3;
+	
 
 	protected String scriptBase;
 	protected ServletContext context;
@@ -147,7 +155,7 @@ public class JSIFilter implements Filter {
 			return true;
 		} else if ("export.action".equals(path)) {
 			initializeEncodingIfNotSet(request, response);
-			int level = 0;
+			int level = JOIN_DIRECT;
 			{
 				String levelParam = request.getParameter("level");
 				if (levelParam != null) {
@@ -158,7 +166,7 @@ public class JSIFilter implements Filter {
 				}
 			}
 			JSIExportorFactory factory = getExportorFactory();
-			if (level != 0
+			if (level != JOIN_DIRECT
 					&& factory.getClass() == DefaultJSIExportorFactory.class) {
 				// 不支持导出方式
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -173,12 +181,23 @@ public class JSIFilter implements Filter {
 				} else {
 					root = this.jsiRoot;
 				}
-				if (level == 0) {
+				if (level == JOIN_DIRECT) {
 					exportor = factory.createSimpleExplorter();
-				} else {
+				} else if (level == EXPORT_AS_REPORT) {
+					exportor = factory.createReportExplorter();
+				} else{
 					String prefix = request.getParameter("prefix");
-					exportor = factory.createExplorter(prefix, "\r\n\r\n",
-							level == 1);
+					if(level == JOIN_WITHOUT_INNER_CONFLICTION){
+						exportor = factory.createConfuseExplorter(prefix, "\r\n\r\n",
+								false);//confuseUnimported
+					}else if (level == JOIN_WITHOUT_ALL_CONFLICTION){
+						exportor = factory.createConfuseExplorter(prefix, "\r\n\r\n",
+								true);//confuseUnimported
+					}else{
+						throw new IllegalArgumentException("不支持的导出方式");
+					}
+					
+					
 				}
 				if (imports == null) {
 					// 只有Data Root 才能支持这种方式

@@ -1,0 +1,112 @@
+/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id: fn.js,v 1.5 2008/02/24 08:58:15 jindw Exp $
+ */
+
+
+var specialRegExp = new RegExp(['/\\*(?:[^\\*]|\\*[^/])*\\*/',//muti-comment
+            '//.*$',                      //single-comment
+            //'/(?:\\\\.|[^/\\n\\r])+/',     //regexp 有bug   /\/(?:\\.|[^/\n\r])+\//
+            '/(?:\\\\.|(?:\\[\\\\.|[^\\n\\r]\\])|[^/\\n\\r])+/[gim]*',     //regexp 好复杂啊   /\/(?:\\.|(?:\[\\.|[^\n\r]\])|[^/\n\r])+\/[gim]*/
+            '"(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^"\\n\\r])*"',
+            "'(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^'\\n\\r])*'",    //string
+            '^\\s*#.*'].join('|'),'gm');                         //process
+function specialReplacer(text){
+    if(text.charAt(0) == '/'){
+        switch(text.charAt(1)){
+            case '/':
+            case '*':
+              return '';
+        }
+    }
+    return '""';
+}
+function findGlobals(source){
+    var source = source.replace(specialRegExp,specialReplacer);
+    //简单的实现，为考虑的问题很多很多：
+    var result = [];
+    var varPattern = /\b(var|function|,)\b\s*([\w\$]+)\s*(.)/mg;
+    var scopePattern = /\bfunction\b[^{]+\{|\{|\}|\[|\]/mg;//|{\s*(?:[\$\w\d]+\s*\:\s*(?:for|while|do)\b|""\:)
+    //找到办法不用判断了，省心了。。。。
+    //var objectPattern = /\{\s*(?:[\$\w\d]+|"")\:/mg
+    //var lineParrern = /([\$\w]+|[^\$\w])\s*[\r\n]+\s*([\$\w]+|[^\$\w])/g
+    var buf = [];
+    var fnDepth = 0;
+    var arrayDepth = 0;
+    var begin = 0;
+    var match;
+    while(match = scopePattern.exec(source)){
+        switch(match[0] ){
+        //array
+        case '[':
+            if(!fnDepth){
+                if(!arrayDepth){
+                    buf.push(source.substring(begin,match.index),'[]');
+                }
+                arrayDepth ++;
+            }
+            break;
+        case ']':
+            if(!fnDepth){
+                arrayDepth --;
+                if(!arrayDepth){
+                    begin = match.index+1;
+                }
+            }
+            break;
+        //function
+        case '{':
+            if(!arrayDepth && fnDepth){//in function
+                depth++;
+            }
+            break;
+        case '}':
+            if(!arrayDepth && fnDepth){//in function
+                fnDepth--;
+                if(fnDepth == 0){
+                    begin = match.index+1;
+                }
+            }
+            break;
+        default://function.. object
+            if(!arrayDepth && !fnDepth){
+                fnDepth++;
+                buf.push(source.substring(begin,match.index),match[0],'}');
+            }
+            break;
+        }
+    }
+    buf.push(source.substr(begin))
+    source=buf.join('');
+    source = source.replace(/([\w\$\]])\s*\([\s\S]*\)/m,'$1()');
+    begin = 0;
+    while(match = varPattern.exec(source)){
+        switch(match[1]){
+        case 'var':
+            begin = match.index;
+        case 'function':
+            result.push(match[2]);
+        default:
+            if(match[3]!=':'){
+                var temp = source.indexOf(';',begin);
+                if(temp>0 && temp<match.index){
+                    continue;
+                }
+                try{
+                    //不知道是不是还有什么问题
+                    temp = source.substring(begin,match.index);
+                    //if(/var|if|else/.test(temp)){continue;}
+                    temp = temp.replace(/[\r\n]/g,' ');
+                    new Function(temp+',a;')
+                }catch(e){
+                    continue;
+                }
+                result.push(match[2])
+            }
+        }
+    }
+    return result;
+}

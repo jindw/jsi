@@ -81,8 +81,10 @@
                     <br/>
                     <input name="level" onclick="ExportUI.checkLevel(this)" value="-1" type="radio" title="导出后需要使用JSA处理成单个压缩文件,实现隔离冲突" />导出为XML
                     <input name="level" onclick="ExportUI.checkLevel(this)" value="-2" type="radio" checked="true"  title="导出JSIDoc文档" />导出文档
+                    <input name="level" onclick="ExportUI.checkLevel(this)" value="-3" type="radio" checked="true"  title="导出JSI分析报告" />导出分析报告
                 </div>
                 <ul>
+                    <li>输出脚本分析报告，可供代码复查时参考</li>
                     <li>将导出的数据保存于hta或者html中,查看时需要连接到网络,才能正确解析,您也可以指定一个本地的文档服务器.</li>
                     <li>导出为xml格式的结果，<b>无法直接正确执行</b>,他只是一个多文件打包的合并方式,需要经过JSA的处理.</li>
                     <li>脱离JSI后,直接合并可能有命名冲突的危险.不推荐.</li>
