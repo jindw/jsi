@@ -418,7 +418,10 @@ ECMAParser.prototype = new SyntaxParser(
         'document':'/\\*\\*(?:[^\\*]|\\*[^/])*\\*/'
         ,'muti-comment':'/\\*(?:[^\\*]|\\*[^/])*\\*/'//muti-comment
         ,'comment':'//.*$'                //single-comment
-        ,'regexp':'/(?:\\\\.|[^/\\n\\r])+/'    //regexp
+        //'/(?:\\\\.|[^/\\n\\r])+/',     //regexp 有bug   /\/(?:\\.|[^/\n\r])+\//
+        ,'regexp':'/(?:\\\\.|(?:\\[\\\\.|[^\\n\\r]\\])|[^/\\n\\r])+/[gim]*'     //regexp 好复杂啊   /\/(?:\\.|(?:\[\\.|[^\n\r]\])|[^/\n\r])+\/[gim]*/
+
+
         ,'string':['"(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^"\\n\\r])*"',
                    "'(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^'\\n\\r])*'"]    //string
         ,'preprocessor':'^\\s*#.*'                         //process

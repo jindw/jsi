@@ -79,7 +79,7 @@ var ExportUI = {
         jsidoc.style.display = (level == -2) ? 'block':'none';
         var lis = levelInput.form.getElementsByTagName("li");
         for(var i=0;i<lis.length;i++){
-            lis[i].style.display = (i-2 == level)?'block':'none';
+            lis[i].style.display = (i-3 == level)?'block':'none';
         }
         
     },
@@ -108,9 +108,12 @@ var ExportUI = {
             showResult(exporter.getTextContent());
             break;
         
+        case -3:
+            //导出分析报告
         case 1:
-            //按2处理
+            //导出时解决内部变量之间的冲突
         case 2:
+            //导出时尽可能解决全部冲突
             //submit to JSA
             var xmlContent = exporter.getXMLContent();
             showResult("数据装在中.....");

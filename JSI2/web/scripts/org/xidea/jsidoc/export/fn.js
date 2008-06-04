@@ -161,30 +161,3 @@ function loadTextByURL(url){
         req.abort();
     }
 }
-var specialRegExp = new RegExp(['/\\*(?:[^\\*]|\\*[^/])*\\*/',//muti-comment
-            '//.*$',                      //single-comment
-            '/(?:\\\\.|[^/\\n\\r])+/',     //regexp 有bug
-            '"(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^"\\n\\r])*"',
-            "'(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^'\\n\\r])*'",    //string
-            '^\\s*#.*'].join('|'),'gm');                         //process
-function specialReplacer(text){
-    if(text.charAt(0) == '/'){
-        switch(text.charAt(1)){
-            case '/':
-            case '*':
-              return '';
-        }
-    }
-    return '""';
-}
-function findGlobals(source){
-    var source = source.replace(specialRegExp,specialReplacer);
-    //简单的实现，为考虑的问题很多很多：
-    var result = [];
-    var pattern = /^(?:var|function)\s+([\w]+)/mg;
-    var match;
-    while(match = pattern.exec(source)){
-        result.push(match[1])
-    }
-    return result;
-}

@@ -24,8 +24,33 @@ Exporter.prototype = {
 //    },
     getTextContent : function(){
         var content = [];
+        var objectMap = {}
+        var conflictMap = {};
         for(var i = 0;i<this.result.length;i++){
-            content[i] = this.getSource(this.result[i]);
+            var path = this.result[i];
+            var content = content[i] = this.getSource(path);
+            var vars = findGlobals(content);
+            var j = vars.length;
+            while(j--){
+                var n = vars[j];
+                if(objectMap[n]){
+                    if(conflictMap[n]){
+                        conflictMap[n] = [path];
+                    }else{
+                        conflictMap[n].push(path);
+                    }
+                }else{
+                    objectMap[n] = path;
+                }
+            }
+        }
+        for(n in conflictMap){
+            var report = ["直接合并可能引起脚本冲突，客户端检测到可能的脚本冲突如下：\n"];
+            for(n in conflictMap){
+                report.push(n,":",objectMap[n],',',conflictMap[n],'\n');
+            }
+            $log.error(report.join(','))
+            break;
         }
         return content.join('\n')
     },

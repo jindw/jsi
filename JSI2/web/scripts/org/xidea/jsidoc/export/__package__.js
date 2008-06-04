@@ -6,12 +6,11 @@
 this.addScript("dependence-info.js",'DependenceInfo');
 
 this.addScript("export.js",['Exporter']
-              ,['DependenceInfo','org.xidea.jsidoc.util:JSON']);
+              ,['DependenceInfo','org.xidea.jsidoc.util:JSON']
+              ,"fn.js");
 this.addScript("export-ui.js",['ExportUI']
-              ,['DependenceInfo','org.xidea.jsidoc.util:Template',"org.xidea.jsidoc.util:Request"]);
+              ,['Exporter','DependenceInfo','org.xidea.jsidoc.util:Template',"org.xidea.jsidoc.util:Request"]
+              ,["fn.js",'findGlobals']);
 
-this.addScript("fn.js",['findPackages','xmlReplacer','loadTextByURL','findGlobals']);
-
-
-this.addDependence("*","*",true);
-              
+this.addScript("fn.js",['findPackages','xmlReplacer','loadTextByURL']);
+this.addScript("find-globals.js",'findGlobals');
