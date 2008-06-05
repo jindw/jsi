@@ -184,15 +184,9 @@ var JSIDoc = {
                 files:packageInfo.fileInfos,
                 packageInfo:packageInfo
             });
-            try{
-                document.documentElement.innerHTML = "";//for IE
-                data = data.replace(/^(<[^<>]*>)?<html[^>]*>|<\/html>\s*$/,'');
-                document.documentElement.innerHTML = data;
-            }catch(e){
-                document.open();
-                document.write(data);
-                document.close();
-            }
+            document.open();
+            document.write(data);
+            document.close();
             //out.close();
         }
         //TODO: 有待改进

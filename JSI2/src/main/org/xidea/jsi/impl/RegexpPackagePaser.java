@@ -59,6 +59,10 @@ public class RegexpPackagePaser implements PackageParser {
 					default:
 						throw new RuntimeException("无效参数");
 					}
+					if("*".equals(arguments.get(1))){
+						throw new UnsupportedSyntaxException("正则解析器不支持复杂定义"
+								+ matcher.group(0) + "#" + other);
+					}
 					addScriptCall.add(arguments);
 				} else if (ADD_DEPENDENCE.equals(method)) {
 					switch (arguments.size()) {

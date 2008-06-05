@@ -1,5 +1,10 @@
 package org.xidea.jsi.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,9 +26,23 @@ public class ScriptPackagePaser implements PackageParser {
 	public static final ScriptEngine engine = new javax.script.ScriptEngineManager()
 			.getEngineByExtension("js");
 
-	private static final String BIND_SCRIPT = "this.addScript = function(){$this.addScript(arguments[0],arguments[1],arguments[2],arguments[3])};"
-			+ "this.addDependence = function(){$this.addDependence(arguments[0],arguments[1],!!arguments[2])};"
-			+ "this.setImplementation = function(){$this.setImplementation(arguments[0])};";
+	private static final String BIND_SCRIPT ;
+	static{
+		InputStream in = ScriptPackagePaser.class.getResourceAsStream("package-parser.js");
+		try {
+			InputStreamReader reader = new InputStreamReader(in,"utf-8");
+			StringWriter out = new StringWriter();
+			char[] cbuf = new char[1024];
+			int count;
+			while((count = reader.read(cbuf))>=0){
+				out.write(cbuf, 0, count);
+			}
+			out.flush();
+			BIND_SCRIPT = out.toString();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 
 	private String source;
 
@@ -88,6 +107,10 @@ public class ScriptPackagePaser implements PackageParser {
 
 		public void setImplementation(String implementation) {
 			packageObject.setImplementation(implementation);
+		}
+		
+		public String getSource(String scriptName){
+			return packageObject.loadText(scriptName);
 		}
 
 		private Boolean convertBoolean(Object object) {
