@@ -79,28 +79,24 @@ public class ScriptPackagePaser implements PackageParser {
 				Object beforeLoadDependences, Object afterLoadDependences) {
 			try {
 
-				packageObject.addScript(scriptName, convertArray(objectNames),
-						convertArray(beforeLoadDependences),
-						convertArray(afterLoadDependences));
+				packageObject.addScript(scriptName, (objectNames),
+						(beforeLoadDependences),
+						(afterLoadDependences));
 			} catch (Exception e) {
 				e.printStackTrace();
-				System.out.println(Arrays.asList(scriptName,
-						convertArray(objectNames),
-						convertArray(beforeLoadDependences),
-						convertArray(afterLoadDependences)));
 				throw new UnsupportedSyntaxException(e);
 			}
 		}
 
 		public void addDependence(String thisPath, Object targetPath,
-				Object afterLoad) {
+				boolean afterLoad) {
 			try {
-				packageObject.addDependence(thisPath, convertArray(targetPath),
-						convertBoolean(afterLoad));
+				packageObject.addDependence(thisPath, (targetPath),
+						afterLoad);
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.out.println(Arrays.asList(thisPath,
-						convertArray(targetPath), afterLoad));
+						(targetPath), afterLoad));
 				throw new UnsupportedSyntaxException(e);
 			}
 		}
@@ -113,31 +109,19 @@ public class ScriptPackagePaser implements PackageParser {
 			return packageObject.loadText(scriptName);
 		}
 
-		private Boolean convertBoolean(Object object) {
-			if (object instanceof Boolean) {
-				return (Boolean) object;
-			} else if (object instanceof Number) {
-				return ((Number) object).floatValue() != 0;
-			} else if (object instanceof String) {
-				return ((String) object).length() > 0;
-			}
-			return object != null;
-
-		}
-
-		private Object convertArray(Object object) {
-			if (object instanceof sun.org.mozilla.javascript.internal.NativeArray) {
-				sun.org.mozilla.javascript.internal.NativeArray source = ((sun.org.mozilla.javascript.internal.NativeArray) object);
-				int len = (int) source.getLength();
-				ArrayList<String> result = new ArrayList<String>(len);
-				for (int i = 0; i < len; i++) {
-					result.add((String) source.get(i, null));
-				}
-				return result;
-			} else {
-				// throw new RuntimeException("不支持的数据格式");
-				return (String) object;
-			}
-		}
+//		private Object convertArray(Object object) {
+//			if (object instanceof sun.org.mozilla.javascript.internal.NativeArray) {
+//				sun.org.mozilla.javascript.internal.NativeArray source = ((sun.org.mozilla.javascript.internal.NativeArray) object);
+//				int len = (int) source.getLength();
+//				ArrayList<String> result = new ArrayList<String>(len);
+//				for (int i = 0; i < len; i++) {
+//					result.add((String) source.get(i, null));
+//				}
+//				return result;
+//			} else {
+//				// throw new RuntimeException("不支持的数据格式");
+//				return (String) object;
+//			}
+//		}
 	}
 }

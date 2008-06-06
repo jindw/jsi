@@ -3,6 +3,8 @@ package org.xidea.jsi;
 import java.util.List;
 import java.util.Map;
 
+import org.xidea.jsi.impl.DefaultJSIPackage;
+
 
 
 
@@ -24,17 +26,28 @@ public interface JSIPackage {
 
 	public void setImplementation(String implementation);
 	
+	/**
+	 * @param scriptName
+	 * @param objectNames
+	 * @param beforeLoadDependences String||Collection
+	 * @param afterLoadDependences String||Collection
+	 * 
+	 * @see DefaultJSIPackage#addScript(String, Object, Object, Object)
+	 */
 	public void addScript(String scriptName, Object objectNames,
 			Object beforeLoadDependences, Object afterLoadDependences);
 	
+	/**
+	 * @param thisPath
+	 * @param targetPath String||Collection
+	 * @param afterLoad
+	 * @see DefaultJSIPackage#addDependence(String, Object, boolean)
+	 */
 	public void addDependence(String thisPath, Object targetPath,
 			boolean afterLoad);
 	
 	public abstract String getImplementation();
 
-	
-	
-	
 	public abstract Map<String, List<String>> getScriptObjectMap();
 
 	public abstract Map<String, String> getObjectScriptMap();
