@@ -218,7 +218,9 @@ public class JSIFilter implements Filter {
 					}
 				}
 				PrintWriter out = response.getWriter();
-				out.print(exportor.export(context));
+				String result = exportor.export(context);
+				System.out.println(result);
+				out.print(result);
 			}
 			return true;
 		}

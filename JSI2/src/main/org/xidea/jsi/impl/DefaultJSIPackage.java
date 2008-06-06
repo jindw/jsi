@@ -95,8 +95,8 @@ public class DefaultJSIPackage implements JSIPackage {
 				thisPath = file;
 			}
 		}
-		if (targetPath instanceof List) {
-			for (Iterator<Object> it = ((List<Object>) targetPath).iterator(); it
+		if (targetPath instanceof Collection) {
+			for (Iterator<Object> it = ((Collection<Object>) targetPath).iterator(); it
 					.hasNext();) {
 				// JSI js 做了展开优化
 				this.addDependence(thisPath, it.next(), afterLoad);
