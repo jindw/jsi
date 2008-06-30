@@ -589,7 +589,17 @@ var $import = function(freeEval,cachedScripts){
                             //targetObjectName = null;
                         }else{
                             distinctPackage = 1;
+                            if(":debug"){
+                                if(!targetPath){
+                                    throw new Error("targetPath 不能为空")
+                                }
+                            }
                             targetPackage = findPackageByPath(targetPath);
+                            if(":debug"){
+                                if(!targetPackage){
+                                    $log.error("targetPath:"+targetPath+" 不是有效对象路径",this.name);
+                                }
+                            }
                             targetPath = targetPath.substring(targetPackage.name.length + 1);
                             targetPackage = realPackage(targetPackage);
                             //targetObjectName = null;
@@ -625,7 +635,17 @@ var $import = function(freeEval,cachedScripts){
                     }else if(thisScriptObjectMap[targetPath]){
                         targetFileName = targetPath;
                     }else{
+                        if(":debug"){
+                            if(!targetPath){
+                                throw new Error("targetPath 不能为空")
+                            }
+                        }
                         targetPackage = findPackageByPath(targetPath);
+                        if(":debug"){
+                            if(!targetPackage){
+                                $log.error("targetPath:"+targetPath+" 不是有效对象路径",this.name);
+                            }
+                        }
                         targetPath = targetPath.substr(targetPackage.name.length + 1);
                         targetPackage = realPackage(targetPackage);
                         var targetFileName = targetPackage.objectScriptMap[targetPath];
