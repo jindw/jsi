@@ -7,7 +7,8 @@
  */
 var templateMap = {};
 var documentMap = {};
-var documentBase = (this.scriptBase + 'html/').substr($JSI.scriptBase.length);
+var scriptBase = this.scriptBase
+var documentBase = (scriptBase + 'html/').substr($JSI.scriptBase.length);
 var jsiCacher = $JSI.preload;
 var cachedScripts = {};
 
@@ -322,8 +323,11 @@ function getTemplate(path){
     if(templateMap[path]){
         return templateMap[path]
     }
-    var template = new Template(loadDocument(path));
-    template.load  = loadDocument;
+    try{
+        var template = new Template(path,scriptBase+"html/");
+    }catch(e){
+        $log.error(e)
+    }
     return templateMap[path] = template;
 }
 function loadDocument(path){
