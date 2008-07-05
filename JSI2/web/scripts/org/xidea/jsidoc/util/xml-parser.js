@@ -119,7 +119,7 @@ XMLParser.prototype.addParser(function(node,context){//for
                 processIncludeTag(node,context);
                 break;
             default:
-                $log.error("未知标签：",tagName)
+                $log.error("未知标签：",tagName,node.ownerDocument.documentURI)
             }
             return true;
         }

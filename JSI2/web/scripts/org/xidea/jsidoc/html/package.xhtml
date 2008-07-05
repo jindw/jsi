@@ -17,17 +17,13 @@
 		</tr>
 	</thead>
 	<tbody>
-		<c:forEach var="line"
-			items="${packageInfo.getSourceEntry().parse()}" varStatus="i">
-			<tr class="${i.index%2?'xidea-syntax-row1':'xidea-syntax-row0'}">
-				<td class="xidea-syntax-vrule0"><input type="button" value="${i.index+1}" /></td>
-				<td nowrap="true"><c:script>
-context.print('&lt;pre&gt;');
-context.print(line);
-context.print('&lt;/pre&gt;');
-  </c:script></td>
+		<c:for var="line"
+			items="${packageInfo.getSourceEntry().parse().toArray()}">
+			<tr class="${for.index%2?'xidea-syntax-row1':'xidea-syntax-row0'}">
+				<td class="xidea-syntax-vrule0"><input type="button" value="${for.index+1}" /></td>
+				<td nowrap="true"><pre><c:out value="${line}"/></pre></td>
 			</tr>
-		</c:forEach>
+		</c:for>
 	</tbody>
 </table>
 </div>
@@ -38,7 +34,7 @@ context.print('&lt;/pre&gt;');
 			<th>File Path</th>
 			<th>Constructor Description</th>
 		</tr>
-		<c:forEach var="object" items="${constructors}">
+		<c:for var="object" items="${constructors}">
 			<tr>
 				<td><a class="item-${object.type}"
 					href="?${object.getPath()}">${object.name}</a></td>
@@ -46,7 +42,7 @@ context.print('&lt;/pre&gt;');
 					href="?${object.fileInfo.getPath()}">${object.fileInfo.name}</a></td>
 				<td>${object.docEntry.description||'&#160;'}</td>
 			</tr>
-		</c:forEach>
+		</c:for>
 		<tr class="space">
 			<td colspan="3"></td>
 		</tr>
@@ -57,7 +53,7 @@ context.print('&lt;/pre&gt;');
 			<th>File Path</th>
 			<th>Function Description</th>
 		</tr>
-		<c:forEach var="object" items="${functions}">
+		<c:for var="object" items="${functions}">
 			<tr>
 				<td><a class="item-${object.type}"
 					href="?${object.getPath()}">${object.name}</a></td>
@@ -65,7 +61,7 @@ context.print('&lt;/pre&gt;');
 					href="?${object.fileInfo.getPath()}">${object.fileInfo.name}</a></td>
 				<td>${object.docEntry.description||'&#160;'}</td>
 			</tr>
-		</c:forEach>
+		</c:for>
 		<tr class="space">
 			<td colspan="3"></td>
 		</tr>
@@ -76,7 +72,7 @@ context.print('&lt;/pre&gt;');
 			<th>File Path</th>
 			<th>Object Description</th>
 		</tr>
-		<c:forEach var="object" items="${objects}">
+		<c:for var="object" items="${objects}">
 			<tr>
 				<td><a class="item-${object.type}"
 					href="?${object.getPath()}">${object.name}</a></td>
@@ -84,7 +80,7 @@ context.print('&lt;/pre&gt;');
 					href="?${object.fileInfo.getPath()}">${object.fileInfo.name}</a></td>
 				<td>${object.docEntry.description||'&#160;'}</td>
 			</tr>
-		</c:forEach>
+		</c:for>
 		<tr class="space">
 			<td colspan="3"></td>
 		</tr>
@@ -96,13 +92,13 @@ context.print('&lt;/pre&gt;');
 		<th>File List</th>
 		<th>File Infomation</th>
 	</tr>
-	<c:forEach var="file" items="${files}">
+	<c:for var="file" items="${files}">
 		<tr>
 			<td><a class="item-file"
 				href="?${file.getPath()}">${file.name}</a></td>
-			<td><c:out value="${file.getDescription()}" default="&#160;" escapeXml='false'/></td>
+			<td><c:out value="${file.getDescription()}"/></td>
 		</tr>
-	</c:forEach>
+	</c:for>
 	<tr class="space">
 		<td colspan="2"></td>
 	</tr>

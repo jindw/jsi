@@ -242,14 +242,21 @@ LineIterator.prototype = {
      * 获取全部内容
      * @owner LineIterator.prototype
      */
-    getContent : function(){
+    toString : function(){
+        return this.toArray().join('\n');
+    },
+    /**
+     * 获取全部内容
+     * @owner LineIterator.prototype
+     */
+    toArray : function(){
         var buf = [];
         while(true){
             var item = this.next();
             if(item!=null){
                 buf.push(item)
             }else{
-                return buf.join('\n');
+                return buf;
             }
         }
         ;
