@@ -1,28 +1,13 @@
-﻿<html>
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<html xmlns="http://www.xidea.org/taglib/xhtml"
+	xmlns:c="http://www.xidea.org/taglib/core">
 <head>
 <meta http-equiv="Content-Type" content="text/html;utf-8" />
 <link rel="stylesheet" type="text/css" href="../styles/export.css" />
 <script>
-    var bootScript = '<script src="%1"><\/script>';
-    var parentScripts = parent.document.getElementsByTagName("script");
-    for(var i=0;i<parentScripts.length;i++){
-        var src = parentScripts[i].src;
-        if(src && /boot(-.*)?.js$/.test(src)){
-            if(!/^[\w\d]{3,8}:\/\/|^\//.test(src)){//绝对地址
-                src = "../"+src
-            }
-            document.write(bootScript.replace(/%1/,src));
-        }
-    }
-</script>
-<script>
-    try{
-	    if(parent.JSIDoc&&parent.JSIDoc.exportToJSI){
-	        parent.JSIDoc.exportToJSI($JSI);
-	    }
-    }catch(e){
-    }
-    $import("org.xidea.jsidoc.export.ExportUI",true);
+<![CDATA[
+    parent.$import("org.xidea.jsidoc.export.ExportUI",this,true);
+]]>
 </script>
 </head>
 <body style="filter: expression(document.execCommand('BackgroundImageCache', false, true))">

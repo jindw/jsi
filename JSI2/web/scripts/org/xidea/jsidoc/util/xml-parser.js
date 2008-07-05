@@ -15,39 +15,11 @@ function XMLParser(){
 }
 XMLParser.prototype = new TextParser()
 XMLParser.prototype.parse = function(data,base){
-    if(base!=null){
-        data = load(data,base);
+    if(data.constructor == String){
+    	data = load(data,base);
     }
     this.parseNode(data);
     return this.reuslt;
-}
-/**
- * 装载模板
- * @public
- */
-function load(data,base){
-    var url = base?base.replace(/[^\/]+(?:#.*)?$/,'') + data : data;
-    var pos = url.indexOf('#');
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET",pos+1?url.substr(0,pos):url,false)
-    xhr.send('');
-    if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
-        var doc = xhr.responseXML;
-    }else{
-        var text = xhr.responseText;
-        if(window.DOMParser){
-            var doc = new DOMParser().parseFromString(text,"text/xml");
-        }else{
-            //["Msxml2.DOMDocument.6.0", "Msxml2.DOMDocument.3.0", "MSXML2.DOMDocument", "MSXML.DOMDocument", "Microsoft.XMLDOM"];
-            var doc = new ActiveXObject("Microsoft.XMLDOM");
-            doc.loadXML(text);
-        }
-    }
-    
-    if(pos>0){
-        doc = selectNodes(doc,url.substr(pos+1));
-    }
-    return doc;
 }
 
 /**
@@ -130,6 +102,7 @@ XMLParser.prototype.addParser(function(node,context){//for
                 parseElseTag(node,context);
                 break;
             case 'for':
+            //case 'forEach':
                 parseForTag(node,context);
                 break;
             case 'set':
@@ -145,7 +118,8 @@ XMLParser.prototype.addParser(function(node,context){//for
             case 'include':
                 processIncludeTag(node,context);
                 break;
-            
+            default:
+                $log.error("未知标签：",tagName)
             }
             return true;
         }
@@ -155,7 +129,7 @@ XMLParser.prototype.addParser(function(node,context){//for
  * 
  */
 function processIncludeTag(node,context){
-    var attributes = loadAttribute(node.attributes,{url:0,xpath:0});
+    var attributes = loadAttribute(node,{url:0,xpath:0});
     var doc = node.ownerDocument;
     var base = doc.documentURI || doc.url;
     if(attributes.url!=null){
@@ -168,7 +142,7 @@ function processIncludeTag(node,context){
 }
 function parseIfTag(node,context){
     var next = node.firstChild;
-    var attributes = loadAttribute(node.attributes,{test:3});
+    var attributes = loadAttribute(node,{test:3});
     context.append([2,attributes.test]);
     if(next){
         do{
@@ -181,7 +155,7 @@ function parseIfTag(node,context){
 function parseElseIfTag(node,context){
     context.removeLastEnd();
     var next = node.firstChild;
-    var attributes = loadAttribute(node.attributes,{test:3});
+    var attributes = loadAttribute(node,{test:3});
     context.append([3,attributes.test]);
     if(next){
         do{
@@ -195,7 +169,7 @@ function parseElseIfTag(node,context){
 function parseElseTag(node,context){
     context.removeLastEnd();
     var next = node.firstChild;
-    var attributes = loadAttribute(node.attributes,{});
+    var attributes = loadAttribute(node,{});
     context.append([4]);
     if(next){
         do{
@@ -208,7 +182,7 @@ function parseElseTag(node,context){
 
 function parseForTag(node,context){
     var next = node.firstChild;
-    var attributes = loadAttribute(node.attributes,{items:3,'var':1,begin:0,end:0,status:0});
+    var attributes = loadAttribute(node,{items:3,'var':1,begin:0,end:0,status:0});
     context.append([5,attributes['var'],attributes.items,status]);
     if(next){
         do{
@@ -218,14 +192,14 @@ function parseForTag(node,context){
     context.append([]);
 }
 function parseVarTag(node,context){
-    var attributes = loadAttribute(node.attributes,{name:1,value:1});
+    var attributes = loadAttribute(node,{name:1,value:1});
     var valueEl = toEL(attributes.value)
     context.append([6,attributes.name,valueEl]);
 
 }
 
 function parseOutTag(node,context){
-    var attributes = loadAttribute(node.attributes,{value:3});
+    var attributes = loadAttribute(node,{value:3});
     context.append([0,attributes.value,true]);
 }
 
@@ -423,24 +397,28 @@ function charReplacer(item) {
  * 2   EL属性
  * 从XML属性集中载入需要的属性集合，同时报告缺失和冗余
  */
-function loadAttribute(attributes,setting){
+function loadAttribute(node,setting){
+	var attributes =node.attributes
+	var tagName = node.tagName;
     var i = attributes.length;
     var data = {};
     while(i--){
         var item = attributes.item(i);
         var key = item.name;
         if(key in setting){
-            data[key] = item.value;
+            data[key] = item.value.replace(/^\s+|\s+$/g,'');
         }else{
-            $log.error("未知属性：", key,item.parentNode);
+        	if(!/^xmlns(?:\:.+)/.test(key)){
+                $log.error("未知属性：", key, tagName);
+        	}
         }
     }
     for(var key in setting){
         var type = setting[key];
         if(type & 1){
-            var value = data[key].replace(/^\s+|\s+$/g,'');
+            var value = data[key];
             if(value == null){
-                $log.error("缺少必要属性：", key);
+                $log.error("缺少必要属性：", key, tagName);
             }
         }
         if(type & 2){
@@ -449,7 +427,7 @@ function loadAttribute(attributes,setting){
                 if(value2 != value){
                     data[key] = value2;
                 }else{
-                    $log.error("属性需要为表达式（${...}）：", key,value,type);
+                    $log.error("属性需要为表达式（${...}）：", key,value,type,tagName);
                 }
             }
         }
@@ -472,6 +450,43 @@ function toEL(value,type){
         }
         return value;
     }
+}
+
+/**
+ * 装载模板
+ * @public
+ */
+function load(data,base){
+	if(base==null){
+        var doc =toDoc(data)
+		//alert([data,doc.documentElement.tagName])
+    }else{
+    	var url = base.replace(/[^\/]+(?:#.*)?$/,'')+data;
+	    var pos = url.indexOf('#');
+	    var xhr = new XMLHttpRequest();
+	    xhr.open("GET",pos+1?url.substr(0,pos):url,false)
+	    xhr.send('');
+	    if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
+	        var doc = xhr.responseXML;
+	    }else{
+	        var doc =toDoc(xhr.responseText)
+	    }
+	    if(pos>0){
+	        doc = selectNodes(doc,url.substr(pos+1));
+	    }
+	}
+	return doc;
+
+}
+function toDoc(text){
+	if(window.DOMParser){
+        var doc = new DOMParser().parseFromString(text,"text/xml");
+    }else{
+        //["Msxml2.DOMDocument.6.0", "Msxml2.DOMDocument.3.0", "MSXML2.DOMDocument", "MSXML.DOMDocument", "Microsoft.XMLDOM"];
+        var doc = new ActiveXObject("Microsoft.XMLDOM");
+        doc.loadXML(text);
+    }
+    return doc;
 }
 /**
  * TODO:貌似需要importNode

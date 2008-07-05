@@ -18,9 +18,11 @@ var JSIDOC_URL_CONTAINER_ID = "jsidocURLContainer";
 var compressServiceURL = $JSI.scriptBase + "export.action";
 
 var inc = 0;
+var exportDocument;
 //var PACKAGE_TEMPLATE = "<li></li>"
 var ExportUI = {
-    initialize:function(sourcePackage,treeTemplateText){
+    initialize:function(sourcePackage,treeTemplateText,doc){
+    	exportDocument = doc;
         var nameList = findPackages(sourcePackage,true);
         var treeTemplate = new Template(treeTemplateText);
         for(var i=0; i<nameList.length; i++) {
@@ -31,7 +33,7 @@ var ExportUI = {
                 packageNodes[name] = new PackageNode(packageObject);
         	}
         }
-        document.getElementById(TREE_CONTAINER_ID).innerHTML = treeTemplate.render({packageNodes:packageNodes});
+        exportDocument.getElementById(TREE_CONTAINER_ID).innerHTML = treeTemplate.render({packageNodes:packageNodes});
         initializeForm();
         var request1 = new Request(compressServiceURL,"post",function(success){
             if(success){
@@ -73,8 +75,8 @@ var ExportUI = {
     },
     checkLevel:function(levelInput){
         var level = levelInput.value;
-        var prefix = document.getElementById(PREFIX_CONTAINER_ID);
-        var jsidoc = document.getElementById(JSIDOC_URL_CONTAINER_ID);
+        var prefix = exportDocument.getElementById(PREFIX_CONTAINER_ID);
+        var jsidoc = exportDocument.getElementById(JSIDOC_URL_CONTAINER_ID);
         prefix.style.display = (level == 1 || level ==2) ? 'block':'none';
         jsidoc.style.display = (level == -2) ? 'block':'none';
         var lis = levelInput.form.getElementsByTagName("li");
@@ -139,15 +141,15 @@ function showResult(content,reuse){
         dialog = null;
     }
     dialog = dialog || window.open('about:blank','source','modal=yes,left=200,top=100,width=600px,height=600px');
-    var document = dialog.document;
-    document.open();
-    document.write("<html><title>==请将文本筐中的内容拷贝到目标文件(js,xml,html,hta)==</title><style>*{width:100%;height:100%;padding:0px;margin:0px;}</style><body><textarea readonly='true' wrap='off'>");
-    document.write(content.replace(/[<>&]/g,xmlReplacer));
-    document.write("</textarea></body></html>");
-    document.close();
+    var doc = dialog.document;
+    doc.open();
+    doc.write("<html><title>==请将文本筐中的内容拷贝到目标文件(js,xml,html,hta)==</title><style>*{width:100%;height:100%;padding:0px;margin:0px;}</style><body><textarea readonly='true' wrap='off'>");
+    doc.write(content.replace(/[<>&]/g,xmlReplacer));
+    doc.write("</textarea></body></html>");
+    doc.close();
 }
 function initializeForm(){
-    var levels = document.forms[0].level;
+    var levels = exportDocument.forms[0].level;
     for(var i=0; i<levels.length; i++) {
         var input = levels[i];
         if(input.value ==1 ||input.value ==2){
@@ -158,7 +160,7 @@ function initializeForm(){
     }
 }
 function updateDisabledForm(value){
-    var levels = document.forms[0].level;
+    var levels = exportDocument.forms[0].level;
     for(var i=0; i<levels.length; i++) {
         var input = levels[i];
         if(input.disabled && input.value == value){
@@ -219,7 +221,7 @@ function updateTree(){
         }
     }
     //update button
-    var button = document.getElementById(EXPORT_BUTTON);
+    var button = exportDocument.getElementById(EXPORT_BUTTON);
     button.disabled = true;
     for(var n in checkMap){
         button.disabled = false;
@@ -227,11 +229,11 @@ function updateTree(){
     }
 }
 function updateNode(node,state){
-    document.getElementById(node.htmlId).className = "checkbox"+state;
+    exportDocument.getElementById(node.htmlId).className = "checkbox"+state;
 }
 function updateOutput(){
-    var fileListOutput = document.getElementById(FILE_OUTPUT_ID);
-    var objectListOutput = document.getElementById(OBJECT_OUTPUT_ID);
+    var fileListOutput = exportDocument.getElementById(FILE_OUTPUT_ID);
+    var objectListOutput = exportDocument.getElementById(OBJECT_OUTPUT_ID);
     var objectNames = [];
     var exporter = new Exporter();
     for(var path in checkMap){
