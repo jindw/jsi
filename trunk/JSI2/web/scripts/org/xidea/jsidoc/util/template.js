@@ -15,8 +15,8 @@ function Template(data,base,type){
     if("org.jside.template:compile"){
         if(data.constructor == String){
             var inlineClass = {
-                'xml':"org.jside.template:XMLParser",
-                'text':"org.jside.template:TextParser"
+                'xml':"org.xidea.jsidoc.util:XMLParser",
+                'text':"org.xidea.jsidoc.util:TextParser"
             }
             var parser = new ($import(inlineClass[type || 'xml'] ||type))();
             parser.parse(data,base);

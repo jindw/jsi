@@ -144,12 +144,14 @@ var JSIDoc = {
     genMenu : function(){
         var template = getTemplate("menu.xhtml");
         //out.open();
-        return template.render(
+        var text =  template.render(
         {
             JSIDoc:JSIDoc,
             rootInfo:JSIDoc.rootInfo,
             packageInfoGroupMap:JSIDoc.packageInfoGroupMap
         });
+        //alert(text)
+        return text;
         //out.close();
     },
     /**

@@ -29,8 +29,7 @@ function load(data,base){
     var url = base?base.replace(/[^\/]+(?:#.*)?$/,'') + data : data;
     var pos = url.indexOf('#');
     var xhr = new XMLHttpRequest();
-    
-    xhr.open("get",url.substr(0,pos),false)
+    xhr.open("GET",pos+1?url.substr(0,pos):url,false)
     xhr.send('');
     if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
         var doc = xhr.responseXML;
@@ -278,7 +277,6 @@ function parseAttribute(node,context){
         var value = buf[i];
         if(value.constructor == String){
             if(value){
-                buf[i] = value = value.replace(/[<>&']/g,xmlReplacer);
                 isStatic = true;
             }else{
                 buf.splice(i,1);
@@ -420,20 +418,6 @@ function charReplacer(item) {
 }
 
 
-function xmlReplacer(c){
-    switch(c){
-        case '<':
-          return '&lt;';
-        case '>':
-          return '&gt;';
-        case '&':
-          return '&amp;';
-        case "'":
-          return '&#39;';
-        case '"':
-          return '&#34;';
-    }
-}
 /**
  * 1   必要
  * 2   EL属性
