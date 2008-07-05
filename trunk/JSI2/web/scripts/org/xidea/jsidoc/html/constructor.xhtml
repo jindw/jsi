@@ -12,7 +12,7 @@
 		href="?${objectInfo.packageInfo.getPath()}">${objectInfo.packageInfo.name}</a></h2>
 </c:if>
 <div><a class="item-constructor">Object</a></div>
-<c:forEach var='c' items="${objectInfo.getInheritList()}" varStatus="i">
+<c:for var='c' items="${objectInfo.getInheritList()}" varStatus="i">
 	<div class='inheritor' style="margin-left:${(1+i.index)*34}px;">
 	<c:if test="${i.last}">
 		<a class="item-constructor"> ${c.name}</a>
@@ -20,7 +20,7 @@
 		<a class="item-constructor"
 			href="?${c.getPath()}"> ${c.name}</a>
 	</c:else></div>
-</c:forEach>
+</c:for>
 <h2>类(构造器)信息</h2>
 <table border="0" cellpadding="0" width="100%" cellspacing="0"
 	class="content">
@@ -43,10 +43,10 @@
 			<td>
 			<h2>参数</h2>
 			<ul>
-				<c:forEach var="param" items="${objectInfo.getParams().data}">
+				<c:for var="param" items="${objectInfo.getParams().data}">
 					<h3>${param.name}</h3>
 					<p>${param.description||''}</p>
-				</c:forEach>
+				</c:for>
 			</ul>
 			</td>
 		</tr>
@@ -60,7 +60,7 @@
 				<th colspan="3">类属性摘要</th>
 			</tr>
 		</thead>
-		<c:forEach var="memberName" items="${memberInfos}">
+		<c:for var="memberName" items="${memberInfos}">
 			<c:set var="memberInfo" value="${memberInfos[memberName]}" />
 			<tr class="access-${memberInfo.getAccess()}">
 				<td><span
@@ -75,7 +75,7 @@
 				<td colspan="3">
 				</td>
 			</tr>
-		</c:forEach>
+		</c:for>
 	</table>
 	<br />
 	<br />
@@ -88,7 +88,7 @@
 				<th colspan="3">实例属性摘要</th>
 			</tr>
 		</thead>
-		<c:forEach var="memberName" items="${memberInfos}">
+		<c:for var="memberName" items="${memberInfos}">
 			<c:set var="memberInfo" value="${memberInfos[memberName]}" />
 			<tr class="access-${memberInfo.getAccess()}">
 				<td><span
@@ -109,7 +109,7 @@
 				<td colspan="3">
 				</td>
 			</tr>
-		</c:forEach>
+		</c:for>
 	</table>
 	<br />
 	<br />
@@ -117,7 +117,7 @@
 <c:set var="memberInfos" value="${objectInfo.getDeclaredStaticInfos()}" />
 <c:if test="${memberInfos.length>0}">
     <h2>类属性详细信息</h2>
-    <c:forEach var="memberName" items="${memberInfos}">
+    <c:for var="memberName" items="${memberInfos}">
         <c:set var="memberInfo" value="${memberInfos[memberName]}" />
         <a name="${memberInfo.name}"></a>
         <c:choose>
@@ -131,10 +131,10 @@
                 <c:if test="${memberInfo.getParams().length}">
                     <h2>参数</h2>
                     <ul>
-                        <c:forEach var="param" items="${memberInfo.getParams().data}">
+                        <c:for var="param" items="${memberInfo.getParams().data}">
                             <h3>${param.name}</h3>
                             <p>${param.description||''}</p>
-                        </c:forEach>
+                        </c:for>
                     </ul>
                 </c:if>
                 <c:if test="${memberInfo.getReturnInfo().isValid()}">
@@ -179,7 +179,7 @@
             </c:otherwise>
         </c:choose>
         <hr />
-    </c:forEach>
+    </c:for>
     <br />
 </c:if>
 
@@ -188,7 +188,7 @@
 <c:set var="memberInfos" value="${objectInfo.getDeclaredInstanceInfos()}" />
 <c:if test="${memberInfos.length>0}">
 	<h2>实例属性详细信息</h2>
-	<c:forEach var="memberName" items="${memberInfos}">
+	<c:for var="memberName" items="${memberInfos}">
 		<c:set var="memberInfo" value="${memberInfos[memberName]}" />
 		<a name="${memberInfo.name}"></a>
 		<c:choose>
@@ -202,10 +202,10 @@
 				<c:if test="${memberInfo.getParams().length}">
 					<h2>参数</h2>
 					<ul>
-						<c:forEach var="param" items="${memberInfo.getParams().data}">
+						<c:for var="param" items="${memberInfo.getParams().data}">
 							<h3>${param.name}</h3>
 							<p>${param.description||''}</p>
-						</c:forEach>
+						</c:for>
 					</ul>
 				</c:if>
 				<c:if test="${memberInfo.getReturnInfo().isValid()}">
@@ -250,7 +250,7 @@
 			</c:otherwise>
 		</c:choose>
 		<hr />
-	</c:forEach>
+	</c:for>
 	<br />
 </c:if>
 </body>

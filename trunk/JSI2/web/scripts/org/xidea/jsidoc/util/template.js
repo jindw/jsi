@@ -147,8 +147,8 @@ function buildAttribute(data){
     return function(context,result){
         var buf = data(context);
         //alert(buf)
-        if(buf){
-            result.push(prefix,buf.replace(/[<>&'"]/g,xmlReplacer)+'"');
+        if(buf!=null){
+            result.push(prefix,String(buf).replace(/[<>&'"]/g,xmlReplacer)+'"');
         }
     }
 }

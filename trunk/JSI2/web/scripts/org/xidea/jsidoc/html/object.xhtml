@@ -44,7 +44,7 @@
                 <th colspan="3">类属性摘要</th>
             </tr>
         </thead>
-        <c:forEach var="memberName" items="${memberInfos}">
+        <c:for var="memberName" items="${memberInfos}">
             <c:set var="memberInfo" value="${memberInfos[memberName]}" />
             <tr class="access-${memberInfo.getAccess()}">
                 <td><span
@@ -63,7 +63,7 @@
                 <td colspan="3">
                 </td>
             </tr>
-        </c:forEach>
+        </c:for>
     </table>
     <br />
     <br />

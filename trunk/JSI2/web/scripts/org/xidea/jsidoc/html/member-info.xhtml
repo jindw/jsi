@@ -2,7 +2,7 @@
 <html xmlns="http://www.xidea.org/taglib/xhtml"
 	xmlns:c="http://www.xidea.org/taglib/core">
 <body>
-    <c:forEach class="memberDetail" var="memberName" items="${memberInfos}">
+    <c:for class="memberDetail" var="memberName" items="${memberInfos}">
         <c:set var="memberInfo" value="${memberInfos[memberName]}" />
         <a name="${memberInfo.name}"></a>
         <c:choose>
@@ -17,10 +17,10 @@
                 <c:if test="${memberInfo.getParams().length}">
                     <h2>参数</h2>
                     <ul>
-                        <c:forEach var="param" items="${memberInfo.getParams().data}">
+                        <c:for var="param" items="${memberInfo.getParams().data}">
                             <h3>${param.name}</h3>
                             <p>${param.description||''}</p>
-                        </c:forEach>
+                        </c:for>
                     </ul>
                 </c:if>
                 <c:if test="${memberInfo.getReturnInfo().isValid()}">
@@ -66,6 +66,6 @@
             </c:otherwise>
         </c:choose>
         <hr />
-    </c:forEach>
+    </c:for>
 </body>
 </html>

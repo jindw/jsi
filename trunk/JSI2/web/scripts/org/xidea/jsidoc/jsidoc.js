@@ -122,8 +122,8 @@ var JSIDoc = {
         path = path.replace(/^([^#\?]+[#\?])([^#]+)(#.*)?$/g,"$2");
         if(path == "@menu"){
             document.write(this.genMenu());
-        }if(path == "@export"){
-            document.write(this.genMenu());
+        }else if(path == "@export"){
+            document.write(this.genExport(document));
         }else{
             var pos = path.lastIndexOf('/');
             if(pos>=0){
@@ -140,6 +140,7 @@ var JSIDoc = {
             }
         }
     },
+
     /**
      * @public
      */
@@ -152,6 +153,22 @@ var JSIDoc = {
             rootInfo:JSIDoc.rootInfo,
             packageInfoGroupMap:JSIDoc.packageInfoGroupMap
         });
+        //alert(text)
+        return text;
+        //out.close();
+    },
+    
+    /**
+     * @public
+     */
+    genExport : function(document){
+        var template = getTemplate("export.xhtml");
+        var packageNames = [];
+        for(var name in this.packageInfoMap){
+            packageNames.push(name);
+        }
+        //out.open();
+        var text =  template.render({packageNodes:ExportUI.prepare(document,packageNames)});
         //alert(text)
         return text;
         //out.close();

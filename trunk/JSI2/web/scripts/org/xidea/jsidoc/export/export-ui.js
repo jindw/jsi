@@ -21,10 +21,9 @@ var inc = 0;
 var exportDocument;
 //var PACKAGE_TEMPLATE = "<li></li>"
 var ExportUI = {
-    initialize:function(sourcePackage,treeTemplateText,doc){
+    prepare:function(doc,sourcePackage){
     	exportDocument = doc;
         var nameList = findPackages(sourcePackage,true);
-        var treeTemplate = new Template(treeTemplateText);
         for(var i=0; i<nameList.length; i++) {
             var name = nameList[i];
         	var packageObject = $import(name+':');
@@ -33,7 +32,9 @@ var ExportUI = {
                 packageNodes[name] = new PackageNode(packageObject);
         	}
         }
-        exportDocument.getElementById(TREE_CONTAINER_ID).innerHTML = treeTemplate.render({packageNodes:packageNodes});
+        return packageNodes;
+    },
+    initialize:function(){
         initializeForm();
         var request1 = new Request(compressServiceURL,"post",function(success){
             if(success){

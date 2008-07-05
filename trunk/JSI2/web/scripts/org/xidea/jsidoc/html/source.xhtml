@@ -14,9 +14,9 @@
 		</tr>
 	</thead>
 	<tbody>
-		<c:forEach var="line" items="${lines}" varStatus="i">
-			<tr depth="${lines.depth}" class="xidea-syntax-open ${i.index%2?'xidea-syntax-row1':'xidea-syntax-row0'}">
-				<td class="xidea-syntax-vrule0"><input type="button" value="${i.index+1}" /></td>
+		<c:for var="line" items="${lines.toArray()}">
+			<tr depth="${lines.depth}" class="xidea-syntax-open ${for.index%2?'xidea-syntax-row1':'xidea-syntax-row0'}">
+				<td class="xidea-syntax-vrule0"><input type="button" value="${for.index+1}" /></td>
 				<c:if test="${lines.nextDepth&gt;lines.depth}">
 					<td onclick="collapse(this)"
 						onmouseover="showBound(this,${lines.lineIndex})"
@@ -29,19 +29,14 @@
 						onmouseout="hiddenBound(this,${lines.depthStart})"
 						ondblclick="collapse(this,${lines.depthStart})" class="xidea-syntax-vrule1">&#160;</td>
 				</c:else>
-				<td nowrap="true"><c:script>
-//<![CDATA[
-context.print('<pre>');
-context.print(lines.anchor);
-context.print(line);
-if(lines.nextDepth>lines.depth){
-  context.print('<b class="xidea-syntax-more">...</b>');
-}
-context.print('</pre>');
-//]]>
-				</c:script></td>
+				<td nowrap="true">
+				<pre><c:out value="${lines.anchor+line}"/>
+				<c:if test="${(lines.nextDepth>lines.depth)}">
+				   <b class="xidea-syntax-more">...</b>
+				</c:if>
+				</pre></td>
 			</tr>
-		</c:forEach>
+		</c:for>
 	</tbody>
 	<tfoot>
 		<tr>

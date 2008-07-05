@@ -5,9 +5,9 @@
 <meta http-equiv="Content-Type" content="text/html;utf-8" />
 <link rel="stylesheet" type="text/css" href="../styles/export.css" />
 <script>
-<![CDATA[
-    parent.$import("org.xidea.jsidoc.export.ExportUI",this,true);
-]]>
+//<!-- opera bug --><![CDATA[
+    parent.$import("org.xidea.jsidoc.export.ExportUI",this);
+//]]>
 </script>
 </head>
 <body style="filter: expression(document.execCommand('BackgroundImageCache', false, true))">
@@ -15,7 +15,6 @@
 
 <div id="body">
     <div id="treeContainer" >
-<textarea>
 <c:for var="packageName" items="${packageNodes}" xmlns:c="http://www.xidea.org/taglib/core">
 <c:set name="packageNode" value="${packageNodes[packageName]}"/>
 <table class="closed" border="0" cellpadding="0" cellspacing="0">
@@ -44,7 +43,6 @@
     </tbody>
 </table>
 </c:for>
-</textarea>
     </div>
     <div id="output">
         <fieldset>
@@ -123,14 +121,7 @@ function collapse(el){
         el.className = el.className.replace(/\bclosed\b/,'open');
     }
 }
-var packageNames = [];
-for(var name in parent.JSIDoc.packageInfoMap){
-    packageNames.push(name);
-}
-ExportUI.initialize(packageNames,
-             document.getElementsByTagName("textarea")[0].value);
-
-
+ExportUI.initialize();
 //]]>
 
 </script>
