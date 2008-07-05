@@ -122,6 +122,8 @@ var JSIDoc = {
         path = path.replace(/^([^#\?]+[#\?])([^#]+)(#.*)?$/g,"$2");
         if(path == "@menu"){
             document.write(this.genMenu());
+        }if(path == "@export"){
+            document.write(this.genMenu());
         }else{
             var pos = path.lastIndexOf('/');
             if(pos>=0){
@@ -205,7 +207,7 @@ var JSIDoc = {
     /**
      * @public
      */
-    genObject : function(packageName,objectName){
+    genObject : function(document){
         var packageInfo = PackageInfo.require(packageName);
         var objectInfo = packageInfo.getObjectInfoMap()[objectName];
         switch(objectInfo.type){
@@ -227,7 +229,7 @@ var JSIDoc = {
             objectInfo:objectInfo
         });
     },
-  
+    
     
     /**
      * @public
@@ -292,6 +294,8 @@ var JSIDoc = {
             }
         }
     },
+    
+    
     /**
      * 
      */
