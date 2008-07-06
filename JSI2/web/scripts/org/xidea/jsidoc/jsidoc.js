@@ -35,7 +35,7 @@ var JSIDoc = {
         	checkInterval = setInterval(function(){
         		var url = decodeURIComponent(checkLocation.hash.substr(1));
         		var contentLocation = contentWindow.location;
-        		if(contentLocation != url){
+        		if(url && url != contentLocation){
                     contentLocation.replace(url);
         		}
         	},100);
