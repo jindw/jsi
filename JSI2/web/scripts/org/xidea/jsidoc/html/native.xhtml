@@ -17,7 +17,7 @@
 	class="content">
 	<thead>
 		<tr>
-			<th><span class="item-${objectInfo.type}"> ${objectInfo.getAccess()} <a
+			<th><span class="item-${objectInfo.type}"> ${objectInfo.getAccess()}<a
 				href="?${objectInfo.fileInfo.getPath()}#${objectInfo.name}">${objectInfo.name}</a></span></th>
 		</tr>
 	</thead>
@@ -27,14 +27,14 @@
 		<c:choose>
             <c:when test="${objectInfo.type == 'string'}">
                 ${objectInfo.object == null?null:'"' + objectInfo.object + '"'}
-             </c:when>
+            </c:when>
             <c:otherwise>
                 ${objectInfo.object}
             </c:otherwise>
         </c:choose>
 		</h3>
 		<ul>
-			${objectInfo.getDescription()}
+			<c:out value="${objectInfo.getDescription()}"/>
 		</ul>
 		</td>
 	</tr>

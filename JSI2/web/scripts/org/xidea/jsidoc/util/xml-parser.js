@@ -16,12 +16,33 @@ function XMLParser(){
 XMLParser.prototype = new TextParser()
 XMLParser.prototype.parse = function(data,base){
     if(data.constructor == String){
-    	data = load(data,base);
+    	data = this.load(data,base);
     }
     this.parseNode(data);
     return this.reuslt;
 }
-
+XMLParser.prototype.load = function(data,base){
+	if(base==null){
+        var doc =toDoc(data)
+		//alert([data,doc.documentElement.tagName])
+    }else{
+    	var url = base.replace(/[^\/]+(?:#.*)?$/,'')+data;
+	    var pos = url.indexOf('#');
+	    var xhr = new XMLHttpRequest();
+	    xhr.open("GET",pos+1?url.substr(0,pos):url,false)
+	    xhr.send('');
+	    if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
+	        var doc = xhr.responseXML;
+	    }else{
+	        var doc =toDoc(xhr.responseText)
+	    }
+	    if(pos>0){
+	        doc = selectNodes(doc,url.substr(pos+1));
+	    }
+	    this.url = url;
+	}
+	return doc;
+}
 /**
  * 解析函数集
  * @private
@@ -102,7 +123,7 @@ XMLParser.prototype.addParser(function(node,context){//for
                 parseElseTag(node,context);
                 break;
             case 'for':
-            //case 'forEach':
+            case 'foreach':
                 parseForTag(node,context);
                 break;
             case 'set':
@@ -112,8 +133,14 @@ XMLParser.prototype.addParser(function(node,context){//for
             case 'out':
                 parseOutTag(node,context);
                 break;
-                
-                
+            case 'choose':
+                parseChooseTag(node,context);
+                break;
+            case 'when':
+            case 'otherwise':
+                break;
+            
+            
             //for other
             case 'include':
                 processIncludeTag(node,context);
@@ -129,16 +156,20 @@ XMLParser.prototype.addParser(function(node,context){//for
  * 
  */
 function processIncludeTag(node,context){
-    var attributes = loadAttribute(node,{url:0,xpath:0});
+    var attributes = loadAttribute(node,{path:0,xpath:0});
     var doc = node.ownerDocument;
-    var base = doc.documentURI || doc.url;
-    if(attributes.url!=null){
-        var doc = load(attributes.url,base)
+    var parentURL = context.url;
+	try{
+	    if(attributes.path!=null){
+	        var doc = context.load(attributes.path,parentURL)
+	    }
+	    if(attributes.xpath!=null){
+	        doc = selectNodes(doc,attributes.xpath);
+	    }
+	    context.parseNode(doc,context)
+    }finally{
+        context.url = parentURL;
     }
-    if(attributes.xpath!=null){
-        doc = selectNodes(doc,attributes.xpath);
-    }
-    context.parseNode(doc,context)
 }
 function parseIfTag(node,context){
     var next = node.firstChild;
@@ -179,6 +210,32 @@ function parseElseTag(node,context){
     context.append([]);
 }
 
+
+function parseChooseTag(node,context){
+	var next = node.firstChild;
+	var first = true;
+	var whenTag = node.tagName.split(':')[0];
+	var elseTag = whenTag + ':otherwise';
+	whenTag += ':when';
+    if(next){
+        do{
+        	if(next.tagName == whenTag){
+        		var n = next.parentNode.firstChild;
+        		if(first){
+        			first = false;
+        			parseIfTag(next,context);
+        		}else{
+		            parseElseIfTag(next,context);
+        		}
+        	}else if(next.tagName == elseTag){
+        		parseElseTag(next,context);
+        	}else if(next.tagName){
+        		$log.error("choose 只接受 when，otherwise 节点");
+        	}
+        	context.parseNode(next,context)
+		}while(next = next.nextSibling)
+    }
+}
 
 function parseForTag(node,context){
     var next = node.firstChild;
@@ -287,7 +344,7 @@ function parseAttribute(node,context){
 }
 function parseTextNode(node,context){
     var data = node.data;
-    context.append.apply(context,parseText(data.replace(/^\s+|\s+$/g,'')))
+    context.append.apply(context,parseText(data.replace(/^\s+|\s+$/g,' ')))
     return true;
 }
 
@@ -453,31 +510,8 @@ function toEL(value,type){
 }
 
 /**
- * 装载模板
  * @public
  */
-function load(data,base){
-	if(base==null){
-        var doc =toDoc(data)
-		//alert([data,doc.documentElement.tagName])
-    }else{
-    	var url = base.replace(/[^\/]+(?:#.*)?$/,'')+data;
-	    var pos = url.indexOf('#');
-	    var xhr = new XMLHttpRequest();
-	    xhr.open("GET",pos+1?url.substr(0,pos):url,false)
-	    xhr.send('');
-	    if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
-	        var doc = xhr.responseXML;
-	    }else{
-	        var doc =toDoc(xhr.responseText)
-	    }
-	    if(pos>0){
-	        doc = selectNodes(doc,url.substr(pos+1));
-	    }
-	}
-	return doc;
-
-}
 function toDoc(text){
 	if(window.DOMParser){
         var doc = new DOMParser().parseFromString(text,"text/xml");
