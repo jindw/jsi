@@ -25,31 +25,21 @@ var JSIDoc = {
      * @return packageGroupMap 或者 false(发现有外部脚本文件)
      */
     prepare:function(){
-        try{
-            var link = window.location.hash || top.location.hash;
-        }catch(e){}
         var search = window.location.search;
         var packageGroup = [];
         window.onload = function(){
-            if(link && link.length>2){
-                var content = document.getElementById("content");
-                content.src = decodeURIComponent(link.substr(1));
-                content.onload = contentLoad;
-                link = '';
+            if(checkInterval){
+            	checkInterval.clear();
             }
-        }
-        function contentLoad(){
-            if(document.all){
-                try{
-                    var location = top.location;
-                }catch(e){
-                    var location = window.location;
-                }
-            }
-            
-            if(location){
-                location.replace("#"+encodeURIComponent(this.contentWindow.location.href));
-            }
+        	var contentWindow = document.getElementById("content").contentWindow;
+        	checkInterval = setInterval(function(){
+        		var url = decodeURIComponent(checkLocation.hash.substr(1));
+        		var contentLocation = contentWindow.location;
+        		if(contentLocation != url){
+                    contentLocation.replace(url);
+        		}
+        	},100);
+            window.onload = Function.prototype;
         }
         for(var packageName in cachedSourceMap){
             preload(packageName,cachedSourceMap[packageName]);
@@ -67,7 +57,7 @@ var JSIDoc = {
                     }else{
                         document.write("<script src='"+value+"'><\/script>")
                     }
-                    return value
+                    return value;//???
                 }else if(name = name.replace(/^group\.(.*)|.*/,'$1')){//group
                     packageGroup.push(name)
                     packageGroup[name] = value.split(',');
@@ -119,25 +109,30 @@ var JSIDoc = {
      */
     render:function(document){
         var path = document.location.href;
+        
         path = path.replace(/^([^#\?]+[#\?])([^#]+)(#.*)?$/g,"$2");
         if(path == "@menu"){
             document.write(this.genMenu());
-        }else if(path == "@export"){
-            document.write(this.genExport(document));
         }else{
-            var pos = path.lastIndexOf('/');
-            if(pos>=0){
-                var packageName = path.substr(0,pos).replace(/\//g,'.');
-                var fileName = path.substr(pos+1);
-                document.write(this.genSource(packageName,fileName));
-            }else{
-                var data = path.split(':')
-                if(data[1]){
-                    document.write(this.genObject(data[0],data[1]));
-                }else{
-                    this.genPackage(data[0],document);
-                }
-            }
+        	var url = '#'+encodeURIComponent(document.location.href);
+        	checkLocation.hash = url;
+        	if(path == "@export"){
+	            document.write(this.genExport(document));
+	        }else{
+	            var pos = path.lastIndexOf('/');
+	            if(pos>=0){
+	                var packageName = path.substr(0,pos).replace(/\//g,'.');
+	                var fileName = path.substr(pos+1);
+	                document.write(this.genSource(packageName,fileName));
+	            }else{
+	                var data = path.split(':')
+	                if(data[1]){
+	                    document.write(this.genObject(data[0],data[1]));
+	                }else{
+	                    this.genPackage(data[0],document);
+	                }
+	            }
+	        }
         }
     },
 
@@ -325,7 +320,17 @@ var JSIDoc = {
         }
     }
 }
-
+var win = window;
+while(win!=win.top){
+	try{
+		win.parent.document.forms.length;
+	}catch(e){
+		break;
+	}
+	win = win.parent;
+}
+var checkLocation = win.location;
+var checkInterval;
 function preload(pkg,file2dataMap,value){
     jsiCacher.apply($JSI,arguments);
     var base = pkg.replace(/\.|(.)$/g,'$1/');
@@ -351,26 +356,4 @@ function getTemplate(path){
         $log.error(e)
     }
     return templateMap[path] = template;
-}
-function loadDocument(path){
-    if(documentMap[path]){
-        return documentMap[path]
-    }
-    var cache = JSIDoc.getSource(documentBase+path)
-    return documentMap[path] = parseDocument(cache);
-}
-function parseDocument(value){
-    if(/^[\s\ufeff]*</.test(value)){
-        value = value.replace(/^[\s\ufeff]*</,'<');
-    }else{
-        value = new Request(value).send('',true).getResult();
-    }
-    if(window.DOMParser){//code for Mozilla, Firefox, Opera, etc.
-        return new DOMParser().parseFromString(value,"text/xml");
-    }else{
-        var doc=new ActiveXObject("Microsoft.XMLDOM");
-        doc.async="false";
-        doc.loadXML(value);
-        return doc;
-    }
 }
