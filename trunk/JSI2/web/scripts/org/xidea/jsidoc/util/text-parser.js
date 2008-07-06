@@ -118,12 +118,12 @@ function parseEL(fn,expression,buf,unescape){
 
 function compileEL(el){
     if(!/'"\//.test(el)){
-        return el.replace(/\bfor\s*\./g,"____.$for.")
+        return el.replace(/\bfor\s*\./g,"this.$for.")
     }
     //好复杂的一段，这里还不够完善
     el.replace(/(\bfor\s*\.)||'[\\.]*?'|"[\\.]*?"|[\s\S]*?/g,function(code,_for){
         if(_for){
-            return "____.$for."
+            return "this.$for."
         }else{
             return code;
         }

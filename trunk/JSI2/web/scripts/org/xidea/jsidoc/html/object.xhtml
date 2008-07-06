@@ -16,10 +16,12 @@
 	class="content">
 	<thead>
 		<tr>
-			<th><span class="item-object"> ${objectInfo.getAccess()} <a
-				href="?${objectInfo.fileInfo.getPath()}#${objectInfo.name}">${objectInfo.name}</a></span>
-             <c:set var="constructorInfo" value="${objectInfo.getConstructorInfo()}" />
-             <c:if test="${constructorInfo}">
+			<th><span class="item-object">
+			    ${objectInfo.getAccess()}
+			    <a
+				    href="?${objectInfo.fileInfo.getPath()}#${objectInfo.name}">${objectInfo.name}</a></span>
+                <c:set name="constructorInfo" value="${objectInfo.getConstructorInfo()}" />
+                <c:if test="${constructorInfo}">
 					(<a class="item-constructor"
 					href="?constructorInfo.getPath()">${constructorInfo.name}</a>)
 			</c:if></th>
@@ -28,15 +30,14 @@
 	<tr>
 		<td>
 		<ul>
-			<c:out value="${objectInfo.getDescription()}" default="&#160;"
-				escapeXml='false' />
+			<c:out value="${objectInfo.getDescription()}" />
 		</ul>
 		</td>
 	</tr>
 </table>
 
 
-<c:set var="memberInfos" value="${objectInfo.getStaticInfos()}"/>
+<c:set name="memberInfos" value="${objectInfo.getStaticInfos()}"/>
 <c:if test="${memberInfos.length>0}">
     <table cellpadding="0" width="100%" cellspacing="0" class="content">
         <thead>
@@ -44,35 +45,16 @@
                 <th colspan="3">类属性摘要</th>
             </tr>
         </thead>
-        <c:for var="memberName" items="${memberInfos}">
-            <c:set var="memberInfo" value="${memberInfos[memberName]}" />
-            <tr class="access-${memberInfo.getAccess()}">
-                <td><span
-                    title="${memberInfo.getAccess()} static ${memberInfo.type}"
-                    class="item-${memberInfo.type}"> <c:if
-                    test="${memberInfo.getPlace() == objectInfo}">
-                    <a href="#${memberInfo.name}">${memberName}</a>
-                </c:if> <c:else>
-                    <a
-                        href="#${memberInfo.name}">${memberName}</a>
-                </c:else> </span></td>
-                <td>${memberInfo.getAccess()||'&#160;'}</td>
-                <td>${memberInfo.getShortDescription()}&#160;</td>
-            </tr>
-            <tr>
-                <td colspan="3">
-                </td>
-            </tr>
-        </c:for>
+        <c:include path="part.xhtml" xpath="//*[@id='memberTable']/*"/>
     </table>
     <br />
     <br />
 </c:if>
 
-<c:set var="memberInfos" value="${objectInfo.getDeclaredStaticInfos()}" />
+<c:set name="memberInfos" value="${objectInfo.getDeclaredStaticInfos()}" />
 <c:if test="${memberInfos.length>0}">
     <h2>对象属性详细信息</h2>
-    <c:include path="member-info.xhtml" xpath="//*[@class='memberDetail']"/>
+    <c:include path="part.xhtml" xpath="//*[@id='memberDetail']/*"/>
     <br />
 </c:if>
 

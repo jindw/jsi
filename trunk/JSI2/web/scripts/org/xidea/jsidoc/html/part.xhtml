@@ -2,31 +2,53 @@
 <html xmlns="http://www.xidea.org/taglib/xhtml"
 	xmlns:c="http://www.xidea.org/taglib/core">
 <body>
-    <c:for class="memberDetail" var="memberName" items="${memberInfos}">
-        <c:set var="memberInfo" value="${memberInfos[memberName]}" />
+<div id="memberTable">
+    <c:for var="memberName" items="${memberInfos}">
+        <c:set name="memberInfo" value="${memberInfos[memberName]}" />
+        <tr class="access-${memberInfo.getAccess()}">
+            <td><span
+                title="${memberInfo.getAccess()} static ${memberInfo.type}"
+                class="item-${memberInfo.type}">&#160;<c:if
+                test="${memberInfo.getPlace() == objectInfo}">
+                <a href="#${memberInfo.name}">${memberName}</a>
+            </c:if> <c:else>
+                <a
+                    href="#${memberInfo.name}">${memberName}</a>
+            </c:else> </span></td>
+            <td>${memberInfo.getAccess()}&#160;</td>
+            <td>${memberInfo.getShortDescription()}&#160;</td>
+        </tr>
+        <tr>
+            <td colspan="3">
+            </td>
+        </tr>
+    </c:for>
+</div>
+<div id="memberDetail">
+    <c:for var="memberName" items="${memberInfos}">
+        <c:set name="memberInfo" value="${memberInfos[memberName]}" />
         <a name="${memberInfo.name}"></a>
         <c:choose>
             <c:when test="${memberInfo.type == 'function'}">
                 <span class="item-function"> static ${memberInfo.getAccess()}
-                ${memberInfo.getReturnInfo()} <a
-                    href="?${memberInfo.fileInfo.getPath()}#${memberInfo.name}">${memberName}</a>${memberInfo.getParams()}</span>
+                <c:out value="${memberInfo.getReturnInfo()}"/> <a
+                    href="?${memberInfo.fileInfo.getPath()}#${memberInfo.name}">${memberName}</a><c:out value="${memberInfo.getParams()}"/></span>
                 <ul>
-                    <c:out value="${memberInfo.getDescription()}" default="&#160;"
-                        escapeXml='false' />
+                    <c:out value="${memberInfo.getDescription()}"/>
                 </ul>
                 <c:if test="${memberInfo.getParams().length}">
                     <h2>参数</h2>
                     <ul>
                         <c:for var="param" items="${memberInfo.getParams().data}">
                             <h3>${param.name}</h3>
-                            <p>${param.description||''}</p>
+                            <p><c:out value="${param.description||''}"/></p>
                         </c:for>
                     </ul>
                 </c:if>
                 <c:if test="${memberInfo.getReturnInfo().isValid()}">
                     <h2>返回</h2>
                     <ul>
-                        <p>${memberInfo.getReturnInfo().description||''}</p>
+                        <p><c:out value="${memberInfo.getReturnInfo().description||''}"/></p>
                     </ul>
                 </c:if>
             </c:when>
@@ -34,8 +56,7 @@
                 <span class="item-constructor"> static ${memberInfo.getAccess()} <a
                     href="?${memberInfo.fileInfo.getPath()}#${memberInfo.name}">${memberName}</a>${memberInfo.getParams()}</span>
                 <ul>
-                    <c:out value="${memberInfo.getDescription()}" default="&#160;"
-                        escapeXml='false' />
+                    <c:out value="${memberInfo.getDescription()}"/>
                 </ul>
                 <ul>
                     <p>参考：<a class="item-constructor"
@@ -46,9 +67,9 @@
                 <span class="item-object"> static ${memberInfo.getAccess()} <a
                     href="?${memberInfo.fileInfo.getPath()}#${memberInfo.name}">${memberName}</a></span>
                 <ul>
-                    ${memberInfo.getDescription()}&#160;
+                    <c:out value="${memberInfo.getDescription()}"/>&#160;
                 </ul>
-                <c:set var="constructorInfo" value="${memberInfo.getConstructorInfo()}" />
+                <c:set name="constructorInfo" value="${memberInfo.getConstructorInfo()}" />
                 <c:if test="${constructorInfo}">
                     <ul>
                         <p>构造器：<a class="item-constructor"
@@ -61,11 +82,12 @@
                 <a
                     href="?${memberInfo.fileInfo.getPath()}#${memberInfo.name}">${memberName}</a></span>
                 <ul>
-                    ${memberInfo.getDescription()}&#160;
+                    <c:out value="${memberInfo.getDescription()}"/>&#160;
                 </ul>
             </c:otherwise>
         </c:choose>
         <hr />
     </c:for>
+</div>
 </body>
 </html>

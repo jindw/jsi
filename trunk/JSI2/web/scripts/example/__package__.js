@@ -1,3 +1,3 @@
 /*
  */
-this.addScript('hello-world.js','sayHello');
+this.addScript('hello-world.js',['sayHello','message']);

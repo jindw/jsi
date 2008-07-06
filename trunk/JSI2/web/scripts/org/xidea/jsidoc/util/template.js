@@ -40,27 +40,23 @@ function Template(data,base,type){
  */
 Template.prototype.render = function(context){
     var buf = [];
-    renderList(createContext(context),this.data,buf)
+//    function c(){}
+//    c.prototype = context;
+//    context = new c()
+    renderList(this,context,this.data,buf)
     return buf.join("");
 }
 
-function createContext(context){
-    function c(){}
-    c.prototype = context;
-    context = new c();
-    context.____ = {}
-    return context;
-}
 
 /**
  * 模版渲染函数
  * @internal
  */
-function renderList(context,data,buf){
+function renderList(thisObject,context,data,buf){
     for(var i=0;i<data.length;i++){
         var item = data[i];
         if(item instanceof Function){
-            item(context,buf)
+            item.call(thisObject,context,buf)
         }else{
             buf.push(item);
         }
@@ -126,9 +122,9 @@ function buildExpression(data){
     //if(data[0]){//==1
     el = createExpression(el)
     return function(context,result){
-        var value = el(context);
+        var value = el.call(this,context);
         if(escape && value!=null ){
-            value = value.toString().replace(/[<>&'"]/g,xmlReplacer)
+            value = String(value).replace(/[<>&'"]/g,xmlReplacer)
         }
         result.push(value);
     }
@@ -145,7 +141,7 @@ function buildAttribute(data){
     var prefix = " "+data[1]+'="';
     var data = createExpression(data[2]);
     return function(context,result){
-        var buf = data(context);
+        var buf = data.call(this,context);
         //alert(buf)
         if(buf!=null){
             result.push(prefix,String(buf).replace(/[<>&'"]/g,xmlReplacer)+'"');
@@ -165,9 +161,9 @@ function buildIf(data,unitStack){
         var test = data(context);
         //alert(buf)
         if(test){
-            renderList(context,children,result);
+            renderList(this,context,children,result);
         }
-        context.____.$if = test;
+        this.$if = test;
     })
     unitStack.unshift(children);
 }
@@ -182,13 +178,13 @@ function buildElseIf(data,unitStack){
     var data = createExpression(data[1]);
     var children = [];
     unitStack[0].push(function(context,result){
-        if(!context.____.$if){
-            var test = data(context);
+        if(!this.$if){
+            var test = data.call(this,context);
             //alert(buf)
             if(test){
-                renderList(context,children,result);
+                renderList(this,context,children,result);
             }
-            context.____.$if = test;
+            this.$if = test;
         }
     })
     unitStack.unshift(children);
@@ -203,11 +199,10 @@ function buildElse(data,unitStack){
     unitStack.shift();
     var children = [];
     unitStack[0].push(function(context,result){
-         
-        if(!context.____.$if){
+        if(!this.$if){
             //alert(buf)
-            renderList(context,children,result);
-            //delete context.____.test;//留着也无妨
+            renderList(this,context,children,result);
+            //delete this.test;//留着也无妨
         }
     })
     unitStack.unshift(children);
@@ -223,7 +218,7 @@ function buildFor(data,unitStack){
     var statusName = data[3];
     var children = [];
     unitStack[0].push(function(context,result){
-        data = itemExpression(context);
+        data = itemExpression.call(this,context);
         //alert(data.constructor)
         if(!(data instanceof Array)){
             //hack $for as buf
@@ -234,21 +229,20 @@ function buildFor(data,unitStack){
             }
             data = $for;
         }
-        var status = context.____;
-        var preiousStatus = status.$for;
-        
+        var preiousStatus = this.$for;
         var i = 0;
         var len = data.length;
-        var $for = status.$for = {end:len-1};
-        //prepareFor(status);
-        context[statusName] = $for;
+        var $for = this.$for = {end:len-1};
+        //prepareFor(this);
+        statusName && (context[statusName] = $for);
         for(;i<len;i++){
             $for.index = i;
             context[varName] = data[i];
-            renderList(context,children,result);
+            renderList(this,context,children,result);
         }
-        status.$for = preiousStatus;
-        status.$if = len;
+        statusName && (context[statusName] = preiousStatus);
+        this.$for = preiousStatus;
+        this.$if = len;
     });
     unitStack.unshift(children);
 }
@@ -262,7 +256,7 @@ function buildVar(data){
     var name = data[1];
     var data = createExpression(data[2]);
     return function(context,result){
-        context[name] = data(context);
+        context[name] = data.call(this,context);
     }
 }
 
@@ -282,11 +276,18 @@ function xmlReplacer(c){
 }
 
 function createExpression(e){
-    return /^[\w_\$]+$/.test(e)? function(context){
+	/*
+	 * /^[\w_\$]+$/.test(e)? function(context){
             return (e in context) ? context[e] : window[e];
-        }:function(c){
-            with(c){//
-                return c.eval?c.eval(e):window.eval(e);
+        }:
+	 */
+    return function(_){
+            with(_){//
+	            try{
+	                return (_.eval||window.eval)(e,_);
+	            }catch(x){
+	            	//$log.error(x,this,c.constructor,1,e)
+	            }
             }
         }
 }

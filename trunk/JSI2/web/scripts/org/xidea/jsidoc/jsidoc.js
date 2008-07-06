@@ -224,7 +224,7 @@ var JSIDoc = {
     /**
      * @public
      */
-    genObject : function(document){
+    genObject : function(packageName,objectName){
         var packageInfo = PackageInfo.require(packageName);
         var objectInfo = packageInfo.getObjectInfoMap()[objectName];
         switch(objectInfo.type){
@@ -241,8 +241,7 @@ var JSIDoc = {
                 var template = getTemplate("native.xhtml");
         }
         //out.open();
-        return template.render(
-        {
+        return template.render({
             objectInfo:objectInfo
         });
     },
