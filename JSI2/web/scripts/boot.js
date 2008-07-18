@@ -689,7 +689,7 @@ var $import = function(freeEval,cachedScripts){
                     $log.trace("部署后不应出现的配置，需要压缩处理掉相关问题！！！");
                     objectNames = doObjectImport(
                         findPackage("org.xidea.jsidoc.export",
-                        true),"findGlobals")(loadTextByURL(this.scriptBase+scriptPath));
+                        true),"findGlobals")(loadTextByURL(scriptBase+"?path="+this.name.replace(/\.|$/g,'/')+scriptPath));
                     
                 }
             }
@@ -780,19 +780,6 @@ var $import = function(freeEval,cachedScripts){
 
 //    if("org.xidea.jsi.boot:exportPackage"){
 //        $JSI.Package = Package; 
-//    }
-
-
-
-//    /**
-//     * 包内文本加载函数
-//     * 为方便后续扩展
-//     * @private
-//     * @owner Package.prototype
-//     * @typeof function
-//     */
-//    function loadText(fileName){
-//        return loadTextByURL(this.scriptBase+ fileName);
 //    }
 
 
@@ -901,8 +888,13 @@ var $import = function(freeEval,cachedScripts){
             }
             
             if(packageMap[name] === undefined){
-                var pscript = getCachedScript(name,'') ||
-                    loadTextByURL(scriptBase+(name.replace(/\.|$/g,'/'))+ '__package__.js');
+                if(":debug"){
+                    var pscript = getCachedScript(name,'') ||
+                        loadTextByURL(scriptBase+"?path="+name.replace(/\.|$/g,'/')+ '__package__.js');
+                }else{
+                    var pscript = getCachedScript(name,'') ||
+                        loadTextByURL(scriptBase+name.replace(/\.|$/g,'/')+ '__package__.js');
+                }
                 if(pscript){
                     return new Package(name,pscript);
                 }
@@ -1033,8 +1025,13 @@ var $import = function(freeEval,cachedScripts){
                 cachedScripts[packageName][name]='';//clear cache
                 return cachedScript.call(loader);
             }else{
-                //不要清除文本缓存
-                return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(packageObject.scriptBase+name)));
+                if(":debug"){
+                    //不要清除文本缓存
+                    return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(scriptBase+"?path="+packageObject.name.replace(/\.|$/g,'/')+name)));
+                }else{
+                     //不要清除文本缓存
+                    return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(packageObject.scriptBase+name)));
+                }
             }
         }catch(e){
             if(":debug"){
@@ -1147,7 +1144,7 @@ var $import = function(freeEval,cachedScripts){
                 pkg = document.createElement("script");
                 (document.body||document.documentElement).appendChild(pkg);
                 if(":debug"){
-                    pkg.src=scriptBase +"?path="+ filePath;
+                    pkg.src=scriptBase +"?preload&path="+ filePath;
                 }else{
                     pkg.src=scriptBase + filePath.replace(/\.js$/,'__preload__.js');
                 }
@@ -1224,12 +1221,12 @@ var $import = function(freeEval,cachedScripts){
                             loadTextByURL(scriptBase+list[0].replace(/.js$/gm,"__preload__.js"))
                             document.write(list.join("\n").
                                 replace(/.js$/gm,"__preload__.js").
-                                replace(/.+/g,"<script src='"+scriptBase+"$&' onerror='return alert'></script>"));
+                                replace(/.+/g,"<script src='"+scriptBase+"?preload&path=$&' onerror='return alert'></script>"));
                         }catch(e){
                         }
                     }else{
                         document.write(list.join("\n").
-                                replace(/.+/g,"<script src='"+scriptBase+"?path=$&'></script>"))
+                                replace(/.+/g,"<script src='"+scriptBase+"?preload&path=$&'></script>"))
                     }
                 }else{
                     document.write(list.join("\n").
