@@ -13,8 +13,7 @@ function printEntry($path){
     if(file_exists(realpath("./$path"))){
         header("Content-Type:".findMimiType($path).";charset=UTF-8");
         readfile(realpath("./$path"));
-    }else 
-    if(function_exists("zip_open")){
+    }else if(function_exists("zip_open")){
         findFromLib(".",$path)||findFromLib("../WEB-INF/lib/",$path);
     }else{
         echo "//您的php没有安装zip扩展";
@@ -62,27 +61,33 @@ function findMimiType($path){
 function findPackageList($root) {
     $result = array();
     walkPackageTree($root, null, $result);
-    return $result;
+    $count = count($result);
+    $buf= '';
+    for($i=0;$i<$count;$i++){
+        $buf=$buf.",".$result[$i];
+    }
+    return substr($buf,1);
 
 }
 
-function walkPackageTree($dir, $prefix,
-        $result) {
-    if ($prefix == null) {
-        $subPrefix = "";
-    } else if ($prefix.length() == 0) {
-        $subPrefix = dir.getName();
+function walkPackageTree($base, $prefix, &$result) {
+    if ($prefix) {
+        $subPrefix = $prefix .'.' . basename($base);
     } else {
-        $subPrefix = $prefix + '.' + dir.getName();
+	    if ($prefix === null) {
+	        $subPrefix = "";
+	    } else {
+	        $subPrefix = basename($base);
+        }
     }
-    if (file_exists("__package__.js")){
-        result.add($subPrefix);
+    if ($subPrefix && file_exists($base."/__package__.js")){
+        array_push($result,$subPrefix);
     }
+    $dir = dir($base);
     while (false !== ($file = $dir->read())) {
-        if (is_dir($file)) {
-            $name = file.getName();
-            if (!$name.startsWith(".")) {
-                walkPackageTree($file, subPrefix, result);
+        if (is_dir("$base/$file")) {
+            if (substr($file,0,1) != ".") {
+                walkPackageTree("$base/$file", $subPrefix, $result);
             }
         }
     }
@@ -118,10 +123,10 @@ if($path != null){
     if(array_key_exists('externalScript',$_GET)){
         $externalScript = $_GET['externalScript'];
     }else{
-        $externalScript = "";
+        $externalScript = findPackageList(realpath("."));
     }
     header("Content-Type:text/html;");
-    echo("<html><frameset rows='100%'><frame src='index.php/org/xidea/jsidoc/index.html?externalScript=$externalScript'></frame></html>");
+    echo("<html><frameset rows='100%'><frame src='index.php/org/xidea/jsidoc/index.html?group.All%20Scripts=$externalScript'></frame></html>");
 }
 return;
 ?>/**/
