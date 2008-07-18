@@ -11,39 +11,31 @@
 ob_clean();
 function printEntry($path){
     if(file_exists(realpath("./$path"))){
+        header("Content-Type:".findMimiType($path).";charset=UTF-8");
         readfile(realpath("./$path"));
+    }else 
+    if(function_exists("zip_open")){
+        findFromLib(".",$path)||findFromLib("../WEB-INF/lib/",$path);
     }else{
-        $base = realpath("../WEB-INF/lib/");
+        echo "//您的php没有安装zip扩展";
+    }
+}
+function findFromLib($base,$path){
+    $base = realpath($base);
+    if($base){
         $dir = dir($base); 
         while (false !== ($file = $dir->read())) {
             if(strtolower(preg_replace('/.*\./',".",$file)) == ".jar"){
                 $zip = zip_open("$base\\$file");
                 while ($entry = zip_read($zip)) {
                     if (zip_entry_name($entry) == $path && zip_entry_open($zip, $entry, "r")) {
-                        $ext = strtolower(preg_replace('/.*\./',".",$path));
-                        $contentType = "text/html";
-                        switch($ext){
-                        case '.css':
-                            $contentType = "text/css";
-                            break;
-                        case '.png':
-                            $contentType = "image/png";
-                            break;
-                        case '.gif':
-                            $contentType = "image/gif";
-                            break;
-                        case '.jpeg':
-                        case '.jpg':
-                            $contentType = "image/jpeg";
-                            break;
-                        }
                         //$contentType = mime_content_type($path);
-                        header("Content-Type:$contentType;charset=UTF-8");
+                        header("Content-Type:".findMimiType($path).";charset=UTF-8");
                         echo zip_entry_read($entry, zip_entry_filesize($entry));
                         zip_entry_close($entry);
                         zip_close($zip);
                         $dir->close();
-                        return ;
+                        return true;
                     }
                 }
                 zip_close($zip);
@@ -52,8 +44,23 @@ function printEntry($path){
         $dir->close();
     }
 }
+function findMimiType($path){
+    switch(strtolower(preg_replace('/.*\./',".",$path))){
+    case '.css':
+        return "text/css";
+    case '.png':
+        return "image/png";
+    case '.gif':
+        return "image/gif";
+    case '.jpeg':
+    case '.jpg':
+        return "image/jpeg";
+    default:
+        return "text/html";
+    }
+}
 function findPackageList($root) {
-    $result = [];
+    $result = array();
     walkPackageTree($root, null, $result);
     return $result;
 
