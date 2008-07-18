@@ -1,4 +1,13 @@
-/**<?php echo("/");
+/**<?php
+//
+// PHP 版本的JSI 代理程序（开发期间使用）
+// 功能：
+// 1.即时编译
+// 2.类库支持
+// 3.JSIDoc系列工具支持
+//
+?>
+<?php echo("/");
 ob_clean();
 function printEntry($path){
     if(file_exists(realpath("./$path"))){
@@ -13,9 +22,22 @@ function printEntry($path){
                     if (zip_entry_name($entry) == $path && zip_entry_open($zip, $entry, "r")) {
                         $ext = strtolower(preg_replace('/.*\./',".",$path));
                         $contentType = "text/html";
-                        if($ext == '.css'){
+                        switch($ext){
+                        case '.css':
                             $contentType = "text/css";
+                            break;
+                        case '.png':
+                            $contentType = "image/png";
+                            break;
+                        case '.gif':
+                            $contentType = "image/gif";
+                            break;
+                        case '.jpeg':
+                        case '.jpg':
+                            $contentType = "image/jpeg";
+                            break;
                         }
+                        //$contentType = mime_content_type($path);
                         header("Content-Type:$contentType;charset=UTF-8");
                         echo zip_entry_read($entry, zip_entry_filesize($entry));
                         zip_entry_close($entry);
@@ -30,6 +52,39 @@ function printEntry($path){
         $dir->close();
     }
 }
+function findPackageList($root) {
+    $result = [];
+    walkPackageTree($root, null, $result);
+    return $result;
+
+}
+
+function walkPackageTree($dir, $prefix,
+        $result) {
+    if ($prefix == null) {
+        $subPrefix = "";
+    } else if ($prefix.length() == 0) {
+        $subPrefix = dir.getName();
+    } else {
+        $subPrefix = $prefix + '.' + dir.getName();
+    }
+    if (file_exists("__package__.js")){
+        result.add($subPrefix);
+    }
+    while (false !== ($file = $dir->read())) {
+        if (is_dir($file)) {
+            $name = file.getName();
+            if (!$name.startsWith(".")) {
+                walkPackageTree($file, subPrefix, result);
+            }
+        }
+    }
+    $dir->close();
+
+}
+
+
+
 if(array_key_exists('path',$_GET)){
    $path = $_GET['path'];
 }else if(array_key_exists('PATH_INFO',$_SERVER)){
@@ -62,11 +117,4 @@ if($path != null){
     echo("<html><frameset rows='100%'><frame src='index.php/org/xidea/jsidoc/index.html?externalScript=$externalScript'></frame></html>");
 }
 return;
-?>
-<?php
-//
-// PHP 版本的JSI 代理程序
-//
-?>
-/**/
-
+?>/**/
