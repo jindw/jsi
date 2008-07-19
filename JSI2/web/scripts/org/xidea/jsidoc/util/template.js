@@ -21,6 +21,7 @@ function Template(data,base,type){
             var parser = new ($import(inlineClass[type || 'xml'] ||type))();
             parser.parse(data,base);
             data = parser.result;
+            this.compileData = data;
         }
     }
     //alert(data.join("\n"));;
@@ -73,11 +74,15 @@ function compile(items){
         var item = items[i];
         //alert(typeof item)
         if(item.constructor == String){
+            if(":debug"){
+                if(!unitStack[0]){
+                    $log.error("无效结构",i,items,unitStack)
+                }
+            }
             unitStack[0].push(item);
         }else{
             //alert(typeof item)
-            item = compileItem(item,unitStack);
-            item != '' && unitStack[0].push(item);
+            compileItem(item,unitStack);
         }
     }
     return unitStack[0];
@@ -105,7 +110,6 @@ function compileItem(object,unitStack){
             return buildVar(object,unitStack);
         default://:end
             unitStack.shift();
-            return '';
             //return $import(type,null,null)(object)
     }
 }
@@ -115,19 +119,19 @@ function compileItem(object,unitStack){
  * el             [0,expression,unescape]
  * @internal
  */
-function buildExpression(data){
+function buildExpression(data,unitStack){
     //var type = data[0];
     var el = data[1];
     var escape = !data[2];
     //if(data[0]){//==1
     el = createExpression(el)
-    return function(context,result){
+    unitStack[0].push(function(context,result){
         var value = el.call(this,context);
         if(escape && value!=null ){
             value = String(value).replace(/[<>&'"]/g,xmlReplacer)
         }
         result.push(value);
-    }
+    });
 }
 
 /**
@@ -137,16 +141,16 @@ function buildExpression(data){
  * name = "${123}1230"?? 不可能出现，所以只能是i ==1
  * @internal
  */
-function buildAttribute(data){
+function buildAttribute(data,unitStack){
     var prefix = " "+data[1]+'="';
     var data = createExpression(data[2]);
-    return function(context,result){
+    unitStack[0].push(function(context,result){
         var buf = data.call(this,context);
         //alert(buf)
         if(buf!=null){
             result.push(prefix,String(buf).replace(/[<>&'"]/g,xmlReplacer)+'"');
         }
-    }
+    });
 }
 
 /**
@@ -252,11 +256,23 @@ function buildFor(data,unitStack){
  * var            [6,name,expression]             //设置某个变量（el||string）
  * @internal
  */
-function buildVar(data){
+function buildVar(data,unitStack){
     var name = data[1];
-    var data = createExpression(data[2]);
-    return function(context,result){
-        context[name] = data.call(this,context);
+    var data = data[2];
+    if(data){
+        data = createExpression(data);
+        unitStack[0].push(function(context,result){
+            context[name] = data.call(this,context);
+        })
+    }else{
+        //hack reuse data for hack
+        data = [];
+        unitStack[0].push(function(context,result){
+            result = [];
+            renderList(this,context,data,result);
+            context[name] = result.join('');
+        })
+        unitStack.unshift(data);//#end
     }
 }
 

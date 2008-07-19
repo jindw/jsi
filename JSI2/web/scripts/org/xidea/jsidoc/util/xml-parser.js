@@ -156,10 +156,20 @@ XMLParser.prototype.addParser(function(node,context){//for
  * 
  */
 function processIncludeTag(node,context){
-    var attributes = loadAttribute(node,{path:0,xpath:0});
+    var attributes = loadAttribute(node,{'var':0,path:0,xpath:0});
     var doc = node.ownerDocument;
     var parentURL = context.url;
 	try{
+	    if(attributes['var']){
+            var next = node.firstChild;
+            context.append([6,attributes['var']]);
+            if(next){
+                do{
+                    context.parseNode(next,context)
+                }while(next = next.nextSibling)
+            }
+            context.append([]);
+	    }
 	    if(attributes.path!=null){
 	        var doc = context.load(attributes.path,parentURL)
 	    }
@@ -249,10 +259,20 @@ function parseForTag(node,context){
     context.append([]);
 }
 function parseVarTag(node,context){
-    var attributes = loadAttribute(node,{name:1,value:1});
+    var attributes = loadAttribute(node,{name:1,value:0});
     var valueEl = toEL(attributes.value)
-    context.append([6,attributes.name,valueEl]);
-
+    if(valueEl){
+        context.append([6,attributes.name,valueEl]);
+    }else{
+        var next = node.firstChild;
+        context.append([6,attributes.name]);
+        if(next){
+            do{
+                context.parseNode(next,context)
+            }while(next = next.nextSibling)
+        }
+        context.append([]);
+    }
 }
 
 function parseOutTag(node,context){
