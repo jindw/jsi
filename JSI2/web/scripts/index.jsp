@@ -1,20 +1,18 @@
 /**<%='/'%><%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"
  isELIgnored="false"%><%
-    String url = request.getParameter("path");
-    String path = path.replaceFirst("__package__\.js$",".js");
-    System.out.println(url);
-    System.out.println(path);
-    if(path == null){
+    String path = request.getParameter("path");
+    String resourcePath = path.replaceFirst("__preload__\\.js$",".js");
+    if(resourcePath == null){
         // 没有指定需要代理的路径，跳转到JSI项目主页 
         response.sendRedirect("http://www.xidea.org/project/jsi");
         return;
     }
-    int pos = path.lastIndexOf('/');
-    String packageName = path.substring(0,pos).replace('/', '.');
-    String fileName = path.substring(pos+1);
+    int pos = resourcePath.lastIndexOf('/');
+    String packageName = resourcePath.substring(0,pos).replace('/', '.');
+    String fileName = resourcePath.substring(pos+1);
     String url = request.getRequestURI().substring(request.getContextPath().length());
     url = url.substring(0,url.lastIndexOf('/')+1);
-    java.io.InputStream in = application.getResourceAsStream(url + path);
+    java.io.InputStream in = application.getResourceAsStream(url + resourcePath);
     java.io.Reader reader = new java.io.InputStreamReader(in,response.getCharacterEncoding());
     StringBuffer source = new StringBuffer();
     char[] cbuf = new char[1024];
@@ -22,7 +20,7 @@
     while((count = reader.read(cbuf))>=0){
         source.append(cbuf,0,count);
     }
-    if(url.equals(path)){
+    if(path.equals(resourcePath)){
 %><%=source%>
 <%}else{%>$JSI.preload('<%=packageName%>','<%=fileName%>',function(){eval(this.varText);<%=source%>
 })
