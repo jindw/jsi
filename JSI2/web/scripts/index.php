@@ -113,8 +113,7 @@ if($path != null){
     $packageName = preg_replace("/\//", "." ,substr($path, 0, $pos));
     if($filePath!=$path){
         echo("\$JSI.preload('$packageName','$fileName',function(){eval(this.varText);");
-        printEntry();
-        //require($path)
+        printEntry($filePath);
         echo("\n})");
     }else{
         printEntry($path);

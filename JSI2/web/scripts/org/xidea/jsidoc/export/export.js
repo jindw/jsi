@@ -19,14 +19,14 @@ Exporter.prototype = {
     getResult : function(){
         return this.result;
     },
-    createCompileFilter : function(){
+    buildCompileFilter : function(){
         return defaultTemplateFilter;
     },
     getTextContent : function(){
         var content = [];
         var objectMap = {}
         var conflictMap = {};
-        var compileFilter = this.createCompileFilter();
+        var compileFilter = this.buildCompileFilter();
         for(var i = 0;i<this.result.length;i++){
             var path = this.result[i];
             var vars = findGlobals(content[i] = this.getSource(path,compileFilter));
@@ -55,7 +55,7 @@ Exporter.prototype = {
         return content.join('\n')
     },
     getXMLContent : function(){
-        var compileFilter = this.createCompileFilter();
+        var compileFilter = this.buildCompileFilter();
         var content = ["<script-map export='",this.imports.join(','),"'>\n"];
         var packageMap = {};
         var packageList = [];
@@ -85,7 +85,7 @@ Exporter.prototype = {
     getDocumentContent : function(jsiDocURL){
         var packageMap = {};
         var packageList = [];
-        var compileFilter = this.createCompileFilter();
+        var compileFilter = this.buildCompileFilter();
         for(var i = 0;i<this.result.length;i++){
             var path = this.result[i];
             var packageName = path.replace(/\/[^\/\/]+$/,"").replace(/\//g,'.');
@@ -169,29 +169,25 @@ var encodeMap = {
     '&':'\\u0026',
     '>':'\\u003e'
 }
-var templateRegexp = /([\$\w]+(?:\[(?:'[^']*?'|"[^"]*?")\])?)(\s*=\s*new\s+Template\s*\((?:[^)]|'[^']*?'|"[^"]*?"|)+\))/g
+var templateRegexp = /new\s+Template\s*\((?:[^)]|'[^']*?'|"[^"]*?")+\)/g;
 function encodeReplacer(c){
     return encodeMap[c];
 }
 
 function defaultTemplateFilter(text,path){
-    if(path.indexOf("jsidoc.js")>0){
-    $log.error(templateRegexp.test(text));
-    }
     if(templateRegexp.test(text)){
-        $log.error(path)
         $import(path,{});
-        $log.error(path)
         var packageObject = $import(path.replace(/\/[^\/]+$/,':').replace(/\//g,'.'));
         var loader = packageObject.loaderMap[path.replace(/.*\//,'')];
-        text = text.replace(templateRegexp,function(rawText,name){
-            var object = loader.hook(name);
-            if(object && object.compileData){
-                object = JSON.serialize(object.compileData);
-                return name + "=new Template("+object+")";
-            }else{
-                return rawText;
-            }
+        text = text.replace(templateRegexp,function(template){
+            try{
+                var object = loader.hook(template);
+                if(object && object.compileData){
+                    object = JSON.serialize(object.compileData);
+                    return "new Template("+object+")";
+                }
+            }catch(e){$log.error("替换出错：",template)}
+            return template;
         });
     }
     return text;
