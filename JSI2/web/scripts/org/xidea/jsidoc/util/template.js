@@ -69,47 +69,47 @@ function renderList(thisObject,context,data,buf){
  * @internal
  */
 function compile(items){
-    var unitStack = [[]];
+    var itemsStack = [[]];
     for(var i = 0;i<items.length;i++){
         var item = items[i];
         //alert(typeof item)
         if(item.constructor == String){
             if(":debug"){
-                if(!unitStack[0]){
-                    $log.error("无效结构",i,items,unitStack)
+                if(!itemsStack[0]){
+                    $log.error("无效结构",i,items,itemsStack)
                 }
             }
-            unitStack[0].push(item);
+            itemsStack[0].push(item);
         }else{
             //alert(typeof item)
-            compileItem(item,unitStack);
+            compileItem(item,itemsStack);
         }
     }
-    return unitStack[0];
+    return itemsStack[0];
 }
 
 /**
  * 模板单元编译函数
  * @internal
  */
-function compileItem(object,unitStack){
+function compileItem(object,itemsStack){
     switch(object[0]){
         case 0://":el":
-            return buildExpression(object,unitStack);
+            return buildExpression(object,itemsStack);
         case 1://":attribute":
-            return buildAttribute(object,unitStack);
+            return buildAttribute(object,itemsStack);
         case 2://":if":
-            return buildIf(object,unitStack);
+            return buildIf(object,itemsStack);
         case 3://":else-if":
-            return buildElseIf(object,unitStack);
+            return buildElseIf(object,itemsStack);
         case 4://":else":
-            return buildElse(object,unitStack);
+            return buildElse(object,itemsStack);
         case 5://":for":
-            return buildFor(object,unitStack);
+            return buildFor(object,itemsStack);
         case 6://":set"://var
-            return buildVar(object,unitStack);
+            return buildVar(object,itemsStack);
         default://:end
-            unitStack.shift();
+            itemsStack.shift();
             //return $import(type,null,null)(object)
     }
 }
@@ -119,13 +119,13 @@ function compileItem(object,unitStack){
  * el             [0,expression,unescape]
  * @internal
  */
-function buildExpression(data,unitStack){
+function buildExpression(data,itemsStack){
     //var type = data[0];
     var el = data[1];
     var escape = !data[2];
     //if(data[0]){//==1
     el = createExpression(el)
-    unitStack[0].push(function(context,result){
+    itemsStack[0].push(function(context,result){
         var value = el.call(this,context);
         if(escape && value!=null ){
             value = String(value).replace(/[<>&'"]/g,xmlReplacer)
@@ -141,10 +141,10 @@ function buildExpression(data,unitStack){
  * name = "${123}1230"?? 不可能出现，所以只能是i ==1
  * @internal
  */
-function buildAttribute(data,unitStack){
+function buildAttribute(data,itemsStack){
     var prefix = " "+data[1]+'="';
     var data = createExpression(data[2]);
-    unitStack[0].push(function(context,result){
+    itemsStack[0].push(function(context,result){
         var buf = data.call(this,context);
         //alert(buf)
         if(buf!=null){
@@ -158,10 +158,10 @@ function buildAttribute(data,unitStack){
  * if             [2,expression]                  //
  * @internal
  */
-function buildIf(data,unitStack){
+function buildIf(data,itemsStack){
     var data = createExpression(data[1]);
     var children = [];
-    unitStack[0].push(function(context,result){
+    itemsStack[0].push(function(context,result){
         var test = data(context);
         //alert(buf)
         if(test){
@@ -169,7 +169,7 @@ function buildIf(data,unitStack){
         }
         this.$if = test;
     })
-    unitStack.unshift(children);
+    itemsStack.unshift(children);
 }
 
 /**
@@ -177,11 +177,11 @@ function buildIf(data,unitStack){
  * else if        [3,expression]                  //
  * @internal
  */
-function buildElseIf(data,unitStack){
-    unitStack.shift();
+function buildElseIf(data,itemsStack){
+    itemsStack.shift();
     var data = createExpression(data[1]);
     var children = [];
-    unitStack[0].push(function(context,result){
+    itemsStack[0].push(function(context,result){
         if(!this.$if){
             var test = data.call(this,context);
             //alert(buf)
@@ -191,7 +191,7 @@ function buildElseIf(data,unitStack){
             this.$if = test;
         }
     })
-    unitStack.unshift(children);
+    itemsStack.unshift(children);
 }
 
 /**
@@ -199,17 +199,17 @@ function buildElseIf(data,unitStack){
  * else           [4]                             //
  * @internal
  */
-function buildElse(data,unitStack){
-    unitStack.shift();
+function buildElse(data,itemsStack){
+    itemsStack.shift();
     var children = [];
-    unitStack[0].push(function(context,result){
+    itemsStack[0].push(function(context,result){
         if(!this.$if){
             //alert(buf)
             renderList(this,context,children,result);
             //delete this.test;//留着也无妨
         }
     })
-    unitStack.unshift(children);
+    itemsStack.unshift(children);
 }
 
 /**
@@ -217,11 +217,11 @@ function buildElse(data,unitStack){
  * @internal
  * for:[5,var,itemExpression,status]
  */
-function buildFor(data,unitStack){
+function buildFor(data,itemsStack){
     var varName = data[1];    var itemExpression = createExpression(data[2]);
     var statusName = data[3];
     var children = [];
-    unitStack[0].push(function(context,result){
+    itemsStack[0].push(function(context,result){
         data = itemExpression.call(this,context);
         //alert(data.constructor)
         if(!(data instanceof Array)){
@@ -248,7 +248,7 @@ function buildFor(data,unitStack){
         this.$for = preiousStatus;
         this.$if = len;
     });
-    unitStack.unshift(children);
+    itemsStack.unshift(children);
 }
 
 /**
@@ -256,23 +256,23 @@ function buildFor(data,unitStack){
  * var            [6,name,expression]             //设置某个变量（el||string）
  * @internal
  */
-function buildVar(data,unitStack){
+function buildVar(data,itemsStack){
     var name = data[1];
     var data = data[2];
     if(data){
         data = createExpression(data);
-        unitStack[0].push(function(context,result){
+        itemsStack[0].push(function(context,result){
             context[name] = data.call(this,context);
         })
     }else{
         //hack reuse data for hack
         data = [];
-        unitStack[0].push(function(context,result){
+        itemsStack[0].push(function(context,result){
             result = [];
             renderList(this,context,data,result);
             context[name] = result.join('');
         })
-        unitStack.unshift(data);//#end
+        itemsStack.unshift(data);//#end
     }
 }
 
