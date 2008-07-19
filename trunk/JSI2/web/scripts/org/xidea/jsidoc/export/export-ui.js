@@ -24,6 +24,7 @@ var ExportUI = {
     prepare:function(doc,sourcePackage){
     	exportDocument = doc;
         var nameList = findPackages(sourcePackage,true);
+        packageNodes = [];
         for(var i=0; i<nameList.length; i++) {
             var name = nameList[i];
         	var packageObject = $import(name+':');
@@ -78,8 +79,8 @@ var ExportUI = {
         var level = levelInput.value;
         var prefix = exportDocument.getElementById(PREFIX_CONTAINER_ID);
         var jsidoc = exportDocument.getElementById(JSIDOC_URL_CONTAINER_ID);
-        prefix.style.display = (level == 1 || level ==2) ? 'block':'none';
-        jsidoc.style.display = (level == -2) ? 'block':'none';
+        prefix.style.display = (level == 1 || level ==2) ? 'inline':'none';
+        jsidoc.style.display = (level == -2) ? 'inline':'none';
         var lis = levelInput.form.getElementsByTagName("li");
         for(var i=0;i<lis.length;i++){
             lis[i].style.display = (i-3 == level)?'block':'none';
