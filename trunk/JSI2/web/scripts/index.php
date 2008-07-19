@@ -107,12 +107,13 @@ if(array_key_exists('path',$_GET)){
 }
 
 if($path != null){
+    $filePath = preg_replace("/__preload__\.js$/",".js",$path);
     $pos = strrpos($path, '/');
-    $fileName = substr($path, $pos + 1);
+    $fileName = substr($filePath, $pos + 1);
     $packageName = preg_replace("/\//", "." ,substr($path, 0, $pos));
-    if(array_key_exists('preload',$_GET)){
+    if($filePath!=$path){
         echo("\$JSI.preload('$packageName','$fileName',function(){eval(this.varText);");
-        printEntry($path);
+        printEntry();
         //require($path)
         echo("\n})");
     }else{

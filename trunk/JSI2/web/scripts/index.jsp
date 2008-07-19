@@ -1,6 +1,9 @@
 /**<%='/'%><%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"
  isELIgnored="false"%><%
-    String path = request.getParameter("path");
+    String url = request.getParameter("path");
+    String path = path.replaceFirst("__package__\.js$",".js");
+    System.out.println(url);
+    System.out.println(path);
     if(path == null){
         // 没有指定需要代理的路径，跳转到JSI项目主页 
         response.sendRedirect("http://www.xidea.org/project/jsi");
@@ -19,10 +22,11 @@
     while((count = reader.read(cbuf))>=0){
         source.append(cbuf,0,count);
     }
-    
-%>$JSI.preload('<%=packageName%>','<%=fileName%>',function(){eval(this.varText);<%=source%>
+    if(url.equals(path)){
+%><%=source%>
+<%}else{%>$JSI.preload('<%=packageName%>','<%=fileName%>',function(){eval(this.varText);<%=source%>
 })
-
+<%}%>
 <%--
 您可以修改jsp的page指令，达到修改代理脚本编码的目的。
 这是一个JSP 版本的 JSI 代理程序 

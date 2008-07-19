@@ -5,7 +5,6 @@
  * @author jindw
  * @version $Id: jsidoc.js,v 1.9 2008/02/28 14:39:09 jindw Exp $
  */
-var templateMap = {};
 var documentMap = {};
 var scriptBase = this.scriptBase
 var documentBase = (scriptBase + 'html/').substr($JSI.scriptBase.length);
@@ -331,6 +330,7 @@ while(win!=win.top){
 }
 var checkLocation = win.location;
 var checkInterval;
+var templateMap = {}
 function preload(pkg,file2dataMap,value){
     jsiCacher.apply($JSI,arguments);
     var base = pkg.replace(/\.|(.)$/g,'$1/');
@@ -343,17 +343,18 @@ function preload(pkg,file2dataMap,value){
     }
 
 };
+templateMap["constructor.xhtml"]=new Template("constructor.xhtml",scriptBase+"html/");
+templateMap["export.xhtml"]=new Template("export.xhtml",scriptBase+"html/");
+templateMap["function.xhtml"]=new Template("function.xhtml",scriptBase+"html/");
+templateMap["menu.xhtml"]=new Template("menu.xhtml",scriptBase+"html/");
+templateMap["native.xhtml"]=new Template("native.xhtml",scriptBase+"html/");
+templateMap["object.xhtml"]=new Template("object.xhtml",scriptBase+"html/");
+templateMap["package.xhtml"]=new Template("package.xhtml",scriptBase+"html/");
+templateMap["part.xhtml"]=new Template("part.xhtml",scriptBase+"html/");
+templateMap["source.xhtml"]=new Template("source.xhtml",scriptBase+"html/");
 /**
  * @internal
  */
 function getTemplate(path){
-    if(templateMap[path]){
-        return templateMap[path]
-    }
-    try{
-        var template = new Template(path,scriptBase+"html/");
-    }catch(e){
-        $log.error(e)
-    }
-    return templateMap[path] = template;
+    return templateMap[path]
 }
