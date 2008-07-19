@@ -98,6 +98,9 @@ public class JSIFilter implements Filter {
 					path)) {
 				return;
 			}
+			if (isIndex(path)) {
+				path = req.getParameter("path");
+			}
 			String resourcePath = getResourcePath(req, path);
 
 			// 容错设计
@@ -304,8 +307,6 @@ public class JSIFilter implements Filter {
 	public String getResourcePath(ServletRequest req, String path) {
 		if (path.endsWith(JSIUtil.PRELOAD_FILE_POSTFIX)) {
 			return path.replaceFirst(JSIUtil.PRELOAD_FILE_POSTFIX + "$", ".js");
-		} else if (isIndex(path)) {
-			return req.getParameter("path");
 		} else {
 			return null;
 		}

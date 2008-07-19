@@ -19,16 +19,17 @@ Exporter.prototype = {
     getResult : function(){
         return this.result;
     },
-//    isLoaded : function(path){
-//        var packageFileObject = parsePath(path);
-//    },
+    createCompileFilter : function(){
+        return defaultTemplateFilter;
+    },
     getTextContent : function(){
         var content = [];
         var objectMap = {}
         var conflictMap = {};
+        var compileFilter = this.createCompileFilter();
         for(var i = 0;i<this.result.length;i++){
             var path = this.result[i];
-            var vars = findGlobals(content[i] = this.getSource(path));
+            var vars = findGlobals(content[i] = this.getSource(path,compileFilter));
             var j = vars.length;
             while(j--){
                 var n = vars[j];
@@ -43,9 +44,9 @@ Exporter.prototype = {
                 }
             }
         }
-        for(n in conflictMap){
+        for(var n in conflictMap){
             var report = ["直接合并可能引起脚本冲突，客户端检测到可能的脚本冲突如下：\n"];
-            for(n in conflictMap){
+            for(var n in conflictMap){
                 report.push(n,":",objectMap[n],',',conflictMap[n],'\n');
             }
             confirm(report.join(''))
@@ -54,6 +55,7 @@ Exporter.prototype = {
         return content.join('\n')
     },
     getXMLContent : function(){
+        var compileFilter = this.createCompileFilter();
         var content = ["<script-map export='",this.imports.join(','),"'>\n"];
         var packageMap = {};
         var packageList = [];
@@ -64,7 +66,7 @@ Exporter.prototype = {
                 packageMap[packageName] = true;
                 packageList.push(packageName)
             }
-            var txt = this.getSource(path);
+            var txt = this.getSource(path,compileFilter);
             content.push("<script path='",path,"'>") ;
             content.push(txt.replace(/[<>&]/g,xmlReplacer));
             content.push("</script>\n");
@@ -72,7 +74,7 @@ Exporter.prototype = {
         packageList = findPackages(packageList,true);
         for(var i = 0;i<packageList.length;i++){
             var path = packageList[i].replace(/\./g,'/')+"/__package__.js";
-            var txt = this.getSource(path);
+            var txt = this.getSource(path,compileFilter);
             content.push("<script path='",path,"'>") ;
             content.push(txt.replace(/[<>&]/g,xmlReplacer));
             content.push("</script>\n");
@@ -83,6 +85,7 @@ Exporter.prototype = {
     getDocumentContent : function(jsiDocURL){
         var packageMap = {};
         var packageList = [];
+        var compileFilter = this.createCompileFilter();
         for(var i = 0;i<this.result.length;i++){
             var path = this.result[i];
             var packageName = path.replace(/\/[^\/\/]+$/,"").replace(/\//g,'.');
@@ -98,7 +101,7 @@ Exporter.prototype = {
             var packageObject = $import(packageName + ':');
             packageMap[packageName] = {'':this.getSource(base+"__package__.js")}
             for(var file in packageObject.scriptObjectMap){
-                var txt = this.getSource(base + file);
+                var txt = this.getSource(base + file,compileFilter);
                 packageMap[packageName][file] = txt;
             }
         }
@@ -139,7 +142,7 @@ Exporter.prototype = {
         content.push("");
         return content.join('')
     },
-    getSource:function(path){
+    getSource:function(path,compileFilter){
         if(parentJSIDoc && parentJSIDoc.getSource){
             //$log.info(packageName,path.substr(packageName.length+1));
             var rtv = parentJSIDoc.getSource(path);
@@ -149,22 +152,55 @@ Exporter.prototype = {
         if(rtv == null){
             $log.error("装载源代码失败:",path);
         }
+        if(compileFilter){
+            rtv = compileFilter(rtv,path);
+        }
         return rtv;
     }
 }
-function encodeReplacer(c){
-    return encodeMap[c];
+try{
+   var parentJSIDoc = parent.JSIDoc;
+}catch(e){
 }
+
 var encodeMap = {
     '--':'\\u002d-',
     '<':'\\u003c',
     '&':'\\u0026',
     '>':'\\u003e'
 }
-try{
-   var parentJSIDoc = parent.JSIDoc;
-}catch(e){
+var templateRegexp = /([\$\w]+(?:\[(?:'[^']*?'|"[^"]*?")\])?)(\s*=\s*new\s+Template\s*\((?:[^)]|'[^']*?'|"[^"]*?"|)+\))/g
+function encodeReplacer(c){
+    return encodeMap[c];
 }
+
+function defaultTemplateFilter(text,path){
+    if(path.indexOf("jsidoc.js")>0){
+    $log.error(templateRegexp.test(text));
+    }
+    if(templateRegexp.test(text)){
+        $log.error(path)
+        $import(path,{});
+        $log.error(path)
+        var packageObject = $import(path.replace(/\/[^\/]+$/,':').replace(/\//g,'.'));
+        var loader = packageObject.loaderMap[path.replace(/.*\//,'')];
+        text = text.replace(templateRegexp,function(rawText,name){
+            var object = loader.hook(name);
+            if(object && object.compileData){
+                object = JSON.serialize(object.compileData);
+                return name + "=new Template("+object+")";
+            }else{
+                return rawText;
+            }
+        });
+    }
+    return text;
+}
+
+
+
+
+
 
 function addDependenceInfo(dependenceInfo,result,cachedInfos){
     var befores = dependenceInfo.getBeforeInfos();

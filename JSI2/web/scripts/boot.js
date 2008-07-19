@@ -1144,7 +1144,7 @@ var $import = function(freeEval,cachedScripts){
                 pkg = document.createElement("script");
                 (document.body||document.documentElement).appendChild(pkg);
                 if(":debug"){
-                    pkg.src=scriptBase +"?preload&path="+ filePath;
+                    pkg.src=scriptBase +"?path="+ filePath.replace(/\.js$/,'__preload__.js');
                 }else{
                     pkg.src=scriptBase + filePath.replace(/\.js$/,'__preload__.js');
                 }
@@ -1221,12 +1221,13 @@ var $import = function(freeEval,cachedScripts){
                             loadTextByURL(scriptBase+list[0].replace(/.js$/gm,"__preload__.js"))
                             document.write(list.join("\n").
                                 replace(/.js$/gm,"__preload__.js").
-                                replace(/.+/g,"<script src='"+scriptBase+"?preload&path=$&' onerror='return alert'></script>"));
+                                replace(/.+/g,"<script src='"+scriptBase+"?path=$&' onerror='return alert'></script>"));
                         }catch(e){
                         }
                     }else{
                         document.write(list.join("\n").
-                                replace(/.+/g,"<script src='"+scriptBase+"?preload&path=$&'></script>"))
+                                replace(/\.js$/gm,'__preload__.js').
+                                replace(/.+/g,"<script src='"+scriptBase+"?path=$&'></script>"))
                     }
                 }else{
                     document.write(list.join("\n").
