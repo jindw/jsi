@@ -66,6 +66,15 @@
                     <input name="level" onclick="ExportUI.checkLevel(this)" value="-2" type="radio" checked="true"  title="导出JSIDoc文档" />导出文档
                     <input name="level" onclick="ExportUI.checkLevel(this)" value="-3" type="radio" checked="true"  title="导出JSI分析报告" />导出分析报告
                 </div>
+                <div>
+                    <span id="prefixContainer">内部变量前缀:<input size="4" name="prefix" value="_$" type="text" title="当选择隔离冲突时，需要指定混淆后内部变量前缀，以避免二次冲突"/></span>
+                    <span id="jsidocURLContainer">
+                          服务地址:
+                       <input id="jsidocURL" size="40" name="jsidocURL"
+                            value="http://www.xidea.org/project/jsidoc/"
+                            type="text" title="指定您架设的文档服务器"/></span>
+                    <button id="exportButton" disabled="true" onclick="ExportUI.doExport(this.form);return false;">   导出&gt;&gt;   </button>
+                </div>
                 <ul>
                     <li>输出脚本分析报告，可供代码复查时参考</li>
                     <li>将导出的数据保存于hta或者html中,查看时需要连接到网络,才能正确解析,您也可以指定一个本地的文档服务器.</li>
@@ -74,11 +83,6 @@
                     <li>隔离内部冲突是指混淆掉文件内部的未公开全局变量,这需要服务端支持,<b>如果你现在的导出环境不支持java,可以导出成xml,再交由JSA处理</b></li>
                     <li>隔离全部冲突有和JSI等价的隔离级别,这需要服务端支持,<b>如果你现在的导出环境不支持java,可以导出成xml,再交由JSA处理</b></li>
                 </ul>
-                <div>
-                    <div id="prefixContainer">内部变量前缀:<input size="4" name="prefix" value="_$" type="text" title="当选择隔离冲突时，需要指定混淆后内部变量前缀，以避免二次冲突"/></div>
-                    <div id="jsidocURLContainer">文档服务地址:<input size="40" name="jsidocURL" value="http://www.xidea.org/project/jsidoc/" type="text" title="指定您架设的文档服务器"/></div>
-                    <button id="exportButton" disabled="true" onclick="ExportUI.doExport(this.form);return false;">   导出&gt;&gt;   </button>
-                </div>
             </div>
             </form>
         </fieldset>

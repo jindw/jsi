@@ -75,6 +75,7 @@ td{
     right:5px;
 }
 fieldset{
+    font-size:12px;
     height:32%;
     padding:0px;
     padding-top:5px;
@@ -88,4 +89,9 @@ legend{
     height:85%;
     overflow:auto;
     cursor:pointer;
+}
+#jsidocURL{
+    font-size:11px;
+    height:12px;
+    width:200px;
 }
