@@ -358,5 +358,5 @@ function preload(pkg,file2dataMap,value){
  * @internal
  */
 function getTemplate(path){
-    return templateMap[path]
+    return templateMap[path];
 }
