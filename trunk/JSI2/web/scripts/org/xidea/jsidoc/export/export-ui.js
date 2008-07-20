@@ -15,6 +15,7 @@ var OBJECT_OUTPUT_ID = "objectOutput";
 var EXPORT_BUTTON = "exportButton";
 var PREFIX_CONTAINER_ID = "prefixContainer";
 var JSIDOC_URL_CONTAINER_ID = "jsidocURLContainer";
+var MIX_TEMPLATE_CONTAINER_ID = "mixTemplateContainer";
 var compressServiceURL = $JSI.scriptBase + "export.action";
 
 var inc = 0;
@@ -79,8 +80,10 @@ var ExportUI = {
         var level = levelInput.value;
         var prefix = exportDocument.getElementById(PREFIX_CONTAINER_ID);
         var jsidoc = exportDocument.getElementById(JSIDOC_URL_CONTAINER_ID);
+        var mixTemplate = exportDocument.getElementById(MIX_TEMPLATE_CONTAINER_ID);
         prefix.style.display = (level == 1 || level ==2) ? 'inline':'none';
         jsidoc.style.display = (level == -2) ? 'inline':'none';
+        mixTemplate.style.display = (level == -3) ? 'none':'inline';
         var lis = levelInput.form.getElementsByTagName("li");
         for(var i=0;i<lis.length;i++){
             lis[i].style.display = (i-3 == level)?'block':'none';
@@ -90,6 +93,7 @@ var ExportUI = {
     doExport : function(form){
         var level = form.level;
         var i=level.length;
+        var mixTemplate = form.mixTemplate.checked;
         while(i--){
             var input = level[i];
             if(input.checked){
@@ -99,6 +103,9 @@ var ExportUI = {
         }
         var exporter = new Exporter();
         for(var path in checkMap){
+            if(mixTemplate){
+                exporter.addFeatrue("mixTemplate");
+            }
             exporter.addImport(path);
         }
         switch(level*1){
