@@ -10,6 +10,7 @@ function Exporter(){
     this.imports = [];
     this.result = [];
     this.cachedInfos = [];
+    this.featrueMap = {};
 }
 Exporter.prototype = {
     addImport : function(path){
@@ -19,14 +20,29 @@ Exporter.prototype = {
     getResult : function(){
         return this.result;
     },
-    buildCompileFilter : function(){
-        return defaultTemplateFilter;
+    addFeatrue : function(featrue){
+        this.featrueMap[featrue] = true;
+    },
+    buildSourceFilter : function(){
+        var list = [];
+        function filter(text,path){
+            var i=list.length
+            while(i--){
+                text = list[i](text,path);
+            }
+            return text;
+        }
+        if(this.featrueMap.mixTemplate){
+            list.push(defaultTemplateFilter);
+        }
+        list.reverse();
+        return filter;
     },
     getTextContent : function(){
         var content = [];
         var objectMap = {}
         var conflictMap = {};
-        var compileFilter = this.buildCompileFilter();
+        var compileFilter = this.buildSourceFilter();
         for(var i = 0;i<this.result.length;i++){
             var path = this.result[i];
             var vars = findGlobals(content[i] = this.getSource(path,compileFilter));
@@ -55,7 +71,7 @@ Exporter.prototype = {
         return content.join('\n')
     },
     getXMLContent : function(){
-        var compileFilter = this.buildCompileFilter();
+        var compileFilter = this.buildSourceFilter();
         var content = ["<script-map export='",this.imports.join(','),"'>\n"];
         var packageMap = {};
         var packageList = [];
@@ -85,7 +101,7 @@ Exporter.prototype = {
     getDocumentContent : function(jsiDocURL){
         var packageMap = {};
         var packageList = [];
-        var compileFilter = this.buildCompileFilter();
+        var compileFilter = this.buildSourceFilter();
         for(var i = 0;i<this.result.length;i++){
             var path = this.result[i];
             var packageName = path.replace(/\/[^\/\/]+$/,"").replace(/\//g,'.');

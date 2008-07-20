@@ -85,6 +85,10 @@ legend{
     font-size: 110%;
     font-weight:bold;
 }
+fieldset label{
+    padding-left:18px;
+    font-weight:bold;
+}
 #fileOutput,#objectOutput{
     height:85%;
     overflow:auto;
