@@ -184,7 +184,7 @@ function defaultTemplateFilter(text,path){
                 var object = loader.hook(template);
                 if(object && object.compileData){
                     object = JSON.serialize(object.compileData);
-                    return "new Template("+object+")";
+                    return "new Template"+"("+object+")";
                 }
             }catch(e){$log.error("替换出错：",template)}
             return template;
