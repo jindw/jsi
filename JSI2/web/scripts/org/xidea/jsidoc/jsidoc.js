@@ -330,7 +330,17 @@ while(win!=win.top){
 }
 var checkLocation = win.location;
 var checkInterval;
-var templateMap = {}
+var templateMap = {
+	"constructor.xhtml" : new Template("constructor.xhtml",scriptBase+"html/"),
+	"export.xhtml" : new Template("export.xhtml",scriptBase+"html/"),
+	"function.xhtml" : new Template("function.xhtml",scriptBase+"html/"),
+	"menu.xhtml" : new Template("menu.xhtml",scriptBase+"html/"),
+	"native.xhtml" : new Template("native.xhtml",scriptBase+"html/"),
+	"object.xhtml" : new Template("object.xhtml",scriptBase+"html/"),
+	"package.xhtml" : new Template("package.xhtml",scriptBase+"html/"),
+	"part.xhtml" : new Template("part.xhtml",scriptBase+"html/"),
+	"source.xhtml" : new Template("source.xhtml",scriptBase+"html/")
+};
 function preload(pkg,file2dataMap,value){
     jsiCacher.apply($JSI,arguments);
     var base = pkg.replace(/\.|(.)$/g,'$1/');
@@ -343,15 +353,7 @@ function preload(pkg,file2dataMap,value){
     }
 
 };
-templateMap["constructor.xhtml"]=new Template("constructor.xhtml",scriptBase+"html/");
-templateMap["export.xhtml"]=new Template("export.xhtml",scriptBase+"html/");
-templateMap["function.xhtml"]=new Template("function.xhtml",scriptBase+"html/");
-templateMap["menu.xhtml"]=new Template("menu.xhtml",scriptBase+"html/");
-templateMap["native.xhtml"]=new Template("native.xhtml",scriptBase+"html/");
-templateMap["object.xhtml"]=new Template("object.xhtml",scriptBase+"html/");
-templateMap["package.xhtml"]=new Template("package.xhtml",scriptBase+"html/");
-templateMap["part.xhtml"]=new Template("part.xhtml",scriptBase+"html/");
-templateMap["source.xhtml"]=new Template("source.xhtml",scriptBase+"html/");
+
 /**
  * @internal
  */
