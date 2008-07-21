@@ -112,7 +112,11 @@ function parseEL(fn,expression,buf,unescape){
         if(expression != el2){
             expression = compileEL(expression)
         }
-        buf.push([0,expression,unescape])
+        expression = [0,expression]
+        if(unescape){
+            expression.push(unescape);
+        }
+        buf.push(expression);
     }
 }
 

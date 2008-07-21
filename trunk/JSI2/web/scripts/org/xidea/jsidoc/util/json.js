@@ -87,7 +87,7 @@ function serialize(value) {
             }
             return '{' + buf.join(',') + '}';
         case 'number':
-            if(isFinite(value)){
+            if(!isFinite(value)){
                 value = 'null';
             }
         default:
