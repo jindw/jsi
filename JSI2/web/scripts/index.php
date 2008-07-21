@@ -9,6 +9,19 @@
 ?>
 <?php echo("/");
 ob_clean();
+if(array_key_exists('path',$_GET)){
+   $path = $_GET['path'];
+}else if(array_key_exists('PATH_INFO',$_SERVER)){
+   $path = $_SERVER['PATH_INFO'] ;
+   $path = substr($path, 1);
+}else{
+   $path = null;
+}
+if($path == 'export.action'){
+   header("HTTP/1.0 404 Not Found");
+   return;
+}
+
 function printEntry($path){
     $classpath = array(
         "../WEB-INF/classes"
@@ -140,14 +153,6 @@ function walkPackageTree($base, $prefix, &$result) {
 
 
 
-if(array_key_exists('path',$_GET)){
-   $path = $_GET['path'];
-}else if(array_key_exists('PATH_INFO',$_SERVER)){
-   $path = $_SERVER['PATH_INFO'] ;
-   $path = substr($path, 1);
-}else{
-   $path = null;
-}
 
 if($path != null){
     $filePath = preg_replace("/__preload__\.js$/",".js",$path);

@@ -21,6 +21,8 @@ html,body{
     background-repeat: no-repeat;
     cursor:pointer;
     width:20px;
+    height:20px;
+    display:block;
 }
 .checkbox1{
     background-position: 0 -32px;
