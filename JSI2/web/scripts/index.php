@@ -10,38 +10,97 @@
 <?php echo("/");
 ob_clean();
 function printEntry($path){
+    $classpath = array(
+        "../WEB-INF/classes"
+        //,"../../../JSI2/web/scripts/"
+    );
+    foreach ($classpath as $dir){
+        if(file_exists(realpath("$dir$path"))){
+	        header("Content-Type:".findMimiType($path).";charset=UTF-8");
+	        readfile(realpath("$dir$path"));
+	        return;
+	    }
+    }
     if(file_exists(realpath("./$path"))){
         header("Content-Type:".findMimiType($path).";charset=UTF-8");
         readfile(realpath("./$path"));
-    }else if(function_exists("zip_open")){
-        findFromLib(".",$path)||findFromLib("../WEB-INF/lib/",$path);
     }else{
-        echo "//您的php没有安装zip扩展";
+        findFromLib(".",$path)||findFromLib("../WEB-INF/lib/",$path);
     }
 }
 function findFromLib($base,$path){
     $base = realpath($base);
     if($base){
+        $miss_zip = false;
         $dir = dir($base); 
         while (false !== ($file = $dir->read())) {
-            if(strtolower(preg_replace('/.*\./',".",$file)) == ".jar"){
-                $zip = zip_open("$base\\$file");
-                while ($entry = zip_read($zip)) {
-                    if (zip_entry_name($entry) == $path && zip_entry_open($zip, $entry, "r")) {
-                        //$contentType = mime_content_type($path);
-                        header("Content-Type:".findMimiType($path).";charset=UTF-8");
-                        echo zip_entry_read($entry, zip_entry_filesize($entry));
-                        zip_entry_close($entry);
-                        zip_close($zip);
-                        $dir->close();
-                        return true;
-                    }
-                }
-                zip_close($zip);
+            if(preg_match('/.*\.(?:jar|zip)$/i',$file)){
+                if(function_exists("zip_open")){
+	                if(findFromZip("$base\\$file",$path)){
+	                    $dir->close();
+	                    return true;
+	                }
+	            }else{
+	                $miss_zip = true;
+			    }
+            }else if(preg_match('/.*\.xml$/i',$file)){
+                //读取XML格式的类库
+				if(findFromXML($file)){
+				    return true;
+				}
             }
+        }
+        if($miss_zip){
+            echo "//您的php没有安装zip扩展,无法遍历zip格式类库";
         }
         $dir->close();
     }
+}
+function findFromZip($file,$path){
+    $zip = zip_open("$file");
+    while ($entry = zip_read($zip)) {
+        if (zip_entry_name($entry) == $path && zip_entry_open($zip, $entry, "r")) {
+            //$contentType = mime_content_type($path);
+            header("Content-Type:".findMimiType($path).";charset=UTF-8");
+            echo zip_entry_read($entry, zip_entry_filesize($entry));
+            zip_entry_close($entry);
+            zip_close($zip);
+            return true;
+        }
+    }
+    zip_close($zip);
+}
+function findFromXML($file){
+return false;
+    $depth = array();
+    function startElement($parser, $name, $attrs) 
+    {
+        global $depth;
+        for ($i = 0; $i < $depth[$parser]; $i++) {
+            echo "  ";
+        }
+        echo "$name\n";
+    }
+    function endElement($parser, $name) 
+    {
+        global $depth;
+    }
+    function characterData($parser, $data){
+        echo $data;
+    }
+    $xml_parser = xml_parser_create();
+    xml_set_element_handler($xml_parser, "startElement", "endElement");
+    xml_set_character_data_handler($xml_parser,"characterData");
+    if (($fp = fopen($file, "r"))) {
+        while ($data = fread($fp, 4096)) {
+            if (!xml_parse($xml_parser, $data, feof($fp))) {
+                die(sprintf("XML error: %s at line %d",
+                            xml_error_string(xml_get_error_code($xml_parser)),
+                            xml_get_current_line_number($xml_parser)));
+            }
+        }
+    }
+    xml_parser_free($xml_parser);
 }
 function findMimiType($path){
     switch(strtolower(preg_replace('/.*\./',".",$path))){
