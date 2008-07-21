@@ -58,13 +58,13 @@
             <form onsubmit="return false" ation="/servlet/JSA">
             <div>
                 <div>
-                    <input name="level" onclick="ExportUI.checkLevel(this)" value="2" type="radio" disabled="true"  checked="true" />隔离全部冲突
+                    <input name="level" onclick="ExportUI.checkLevel(this)" value="2" type="radio" disabled="true" />隔离全部冲突
                     <input name="level" onclick="ExportUI.checkLevel(this)" value="1" type="radio" disabled="true" />隔离内部冲突
                     <input name="level" onclick="ExportUI.checkLevel(this)" value="0" type="radio" />直接合并
                     <br/>
-                    <input name="level" onclick="ExportUI.checkLevel(this)" value="-1" type="radio" title="导出后需要使用JSA处理成单个压缩文件,实现隔离冲突" />导出为XML
-                    <input name="level" onclick="ExportUI.checkLevel(this)" value="-2" type="radio" checked="true"  title="导出JSIDoc文档" />导出文档
-                    <input name="level" onclick="ExportUI.checkLevel(this)" value="-3" type="radio" checked="true"  title="导出JSI分析报告" />导出分析报告
+                    <input name="level" onclick="ExportUI.checkLevel(this)" value="-1" type="radio" checked="true"  title="导出后需要使用JSA处理成单个压缩文件,实现隔离冲突" />导出为XML
+                    <input name="level" onclick="ExportUI.checkLevel(this)" value="-2" type="radio" title="导出JSIDoc文档" />导出文档
+                    <input name="level" onclick="ExportUI.checkLevel(this)" value="-3" type="radio" disabled="true"  title="导出JSI分析报告" />导出分析报告
                 </div>
                 <div>
                     <span id="prefixContainer">
