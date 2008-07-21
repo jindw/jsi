@@ -45,7 +45,7 @@ function findFromLib($base,$path){
 			    }
             }else if(preg_match('/.*\.xml$/i',$file)){
                 //读取XML格式的类库
-				if(findFromXML($file)){
+				if(findFromXML($file,$path)){
 				    return true;
 				}
             }
@@ -70,37 +70,21 @@ function findFromZip($file,$path){
     }
     zip_close($zip);
 }
-function findFromXML($file){
-return false;
-    $depth = array();
-    function startElement($parser, $name, $attrs) 
-    {
-        global $depth;
-        for ($i = 0; $i < $depth[$parser]; $i++) {
-            echo "  ";
-        }
-        echo "$name\n";
-    }
-    function endElement($parser, $name) 
-    {
-        global $depth;
-    }
-    function characterData($parser, $data){
-        echo $data;
-    }
-    $xml_parser = xml_parser_create();
-    xml_set_element_handler($xml_parser, "startElement", "endElement");
-    xml_set_character_data_handler($xml_parser,"characterData");
-    if (($fp = fopen($file, "r"))) {
-        while ($data = fread($fp, 4096)) {
-            if (!xml_parse($xml_parser, $data, feof($fp))) {
-                die(sprintf("XML error: %s at line %d",
-                            xml_error_string(xml_get_error_code($xml_parser)),
-                            xml_get_current_line_number($xml_parser)));
-            }
-        }
-    }
-    xml_parser_free($xml_parser);
+function findFromXML($file,$path){
+    $xml = simplexml_load_file($file);
+    $result = $xml->xpath("//script[@path='$path']");
+    if($result){
+        header("Content-Type:".findMimiType($path).";charset=UTF-8");
+		while(list( $key, $node) = each($result)) {
+		    if($node->attributes()->encoding=="base64"){
+		        echo base64_decode($node);
+		    }else{
+		        echo $node;
+		    }
+		    
+	    }
+	    return true;
+	}
 }
 function findMimiType($path){
     switch(strtolower(preg_replace('/.*\./',".",$path))){
