@@ -92,11 +92,11 @@ DependenceInfo.prototype = {
             }else{
                 //this.objectName != null
                 //dest.objectName == null || not null
-                return ! dest.getAfterInfos().length;
+                //return ! dest.getAfterInfos().length;
+                return afterInfosIsEmpty(dest);
             }
         }
     }
-    
 };
 if(":debug"){
     DependenceInfo.prototype.toString = function(){
@@ -120,6 +120,24 @@ function parsePath(path){
     }
     return [packageName,fileName,objectName]
 }
+
+function afterInfosIsEmpty(dependenceInfo){
+    if(dependenceInfo.subInfos[1]){
+        return !dependenceInfo.subInfos[1].length;
+    }
+    var dependences = dependenceInfo.packageObject.dependenceMap[dependenceInfo.fileName];
+    var i = dependences && dependences.length;
+    while(i--){
+        var dependence = dependences[i];
+        if(dependence[4]){//afterload
+            var thisObject = dependence[3];
+            if(!thisObject || !dependenceInfo.objectName || dependenceInfo.objectName == thisObject){
+                return false;
+            }
+        }
+    }
+    return true;
+}
 function findDependence(dependenceInfo,index){
     if(!dependenceInfo.subInfos[index]){
         var dependences = dependenceInfo.packageObject.dependenceMap[dependenceInfo.fileName];
@@ -130,7 +148,7 @@ function findDependence(dependenceInfo,index){
             var dependence = dependences[i];
             if(!index == !dependence[4]){
                 var thisObject = dependence[3];
-                if(!index || !thisObject || !this.objectName || this.objectName == thisObject){
+                if(!index || !thisObject || !dependenceInfo.objectName || dependenceInfo.objectName == thisObject){
                     if(dependence[2]){//object
                         var path = dependence[0].name + ':' + dependence[2];
                     }else{

@@ -222,11 +222,11 @@ function addDependenceInfo(dependenceInfo,result,cachedInfos){
         var item = befores[i];
         var j = cachedInfos.length;
         while(j--){
+            if(cachedInfos[j].implicit(dependenceInfo)){//一旦发现自己已被包含，可以立即跳出判断（需要后续条件）
+                return;
+            }
             if(cachedInfos[j].implicit(item)){
                 continue dependenceLoop;
-            }
-            if(cachedInfos[j].implicit(dependenceInfo)){
-                return;
             }
         }
         addDependenceInfo(item,result,cachedInfos);
@@ -251,7 +251,7 @@ function addDependenceInfo(dependenceInfo,result,cachedInfos){
         var item = afters[i];
         var j = cachedInfos.length;
         while(j--){
-            if(cachedInfos[j].implicit(item)){
+            if(cachedInfos[j].implicit(item)){//后面的一定不能中途跳出，否者前面的跳出条件不充分
                 continue dependenceLoop;
             }
         }
