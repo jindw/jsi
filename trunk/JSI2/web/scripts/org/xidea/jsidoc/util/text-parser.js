@@ -72,7 +72,8 @@ function parseText(text,unescape){
             while((expressionEnd = text.indexOf("}",expressionEnd+1))>0){
                 try{
                     var expression = text.substring(expressionBegin ,expressionEnd );
-                    parseEL(fn,expression,buf,unescape)
+                    expression = parseEL(fn,expression);
+                    buf.push([0,expression,unescape])
                     text = text.substr(expressionEnd+1);
                     pattern = text && new RegExp(pattern);
                     //continue seach;
@@ -99,7 +100,7 @@ function parseText(text,unescape){
 
 
 
-function parseEL(fn,expression,buf,unescape){
+function parseEL(fn,expression){
     if(fn){
         switch(fn){
             case 'for':
@@ -112,11 +113,7 @@ function parseEL(fn,expression,buf,unescape){
         if(expression != el2){
             expression = compileEL(expression)
         }
-        expression = [0,expression]
-        if(unescape){
-            expression.push(unescape);
-        }
-        buf.push(expression);
+        return expression;
     }
 }
 
