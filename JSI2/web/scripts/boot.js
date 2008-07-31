@@ -383,7 +383,11 @@ var $import = function(freeEval,cachedScripts){
     //模拟XMLHttpRequest对象
     if(this.ActiveXObject ){
         if("org.xidea.jsi.boot:col"){
-            lazyScript =lazyScript.replace(/'.*'/,scriptBase+"lazy-trigger.js");
+            if(":debug"){
+                lazyScript =lazyScript.replace(/'.*'/,scriptBase+"?path=lazy-trigger.js");
+            }else{
+                lazyScript =lazyScript.replace(/'.*'/,scriptBase+"lazy-trigger.js");
+            }
         }
         if(!this.XMLHttpRequest ){
             var xmlHttpRequstActiveIds = [

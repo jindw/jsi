@@ -250,7 +250,7 @@ function parseChooseTag(node,context){
 function parseForTag(node,context){
     var next = node.firstChild;
     var attributes = loadAttribute(node,{items:3,'var':1,begin:0,end:0,status:0});
-    context.append([5,attributes['var'],attributes.items,status]);
+    context.append([5,attributes['var'],attributes.items,attributes.status]);
     if(next){
         do{
             context.parseNode(next,context)
@@ -260,9 +260,9 @@ function parseForTag(node,context){
 }
 function parseVarTag(node,context){
     var attributes = loadAttribute(node,{name:1,value:0});
-    var valueEl = toEL(attributes.value)
+    var valueEl = attributes.value
     if(valueEl){
-        context.append([6,attributes.name,valueEl]);
+        context.append([6,attributes.name,toEL(valueEl)]);
     }else{
         var next = node.firstChild;
         context.append([6,attributes.name]);
@@ -502,7 +502,7 @@ function loadAttribute(node,setting){
             if(value){
                 var value2 = value.replace(/^\s*\$\{([\S\s]*)\}\s*$/,'$1')
                 if(value2 != value){
-                    data[key] = value2;
+                    data[key] = parseEL('',value2);
                 }else{
                     $log.error("属性需要为表达式（${...}）：", key,value,type,tagName);
                 }
@@ -515,7 +515,7 @@ function loadAttribute(node,setting){
 function toEL(value,type){
     var value2 = value.replace(/^\s*\$\{([\S\s]*)\}\s*$/,'$1')
     if(value2 != value){
-        return value2;
+        return parseEL('',value2);
     }else{
         if(type == Number){//int
             

@@ -3,7 +3,7 @@ this.addScript("json.js",['JSON']);
 
 this.addScript('template.js',"Template","XMLParser");
 this.addScript('template-parser.js',"TemplateParser");
-this.addScript('text-parser.js',["TextParser","parseText"]
+this.addScript('text-parser.js',["TextParser","parseText","parseEL"]
                ,"TemplateParser");
 this.addScript('xml-parser.js',"XMLParser"
-               ,["TextParser","parseText"]); 
+               ,["TextParser","parseText","parseEL"]); 
