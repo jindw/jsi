@@ -16,7 +16,7 @@
   代码总体风格向简单、直接、严谨的方向靠拢。这样的代码，虽然从某些角度上看，不是最简洁，但是更易阅读。注意: 简便 !== 简单
 
 
-=== 编码约定 ===
+=== 一些约定 ===
 
   * 目录名以"/"结尾。
   JSI内核中，有一些地方需要记录目录地址。这里我们统一以“/”结尾。
@@ -26,6 +26,9 @@
 
   * hack运用必须注释。
   hack的运用必须注释,否则工程将编程地狱
+
+  * 使用特征编译。
+  使用特征编译(如调试特征 :":debug",延迟或异步装载特征:"org.xidea.jsi.boot:col",JSI日志特征:"org.xidea.jsi.boot:$log"),以便按需定制jsi引导文件.
 
 ==== 一些诡异的技巧 ====
   * {}就是Map
@@ -44,4 +47,4 @@ fn&&fn();
 
 
 *更多编码规范见:*
-[http://code.google.com/p/jsiside/wiki/JSISideCodeStyle]
+http://code.google.com/p/jsiside/wiki/JSISideCodeStyle
