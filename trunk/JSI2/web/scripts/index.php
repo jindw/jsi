@@ -6,8 +6,11 @@
 // 2.类库支持
 // 3.JSIDoc系列工具支持
 //
+$encoding = "UTF-8";
+$exportService = "http://ue:8080/platform/scripts/export.action";
 ?>
-<?php echo("/");
+<?php
+echo("/");
 ob_clean();
 if(array_key_exists('path',$_GET)){
    $path = $_GET['path'];
@@ -18,86 +21,112 @@ if(array_key_exists('path',$_GET)){
    $path = null;
 }
 if($path == 'export.action'){
-   header("HTTP/1.0 404 Not Found");
-   return;
+    //转发到指定jsa服务器
+    if($exportService){
+	    global $exportService;  
+		$postdata = http_build_query(
+		    $_POST
+		);
+		$opts = array('http' =>
+		    array(
+		        'method'  => 'POST',
+		        'header'  => 'Content-type: application/x-www-form-urlencoded',
+		        'content' => $postdata
+		    )
+		);
+		$context  = stream_context_create($opts);
+		echo file_get_contents($exportService, false, $context);
+    }else{
+        header("HTTP/1.0 404 Not Found");
+    }
+    return;
 }
 
 function printEntry($path){
+    global $encoding;
     $classpath = array(
         "../WEB-INF/classes"
         //,"../../../JSI2/web/scripts/"
     );
-    foreach ($classpath as $dir){
-        if(file_exists(realpath("$dir$path"))){
-	        header("Content-Type:".findMimiType($path).";charset=UTF-8");
-	        readfile(realpath("$dir$path"));
-	        return;
-	    }
-    }
     if(file_exists(realpath("./$path"))){
-        header("Content-Type:".findMimiType($path).";charset=UTF-8");
+        header("Content-Type:".findMimiType($path).";charset=$encoding");
         readfile(realpath("./$path"));
     }else{
-        findFromLib(".",$path)||findFromLib("../WEB-INF/lib/",$path);
+        if(!findEntry(".",$path,"findFromXML")){
+	        foreach ($classpath as $dir){
+		        if(file_exists(realpath("$dir$path"))){
+		            header("Content-Type:".findMimiType($path).";charset=$encoding");
+		            readfile(realpath("$dir$path"));
+		            return;
+		        }
+		    }
+		    if(!findEntry("../WEB-INF/lib/",$path,"findFromZip")){
+		        header("HTTP/1.0 404 Not Found");
+		    }
+	    }
+        
     }
 }
-function findFromLib($base,$path){
+function findEntry($base,$path,$action){
     $base = realpath($base);
     if($base){
         $miss_zip = false;
         $dir = dir($base); 
         while (false !== ($file = $dir->read())) {
-            if(preg_match('/.*\.(?:jar|zip)$/i',$file)){
-                if(function_exists("zip_open")){
-	                if(findFromZip("$base\\$file",$path)){
-	                    $dir->close();
-	                    return true;
-	                }
-	            }else{
-	                $miss_zip = true;
-			    }
-            }else if(preg_match('/.*\.xml$/i',$file)){
-                //读取XML格式的类库
-				if(findFromXML($file,$path)){
-				    return true;
-				}
+            if($action($file,$path)){
+                $dir->close();
+                return true;
             }
-        }
-        if($miss_zip){
-            echo "//您的php没有安装zip扩展,无法遍历zip格式类库";
         }
         $dir->close();
     }
 }
 function findFromZip($file,$path){
-    $zip = zip_open("$file");
-    while ($entry = zip_read($zip)) {
-        if (zip_entry_name($entry) == $path && zip_entry_open($zip, $entry, "r")) {
-            //$contentType = mime_content_type($path);
-            header("Content-Type:".findMimiType($path).";charset=UTF-8");
-            echo zip_entry_read($entry, zip_entry_filesize($entry));
-            zip_entry_close($entry);
-            zip_close($zip);
-            return true;
-        }
+    global $encoding;
+    if(preg_match('/.*\.(?:jar|zip)$/i',$file)){
+	    if(function_exists("zip_open")){
+		    $zip = zip_open("$file");
+		    while ($entry = zip_read($zip)) {
+		        if (zip_entry_name($entry) == $path && zip_entry_open($zip, $entry, "r")) {
+		            $contentType = findMimiType($path);
+		            if(preg_match('/^image\//i',$contentType)){
+                        header("Content-Type:$contentType;");
+                    }else{
+		                header("Content-Type:$contentType;charset=$encoding");
+		            }
+		            echo zip_entry_read($entry, zip_entry_filesize($entry));
+		            zip_entry_close($entry);
+		            zip_close($zip);
+		            return true;
+		        }
+		    }
+		    zip_close($zip);
+	    }else{
+	        echo "//您的php没有安装zip扩展,无法遍历zip格式类库";
+	        return true;
+	    }
     }
-    zip_close($zip);
 }
 function findFromXML($file,$path){
-    $xml = simplexml_load_file($file);
-    $result = $xml->xpath("//script[@path='$path']");
-    if($result){
-        header("Content-Type:".findMimiType($path).";charset=UTF-8");
-		while(list( $key, $node) = each($result)) {
-		    if($node->attributes()->encoding=="base64"){
-		        echo base64_decode($node);
-		    }else{
-		        echo $node;
+    global $encoding;
+	if(preg_match('/.*\.xml$/i',$file)){
+	    $xml = simplexml_load_file($file);
+	    $result = $xml->xpath("//script[@path='$path']");
+	    if($result){
+	        $contentType = findMimiType($path);
+			while(list( $key, $node) = each($result)) {
+			    if(preg_match('/^image\//i',$contentType)){
+                    header("Content-Type:$contentType;");
+			        echo base64_decode($node);
+			    }else{
+                    header("Content-Type:$type;charset=$encoding");
+			        echo $node;
+			    }
+			    
 		    }
-		    
-	    }
-	    return true;
-	}
+		    return true;
+		}
+    }
 }
 function findMimiType($path){
     switch(strtolower(preg_replace('/.*\./',".",$path))){
@@ -173,7 +202,7 @@ if($path != null){
     }else{
         $externalScript = findPackageList(realpath("."));
     }
-    header("Content-Type:text/html;");
+    header("Content-Type:text/html;charset=$encoding");
     echo("<html><frameset rows='100%'><frame src='index.php/org/xidea/jsidoc/index.html?group.All%20Scripts=$externalScript'></frame></html>");
 }
 return;

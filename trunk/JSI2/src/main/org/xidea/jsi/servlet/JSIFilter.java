@@ -1,7 +1,11 @@
 package org.xidea.jsi.servlet;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -11,7 +15,10 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.InvalidPropertiesFormatException;
 import java.util.List;
+import java.util.Properties;
+import java.util.regex.Pattern;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -67,12 +74,11 @@ public class JSIFilter implements Filter {
 	 * 导出成文档
 	 */
 	private static final int EXPORT_AS_JSIDOC = -2;
-	
+
 	/**
 	 * 导出成分析报告
 	 */
 	private static final int EXPORT_AS_REPORT = -3;
-	
 
 	protected String scriptBase;
 	protected ServletContext context;
@@ -188,19 +194,18 @@ public class JSIFilter implements Filter {
 					exportor = factory.createSimpleExplorter();
 				} else if (level == EXPORT_AS_REPORT) {
 					exportor = factory.createReportExplorter();
-				} else{
+				} else {
 					String prefix = request.getParameter("prefix");
-					if(level == JOIN_WITHOUT_INNER_CONFLICTION){
-						exportor = factory.createConfuseExplorter(prefix, "\r\n\r\n",
-								false);//confuseUnimported
-					}else if (level == JOIN_WITHOUT_ALL_CONFLICTION){
-						exportor = factory.createConfuseExplorter(prefix, "\r\n\r\n",
-								true);//confuseUnimported
-					}else{
+					if (level == JOIN_WITHOUT_INNER_CONFLICTION) {
+						exportor = factory.createConfuseExplorter(prefix,
+								"\r\n\r\n", false);// confuseUnimported
+					} else if (level == JOIN_WITHOUT_ALL_CONFLICTION) {
+						exportor = factory.createConfuseExplorter(prefix,
+								"\r\n\r\n", true);// confuseUnimported
+					} else {
 						throw new IllegalArgumentException("不支持的导出方式");
 					}
-					
-					
+
 				}
 				if (imports == null) {
 					// 只有Data Root 才能支持这种方式
@@ -318,7 +323,46 @@ public class JSIFilter implements Filter {
 	}
 
 	protected InputStream getResourceStream(String path) {
-		return context.getResourceAsStream(scriptBase + path);
+		InputStream in = context.getResourceAsStream(scriptBase + path);
+		if (in == null) {
+			return this.getClass().getClassLoader().getResourceAsStream(path);
+		}
+		if (in == null) {
+			File dir = new File(context.getRealPath(scriptBase));
+			File[] list = dir.listFiles(new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					return false;
+				}
+			});
+			if (list != null) {
+				int i = list.length;
+				while (i-- > 0) {
+					in = findByXML(list[i], path);
+				}
+			}
+		}
+		return in;
+	}
+
+	protected InputStream findByXML(File file, String path) {
+		Properties ps = new Properties();
+		try {
+			ps.loadFromXML(new FileInputStream(file));
+			String value = ps.getProperty(path);
+			if (value != null) {
+				Pattern pattern = Pattern.compile("\\.(?:gif|png|jpeg|jpg)$",
+						Pattern.CASE_INSENSITIVE);
+				byte[] data;
+				if (pattern.matcher(path).matches()) {
+					data = new sun.misc.BASE64Decoder().decodeBuffer(value);
+				} else {
+					data = value.getBytes(encoding == null ? "utf8" : encoding);
+				}
+				return new ByteArrayInputStream(data);
+			}
+		} catch (Exception e) {
+		}
+		return null;
 	}
 
 	protected void processResourceStream(InputStream in,
