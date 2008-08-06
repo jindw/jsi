@@ -44,15 +44,15 @@ if($path == 'export.action'){
 
 function printEntry($path){
     global $encoding;
-    $classpath = array(
-        "../WEB-INF/classes"
-        //,"../../../JSI2/web/scripts/"
-    );
     if(file_exists(realpath("./$path"))){
         header("Content-Type:".findMimiType($path).";charset=$encoding");
         readfile(realpath("./$path"));
     }else{
         if(!findEntry(".",$path,"findFromXML")){
+		    $classpath = array(
+		        "../WEB-INF/classes"
+		        //,"../../../JSI2/web/scripts/"//这里可以定义其他类路径
+		    );
 	        foreach ($classpath as $dir){
 		        if(file_exists(realpath("$dir$path"))){
 		            header("Content-Type:".findMimiType($path).";charset=$encoding");
