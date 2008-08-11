@@ -54,9 +54,9 @@ function printEntry($path){
 		        //,"../../../JSI2/web/scripts/"//这里可以定义其他类路径
 		    );
 	        foreach ($classpath as $dir){
-		        if(file_exists(realpath("$dir$path"))){
+		        if(file_exists(realpath("$dir/$path"))){
 		            header("Content-Type:".findMimiType($path).";charset=$encoding");
-		            readfile(realpath("$dir$path"));
+		            readfile(realpath("$dir/$path"));
 		            return;
 		        }
 		    }
@@ -73,7 +73,7 @@ function findEntry($base,$path,$action){
         $miss_zip = false;
         $dir = dir($base); 
         while (false !== ($file = $dir->read())) {
-            if($action($file,$path)){
+            if($action("$base/$file",$path)){
                 $dir->close();
                 return true;
             }
