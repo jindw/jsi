@@ -14,19 +14,16 @@ function XMLParser(){
     this.result = [];
 }
 XMLParser.prototype = new TextParser()
-XMLParser.prototype.parse = function(data,base){
-    if(data.constructor == String){
-    	data = this.load(data,base);
-    }
+XMLParser.prototype.parse = function(url){
+    var data = this.load(url);
     this.parseNode(data);
     return this.reuslt;
 }
-XMLParser.prototype.load = function(data,base){
-	if(base==null){
-        var doc =toDoc(data)
+XMLParser.prototype.load = function(url){
+	if(/^[\s\ufeff]*</.test(url)){
+        var doc =toDoc(url)
 		//alert([data,doc.documentElement.tagName])
     }else{
-    	var url = base.replace(/[^\/]+(?:#.*)?$/,'')+data;
 	    var pos = url.indexOf('#');
 	    var xhr = new XMLHttpRequest();
 	    xhr.open("GET",pos+1?url.substr(0,pos):url,false)
@@ -171,7 +168,8 @@ function processIncludeTag(node,context){
             context.append([]);
 	    }
 	    if(attributes.path!=null){
-	        var doc = context.load(attributes.path,parentURL)
+	        var url = parentURL.replace(/[^\/]*(?:[#\?].*)?$/,attributes.path);
+	        var doc = context.load(url)
 	    }
 	    if(attributes.xpath!=null){
 	        doc = selectNodes(doc,attributes.xpath);

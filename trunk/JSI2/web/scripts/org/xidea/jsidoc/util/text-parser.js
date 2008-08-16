@@ -22,14 +22,11 @@ function TextParser(){
  * @private
  */
 TextParser.prototype = new TemplateParser();
-TextParser.prototype.parse = function(data,base){
-    if(base!=null){
-        var xhr = new XMLHttpRequest();
-        xhr.open("get",base + data,true)
-        xhr.send('');
-        data = xhr.responseText;
-    }
-    this.parseNode(data);
+TextParser.prototype.parse = function(url){
+    var xhr = new XMLHttpRequest();
+    xhr.open("get",url,true)
+    xhr.send('');
+    this.parseNode(xhr.responseText);
     return this.reuslt;
 }
 //parse text

@@ -11,7 +11,7 @@
  * <a href="http://code.google.com/p/jsiside/wiki/Template"> 模版基础指令说明</a>
  * @public
  */
-function Template(data,base,type){
+function Template(data,type){
     if("org.jside.template:compile"){
         if(data.constructor == String){
             var inlineClass = {
@@ -19,7 +19,7 @@ function Template(data,base,type){
                 'text':"org.xidea.jsidoc.util:TextParser"
             }
             var parser = new ($import(inlineClass[type || 'xml'] ||type))();
-            parser.parse(data,base);
+            parser.parse(data);
             data = parser.result;
             this.compileData = data;
         }

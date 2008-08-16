@@ -331,15 +331,15 @@ while(win!=win.top){
 var checkLocation = win.location;
 var checkInterval;
 var templateMap = {
-	"constructor.xhtml" : new Template("constructor.xhtml",scriptBase+"html/"),
-	"export.xhtml" : new Template("export.xhtml",scriptBase+"html/"),
-	"function.xhtml" : new Template("function.xhtml",scriptBase+"html/"),
-	"menu.xhtml" : new Template("menu.xhtml",scriptBase+"html/"),
-	"native.xhtml" : new Template("native.xhtml",scriptBase+"html/"),
-	"object.xhtml" : new Template("object.xhtml",scriptBase+"html/"),
-	"package.xhtml" : new Template("package.xhtml",scriptBase+"html/"),
-	"part.xhtml" : new Template("part.xhtml",scriptBase+"html/"),
-	"source.xhtml" : new Template("source.xhtml",scriptBase+"html/")
+	"constructor.xhtml" : new Template(scriptBase+"html/constructor.xhtml"),
+	"export.xhtml" : new Template(scriptBase+"html/export.xhtml"),
+	"function.xhtml" : new Template(scriptBase+"html/function.xhtml"),
+	"menu.xhtml" : new Template(scriptBase+"html/menu.xhtml"),
+	"native.xhtml" : new Template(scriptBase+"html/native.xhtml"),
+	"object.xhtml" : new Template(scriptBase+"html/object.xhtml"),
+	"package.xhtml" : new Template(scriptBase+"html/package.xhtml"),
+	"part.xhtml" : new Template(scriptBase+"html/part.xhtml"),
+	"source.xhtml" : new Template(scriptBase+"html/source.xhtml")
 };
 function preload(pkg,file2dataMap,value){
     jsiCacher.apply($JSI,arguments);
