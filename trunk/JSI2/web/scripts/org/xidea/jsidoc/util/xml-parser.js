@@ -498,7 +498,7 @@ function loadAttribute(node,setting){
         }
         if(type & 2){
             if(value){
-                var value2 = value.replace(/^\s*\$\{([\S\s]*)\}\s*$/,'$1')
+                var value2 = value.replace(/^\s*\$\{\s*(\S[\S\s]*)\}\s*$/,'$1')
                 if(value2 != value){
                     data[key] = parseEL('',value2);
                 }else{
@@ -511,7 +511,7 @@ function loadAttribute(node,setting){
 }
 
 function toEL(value,type){
-    var value2 = value.replace(/^\s*\$\{([\S\s]*)\}\s*$/,'$1')
+    var value2 = value.replace(/^\s*\$\{\s*(\S[\S\s]*)\}\s*$/,'$1')
     if(value2 != value){
         return parseEL('',value2);
     }else{
