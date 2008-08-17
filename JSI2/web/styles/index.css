@@ -1,0 +1,76 @@
+@import url(default.css);
+a .tooltip{
+    display:none;
+    z-index:2;
+    position:absolute;
+    top:12px;
+    left:40px;
+    width:280px;
+    padding:12px;
+    
+    color:#666;
+    background:#FFF; 
+    text-decoration:none;
+    border:1px #CCC solid;
+}
+a:hover{
+    position:relative;
+    top:0;
+    left:0;
+}
+a:hover .tooltip{
+    display:block;
+}
+#logo{
+    float:right;
+    width:30%;
+    padding:28px;
+    text-align:center;
+}
+#logo p{
+    margin:0px;
+    padding:2px;
+    text-indent:0px;
+    font-weight:light;
+    font-family:'方正小篆体','隶书';
+    font-size:14px;
+}
+#logo div{
+    padding:2px;
+}
+p{
+    text-indent:24px;
+}
+#logo a{
+    padding:8px;
+    text-decoration:none;
+}
+#logo .tooltip{
+    width:80px;
+    padding:4px;
+    text-align:left;
+    left:-18px;
+    top:32px;
+}
+form div{
+    text-align:right;
+}
+#header{
+    background:#F8F8FA;
+    margin:0px;
+    padding:5px;
+    margin-bottom:20px;
+}
+.block-item{
+    padding-bottom:10px;
+}
+.block-item:hover{
+    /*border:1px solid #EEE;*/
+    /*width:49%;*/
+    /*margin:2px;*/
+    background:#F8F8FA;
+}
+.block-item:hover h3{
+    /*margin:2px;*/
+    /*margin-bottom:20px;*/
+}
