@@ -14,6 +14,10 @@ body{
     background:#fefefe;
     border:3px double #DDD;
 }
+.online-ppt{
+    background:url(http://docs.google.com/images/doclist/icon_4_pres.gif) right top no-repeat;
+    padding-right:24px;
+}
 p,h3{
 	text-align:left;
 }
