@@ -8,6 +8,9 @@
 
 /**
  * 模板类
+ * 起初base 的设计是表示，他是一个url还是一段文本。
+ * 感觉没有必要，感觉需要简化。
+ * 设计为接受两个参数？
  * <a href="http://code.google.com/p/jsiside/wiki/Template"> 模版基础指令说明</a>
  * @public
  */
