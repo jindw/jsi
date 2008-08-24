@@ -1,0 +1,28 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<script>
+function print(msg){
+document.getElementsByTagName('textarea')[1].value 
+  = document.getElementsByTagName('textarea')[1].value+msg;
+}
+</script>
+<script src="../scripts/boot.js"></script>
+</head>
+<body>
+<textarea></textarea>
+<textarea></textarea>
+<script>
+$import("org.xidea.jsidoc.export:Exporter");
+</script>
+
+<script>
+var exporter = new Exporter();
+exporter.addFeatrue("mixTemplate");
+exporter.addImport("org.xidea.jsidoc:JSIDoc");
+document.getElementsByTagName('textarea')[0].value = (exporter.getXMLContent())
+
+</script>
+</body>
+</html>

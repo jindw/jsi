@@ -23,9 +23,9 @@ function DependenceInfo(path){
         dependenceInfoMap[path] = this;
     }
     var packageFileObject = parsePath(path);
-    packageName = packageFileObject[0];
-    fileName = packageFileObject[1];
-    objectName = packageFileObject[2];
+    var packageName = packageFileObject[0];
+    var fileName = packageFileObject[1];
+    var objectName = packageFileObject[2];
     var packageObject = this.packageObject = $import(packageName+':');
     if(packageObject.initialize){
         packageObject.initialize();

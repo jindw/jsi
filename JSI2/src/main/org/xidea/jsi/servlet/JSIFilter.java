@@ -350,15 +350,16 @@ public class JSIFilter implements Filter {
 			ps.loadFromXML(new FileInputStream(file));
 			String value = ps.getProperty(path);
 			if (value != null) {
-				Pattern pattern = Pattern.compile("\\.(?:gif|png|jpeg|jpg)$",
-						Pattern.CASE_INSENSITIVE);
-				byte[] data;
-				if (pattern.matcher(path).matches()) {
-					data = new sun.misc.BASE64Decoder().decodeBuffer(value);
-				} else {
-					data = value.getBytes(encoding == null ? "utf8" : encoding);
-				}
+				byte[] data = value.getBytes(encoding == null ? "utf8"
+						: encoding);
 				return new ByteArrayInputStream(data);
+			} else {
+				value = ps.getProperty(path + "#base64");
+				if (value != null) {
+					byte[] data = new sun.misc.BASE64Decoder()
+							.decodeBuffer(value);
+					return new ByteArrayInputStream(data);
+				}
 			}
 		} catch (Exception e) {
 		}
