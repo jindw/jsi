@@ -45,6 +45,7 @@ XMLParser.prototype.load = function(url){
  * @private
  */
 XMLParser.prototype.addParser(function(node,context){
+	$log.error("node",node.nodeType)
     switch(node.nodeType){
         case 1: //NODE_ELEMENT 
             return parseElement(node,context)
@@ -295,6 +296,7 @@ function parseOutTag(node,context){
 //parser element
 function parseElement(node,context){
     var next = node.attributes;
+    $log.error(next)
     context.append('<'+node.tagName);
     for (var i=0; i<next.length; i++) {
         context.parseNode(next.item(i))
@@ -386,6 +388,8 @@ function parseComment(){
     return true;//not support
 }
 function parseDocument(node,context){
+	$log.error("xxxxxyyyy")
+	$log.error("xxxxxyyyyzzzz",node.nodeType,node.firstChild)
     for(var n = node.firstChild;n!=null;n = n.nextSibling){
         context.parseNode(n);
     }

@@ -111,7 +111,7 @@ function findFromXML($file,$path){
     global $encoding;
 	if(preg_match('/.*\.xml$/i',$file)){
 	    $xml = simplexml_load_file($file);
-	    $result = $xml->xpath("//script[@path='$path']");
+	    $result = $xml->xpath("//entry[@key='$path']");
 	    if($result){
 	        $contentType = findMimiType($path);
 			while(list( $key, $node) = each($result)) {
@@ -119,7 +119,7 @@ function findFromXML($file,$path){
                     header("Content-Type:$contentType;");
 			        echo base64_decode($node);
 			    }else{
-                    header("Content-Type:$type;charset=$encoding");
+                    header("Content-Type:$contentType;charset=$encoding");
 			        echo $node;
 			    }
 			    

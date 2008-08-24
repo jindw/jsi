@@ -71,10 +71,13 @@ Exporter.prototype = {
         return content.join('\n')
     },
     getXMLContent : function(){
-        var compileFilter = this.buildSourceFilter();
-        var content = ["<script-map export='",this.imports.join(','),"'>\n"];
         var packageMap = {};
         var packageList = [];
+        var compileFilter = this.buildSourceFilter();
+        var content = ['<?xml version="1.0" encoding="UTF-8"?>\n',
+			'<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">\n',
+			"<properties>\n"];
+        appendEntry(content,'#export',this.imports.join(','));
         for(var i = 0;i<this.result.length;i++){
             var path = this.result[i];
             var packageName = path.replace(/\/[^\/\/]+$/,"").replace(/\//g,'.');
@@ -82,20 +85,22 @@ Exporter.prototype = {
                 packageMap[packageName] = true;
                 packageList.push(packageName)
             }
-            var txt = this.getSource(path,compileFilter);
-            content.push("<script path='",path,"'>") ;
-            content.push(txt.replace(/[<>&]/g,xmlReplacer));
-            content.push("</script>\n");
+            
+            var text = this.getSource(path,compileFilter);
+            appendEntry(content,path,text);
         }
+        //alert("xxx.yyy.zz".replace(/\./g,'/'));
+        //alert("xxx.yyy.zz".replace(/\./g,'/'));
+        
+        //mozilla bug fix
+        ''.replace(/\./g,'/');
         packageList = findPackages(packageList,true);
         for(var i = 0;i<packageList.length;i++){
             var path = packageList[i].replace(/\./g,'/')+"/__package__.js";
-            var txt = this.getSource(path,compileFilter);
-            content.push("<script path='",path,"'>") ;
-            content.push(txt.replace(/[<>&]/g,xmlReplacer));
-            content.push("</script>\n");
+            var text = this.getSource(path,compileFilter);
+            appendEntry(content,path,text);
         }
-        content.push("</script-map>\n");
+        content.push("</properties>\n");
         return content.join('')
     },
     getDocumentContent : function(jsiDocURL){
@@ -117,8 +122,8 @@ Exporter.prototype = {
             var packageObject = $import(packageName + ':');
             packageMap[packageName] = {'':this.getSource(base+"__package__.js")}
             for(var file in packageObject.scriptObjectMap){
-                var txt = this.getSource(base + file,compileFilter);
-                packageMap[packageName][file] = txt;
+                var text = this.getSource(base + file,compileFilter);
+                packageMap[packageName][file] = text;
             }
         }
         var content = ["/*<meta http-equiv='Content-Type' content='text/html;utf-8' />"];
@@ -163,7 +168,7 @@ Exporter.prototype = {
             //$log.info(packageName,path.substr(packageName.length+1));
             var rtv = parentJSIDoc.getSource(path);
         }else{
-            var rtv = loadTextByURL($JSI.scriptBase +path);
+            var rtv = loadTextByURL($JSI.scriptBase+"?path=" +path);
         }
         if(rtv == null){
             $log.error("装载源代码失败:",path);
@@ -188,6 +193,13 @@ var encodeMap = {
 var templateRegexp = /new\s+Template\s*\((?:[^)]|'[^']*?'|"[^"]*?")+\)/g;
 function encodeReplacer(c){
     return encodeMap[c];
+}
+function appendEntry(content,path,text){
+	content.push("<entry key='",path,"'>") ;
+    content.push(text.indexOf(']]>')<0?
+	    "<![CDATA["+text + ']]>'
+	    :text.replace(/[<>&]/g,xmlReplacer));
+    content.push("</entry>\n");
 }
 
 function defaultTemplateFilter(text,path){
