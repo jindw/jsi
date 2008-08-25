@@ -64,10 +64,8 @@ public class HTMLUnitTest {
 			public WebResponse loadWebResponse(
 					final WebRequestSettings webRequestSettings)
 					throws IOException {
-
-				final String protocol = webRequestSettings.getUrl()
-						.getProtocol();
-				if (protocol.equals("classpath")) {
+				final URL url = webRequestSettings.getUrl();
+				if (url.getProtocol().equals("file") && url.getHost().equals("classpath")) {
 					return makeWebResponseForClasspath(webRequestSettings.getUrl());
 				}else{
 					return super.loadWebResponse(webRequestSettings);
@@ -76,7 +74,7 @@ public class HTMLUnitTest {
 
 			private WebResponse makeWebResponseForClasspath(final URL url) throws IOException {
 				String path = url.toString();
-				path = path.substring(12);
+				path = path.substring(16);
 				if(path.startsWith("/?path=")){
 					path = '/'+path.substring(7);
 				}
@@ -87,10 +85,10 @@ public class HTMLUnitTest {
 	            	contentType = URLConnection.guessContentTypeFromName(path);
 	            }
 				final byte[] data = IOUtils.toByteArray(inputStream);
-				return new BinaryWebResponse(data, url, contentType);
+				return new BinaryWebResponse(data, url, contentType+";charset="+charset);
 			}
 		};
-		final HtmlPage page = (HtmlPage) webClient.getPage("jar:///org/xidea/jsi/test/htmlunit-test.html");
+		final HtmlPage page = (HtmlPage) webClient.getPage("file://classpath/org/xidea/jsi/test/htmlunit-test.html");
 		// .getPage("http://localhost/project/jsi/");//test/test-export.html");
 
 		//webClient.getJavaScriptEngine().execute(page, loadText("/boot.js"),"/boot.js", 0);
