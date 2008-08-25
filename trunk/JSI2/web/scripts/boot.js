@@ -79,14 +79,15 @@ if(":debug"){
         if(this.ActiveXObject && this.XMLHttpRequest && location.protocol=="file:"){
             this.XMLHttpRequest = null;
         }
-        
         var script = scripts[scripts.length-1];
-        //mozilla bug
-        while(script.nextSibling && script.nextSibling.nodeName.toUpperCase() == 'SCRIPT'){
-            script = script.nextSibling;
+	    if(script){
+	        //mozilla bug
+	        while(script.nextSibling && script.nextSibling.nodeName.toUpperCase() == 'SCRIPT'){
+	            script = script.nextSibling;
+	        }
+	        var scriptBase = (script.getAttribute('src')||"/scripts/boot.js").replace(/[^\/\\]+$/,'');
+	        $JSI.scriptBase = computeURL(scriptBase);
         }
-        var scriptBase = (script.getAttribute('src')||"/scripts/boot.js").replace(/[^\/\\]+$/,'');
-        $JSI.scriptBase = computeURL(scriptBase);
     })();
 }else{
     /*
@@ -107,6 +108,11 @@ if(":debug"){
          */
          //scriptBase : "http://localhost:8080/script2/"
     };
+    
+//    if(!scriptBase){
+//        scriptBase = document.getElementsByTagName('script');
+//        $JSI.scriptBase = scriptBase = scriptBase[scriptBase.length-1].src.replace(/[^\/]*$/,'');
+//    }
 }
 
 
@@ -341,10 +347,6 @@ var $import = function(freeEval,cachedScripts){
             $log[logName] = buildLevelLog(logLevelIndex,logName);
         };
 
-    }
-    if(!scriptBase){
-        scriptBase = document.getElementsByTagName('script');
-        $JSI.scriptBase = scriptBase = scriptBase[scriptBase.length-1].src.replace(/[^\/]*$/,'');
     }
     /*
      * 获取脚本缓存。
