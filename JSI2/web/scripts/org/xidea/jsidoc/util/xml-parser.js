@@ -31,7 +31,7 @@ XMLParser.prototype.load = function(url){
 	    if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
 	        var doc = xhr.responseXML;
 	    }else{
-	        var doc =toDoc(xhr.responseText)
+	        var doc = toDoc(xhr.responseText)
 	    }
 	    if(pos>0){
 	        doc = selectNodes(doc,url.substr(pos+1));
@@ -45,10 +45,9 @@ XMLParser.prototype.load = function(url){
  * @private
  */
 XMLParser.prototype.addParser(function(node,context){
-	$log.error("node",node.nodeType)
     switch(node.nodeType){
-        case 1: //NODE_ELEMENT 
-            return parseElement(node,context)
+        //case 1: //NODE_ELEMENT 
+        //    return parseElement(node,context)
         case 2: //NODE_ATTRIBUTE                             
             return parseAttribute(node,context)
         case 3: //NODE_TEXT                                        
@@ -86,7 +85,7 @@ XMLParser.prototype.addParser(function(node,context){
         var next = node.attributes;
         context.append('<'+node.tagName);
         for (var i=0; i<next.length; i++) {
-            context.parseNode(next.item(i),context)
+            context.parseNode(next[i],context)
         }
         if(htmlLeaf.test(node.tagName)){
             context.append('/>')
@@ -294,9 +293,9 @@ function parseOutTag(node,context){
 
 
 //parser element
+/*
 function parseElement(node,context){
     var next = node.attributes;
-    $log.error(next)
     context.append('<'+node.tagName);
     for (var i=0; i<next.length; i++) {
         context.parseNode(next.item(i))
@@ -314,6 +313,7 @@ function parseElement(node,context){
     }
     return true;
 }
+*/
 //parser attribute
 function parseAttribute(node,context){
     var name = node.name;
@@ -388,8 +388,6 @@ function parseComment(){
     return true;//not support
 }
 function parseDocument(node,context){
-	$log.error("xxxxxyyyy")
-	$log.error("xxxxxyyyyzzzz",node.nodeType,node.firstChild)
     for(var n = node.firstChild;n!=null;n = n.nextSibling){
         context.parseNode(n);
     }
@@ -482,7 +480,7 @@ function loadAttribute(node,setting){
     var i = attributes.length;
     var data = {};
     while(i--){
-        var item = attributes.item(i);
+        var item = attributes[i];//item 不行 htmlunit
         var key = item.name;
         if(key in setting){
             data[key] = item.value.replace(/^\s+|\s+$/g,'');

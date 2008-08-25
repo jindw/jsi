@@ -10,10 +10,10 @@ public class HTMLUnitTest {
 
 	@Test
 	public void testHomePage() throws Exception {
-		final WebClient webClient = new WebClient(BrowserVersion.FIREFOX_2);
+		final WebClient webClient = new WebClient(BrowserVersion.INTERNET_EXPLORER_7_0);
 		final HtmlPage page = (HtmlPage) webClient
 				.getPage("http://localhost/project/jsi/test/test-export.html");
-		//System.out.println(page.asXml());
+		System.out.println(page.asXml());
 		// assertEquals("HtmlUnit - Welcome to HtmlUnit", page.getTitleText());
 	}
 }
