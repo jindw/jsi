@@ -1,3 +1,4 @@
+/*
 XMLHttpRequest.prototype.open = function(oldOpen){
 	return function(method,url,asyn){
 		url = url.replace(/^(classpath:\/\/\/)\?path=/,"$1");
@@ -28,7 +29,7 @@ XMLHttpRequest.prototype.send=function(oldSend){
 	    }
     }
 }(XMLHttpRequest.prototype.send);
-
+*/
 $import("org.xidea.jsidoc.export:Exporter");
 var exporter = new Exporter();
 exporter.addFeatrue("mixTemplate");
