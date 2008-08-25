@@ -14,10 +14,18 @@ document.getElementsByTagName('textarea')[1].value
 <textarea></textarea>
 <textarea></textarea>
 <script>
-$import("org.xidea.jsidoc.export:Exporter");
+$import("org.xidea.jsidoc.export:Exporter",true);
+$import("org.xidea.jsidoc.util:Template",true);
+$import("org.xidea.jsidoc.util:XMLParser",true);
+</script>
+<script>
+//$import("org.xidea.jsidoc.export:Exporter");
+//var t = new Template($JSI.scriptBase + "org/xidea/jsidoc/html/object.xhtml");
+//document.write("<textarea>"+(t.compileData)+"</textarea>")
 </script>
 
 <script>
+
 var exporter = new Exporter();
 exporter.addFeatrue("mixTemplate");
 exporter.addImport("org.xidea.jsidoc:JSIDoc");

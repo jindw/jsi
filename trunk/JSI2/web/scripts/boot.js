@@ -191,7 +191,7 @@ var $import = function(freeEval,cachedScripts){
                 }
             }
             if(bindLevel >= 0){
-                temp.push("\n\n继续弹出 "+temp[0]+" 日志?");
+                temp.push("\n\n继续弹出 ",temp[0]," 日志?");
                 if(!confirm(temp.join(''))){
                     consoleLevel = bindLevel+1;
                 }
@@ -230,7 +230,7 @@ var $import = function(freeEval,cachedScripts){
                     $log.apply($log,msg);
                 }
                 if(":debug"){
-                    if(window.console && console.log){
+                    if(window.console != null && console.log){
                         var msg = [bindLevel,bindName];
                         msg.push.apply(msg,arguments);
                         console.log(msg.join(';'))
@@ -1231,7 +1231,7 @@ var $import = function(freeEval,cachedScripts){
                     }else{
                         document.write(list.join("\n").
                                 replace(/\.js$/gm,'__preload__.js').
-                                replace(/.+/g,"<script src='"+scriptBase+"?path=$&'></script>"))
+                                replace(/.+/g,"<script src='"+scriptBase+"?path=$&'></script>"));
                     }
                 }else{
                     document.write(list.join("\n").
