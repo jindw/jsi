@@ -22,8 +22,13 @@ public class FileJSIRoot extends AbstractJSIRoot implements JSIRoot {
 	}
 
 	public String loadText(String pkgName, String scriptName) {
-		pkgName = pkgName.replace('.', '/');
-		File file = new File(new File(this.scriptBase, pkgName), scriptName);
+
+		File file = this.scriptBase;
+		if (pkgName != null && pkgName.length() > 0) {
+			pkgName = pkgName.replace('.', '/');
+			file = new File(file, pkgName);
+		}
+		file = new File(file, scriptName);
 		try {
 			Reader in = new InputStreamReader(new FileInputStream(file),
 					this.encoding);
