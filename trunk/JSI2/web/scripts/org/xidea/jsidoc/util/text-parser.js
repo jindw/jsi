@@ -96,7 +96,9 @@ function parseText(text,unescape){
 
 
 
-
+/**
+ * 异常一定要抛出去，让parseText做回退处理
+ */
 function parseEL(fn,expression){
     if(fn){
         switch(fn){
