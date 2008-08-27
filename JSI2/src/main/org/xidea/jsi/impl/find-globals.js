@@ -37,27 +37,33 @@ function replaceRegExp(source){
     var pattern = /\/[^\/\*\r\n].*\//;
     var head = '';
     var tail = source;
-    while((p = tail.search(pattern))>=0){
+    var p1
+    outer:
+    while((p1 = tail.search(pattern))>=0){
         try{
             new Function(head+tail.replace(pattern,"/\\$&"));
             //是正则
-            var p2 = p+1;
-            while((p2 = tail.indexOf('/',p2))>p){
+            var p2 = p1;
+            while((p2 = tail.indexOf('/',p2+1))>p1){
+                println([p1,p2]);//,tail.substring(p1,p2)
                 try{
-                    new Function(tail.substring(p,p2));
-                    //有效正则
-                    head += tail.substr(0,p)+"/./";
-                    tail = tail.substr(p2);
-                    continue;
+                    var text = tail.substring(p1,p2+1);
+                    if(/.*/.test(text)){//有效正则
+                        new Function(text);
+                    }
+                    
+                    head += tail.substr(0,p1)+"/./";
+                    tail = tail.substr(p2+1);
+                    continue outer;
                 }catch(e){
                     //无效，继续探测
                 }
             }
-            throw new Error("怎么可能？？^_^");
+            //throw new Error("怎么可能？？^_^");
         }catch(e){
             //只是一个除号：（
-            head += tail.substr(0,p+2);
-            tail = tail.substr(p+2);
+            head += tail.substr(0,p1+2);
+            tail = tail.substr(p1+2);
         }
     }
     return head + tail;
@@ -168,4 +174,12 @@ function findGlobals(source){
         result.push(match)
     }
     return result;
+}
+function findGlobalsAsList(source){
+    var result = findGlobals(source)
+    var list = new java.util.ArrayList();
+    for (var i = 0; i < result.length; i++) {
+        list.add(result[i]);
+    }
+    return list;
 }
