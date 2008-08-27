@@ -27,8 +27,44 @@ var specialRegExp = new RegExp([
             //      )|
             //      [^/\n\r\[\]]
             //    )+\/[gim]*/
-            '/(?:\\\\.|(?:\\[\\\\.|[^\\n\\r]\\])|[^/\\n\\r])+/[gim]*'
-          ].join('|'),'gm');                       
+            //'/(?:\\\\.|(?:\\[\\\\.|[^\\n\\r]\\])|[^/\\n\\r])+/[gim]*'
+            
+            //算了，我还是用预处理后的结果吧：（
+            '/\\./[gim]*'
+          ].join('|'),'gm');
+
+function replaceRegExp(source){
+    var pattern = /\/[^\/\*\r\n].*\//;
+    var head = '';
+    var tail = source;
+    while((p = tail.search(pattern))>=0){
+        try{
+            new Function(head+tail.replace(pattern,"/\\$&"));
+            //是正则
+            var p2 = p+1;
+            while((p2 = tail.indexOf('/',p2))>p){
+                try{
+                    new Function(tail.substring(p,p2));
+                    //有效正则
+                    head += tail.substr(0,p)+"/./";
+                    tail = tail.substr(p2);
+                    continue;
+                }catch(e){
+                    //无效，继续探测
+                }
+            }
+            throw new Error("怎么可能？？^_^");
+        }catch(e){
+            //只是一个除号：（
+            head += tail.substr(0,p+2);
+            tail = tail.substr(p+2);
+        }
+    }
+    return head + tail;
+}
+
+
+
 function specialReplacer(text){
     if(text.charAt(0) == '/'){
         switch(text.charAt(1)){
@@ -40,9 +76,9 @@ function specialReplacer(text){
     return '""';
 }
 function findGlobals(source){
-    source = source.replace(/^\s*#.*/,'');
+    source = replaceRegExp(source.replace(/^\s*#.*/,''));
     source = source.replace(specialRegExp,specialReplacer);
-    //简单的实现，为考虑的问题很多很多：
+    //简单的实现，还以为考虑的问题很多很多：
     var varFlagMap = {};
     var scopePattern = /\b(function\b[^\(]*)[^{]+\{|\{|\}|\[|\]/mg;//|{\s*(?:[\$\w\d]+\s*\:\s*(?:for|while|do)\b|""\:)
     //找到办法不用判断了，省心了。。。。
