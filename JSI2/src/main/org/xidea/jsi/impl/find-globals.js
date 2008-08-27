@@ -1,5 +1,3 @@
-
-
 /*
  * JavaScript Integration Framework
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
@@ -7,15 +5,30 @@
  * @author jindw
  * @version $Id: fn.js,v 1.5 2008/02/24 08:58:15 jindw Exp $
  */
-
-
-var specialRegExp = new RegExp(['/\\*(?:[^\\*]|\\*[^/])*\\*/',//muti-comment
-            '//.*$',                      //single-comment
-            //'/(?:\\\\.|[^/\\n\\r])+/',     //regexp 有bug   /\/(?:\\.|[^/\n\r])+\//
-            '/(?:\\\\.|(?:\\[\\\\.|[^\\n\\r]\\])|[^/\\n\\r])+/[gim]*',     //regexp 好复杂啊   /\/(?:\\.|(?:\[\\.|[^\n\r]\])|[^/\n\r])+\/[gim]*/
+var specialRegExp = new RegExp([
+            //muti-comment
+            '/\\*(?:[^\\*]|\\*[^/])*\\*/',
+            //single-comment
+            '//.*$',
+            //string
             '"(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^"\\n\\r])*"',
-            "'(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^'\\n\\r])*'",    //string
-            '^\\s*#.*'].join('|'),'gm');                         //process
+            "'(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^'\\n\\r])*'",      
+            //process                                          
+            //regexp 有bug   /\/(?:\\.|[^/\n\r])+\//
+            //'/(?:\\\\.|[^/\\n\\r])+/',                       
+            //regexp 好复杂啊   
+            // /\/(?:
+            //      \\.|
+            //      (?:
+            //        \[(?:
+            //            \\.|
+            //            [^\n\r])*
+            //        \]
+            //      )|
+            //      [^/\n\r\[\]]
+            //    )+\/[gim]*/
+            '/(?:\\\\.|(?:\\[\\\\.|[^\\n\\r]\\])|[^/\\n\\r])+/[gim]*'
+          ].join('|'),'gm');                       
 function specialReplacer(text){
     if(text.charAt(0) == '/'){
         switch(text.charAt(1)){
@@ -27,7 +40,8 @@ function specialReplacer(text){
     return '""';
 }
 function findGlobals(source){
-    var source = source.replace(specialRegExp,specialReplacer);
+    source = source.replace(/^\s*#.*/,'');
+    source = source.replace(specialRegExp,specialReplacer);
     //简单的实现，为考虑的问题很多很多：
     var varFlagMap = {};
     var scopePattern = /\b(function\b[^\(]*)[^{]+\{|\{|\}|\[|\]/mg;//|{\s*(?:[\$\w\d]+\s*\:\s*(?:for|while|do)\b|""\:)

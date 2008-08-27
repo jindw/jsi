@@ -28,12 +28,17 @@ public class ScriptPackagePaser implements PackageParser {
 
 	private static final String BIND_SCRIPT ;
 	static{
-		InputStream in = ScriptPackagePaser.class.getResourceAsStream("package-parser.js");
+		InputStream in1 = ScriptPackagePaser.class.getResourceAsStream("package-parser.js");
+		InputStream in2 = ScriptPackagePaser.class.getResourceAsStream("find-globals.js");
 		try {
-			InputStreamReader reader = new InputStreamReader(in,"utf-8");
+			InputStreamReader reader = new InputStreamReader(in1,"utf-8");
 			StringWriter out = new StringWriter();
 			char[] cbuf = new char[1024];
 			int count;
+			while((count = reader.read(cbuf))>=0){
+				out.write(cbuf, 0, count);
+			}
+			reader = new InputStreamReader(in2,"utf-8");
 			while((count = reader.read(cbuf))>=0){
 				out.write(cbuf, 0, count);
 			}
