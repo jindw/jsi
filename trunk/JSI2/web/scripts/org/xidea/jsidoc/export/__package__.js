@@ -13,4 +13,5 @@ this.addScript("export-ui.js",['ExportUI']
               ,["fn.js",'findGlobals']);
 
 this.addScript("fn.js",['findPackages','xmlReplacer','loadTextByURL']);
-this.addScript("find-globals.js",'findGlobals');
+//findGlobalsAsList 是为java提供的接口的。
+this.addScript("find-globals.js",['findGlobals','findGlobalsAsList']);
