@@ -1,4 +1,3 @@
-
 /*
  * JavaScript Integration Framework
  * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
@@ -6,28 +5,70 @@
  * @author jindw
  * @version $Id: fn.js,v 1.5 2008/02/24 08:58:15 jindw Exp $
  */
-
-
-var specialRegExp = new RegExp(['/\\*(?:[^\\*]|\\*[^/])*\\*/',//muti-comment
-            '//.*$',                      //single-comment
-            //'/(?:\\\\.|[^/\\n\\r])+/',     //regexp 有bug   /\/(?:\\.|[^/\n\r])+\//
-            '/(?:\\\\.|(?:\\[\\\\.|[^\\n\\r]\\])|[^/\\n\\r])+/[gim]*',     //regexp 好复杂啊   /\/(?:\\.|(?:\[\\.|[^\n\r]\])|[^/\n\r])+\/[gim]*/
+var specialRegExp = new RegExp([
+            //muti-comment
+            '/\\*(?:[^\\*]|\\*[^/])*\\*/',
+            //single-comment
+            '//.*$',
+            //string
             '"(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^"\\n\\r])*"',
-            "'(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^'\\n\\r])*'",    //string
-            '^\\s*#.*'].join('|'),'gm');                         //process
-function specialReplacer(text){
-    if(text.charAt(0) == '/'){
-        switch(text.charAt(1)){
-            case '/':
-            case '*':
-              return '';
+            "'(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^'\\n\\r])*'",      
+            '/.*/'
+          ].join('|'),'m');
+
+function replaceSpecialEntry(source){
+    var head = '';
+    var tail = source;
+    var p1
+    outer:
+    while(p1 = specialRegExp.exec(tail)){
+        var p2 = p1.index + p1[0].length;
+        var p1 = p1.index;
+        if(tail.charAt(p1) == '/'){
+            switch(tail.charAt(p1 + 1)){
+                case '/':
+                case '*':
+                    head += tail.substr(0,p1);
+                    tail = tail.substr(p2+1);
+                    continue outer;
+            }
+            try{//试探正则
+                new Function(head+tail.replace(specialRegExp,"/\\$&"));
+                //是正则
+                p2 = p1;
+                while((p2 = tail.indexOf('/',p2)+1)>p1){
+                    //println([p1,p2]);//,tail.substring(p1,p2)
+                    try{
+                        var text = tail.substring(p1,p2);
+                        if(/.*/.test(text)){//有效正则
+                            new Function(text);
+                        }
+                        head += tail.substr(0,p1)+"/./";
+                        tail = tail.substr(p2);
+                        continue outer;
+                    }catch(e){
+                        //无效，继续探测
+                    }
+                }
+                throw new Error("怎么可能？？^_^");
+            }catch(e){
+                //只是一个除号：（
+                head += tail.substr(0,p1+1);
+                tail = tail.substr(p1+1);
+                continue outer;
+            }
+        }else{
+            head += tail.substr(0,p1)+'""';
+            tail = tail.substr(p2+1);
+            continue outer;
         }
     }
-    return '""';
+    return head + tail;
 }
+
 function findGlobals(source){
-    var source = source.replace(specialRegExp,specialReplacer);
-    //简单的实现，为考虑的问题很多很多：
+    source = replaceSpecialEntry(source.replace(/^\s*#.*/,''));
+    //简单的实现，还以为考虑的问题很多很多：
     var varFlagMap = {};
     var scopePattern = /\b(function\b[^\(]*)[^{]+\{|\{|\}|\[|\]/mg;//|{\s*(?:[\$\w\d]+\s*\:\s*(?:for|while|do)\b|""\:)
     //找到办法不用判断了，省心了。。。。
@@ -117,4 +158,17 @@ function findGlobals(source){
         result.push(match)
     }
     return result;
+}
+/**
+ * java 接口
+ * @param <String>source 脚本源码
+ * @return java.util.Collection 返回全局id集合
+ */
+function findGlobalsAsList(source){
+    var result = findGlobals(source)
+    var list = new java.util.ArrayList();
+    for (var i = 0; i < result.length; i++) {
+        list.add(result[i]);
+    }
+    return list;
 }

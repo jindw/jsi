@@ -29,7 +29,7 @@ public class ScriptPackagePaser implements PackageParser {
 	private static final String BIND_SCRIPT ;
 	static{
 		InputStream in1 = ScriptPackagePaser.class.getResourceAsStream("package-parser.js");
-		InputStream in2 = ScriptPackagePaser.class.getResourceAsStream("find-globals.js");
+		InputStream in2 = ScriptPackagePaser.class.getResourceAsStream("/org/xidea/jsidoc/export/find-globals.js");
 		try {
 			InputStreamReader reader = new InputStreamReader(in1,"utf-8");
 			StringWriter out = new StringWriter();
