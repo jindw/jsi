@@ -74,14 +74,13 @@ public class JSIFilter implements Filter {
 			if (isIndex(path)) {
 				path = req.getParameter("path");
 			}
-			String resourcePath = getResourcePath(req, path);
-
-			// 容错设计
-			if (path.equals(resourcePath)) {
-				resourcePath = null;
+			boolean isPreload = false;
+			if (path.endsWith(JSIUtil.PRELOAD_FILE_POSTFIX)) {
+				isPreload = true;
+				path = path.replaceFirst(JSIUtil.PRELOAD_FILE_POSTFIX + "$",
+						".js");
 			}
-			InputStream in = getResourceStream(resourcePath != null ? resourcePath
-					: path);
+			InputStream in = getResourceStream(path);
 			if (in != null) {
 				// 经测试，metaType是不会自动设置的;
 				// 对于静态文件的设置，我估计是提供静态文件服务的servlet内做的事情。
@@ -95,7 +94,14 @@ public class JSIFilter implements Filter {
 					resp.setContentType(metatype);
 				}
 				ServletOutputStream out = resp.getOutputStream();
-				processResourceStream(in, out, resourcePath);
+				if (isPreload) {
+					out.print(JSIUtil.buildPreloadPerfix(path));
+					output(in, out);
+					out.print(JSIUtil.buildPreloadPostfix());
+				} else {
+					output(in, out);
+				}
+				in.close();
 				return;
 			}
 
@@ -136,39 +142,25 @@ public class JSIFilter implements Filter {
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			} else {
 				String content = request.getParameter("content");
-				JSIRoot root = this.creatJSIRootByXMLContent(content);
-				String[] imports = root.loadText(null, "#export").split(
-						"\\s*,\\s*");
+				JSIRoot root = new DataJSIRoot(content);
 				String type = root.loadText(null, "#type");
 				String prefix = root.loadText(null, "#prefix");
-
-				JSILoadContext context = new DefaultJSILoadContext();
 				JSIExportor exportor;
-				exportor = exportorFactory.createSimpleExplorter();
-				exportor = exportorFactory.createReportExplorter();
 
-				exportor = exportorFactory.createConfuseExplorter(prefix,
-						"\r\n\r\n", false);// confuseUnimported
-				exportor = exportorFactory.createConfuseExplorter(prefix,
-						"\r\n\r\n", true);// confuseUnimported
-
-				if (imports == null) {
-					// 只有Data Root 才能支持这种方式
-					String exports = root.loadText("", "export");
-					if (exports != null) {
-						imports = exports.split("[,\\s]+");
-						for (String item : imports) {
-							root.$import(item, context);
-						}
-					}
+				if ("report".equals(prefix)) {
+					exportor = exportorFactory.createReportExplorter();
+				} else if ("confuse".equals(prefix)) {
+					exportor = exportorFactory.createConfuseExplorter(prefix,
+							"\r\n\r\n", true);// confuseUnimported
 				} else {
-					ArrayList<String> list = new ArrayList<String>();
-					for (String param : imports) {
-						String[] items = param.split("[,\\s]+");
-						for (String item : items) {
-							root.$import(item, context);
-						}
-					}
+					exportor = exportorFactory.createSimpleExplorter();
+				}
+				String[] imports = root.loadText(null, "#export").split(
+						"\\s*,\\s*");
+				JSILoadContext context = new DefaultJSILoadContext();
+				// 只有Data Root 才能支持这种方式
+				for (String item : imports) {
+					root.$import(item, context);
 				}
 				PrintWriter out = response.getWriter();
 				String result = exportor.export(context);
@@ -184,18 +176,10 @@ public class JSIFilter implements Filter {
 			ServletResponse response) throws UnsupportedEncodingException {
 		if (request.getCharacterEncoding() == null) {
 			// request 默认情况下是null
-			String encoding = requireEncoding();
+			String encoding = this.encoding == null ? "utf-8" : this.encoding;
 			request.setCharacterEncoding(encoding);
 			response.setCharacterEncoding(encoding);
 		}
-	}
-
-	private String requireEncoding() {
-		return this.encoding == null ? "utf-8" : this.encoding;
-	}
-
-	protected JSIRoot creatJSIRootByXMLContent(String xmlContent) {
-		return new DataJSIRoot(xmlContent);
 	}
 
 	private void printDocument(HttpServletResponse response) {
@@ -227,21 +211,6 @@ public class JSIFilter implements Filter {
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * 获取资源路径
-	 * 
-	 * @param req
-	 * @param path
-	 * @return 原始资源路径
-	 */
-	public String getResourcePath(ServletRequest req, String path) {
-		if (path.endsWith(JSIUtil.PRELOAD_FILE_POSTFIX)) {
-			return path.replaceFirst(JSIUtil.PRELOAD_FILE_POSTFIX + "$", ".js");
-		} else {
-			return null;
 		}
 	}
 
@@ -294,18 +263,6 @@ public class JSIFilter implements Filter {
 		return null;
 	}
 
-	protected void processResourceStream(InputStream in,
-			ServletOutputStream out, String preloadPath) throws IOException {
-		if (preloadPath != null) {
-			out.print(JSIUtil.buildPreloadPerfix(preloadPath));
-			output(in, out);
-			out.print(JSIUtil.buildPreloadPostfix());
-		} else {
-			output(in, out);
-		}
-		in.close();
-	}
-
 	protected void output(InputStream in, ServletOutputStream out)
 			throws IOException {
 		byte[] buf = new byte[1024];
@@ -313,57 +270,6 @@ public class JSIFilter implements Filter {
 		while (len > 0) {
 			out.write(buf, 0, len);
 			len = in.read(buf);
-		}
-	}
-
-	protected void outputPreload(ServletRequest req,
-			final ServletResponse resp, final String uri)
-			throws ServletException, IOException {
-		final StringWriter bufSting = new StringWriter();
-		final ByteArrayOutputStream bufStream = new ByteArrayOutputStream();
-		final Object[] holder = new Object[2];
-		HttpServletResponseWrapper respw = new HttpServletResponseWrapper(
-				(HttpServletResponse) resp) {
-			@Override
-			public PrintWriter getWriter() throws IOException {
-				holder[1] = resp.getWriter();
-				if (holder[0] == null) {
-					holder[0] = new PrintWriter(bufSting);
-				}
-				return (PrintWriter) holder[0];
-			}
-
-			@Override
-			public ServletOutputStream getOutputStream() throws IOException {
-				holder[1] = resp.getOutputStream();
-				if (holder[0] == null) {
-					holder[0] = new ServletOutputStream() {
-						@Override
-						public void write(int b) throws IOException {
-							bufStream.write(b);
-						}
-					};
-				}
-				return (ServletOutputStream) holder[0];
-			}
-		};
-		final String uri2 = uri.replace(JSIUtil.PRELOAD_FILE_POSTFIX, ".js");
-		RequestDispatcher disp = req.getRequestDispatcher(uri2);
-		disp.include(req, respw);
-		String preloadPerfix = JSIUtil.buildPreloadPerfix(uri2
-				.substring(scriptBase.length()));
-		if (holder[1] instanceof PrintWriter) {
-			PrintWriter out = (PrintWriter) holder[1];
-			out.write(preloadPerfix.toString());
-			out.write(bufSting.toString());
-			out.print(JSIUtil.buildPreloadPostfix());
-			out.flush();
-		} else {
-			ServletOutputStream out = (ServletOutputStream) holder[1];
-			out.print(preloadPerfix.toString());
-			bufStream.writeTo(out);
-			out.print(JSIUtil.buildPreloadPostfix());
-			out.flush();
 		}
 	}
 

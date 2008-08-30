@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import java.util.List;
 
 import org.xidea.jsi.impl.FileJSIRoot;
+import org.xidea.jsi.impl.JSIUtil;
 
 public class SimpleCacheBuilder {
 	private static String packageBase = "D:/workspace/JSI2/web/scripts";
@@ -19,7 +20,7 @@ public class SimpleCacheBuilder {
 			packageBase = args[0];
 			destBase = args[1];
 		}
-		List<String> packages = FileJSIRoot.findPackageList(new File(packageBase));
+		List<String> packages = JSIUtil.findPackageList(new File(packageBase));
 		packages.add("org.xidea.jsidoc.html");
 		packages.add("org.xidea.jsidoc.styles");
 		packages.add("");
