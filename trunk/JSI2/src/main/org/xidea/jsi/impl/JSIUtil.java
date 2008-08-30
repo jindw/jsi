@@ -1,6 +1,12 @@
 package org.xidea.jsi.impl;
 
+import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.xidea.jsi.JSIExportorFactory;
+import org.xidea.jsi.JSIPackage;
 
 public abstract class JSIUtil {
 	
@@ -37,6 +43,38 @@ public abstract class JSIUtil {
 			}
 		}
 		return exportorFactory;
+	}
+	public static List<String> findPackageList(File root) {
+		ArrayList<String> result = new ArrayList<String>();
+		walkPackageTree(root, null, result);
+		return result;
+	}
+	private static void walkPackageTree(final File dir, String prefix,
+			final List<String> result) {
+		final String subPrefix;
+		if (prefix == null) {
+			subPrefix = "";
+		} else if (prefix.length() == 0) {
+			subPrefix = dir.getName();
+		} else {
+			subPrefix = prefix + '.' + dir.getName();
+		}
+		File packageFile = new File(dir, JSIPackage.PACKAGE_FILE_NAME);
+		if (packageFile.exists()) {
+			result.add(subPrefix);
+		}
+		dir.listFiles(new FileFilter() {
+			public boolean accept(File file) {
+				if (file.isDirectory()) {
+					String name = file.getName();
+					if (!name.startsWith(".")) {
+						walkPackageTree(file, subPrefix, result);
+					}
+				}
+				return false;
+			}
+		});
+
 	}
 	public static void main(String args[]) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
 		System.out.println(getExportorFactory().createConfuseExplorter("__1", "\r\n", true));

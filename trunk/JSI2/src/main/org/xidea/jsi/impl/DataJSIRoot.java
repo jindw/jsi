@@ -24,16 +24,23 @@ public class DataJSIRoot extends AbstractJSIRoot implements JSIRoot {
 			Document doc = DocumentBuilderFactory.newInstance()
 					.newDocumentBuilder().parse(
 							new ByteArrayInputStream(source.getBytes("utf-8")));
-			String imports = doc.getDocumentElement().getAttribute("export");
-			NodeList nodes = doc.getElementsByTagName("script");
+			Element root = doc.getDocumentElement();
+			String entryTagName = "entry";
+			String key = "key";
 			HashMap<String, String> dataMap = new HashMap<String, String>();
+			if(root.getTagName().equals("script-map")){//old version
+				entryTagName = "script";
+				key = "path";
+				String imports = root.getAttribute("export");
+				dataMap.put("#export", imports);
+			}
+			NodeList nodes = doc.getElementsByTagName(entryTagName);
 			for (int i = nodes.getLength() - 1; i >= 0; i--) {
 				Element node = (Element) nodes.item(i);
-				String path = node.getAttribute("path");
+				String path = node.getAttribute(key);
 				String content = node.getTextContent();
 				dataMap.put(path, content);
 			}
-			dataMap.put("/export", imports);
 			this.dataMap = dataMap;
 		} catch (Exception e) {
 			e.printStackTrace();
