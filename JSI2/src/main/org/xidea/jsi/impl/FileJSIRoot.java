@@ -43,39 +43,4 @@ public class FileJSIRoot extends AbstractJSIRoot implements JSIRoot {
 			return null;
 		}
 	}
-
-	public static List<String> findPackageList(File root) {
-		ArrayList<String> result = new ArrayList<String>();
-		walkPackageTree(root, null, result);
-		return result;
-
-	}
-
-	private static void walkPackageTree(final File dir, String prefix,
-			final List<String> result) {
-		final String subPrefix;
-		if (prefix == null) {
-			subPrefix = "";
-		} else if (prefix.length() == 0) {
-			subPrefix = dir.getName();
-		} else {
-			subPrefix = prefix + '.' + dir.getName();
-		}
-		File packageFile = new File(dir, JSIPackage.PACKAGE_FILE_NAME);
-		if (packageFile.exists()) {
-			result.add(subPrefix);
-		}
-		dir.listFiles(new FileFilter() {
-			public boolean accept(File file) {
-				if (file.isDirectory()) {
-					String name = file.getName();
-					if (!name.startsWith(".")) {
-						walkPackageTree(file, subPrefix, result);
-					}
-				}
-				return false;
-			}
-		});
-
-	}
 }

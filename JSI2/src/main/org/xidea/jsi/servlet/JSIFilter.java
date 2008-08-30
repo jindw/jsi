@@ -37,11 +37,9 @@ import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSIExportorFactory;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIRoot;
-import org.xidea.jsi.impl.AbstractJSIRoot;
 import org.xidea.jsi.impl.DataJSIRoot;
 import org.xidea.jsi.impl.DefaultJSIExportorFactory;
 import org.xidea.jsi.impl.DefaultJSILoadContext;
-import org.xidea.jsi.impl.FileJSIRoot;
 import org.xidea.jsi.impl.JSIUtil;
 
 /**
@@ -50,45 +48,14 @@ import org.xidea.jsi.impl.JSIUtil;
  * @author jindw
  */
 public class JSIFilter implements Filter {
-	public static final String GLOBAL_JSI_ROOT_KEY = JSIFilter.class.getName()
-			.concat(".GLOBAL_JSIROOT_KEY");
-
-	private static final String UTF8_INCODING = "utf-8";
-	/**
-	 * 直接合并
-	 */
-	private static final int JOIN_DIRECT = 0;
-	/**
-	 * 合并内部冲突
-	 */
-	private static final int JOIN_WITHOUT_INNER_CONFLICTION = 1;
-	/**
-	 * 合并全部冲突
-	 */
-	private static final int JOIN_WITHOUT_ALL_CONFLICTION = 2;
-	/**
-	 * 导出成XML
-	 */
-	private static final int EXPORT_AS_XML = -1;
-	/**
-	 * 导出成文档
-	 */
-	private static final int EXPORT_AS_JSIDOC = -2;
-
-	/**
-	 * 导出成分析报告
-	 */
-	private static final int EXPORT_AS_REPORT = -3;
-
 	protected String scriptBase;
 	protected ServletContext context;
 	/**
 	 * 只有默认的encoding没有设置的时候，才会设置
 	 */
 	protected String encoding = null;
-	protected String exportorFactoryClass = JSIUtil.JSI_EXPORTOR_FACTORY_CLASS;
-	private JSIRoot jsiRoot;
-	private static JSIExportorFactory exportorFactory;
+	private final static JSIExportorFactory exportorFactory = JSIUtil
+			.getExportorFactory();
 
 	public void destroy() {
 	}
@@ -157,56 +124,34 @@ public class JSIFilter implements Filter {
 			} else {
 				response
 						.sendRedirect("org/xidea/jsidoc/index.html?externalScript="
-								+ URLEncoder.encode(externalScript,
-										UTF8_INCODING));
+								+ URLEncoder.encode(externalScript, "utf-8"));
 
 			}
 			return true;
 		} else if ("export.action".equals(path)) {
 			initializeEncodingIfNotSet(request, response);
-			int level = JOIN_DIRECT;
-			{
-				String levelParam = request.getParameter("level");
-				if (levelParam != null) {
-					try {
-						level = Integer.parseInt(levelParam);
-					} catch (Exception e) {
-					}
-				}
-			}
-			JSIExportorFactory factory = getExportorFactory();
-			if (level != JOIN_DIRECT
-					&& factory.getClass() == DefaultJSIExportorFactory.class) {
+
+			if (null == DefaultJSIExportorFactory.class) {
 				// 不支持导出方式
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			} else {
-				JSILoadContext context = new DefaultJSILoadContext();
 				String content = request.getParameter("content");
-				String[] imports = request.getParameterValues("imports");
-				JSIRoot root;
-				JSIExportor exportor;
-				if (content != null) {
-					root = this.creatJSIRootByXMLContent(content);
-				} else {
-					root = this.jsiRoot;
-				}
-				if (level == JOIN_DIRECT) {
-					exportor = factory.createSimpleExplorter();
-				} else if (level == EXPORT_AS_REPORT) {
-					exportor = factory.createReportExplorter();
-				} else {
-					String prefix = request.getParameter("prefix");
-					if (level == JOIN_WITHOUT_INNER_CONFLICTION) {
-						exportor = factory.createConfuseExplorter(prefix,
-								"\r\n\r\n", false);// confuseUnimported
-					} else if (level == JOIN_WITHOUT_ALL_CONFLICTION) {
-						exportor = factory.createConfuseExplorter(prefix,
-								"\r\n\r\n", true);// confuseUnimported
-					} else {
-						throw new IllegalArgumentException("不支持的导出方式");
-					}
+				JSIRoot root = this.creatJSIRootByXMLContent(content);
+				String[] imports = root.loadText(null, "#export").split(
+						"\\s*,\\s*");
+				String type = root.loadText(null, "#type");
+				String prefix = root.loadText(null, "#prefix");
 
-				}
+				JSILoadContext context = new DefaultJSILoadContext();
+				JSIExportor exportor;
+				exportor = exportorFactory.createSimpleExplorter();
+				exportor = exportorFactory.createReportExplorter();
+
+				exportor = exportorFactory.createConfuseExplorter(prefix,
+						"\r\n\r\n", false);// confuseUnimported
+				exportor = exportorFactory.createConfuseExplorter(prefix,
+						"\r\n\r\n", true);// confuseUnimported
+
 				if (imports == null) {
 					// 只有Data Root 才能支持这种方式
 					String exports = root.loadText("", "export");
@@ -246,29 +191,18 @@ public class JSIFilter implements Filter {
 	}
 
 	private String requireEncoding() {
-		return this.encoding == null ? UTF8_INCODING : this.encoding;
+		return this.encoding == null ? "utf-8" : this.encoding;
 	}
 
 	protected JSIRoot creatJSIRootByXMLContent(String xmlContent) {
 		return new DataJSIRoot(xmlContent);
 	}
 
-	protected JSIExportorFactory getExportorFactory() {
-		if (exportorFactory == null) {
-			try {
-				exportorFactory = (JSIExportorFactory) Class.forName(
-						exportorFactoryClass).newInstance();
-			} catch (Exception e) {
-				exportorFactory = JSIUtil.getExportorFactory();
-			}
-		}
-		return exportorFactory;
-	}
-
 	private void printDocument(HttpServletResponse response) {
 		try {
 			PrintWriter out = response.getWriter();
-			List<String> packageList = getPackageList();
+			List<String> packageList = JSIUtil.findPackageList(new File(context
+					.getRealPath(this.scriptBase)));
 
 			if (packageList.isEmpty()) {
 				out
@@ -277,7 +211,7 @@ public class JSIFilter implements Filter {
 
 				out
 						.print("<html><frameset rows='100%'><frame src='org/xidea/jsidoc/index.html?");
-				out.print(URLEncoder.encode("group.全部托管类库", UTF8_INCODING));
+				out.print(URLEncoder.encode("group.All", "utf-8"));
 				out.print("=");
 				boolean isFirst = true;
 				for (String packageName : packageList) {
@@ -294,12 +228,6 @@ public class JSIFilter implements Filter {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	protected List<String> getPackageList() {
-		final File dir = new File(context.getRealPath(scriptBase));
-		final List<String> result = FileJSIRoot.findPackageList(dir);
-		return result;
 	}
 
 	/**
@@ -443,15 +371,9 @@ public class JSIFilter implements Filter {
 		this.context = config.getServletContext();
 		String scriptBase = config.getInitParameter("scriptBase");
 		String encoding = config.getInitParameter("encoding");
-		String exportorFactoryClass = config
-				.getInitParameter("exportorFactoryClass");
 		if (encoding != null) {
 			this.encoding = encoding;
 		}
-		if (exportorFactoryClass != null) {
-			this.exportorFactoryClass = exportorFactoryClass;
-		}
-
 		if (scriptBase != null && (scriptBase = scriptBase.trim()).length() > 0) {
 			if (!scriptBase.endsWith("/")) {
 				scriptBase = scriptBase + '/';
@@ -459,39 +381,6 @@ public class JSIFilter implements Filter {
 		} else {
 			scriptBase = "/scripts/";
 		}
-		// this.contextPath = config.getServletContext().getContextPath();
-		// this.contextLength = this.contextPath.length();
 		this.scriptBase = scriptBase;
-		this.jsiRoot = new JSIRootImpl();
-		config.getServletContext().setAttribute(GLOBAL_JSI_ROOT_KEY,
-				this.jsiRoot);
 	}
-
-	private class JSIRootImpl extends AbstractJSIRoot {
-		@Override
-		public String loadText(String pkgName, String scriptName) {
-			try {
-				InputStream in = getResourceStream('/'
-						+ pkgName.replace('.', '/') + '/' + scriptName);
-				if (in != null) {
-					Reader reader = new InputStreamReader(in,
-							encoding == null ? UTF8_INCODING : encoding);
-
-					StringBuilder buf = new StringBuilder();
-					char[] cbuf = new char[1024];
-					for (int len = reader.read(cbuf); len > 0; len = reader
-							.read(cbuf)) {
-						buf.append(cbuf, 0, len);
-					}
-
-					return buf.toString();
-				} else {
-					return null;
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
-
 }

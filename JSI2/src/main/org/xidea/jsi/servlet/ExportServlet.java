@@ -38,7 +38,7 @@ class ExportServlet extends GenericServlet {
 		response.getWriter().print(result);
 	}
 	private JSIRoot getJSIRoot(){
-		return (JSIRoot) this.getServletContext().getAttribute(JSIFilter.GLOBAL_JSI_ROOT_KEY);
+		return null;//(JSIRoot) this.getServletContext().getAttribute(JSIFilter.GLOBAL_JSI_ROOT_KEY);
 	}
 
 	@Override
