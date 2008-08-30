@@ -15,21 +15,27 @@ import org.xidea.jsi.ScriptLoader;
  */
 public class DefaultJSIExportorFactory implements JSIExportorFactory {
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIExportorFactory#createJSIDocExplorter()
 	 */
 	public JSIExportor createJSIDocExplorter() {
 		throw new UnsupportedOperationException("不支持导出方式");
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIExportorFactory#createXMLExplorter()
 	 */
 	public JSIExportor createXMLExplorter() {
 		return new XMLExporter();
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIExportorFactory#createSimpleExplorter()
 	 */
 	public JSIExportor createSimpleExplorter() {
@@ -37,9 +43,10 @@ public class DefaultJSIExportorFactory implements JSIExportorFactory {
 	}
 
 	/**
-	 * @see org.xidea.jsi.JSIExportorFactory#createConfuseExplorter(java.lang.String, java.lang.String, boolean)
+	 * @see org.xidea.jsi.JSIExportorFactory#createConfuseExplorter(java.lang.String,
+	 *      java.lang.String, boolean)
 	 */
-	public JSIExportor createConfuseExplorter(String internalPrefix, 
+	public JSIExportor createConfuseExplorter(String internalPrefix,
 			String lineSeparator, boolean confuseUnimported) {
 		throw new UnsupportedOperationException("不支持导出方式");
 	}
@@ -66,7 +73,8 @@ class SimpleExporter implements JSIExportor {
 class XMLExporter implements JSIExportor {
 
 	public String export(JSILoadContext context) {
-		StringBuilder content = new StringBuilder("<script-map export='");
+		StringBuilder content = new StringBuilder(
+				"<properties>\n<entry key='#export'>");
 		boolean first = true;
 		Map<String, String> exportMap = context.getExportMap();
 		List<ScriptLoader> scriptList = context.getScriptList();
@@ -81,7 +89,7 @@ class XMLExporter implements JSIExportor {
 			content.append(object);
 		}
 		;
-		content.append("'>\n");
+		content.append("</entry>\n");
 		HashMap<String, Object> packageFileMap = new HashMap<String, Object>();
 		for (ScriptLoader entry : scriptList) {
 			appendEntry(content, entry.getPath(), entry.getSource());
@@ -95,18 +103,25 @@ class XMLExporter implements JSIExportor {
 						+ '/' + JSIPackage.PACKAGE_FILE_NAME, source);
 			}
 		}
-		content.append("</script-map>\n");
+		content.append("</properties>\n");
 		return content.toString();
 	}
 
 	private void appendEntry(StringBuilder content, String path, String source) {
-		content.append("<script path='");
+		content.append("<entry key='");
 		content.append(path);
 		content.append("'>");
-		source = source.replaceAll("&", "&amp;").replaceAll(">", "&gt;")
-				.replaceAll("<", "&lt;");
-		content.append(source);
-		content.append("</script>\n");
+		if (source.indexOf("]]>") < 0) {
+
+			content.append("<![CDATA[");
+			content.append(source);
+			content.append("]]>");
+		} else {
+			source = source.replaceAll("&", "&amp;").replaceAll(">", "&gt;")
+					.replaceAll("<", "&lt;");
+			content.append(source);
+		}
+		content.append("</entry>\n");
 	}
 
 }
