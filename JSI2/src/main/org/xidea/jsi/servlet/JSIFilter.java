@@ -1,29 +1,16 @@
 package org.xidea.jsi.servlet;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.InvalidPropertiesFormatException;
 import java.util.List;
-import java.util.Properties;
-import java.util.regex.Pattern;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
-import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -31,10 +18,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.xidea.jsi.JSIExportor;
-import org.xidea.jsi.JSIExportorFactory;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.impl.DataJSIRoot;
@@ -47,15 +32,9 @@ import org.xidea.jsi.impl.JSIUtil;
  * 
  * @author jindw
  */
-public class JSIFilter implements Filter {
-	protected String scriptBase;
+public class JSIFilter extends JSIService implements Filter {
 	protected ServletContext context;
-	/**
-	 * 只有默认的encoding没有设置的时候，才会设置
-	 */
-	protected String encoding = null;
-	private final static JSIExportorFactory exportorFactory = JSIUtil
-			.getExportorFactory();
+	private ThreadLocal<HttpServletRequest> requestLocal = new ThreadLocal<HttpServletRequest>();
 
 	public void destroy() {
 	}
@@ -63,12 +42,14 @@ public class JSIFilter implements Filter {
 	public void doFilter(ServletRequest req, final ServletResponse resp,
 			FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
+		HttpServletResponse response = (HttpServletResponse) resp;
+		requestLocal.set(request);
 		String path = request.getRequestURI().substring(
 				request.getContextPath().length());
 		if (path.startsWith(scriptBase)) {
 			path = path.substring(scriptBase.length());
-			if (this.processAttachedAction(request, (HttpServletResponse) resp,
-					path)) {
+			if (this.processAttachedAction(request, response, path)) {
+				initializeEncodingIfNotSet(request, response);
 				return;
 			}
 			if (isIndex(path)) {
@@ -110,6 +91,14 @@ public class JSIFilter implements Filter {
 		chain.doFilter(req, resp);
 	}
 
+	protected InputStream getResourceStream(String path) {
+		InputStream in = context.getResourceAsStream(scriptBase + path);
+		if (in == null) {
+			in = super.getResourceStream(path);
+		}
+		return in;
+	}
+
 	/**
 	 * 响应附加行为
 	 * 
@@ -121,12 +110,11 @@ public class JSIFilter implements Filter {
 	 */
 	public boolean processAttachedAction(HttpServletRequest request,
 			HttpServletResponse response, String path) throws IOException {
-		if ("jsidoc.action".equals(path) || isIndex(path)
+		if (isIndex(path)
 				&& request.getParameter("path") == null) {
-			initializeEncodingIfNotSet(request, response);
 			String externalScript = request.getParameter("externalScript");
 			if (externalScript == null) {
-				printDocument(response);
+				printDocument(response.getWriter());
 			} else {
 				response
 						.sendRedirect("org/xidea/jsidoc/index.html?externalScript="
@@ -135,7 +123,6 @@ public class JSIFilter implements Filter {
 			}
 			return true;
 		} else if ("export.action".equals(path)) {
-			initializeEncodingIfNotSet(request, response);
 
 			if (null == DefaultJSIExportorFactory.class) {
 				// 不支持导出方式
@@ -147,9 +134,9 @@ public class JSIFilter implements Filter {
 				String prefix = root.loadText(null, "#prefix");
 				JSIExportor exportor;
 
-				if ("report".equals(prefix)) {
+				if ("report".equals(type)) {
 					exportor = exportorFactory.createReportExplorter();
-				} else if ("confuse".equals(prefix)) {
+				} else if ("confuse".equals(type)) {
 					exportor = exportorFactory.createConfuseExplorter(prefix,
 							"\r\n\r\n", true);// confuseUnimported
 				} else {
@@ -164,7 +151,6 @@ public class JSIFilter implements Filter {
 				}
 				PrintWriter out = response.getWriter();
 				String result = exportor.export(context);
-				System.out.println(result);
 				out.print(result);
 			}
 			return true;
@@ -182,96 +168,7 @@ public class JSIFilter implements Filter {
 		}
 	}
 
-	private void printDocument(HttpServletResponse response) {
-		try {
-			PrintWriter out = response.getWriter();
-			List<String> packageList = JSIUtil.findPackageList(new File(context
-					.getRealPath(this.scriptBase)));
 
-			if (packageList.isEmpty()) {
-				out
-						.print("<html><body> 未发现任何托管脚本包，无法显示JSIDoc。<br /> 请添加脚本包，并在包目录下正确添加相应的包定义文件 。</body><html>");
-			} else {
-
-				out
-						.print("<html><frameset rows='100%'><frame src='org/xidea/jsidoc/index.html?");
-				out.print(URLEncoder.encode("group.All", "utf-8"));
-				out.print("=");
-				boolean isFirst = true;
-				for (String packageName : packageList) {
-					if (isFirst) {
-						isFirst = false;
-					} else {
-						out.print(",");
-					}
-					out.print(packageName);
-
-				}
-				out.print("'> </frameset></html>");
-			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	private boolean isIndex(String path) {
-		return path.length() == 0 || path.equals("index.jsp")
-				|| path.equals("index.php");
-	}
-
-	protected InputStream getResourceStream(String path) {
-		InputStream in = context.getResourceAsStream(scriptBase + path);
-		if (in == null) {
-			return this.getClass().getClassLoader().getResourceAsStream(path);
-		}
-		if (in == null) {
-			File dir = new File(context.getRealPath(scriptBase));
-			File[] list = dir.listFiles(new FilenameFilter() {
-				public boolean accept(File dir, String name) {
-					return false;
-				}
-			});
-			if (list != null) {
-				int i = list.length;
-				while (i-- > 0) {
-					in = findByXML(list[i], path);
-				}
-			}
-		}
-		return in;
-	}
-
-	protected InputStream findByXML(File file, String path) {
-		Properties ps = new Properties();
-		try {
-			ps.loadFromXML(new FileInputStream(file));
-			String value = ps.getProperty(path);
-			if (value != null) {
-				byte[] data = value.getBytes(encoding == null ? "utf8"
-						: encoding);
-				return new ByteArrayInputStream(data);
-			} else {
-				value = ps.getProperty(path + "#base64");
-				if (value != null) {
-					byte[] data = new sun.misc.BASE64Decoder()
-							.decodeBuffer(value);
-					return new ByteArrayInputStream(data);
-				}
-			}
-		} catch (Exception e) {
-		}
-		return null;
-	}
-
-	protected void output(InputStream in, ServletOutputStream out)
-			throws IOException {
-		byte[] buf = new byte[1024];
-		int len = in.read(buf);
-		while (len > 0) {
-			out.write(buf, 0, len);
-			len = in.read(buf);
-		}
-	}
 
 	public void init(FilterConfig config) throws ServletException {
 		this.context = config.getServletContext();
@@ -288,5 +185,6 @@ public class JSIFilter implements Filter {
 			scriptBase = "/scripts/";
 		}
 		this.scriptBase = scriptBase;
+		this.absoluteScriptBase = context.getRealPath(this.scriptBase);
 	}
 }

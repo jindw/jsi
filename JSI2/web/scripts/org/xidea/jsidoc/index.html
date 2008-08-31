@@ -18,49 +18,19 @@ var JSIDoc={
 $import("org.xidea.jsidoc.JSIDoc",true);
 </script>
 
-
-
 <style>
 frame,frameset{
     border-color:#CCF;
 }
 </style>
 <script>
-var prepareResult = JSIDoc.prepare();
-</script>
-<script>
-//
-//                "您需要把您的外部文件放在一个Web服务器上察看;",
-//                "如果您使用的是Firefox，请奖您也可以为当前站点添加本地文件访问权限"
-var packageGroupMap = {
-        "托管脚本示例" : ["example","example.internal","org.xidea.jsidoc"]
-    }
-if(prepareResult){
-    if(prepareResult.constructor == String){//可能是本地全线问题导致，无法加载脚本数据
-        if(JSIDoc.packageGroupMap){
-            var packageGroupMap = JSIDoc.packageGroupMap;
-        }else{
-            if(!text){
-	            var message = ["加载本机文档数据失败:","请直接输入文档源代码!!"].join('\n');
-	            //var text = window.showModalDialog("javascript:document.write('<html><body><form><textarea id=text style=\"width:100%;height:120px;\"></textarea><br><button onclick=\"alert(window.returnValue = this.form.text.value);window.close();\">确定</button></form></body></html>')",window, "dialogHeight:225px;dialogwidth:250px;resizable:no")
-	            var text = prompt(message);
-            }
-            window.eval(text);
-            if(JSIDoc.packageGroupMap){
-                var packageGroupMap = JSIDoc.packageGroupMap;
-            }
-        }
-    }else if(prepareResult.length){
-        packageGroupMap = prepareResult;
-    }
-}
-JSIDoc.resetPackageMap(packageGroupMap);
+JSIDoc.prepare();
 </script>
 
 </head>
 <frameset cols="216,*"
  border="1" frameborder="1" bordercolor="#CCF" framespacing="0" margin="0">
-<frame id="menu" name="menu"  src="html/controller.html?@menu"></frame>
+<frame id="menu" name="menu"  src="about:blank"></frame>
 <frame id="content" name="content" src="welcome.html">welcome.html</frame>
 </frameset>
 </html>

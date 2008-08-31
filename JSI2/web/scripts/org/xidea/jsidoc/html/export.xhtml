@@ -67,14 +67,14 @@
                     <input name="level" onclick="ExportUI.checkLevel(this)" value="-3" type="radio" disabled="true"  title="导出JSI分析报告" />导出分析报告
                 </div>
                 <div>
-                    <span id="prefixContainer">
-                       <label for="prefix">内部变量前缀:</label>
-                       <input size="4"
-                            name="prefix" value="_$" type="text" title="当选择隔离冲突时，需要指定混淆后内部变量前缀，以避免二次冲突"/></span>
                     <span id="mixTemplateContainer">
                        <label for="mixTemplate">编入模板:</label>
                        <input type="checkbox"
                             name="mixTemplate" checked="true"/></span>
+                    <span id="prefixContainer">
+                       <label for="prefix">内部变量前缀:</label>
+                       <input size="4"
+                            name="prefix" value="_$" type="text" title="当选择隔离冲突时，需要指定混淆后内部变量前缀，以避免二次冲突"/></span>
                     <span id="jsidocURLContainer"><br/>
                        <label for="jsidocURL">服务地址:</label>
                        <input size="40" name="jsidocURL"
