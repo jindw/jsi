@@ -5,17 +5,41 @@
  * @author jindw
  * @version $Id: jsidoc.js,v 1.9 2008/02/28 14:39:09 jindw Exp $
  */
-var documentMap = {};
-var scriptBase = this.scriptBase
-var documentBase = (scriptBase + 'html/').substr($JSI.scriptBase.length);
-var jsiCacher = $JSI.preload;
-var cachedScripts = {};
 
-var MENU_FRAME_ID = "menu";
-var CONTENT_FRAME_ID = "content";
-//var loadingHTML = '<img style="margin:40%" src="../styles/loading2.gif"/>';
-var cachedSourceMap = window.JSIDoc && window.JSIDoc.cachedSourceMap;
 
+function onload(){
+    //
+    // "您需要把您的外部文件放在一个Web服务器上察看;",
+    // "如果您使用的是Firefox，您需要将当前站点添加本地文件访问权限"
+    window.onload = Function.prototype;
+	var menuWindow = document.getElementById("menu").contentWindow;
+    var contentWindow = document.getElementById("content").contentWindow;
+	if(checkInterval){
+    	clearInterval(checkInterval);
+    }
+	checkInterval = setInterval(function(){
+		var url = decodeURIComponent(checkLocation.hash.substr(1));
+		var contentLocation = contentWindow.location;
+		if(url && url != contentLocation.href){
+            contentLocation.replace(url);
+		}
+	},100);
+    //可能是本地全线问题导致，无法加载脚本数据
+    if(JSIDoc.waitExternalScript){
+        var message = ["加载本机文档数据失败:","请直接输入文档源代码!!"].join('\n');
+        //var text = window.showModalDialog("javascript:document.write('<html><body><form><textarea id=text style=\"width:100%;height:120px;\"></textarea><br><button onclick=\"alert(window.returnValue = this.form.text.value);window.close();\">确定</button></form></body></html>')",window, "dialogHeight:225px;dialogwidth:250px;resizable:no")
+        var text = prompt(message);
+        if(text){
+            window.eval(text);
+        }else{
+            JSIDoc.packageGroupMap = {
+                "托管脚本示例" : ["example","example.internal","org.xidea.jsidoc"]
+            }
+        }
+    }
+    menuWindow.location.replace("html/controller.html?@menu");
+    JSIDoc.resetPackageMap(JSIDoc.packageGroupMap);
+}
 /**
  * @public
  */
@@ -24,22 +48,9 @@ var JSIDoc = {
      * @return packageGroupMap 或者 false(发现有外部脚本文件)
      */
     prepare:function(){
+        window.onload = onload;
         var search = window.location.search;
         var packageGroup = [];
-        window.onload = function(){
-            if(checkInterval){
-            	checkInterval.clear();
-            }
-        	var contentWindow = document.getElementById("content").contentWindow;
-        	checkInterval = setInterval(function(){
-        		var url = decodeURIComponent(checkLocation.hash.substr(1));
-        		var contentLocation = contentWindow.location;
-        		if(url && url != contentLocation){
-                    contentLocation.replace(url);
-        		}
-        	},100);
-            window.onload = Function.prototype;
-        }
         for(var packageName in cachedSourceMap){
             preload(packageName,cachedSourceMap[packageName]);
         }
@@ -54,10 +65,17 @@ var JSIDoc = {
                         var text = window.clipboardData.getData("Text");
                         document.write("<script>"+text+"<\/script>")
                     }else{
+                        this.waitExternalScript = true;
                         document.write("<script src='"+value+"'><\/script>")
                     }
                     return value;//???
-                }else if(name = name.replace(/^group\.(.*)|.*/,'$1')){//group
+                }else if(name == "group"){
+                    value = JSON.parse(value);
+                    for(name in value){
+                        packageGroup.push(name)
+                        packageGroup[name] = value[name];
+                    }
+                }else if(name = name.replace(/^group\.(.*)|.*/,'$1')){//old 
                     packageGroup.push(name)
                     packageGroup[name] = value.split(',');
                 }
@@ -273,6 +291,7 @@ var JSIDoc = {
         });
     },
     cacheScript:function(packageMap,groupName){
+        this.waitExternalScript = false;
         if(!this.packageGroupMap){
             this.packageGroupMap = {};
         }
@@ -319,15 +338,18 @@ var JSIDoc = {
         }
     }
 }
+var documentMap = {};
+var scriptBase = this.scriptBase
+var documentBase = (scriptBase + 'html/').substr($JSI.scriptBase.length);
+var jsiCacher = $JSI.preload;
+var cachedScripts = {};
+
+var MENU_FRAME_ID = "menu";
+var CONTENT_FRAME_ID = "content";
+//var loadingHTML = '<img style="margin:40%" src="../styles/loading2.gif"/>';
+var cachedSourceMap = window.JSIDoc && window.JSIDoc.cachedSourceMap;
+
 var win = window;
-while(win!=win.top){
-	try{
-		win.parent.document.forms.length;
-	}catch(e){
-		break;
-	}
-	win = win.parent;
-}
 var checkLocation = win.location;
 var checkInterval;
 var templateMap = {
@@ -341,6 +363,14 @@ var templateMap = {
 	"part.xhtml" : new Template(scriptBase+"html/part.xhtml"),
 	"source.xhtml" : new Template(scriptBase+"html/source.xhtml")
 };
+while(win!=win.top){
+	try{
+		win.parent.document.forms.length;
+	}catch(e){
+		break;
+	}
+	win = win.parent;
+}
 function preload(pkg,file2dataMap,value){
     jsiCacher.apply($JSI,arguments);
     var base = pkg.replace(/\.|(.)$/g,'$1/');
