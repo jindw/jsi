@@ -3,6 +3,7 @@ package org.xidea.jsi.web;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -72,13 +73,7 @@ public class JSIFilter extends JSIService implements Filter {
 					resp.setContentType(metatype);
 				}
 				ServletOutputStream out = resp.getOutputStream();
-				if (isPreload) {
-					out.print(JSIUtil.buildPreloadPerfix(path));
-					output(in, out);
-					out.print(JSIUtil.buildPreloadPostfix());
-				} else {
-					output(in, out);
-				}
+				printResource(path, isPreload, in, out);
 				in.close();
 				return;
 			}
@@ -132,7 +127,7 @@ public class JSIFilter extends JSIService implements Filter {
 		}
 	}
 
-	protected InputStream getResourceStream(String path) {
+	public InputStream getResourceStream(String path) {
 		InputStream in = context.getResourceAsStream(scriptBase + path);
 		if (in == null) {
 			in = super.getResourceStream(path);

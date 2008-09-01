@@ -11,7 +11,7 @@ function onload(){
     //
     // "您需要把您的外部文件放在一个Web服务器上察看;",
     // "如果您使用的是Firefox，您需要将当前站点添加本地文件访问权限"
-    window.onload = Function.prototype;
+    this.onload = Function.prototype;
 	var menuWindow = document.getElementById("menu").contentWindow;
     var contentWindow = document.getElementById("content").contentWindow;
 	if(checkInterval){
@@ -31,14 +31,15 @@ function onload(){
         var text = prompt(message);
         if(text){
             window.eval(text);
-        }else{
-            JSIDoc.packageGroupMap = {
-                "托管脚本示例" : ["example","example.internal","org.xidea.jsidoc"]
-            }
         }
     }
+    var packageGroupMap = JSIDoc.packageGroupMap ;
+    if(packageGroupMap.length == 0){
+        packageGroupMap.push("托管脚本示例");
+        packageGroupMap["托管脚本示例"]= ["example","example.internal","org.xidea.jsidoc"]
+    }
+    JSIDoc.addPackageMap(packageGroupMap);
     menuWindow.location.replace("html/controller.html?@menu");
-    JSIDoc.resetPackageMap(JSIDoc.packageGroupMap);
 }
 /**
  * @public
@@ -51,9 +52,7 @@ var JSIDoc = {
         window.onload = onload;
         var search = window.location.search;
         var packageGroup = [];
-        for(var packageName in cachedSourceMap){
-            preload(packageName,cachedSourceMap[packageName]);
-        }
+        this.packageGroupMap = [];
         if(search && search.length>2){
             var exp = /([^\?=&]*)=([^=&]*)/g;
             var match;
@@ -88,18 +87,10 @@ var JSIDoc = {
      * @param packageGroupMap 包含那些包组
      * @param findDependence 是否查找依赖，来收集其他包
      */
-    resetPackageMap : function(packageGroupMap,findDependence){
+    addPackageMap : function(packageGroupMap,findDependence){
         this.rootInfo = PackageInfo.requireRoot();
-        this.packageInfoGroupMap = [];
-        this.packageInfoMap = {};
-        if(!(packageGroupMap instanceof Array)){
-            var packageGroupMap2 = [];
-            for(var key in packageGroupMap){
-                packageGroupMap2.push(key);
-                packageGroupMap2[key] = packageGroupMap[key];
-            }
-            packageGroupMap = packageGroupMap2;
-        }
+        this.packageInfoGroupMap = this.packageInfoGroupMap || [];
+        this.packageInfoMap = this.packageInfoMap || {};
         for(var i = 0;i<packageGroupMap.length;i++){
             var key = packageGroupMap[i]
             var packages = packageGroupMap[key];
@@ -292,9 +283,6 @@ var JSIDoc = {
     },
     cacheScript:function(packageMap,groupName){
         this.waitExternalScript = false;
-        if(!this.packageGroupMap){
-            this.packageGroupMap = {};
-        }
         groupName = groupName||"未命名分组";
         var groupPackages = this.packageGroupMap[groupName];
         if(!groupPackages){
@@ -347,7 +335,6 @@ var cachedScripts = {};
 var MENU_FRAME_ID = "menu";
 var CONTENT_FRAME_ID = "content";
 //var loadingHTML = '<img style="margin:40%" src="../styles/loading2.gif"/>';
-var cachedSourceMap = window.JSIDoc && window.JSIDoc.cachedSourceMap;
 
 var win = window;
 var checkLocation = win.location;

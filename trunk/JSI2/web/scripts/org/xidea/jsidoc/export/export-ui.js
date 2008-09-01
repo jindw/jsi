@@ -41,15 +41,10 @@ var ExportUI = {
         var request1 = new Request(compressServiceURL,"post",function(success){
             if(success){
                 updateDisabledForm('1');
-            }
-        });
-        request1.send("level=2");
-        var request2 = new Request(compressServiceURL,"post",function(success){
-            if(success){
                 updateDisabledForm('2');
             }
         });
-        request2.send("level=2");
+        request1.send("");
     },
     clickScript : function(objectId){
         var checked = checkMap[objectId];
@@ -108,6 +103,7 @@ var ExportUI = {
             }
             exporter.addImport(path);
         }
+        
         switch(level*1){
         case -2:
             showResult(exporter.getDocumentContent(form.jsidocURL.value));
@@ -125,14 +121,22 @@ var ExportUI = {
             //导出时解决内部变量之间的冲突
         case 2:
             //导出时尽可能解决全部冲突
-            //submit to JSA
+            
+            var type = level == -3?"report":"confuse";
             var xmlContent = exporter.getXMLContent();
+            xmlContent.replace(/<properties[^>]*>/,
+            [
+              "$&<entry key='#type'>",type,"</entry>",
+              "<entry key='#internalPrefix'>",prefix,"</entry>",
+              "<entry key='#lineSeperator'>&#10;&#13;</entry>"
+            ].join(""))
+            //submit to JSA
             showResult("数据装在中.....");
             var request = new Request(compressServiceURL,"post",function(){
                 showResult(this.getText(),true)
             });
             var prefix = form.prefix.value;//PARAM_PREFIX
-            request.send("level="+level+"&prefix="+prefix+"&content="+encodeURIComponent(xmlContent));
+            request.send("&content="+encodeURIComponent(xmlContent));
             break;
         default:
             $log.error("不支持导出级别["+level+"],将导出xml格式打包文件");
