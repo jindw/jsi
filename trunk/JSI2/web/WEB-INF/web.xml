@@ -7,7 +7,7 @@
   <description>JSI Site</description>
   <filter>
     <filter-name>JSIFilter</filter-name>
-    <filter-class>org.xidea.jsi.servlet.ClassPathResourceJSIFilter</filter-class>
+    <filter-class>org.xidea.jsi.web.JSIFilter</filter-class>
     <init-param>
       <param-name>scriptBase</param-name>
       <param-value>/scripts/</param-value>
