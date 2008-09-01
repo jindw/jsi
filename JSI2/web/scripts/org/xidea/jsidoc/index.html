@@ -4,17 +4,6 @@
 <title>JavaScript Integeration 自解析API文档</title>
 <script src="../../../boot.js"></script>
 <script>
-//pre defined for cache to JSI
-var JSIDoc={
-    cacheScript:function(packageMap){
-        this.cachedSourceMap = packageMap;
-        for(var packageName in packageMap){
-            $JSI.preload(packageName,packageMap[packageName]);
-        }
-    }
-};
-</script>
-<script>
 $import("org.xidea.jsidoc.JSIDoc",true);
 </script>
 

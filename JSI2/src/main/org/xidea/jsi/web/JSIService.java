@@ -3,6 +3,7 @@ package org.xidea.jsi.web;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,7 +12,6 @@ import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-
 
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSIExportorFactory;
@@ -30,36 +30,96 @@ public class JSIService {
 	protected String encoding = null;
 	protected final static JSIExportorFactory exportorFactory = JSIUtil
 			.getExportorFactory();
+
+	public String getScriptBase() {
+		return scriptBase;
+	}
+
+	public void setScriptBase(String scriptBase) {
+		this.scriptBase = scriptBase;
+	}
+
+	public String getAbsoluteScriptBase() {
+		return absoluteScriptBase;
+	}
+
+	public void setAbsoluteScriptBase(String absoluteScriptBase) {
+		this.absoluteScriptBase = absoluteScriptBase;
+	}
+
+	public String getEncoding() {
+		return encoding;
+	}
+
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
+
 	public JSIService() {
 		super();
 	}
 
-	protected String export(String content) throws IOException {
-		JSIRoot root = new DataJSIRoot(content);
-		String type = root.loadText(null, "#type");
-		JSIExportor exportor;
+	public boolean printResource(String path, OutputStream out)
+			throws IOException {
+		boolean isPreload = false;
+		if (path.endsWith(JSIUtil.PRELOAD_FILE_POSTFIX)) {
+			isPreload = true;
+			path = path.replaceFirst(JSIUtil.PRELOAD_FILE_POSTFIX + "$", ".js");
+		}
+		InputStream in = this.getResourceStream(path);
+		if (in != null) {
+			this.printResource(path, isPreload, in, out);
+			return true;
+		}
+		return false;
 
-		if ("report".equals(type)) {
-			exportor = exportorFactory.createReportExplorter();
-		} else if ("confuse".equals(type)) {
-			// String prefix = root.loadText(null, "#prefix");
-			exportor = exportorFactory.createConfuseExplorter();// confuseUnimported
-		} else {
-			exportor = exportorFactory.createSimpleExplorter();
-		}
-		if(exportor == null){
-			return null;
-		}
-		String[] imports = root.loadText(null, "#export").split("\\s*,\\s*");
-		JSILoadContext context = new DefaultJSILoadContext();
-		// 只有Data Root 才能支持这种方式
-		for (String item : imports) {
-			root.$import(item, context);
-		}
-		return exportor.export( context,null);
 	}
 
-	protected String document() {
+	protected void printResource(String path, boolean isPreload,
+			InputStream in, OutputStream out) throws IOException {
+		if (isPreload) {
+			out.write(JSIUtil.buildPreloadPerfix(path).getBytes());
+			output(in, out);
+			out.write(JSIUtil.buildPreloadPostfix().getBytes());
+		} else {
+			output(in, out);
+		}
+	}
+
+	public String export(String content) throws IOException {
+		if (content != null) {
+			JSIRoot root = new DataJSIRoot(content);
+			String type = root.loadText(null, "#type");
+			JSIExportor exportor;
+			if ("report".equals(type)) {
+				exportor = exportorFactory.createReportExplorter();
+			} else if ("confuse".equals(type)) {
+				// String prefix = root.loadText(null, "#prefix");
+				exportor = exportorFactory.createConfuseExplorter();// confuseUnimported
+			} else {
+				exportor = exportorFactory.createSimpleExplorter();
+			}
+			if (exportor == null) {
+				return null;
+			}
+			String importString = root.loadText(null, "#export");
+			JSILoadContext context = new DefaultJSILoadContext();
+			if (importString != null) {
+				String[] imports = importString.split("\\s*,\\s*");
+				// 只有Data Root 才能支持这种方式
+				for (String item : imports) {
+					root.$import(item, context);
+				}
+			}
+			return exportor.export(context, null);
+		}else{
+			return exportorFactory.createConfuseExplorter() == null?null:"";
+		}
+
+		
+	}
+
+	public String document() {
 		List<String> packageList = JSIUtil.findPackageList(new File(
 				this.absoluteScriptBase));
 		StringWriter out = new StringWriter();
@@ -82,20 +142,29 @@ public class JSIService {
 				out.append(packageName);
 
 			}
-			out.append("\"]'> </frameset></html>");
+			out.append("\"]}'> </frameset></html>");
 		}
 		return out.toString();
 	}
 
-	protected boolean isIndex(String path) {
+	public boolean isIndex(String path) {
 		return path.length() == 0 || path.equals("index.jsp")
 				|| path.equals("index.php");
 	}
 
-	protected InputStream getResourceStream(String path) {
-		InputStream in = this.getClass().getClassLoader().getResourceAsStream(path);
+	public InputStream getResourceStream(String path) {
+		InputStream in = this.getClass().getClassLoader().getResourceAsStream(
+				path);
 		if (in == null) {
 			File dir = new File(absoluteScriptBase);
+			File file = new File(dir, path);
+			if (file.exists()) {
+				try {
+					return new FileInputStream(file);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
 			File[] list = dir.listFiles(new FilenameFilter() {
 				public boolean accept(File dir, String name) {
 					return false;
@@ -133,7 +202,7 @@ public class JSIService {
 		return null;
 	}
 
-	protected void output(InputStream in, OutputStream out)
+	public static void output(InputStream in, OutputStream out)
 			throws IOException {
 		byte[] buf = new byte[1024];
 		int len = in.read(buf);
