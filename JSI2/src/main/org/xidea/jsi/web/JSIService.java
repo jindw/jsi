@@ -1,4 +1,4 @@
-package org.xidea.jsi.servlet;
+package org.xidea.jsi.web;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
