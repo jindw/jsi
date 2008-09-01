@@ -1,4 +1,4 @@
-package org.xidea.jsi.servlet;
+package org.xidea.jsi.web;
 
 import java.io.IOException;
 import java.util.Map;
