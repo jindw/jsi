@@ -34,8 +34,6 @@ import org.xidea.jsi.impl.JSIUtil;
  */
 public class JSIFilter extends JSIService implements Filter {
 	protected ServletContext context;
-	private ThreadLocal<HttpServletRequest> requestLocal = new ThreadLocal<HttpServletRequest>();
-
 	public void destroy() {
 	}
 
@@ -43,7 +41,6 @@ public class JSIFilter extends JSIService implements Filter {
 			FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;
-		requestLocal.set(request);
 		String path = request.getRequestURI().substring(
 				request.getContextPath().length());
 		if (path.startsWith(scriptBase)) {
@@ -91,14 +88,6 @@ public class JSIFilter extends JSIService implements Filter {
 		chain.doFilter(req, resp);
 	}
 
-	protected InputStream getResourceStream(String path) {
-		InputStream in = context.getResourceAsStream(scriptBase + path);
-		if (in == null) {
-			in = super.getResourceStream(path);
-		}
-		return in;
-	}
-
 	/**
 	 * 响应附加行为
 	 * 
@@ -110,11 +99,10 @@ public class JSIFilter extends JSIService implements Filter {
 	 */
 	public boolean processAttachedAction(HttpServletRequest request,
 			HttpServletResponse response, String path) throws IOException {
-		if (isIndex(path)
-				&& request.getParameter("path") == null) {
+		if (isIndex(path) && request.getParameter("path") == null) {
 			String externalScript = request.getParameter("externalScript");
 			if (externalScript == null) {
-				printDocument(response.getWriter());
+				response.getWriter().print(document());
 			} else {
 				response
 						.sendRedirect("org/xidea/jsidoc/index.html?externalScript="
@@ -123,41 +111,17 @@ public class JSIFilter extends JSIService implements Filter {
 			}
 			return true;
 		} else if ("export.action".equals(path)) {
-
-			if (null == DefaultJSIExportorFactory.class) {
-				// 不支持导出方式
+			String content = request.getParameter("content");
+			String result = export(content);
+			if(result == null){
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			} else {
-				String content = request.getParameter("content");
-				JSIRoot root = new DataJSIRoot(content);
-				String type = root.loadText(null, "#type");
-				String prefix = root.loadText(null, "#prefix");
-				JSIExportor exportor;
-
-				if ("report".equals(type)) {
-					exportor = exportorFactory.createReportExplorter();
-				} else if ("confuse".equals(type)) {
-					exportor = exportorFactory.createConfuseExplorter(prefix,
-							"\r\n\r\n", true);// confuseUnimported
-				} else {
-					exportor = exportorFactory.createSimpleExplorter();
-				}
-				String[] imports = root.loadText(null, "#export").split(
-						"\\s*,\\s*");
-				JSILoadContext context = new DefaultJSILoadContext();
-				// 只有Data Root 才能支持这种方式
-				for (String item : imports) {
-					root.$import(item, context);
-				}
-				PrintWriter out = response.getWriter();
-				String result = exportor.export(context);
-				out.print(result);
+			}else{
+				response.getWriter().print(result);
 			}
 			return true;
 		}
 		return false;
 	}
-
 	private void initializeEncodingIfNotSet(ServletRequest request,
 			ServletResponse response) throws UnsupportedEncodingException {
 		if (request.getCharacterEncoding() == null) {
@@ -168,7 +132,13 @@ public class JSIFilter extends JSIService implements Filter {
 		}
 	}
 
-
+	protected InputStream getResourceStream(String path) {
+		InputStream in = context.getResourceAsStream(scriptBase + path);
+		if (in == null) {
+			in = super.getResourceStream(path);
+		}
+		return in;
+	}
 
 	public void init(FilterConfig config) throws ServletException {
 		this.context = config.getServletContext();

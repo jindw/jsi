@@ -7,12 +7,18 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 
+import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSIExportorFactory;
+import org.xidea.jsi.JSILoadContext;
+import org.xidea.jsi.JSIRoot;
+import org.xidea.jsi.impl.DataJSIRoot;
+import org.xidea.jsi.impl.DefaultJSILoadContext;
 import org.xidea.jsi.impl.JSIUtil;
 
 public class JSIService {
@@ -27,31 +33,58 @@ public class JSIService {
 	public JSIService() {
 		super();
 	}
-	protected void printDocument(PrintWriter out) {
+
+	protected String export(String content) throws IOException {
+		JSIRoot root = new DataJSIRoot(content);
+		String type = root.loadText(null, "#type");
+		JSIExportor exportor;
+
+		if ("report".equals(type)) {
+			exportor = exportorFactory.createReportExplorter();
+		} else if ("confuse".equals(type)) {
+			// String prefix = root.loadText(null, "#prefix");
+			exportor = exportorFactory.createConfuseExplorter();// confuseUnimported
+		} else {
+			exportor = exportorFactory.createSimpleExplorter();
+		}
+		if(exportor == null){
+			return null;
+		}
+		String[] imports = root.loadText(null, "#export").split("\\s*,\\s*");
+		JSILoadContext context = new DefaultJSILoadContext();
+		// 只有Data Root 才能支持这种方式
+		for (String item : imports) {
+			root.$import(item, context);
+		}
+		return exportor.export( context,null);
+	}
+
+	protected String document() {
 		List<String> packageList = JSIUtil.findPackageList(new File(
 				this.absoluteScriptBase));
-
+		StringWriter out = new StringWriter();
 		if (packageList.isEmpty()) {
 			out
-					.print("<html><body> 未发现任何托管脚本包，无法显示JSIDoc。<br /> 请添加脚本包，并在包目录下正确添加相应的包定义文件 。</body><html>");
+					.append("<html><body> 未发现任何托管脚本包，无法显示JSIDoc。<br /> 请添加脚本包，并在包目录下正确添加相应的包定义文件 。</body><html>");
 		} else {
 
-			out.print("<html><frameset rows='100%'>");
-			out.print("<frame src='org/xidea/jsidoc/index.html?");
-			out.print("group={\"All\":");
-			out.print("[\"");
+			out.append("<html><frameset rows='100%'>");
+			out.append("<frame src='org/xidea/jsidoc/index.html?");
+			out.append("group={\"All\":");
+			out.append("[\"");
 			boolean isFirst = true;
 			for (String packageName : packageList) {
 				if (isFirst) {
 					isFirst = false;
 				} else {
-					out.print("\",\"");
+					out.append("\",\"");
 				}
-				out.print(packageName);
+				out.append(packageName);
 
 			}
-			out.print("\"]'> </frameset></html>");
+			out.append("\"]'> </frameset></html>");
 		}
+		return out.toString();
 	}
 
 	protected boolean isIndex(String path) {

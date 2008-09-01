@@ -21,7 +21,7 @@ public class DefaultJSIExportorFactory implements JSIExportorFactory {
 	 * @see org.xidea.jsi.impl.JSIExportorFactory#createJSIDocExplorter()
 	 */
 	public JSIExportor createJSIDocExplorter() {
-		throw new UnsupportedOperationException("不支持导出方式");
+		return null;//throw new UnsupportedOperationException("不支持导出方式");
 	}
 
 	/*
@@ -46,19 +46,18 @@ public class DefaultJSIExportorFactory implements JSIExportorFactory {
 	 * @see org.xidea.jsi.JSIExportorFactory#createConfuseExplorter(java.lang.String,
 	 *      java.lang.String, boolean)
 	 */
-	public JSIExportor createConfuseExplorter(String internalPrefix,
-			String lineSeparator, boolean confuseUnimported) {
-		throw new UnsupportedOperationException("不支持导出方式");
+	public JSIExportor createConfuseExplorter() {
+		return null;//throw new UnsupportedOperationException("不支持导出方式");
 	}
 
 	public JSIExportor createReportExplorter() {
-		throw new UnsupportedOperationException("不支持导出方式");
+		return null;//throw new UnsupportedOperationException("不支持导出方式");
 	}
 }
 
 class SimpleExporter implements JSIExportor {
 
-	public String export(JSILoadContext context) {
+	public String export(JSILoadContext context,Map<String, Object> config) {
 		StringBuilder result = new StringBuilder();
 		List<ScriptLoader> scriptList = context.getScriptList();
 		for (ScriptLoader entry : scriptList) {
@@ -72,7 +71,7 @@ class SimpleExporter implements JSIExportor {
 
 class XMLExporter implements JSIExportor {
 
-	public String export(JSILoadContext context) {
+	public String export(JSILoadContext context,Map<String, Object> config) {
 		StringBuilder content = new StringBuilder(
 				"<properties>\n<entry key='#export'>");
 		boolean first = true;
