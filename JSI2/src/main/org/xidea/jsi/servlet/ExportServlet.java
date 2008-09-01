@@ -1,6 +1,7 @@
 package org.xidea.jsi.servlet;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletConfig;
@@ -34,7 +35,7 @@ class ExportServlet extends GenericServlet {
 				root.$import(item,context);
 			}
 		}
-		String result = exportorFactory.createSimpleExplorter().export(context);
+		String result = exportorFactory.createSimpleExplorter().export( context,null);
 		response.getWriter().print(result);
 	}
 	private JSIRoot getJSIRoot(){

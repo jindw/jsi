@@ -74,10 +74,9 @@ public abstract class JSIUtil {
 				return false;
 			}
 		});
-
 	}
 	public static void main(String args[]) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
-		System.out.println(getExportorFactory().createConfuseExplorter("__1", "\r\n", true));
+		System.out.println(getExportorFactory().createConfuseExplorter());
 		System.out.println(exportorFactory = (JSIExportorFactory) Class.forName(JSI_EXPORTOR_FACTORY_CLASS).newInstance());
 	}
 
