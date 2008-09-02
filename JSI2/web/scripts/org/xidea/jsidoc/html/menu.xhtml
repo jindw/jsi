@@ -4,7 +4,7 @@
 <head>
 <base target="content"/>
 <meta http-equiv="Content-Type" content="text/html;utf-8" />
-<title>JSIntegeration Doc Menu</title>
+<title>JSI Doc Menu</title>
 <link rel="stylesheet" type="text/css" href="../styles/menu.css" />
 <script>//<!-- opera bug --><![CDATA[
 window.onload = window.onresize = function(){
@@ -12,8 +12,6 @@ window.onload = window.onresize = function(){
     content.style.width = document.body.clientWidth-10+'px';
     content.style.height = document.body.clientHeight-35+'px';
 }
-
-
 function collapse(li){
   while(li && li.tagName!="LI"){
     li = li.parentNode;
@@ -31,6 +29,16 @@ function closeMenu(li){
     li.className = li.className.replace(/\s*\bopen\b/,'')
 }
 
+
+function addPackage(form){
+    var groupName = form.groupName.value;
+    var packageName = form.packageName.value;
+    var findDependence = form.findDependence.checked;
+    var data = [groupName];
+    data[groupName] = packageName.match(/[\w\.]+/g);
+    parent.JSIDoc.addPackageMap(data,findDependence);
+    this.location.replace(this.location.href);
+}
 //]]> 
 </script>
 
@@ -66,7 +74,21 @@ function closeMenu(li){
         <li class="menu-item"><a class="item-constructor" href="?:XMLHttpRequest">XMLHttpRequest</a></li>
     </ul> 
 </li>
+<li class="menu-box" onmouseover="openMenu(this)" onmouseout="closeMenu(this)">
+    <a href="#null" title="JSI内核脚本"  onclick="return false"><img src="../styles/big-plus.gif" border="0"/></a>
+    <ul class="menu-block" style="font-size:12px;padding:8px;width:180px;height:150px;left:-60px;border:1px solid #000;background:#FFF">
+        <form style="position:fixed;">
+        <div>分组：</div>
+        <div><input style="width:160px" name="groupName" value="其他类库"/></div>
+        <div>包名：</div>
+        <div><textarea style="width:160px" name="packageName"/></div>
+        <div><button onclick="addPackage(this.form);return false">添加类库</button>
+        <input type="checkbox" name="findDependence"/> 附加依赖</div>
+        </form>
+    </ul> 
+</li>
 </div>
+
 <div id="content">
 
 <c:for var="key" items="${packageInfoGroupMap}">
