@@ -28,6 +28,7 @@ var JSON = {
     serialize : serialize
 }
 /**
+ * IE 好像容易出问题，可能是线程不安全导致。
  * @internal
  */
 var stringRegexp = /["\\\x00-\x1f\x7f-\x9f]/g;
@@ -64,7 +65,7 @@ function serialize(value) {
     switch (typeof value) {
         case 'string':
             return '"' + (stringRegexp.test(value) ?
-                            value.replace(stringRegexp,charReplacer) :
+                            value.replace(new RegExp(stringRegexp),charReplacer) :
                             value)
                        + '"';
         case 'object':

@@ -124,7 +124,7 @@ var ExportUI = {
             
             var type = level == -3?"report":"confuse";
             var xmlContent = exporter.getXMLContent();
-            xmlContent.replace(/<properties[^>]*>/,
+            xmlContent = xmlContent.replace(/<properties[^>]*>/,
             [
               "$&<entry key='#type'>",type,"</entry>",
               "<entry key='#internalPrefix'>",prefix,"</entry>",
