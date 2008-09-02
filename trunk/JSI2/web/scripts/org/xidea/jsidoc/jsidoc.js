@@ -12,7 +12,6 @@ function onload(){
     // "您需要把您的外部文件放在一个Web服务器上察看;",
     // "如果您使用的是Firefox，您需要将当前站点添加本地文件访问权限"
     this.onload = Function.prototype;
-	var menuWindow = document.getElementById("menu").contentWindow;
     var contentWindow = document.getElementById("content").contentWindow;
 	if(checkInterval){
     	clearInterval(checkInterval);
@@ -39,7 +38,9 @@ function onload(){
         packageGroupMap["托管脚本示例"]= ["example","example.internal","org.xidea.jsidoc"]
     }
     JSIDoc.addPackageMap(packageGroupMap);
-    menuWindow.location.replace("html/controller.html?@menu");
+    setTimeout(function(){
+        document.getElementById("menu").setAttribute("src","html/controller.html?@menu");
+    },1)
 }
 /**
  * @public
