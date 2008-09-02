@@ -1,19 +1,9 @@
 package org.xidea.jsi.impl;
 
 import java.io.ByteArrayInputStream;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 import org.xidea.jsi.JSIRoot;
 
 public class DataJSIRoot extends AbstractJSIRoot implements JSIRoot {
@@ -40,8 +30,10 @@ public class DataJSIRoot extends AbstractJSIRoot implements JSIRoot {
 	}
 
 	public String loadText(String pkgName, String scriptName) {
-		pkgName = pkgName.replace('.', '/');
-		return dataMap.getProperty(pkgName + '/' + scriptName);
+		if(pkgName!=null&&pkgName.length()>0){
+			scriptName = pkgName.replace('.', '/') + '/' + scriptName;
+		}
+		return dataMap.getProperty(scriptName);
 	}
 
 }

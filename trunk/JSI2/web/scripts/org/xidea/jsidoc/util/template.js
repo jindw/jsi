@@ -24,6 +24,13 @@ function Template(data,type){
             var parser = new ($import(inlineClass[type || 'xml'] ||type))();
             parser.parse(data);
             data = parser.result;
+            var i = data.length;
+            while(i--){
+                var item = data[i];
+                while(item.length && item[item.length-1] == undefined){
+                    item.pop();
+                }
+            }
             this.compileData = data;
         }
     }
