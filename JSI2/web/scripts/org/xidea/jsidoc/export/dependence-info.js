@@ -11,9 +11,11 @@ var dependenceInfoMap = {};
 
 
 /**
- * @param packageName 包名,不可为空
- * @param fileName 文件名,当为空时 objectName 参数一定不为空 (偷懒行为,构造时自动通过objectName查找)
- * @param objectName 对象名,可为空
+ * @param path 文件路径或者类的全名（不能是*匹配）。
+ * 该路径将解析为：
+ *  packageName ： 包名,不可为空
+ *  fileName ： 文件名
+ *  objectName ： 对象名,为空表示文件依赖
  * 
  */ 
 function DependenceInfo(path){
