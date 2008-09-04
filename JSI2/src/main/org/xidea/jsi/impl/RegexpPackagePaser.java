@@ -1,10 +1,8 @@
 package org.xidea.jsi.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,7 +32,6 @@ public class RegexpPackagePaser implements PackageParser {
 		List<List<Object>> addScriptCall = new ArrayList<List<Object>>();
 		List<List<Object>> addDependenceCall = new ArrayList<List<Object>>();
 		String implementation = null;
-		Map<String, List<List<Object>>> callMap = new HashMap<String, List<List<Object>>>();
 		while (matcher.find()) {
 			String method = matcher.group(1);
 			String content = matcher.group(2);
