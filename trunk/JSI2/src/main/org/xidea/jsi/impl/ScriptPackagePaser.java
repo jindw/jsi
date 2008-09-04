@@ -4,15 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Collection;
+import java.util.HashSet;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -48,7 +42,41 @@ public class ScriptPackagePaser implements PackageParser {
 			throw new RuntimeException(e);
 		}
 	}
+	public static Collection<String> findGlobalsFromJava6(String source) {
+		sun.org.mozilla.javascript.internal.CompilerEnvirons env = new sun.org.mozilla.javascript.internal.CompilerEnvirons();
+		env.setReservedKeywordAsIdentifier(true);
+		sun.org.mozilla.javascript.internal.Parser parser = new sun.org.mozilla.javascript.internal.Parser(
+				env, new sun.org.mozilla.javascript.internal.ErrorReporter() {
 
+					public void error(String arg0, String arg1, int arg2,
+							String arg3, int arg4) {
+					}
+
+					public sun.org.mozilla.javascript.internal.EvaluatorException runtimeError(
+							String arg0, String arg1, int arg2, String arg3,
+							int arg4) {
+						return null;
+					}
+
+					public void warning(String arg0, String arg1, int arg2,
+							String arg3, int arg4) {
+
+					}
+
+				});
+		sun.org.mozilla.javascript.internal.ScriptOrFnNode node = parser.parse(
+				source, "<>", 0);
+		HashSet<String> result = new HashSet<String>();
+		result.addAll(Arrays.asList(node.getParamAndVarNames()));
+		int count = node.getFunctionCount();
+		while ((count--) > 0) {
+			String name = node.getFunctionNode(count).getFunctionName();
+			if (name != null && name.length() > 0) {
+				result.add(name);
+			}
+		}
+		return result;
+	}
 	private String source;
 
 	/*
@@ -79,6 +107,11 @@ public class ScriptPackagePaser implements PackageParser {
 		public PackageWapper(JSIPackage packageObject) {
 			this.packageObject = packageObject;
 		}
+		public Collection<String> findGlobals(String scriptName){
+			String source = this.getSource(scriptName);
+			return findGlobalsFromJava6(source);
+		}
+
 
 		public void addScript(String scriptName, Object objectNames,
 				Object beforeLoadDependences, Object afterLoadDependences) {

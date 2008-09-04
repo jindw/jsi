@@ -69,41 +69,6 @@ public class TestFindGlobals {
 		}
 	}
 
-	private Collection<String> findGlobalsFromJava(String source) {
-		sun.org.mozilla.javascript.internal.CompilerEnvirons env = new sun.org.mozilla.javascript.internal.CompilerEnvirons();
-		env.setReservedKeywordAsIdentifier(true);
-		sun.org.mozilla.javascript.internal.Parser parser = new sun.org.mozilla.javascript.internal.Parser(
-				env, new sun.org.mozilla.javascript.internal.ErrorReporter() {
-
-					public void error(String arg0, String arg1, int arg2,
-							String arg3, int arg4) {
-					}
-
-					public sun.org.mozilla.javascript.internal.EvaluatorException runtimeError(
-							String arg0, String arg1, int arg2, String arg3,
-							int arg4) {
-						return null;
-					}
-
-					public void warning(String arg0, String arg1, int arg2,
-							String arg3, int arg4) {
-
-					}
-
-				});
-		sun.org.mozilla.javascript.internal.ScriptOrFnNode node = parser.parse(
-				source, "<>", 0);
-		HashSet<String> result = new HashSet<String>();
-		result.addAll(Arrays.asList(node.getParamAndVarNames()));
-		int count = node.getFunctionCount();
-		while ((count--) > 0) {
-			String name = node.getFunctionNode(count).getFunctionName();
-			if (name != null && name.length() > 0) {
-				result.add(name);
-			}
-		}
-		return result;
-	}
 
 	private int javaTime = 0;
 	private int scriptTime = 0;
@@ -131,7 +96,7 @@ public class TestFindGlobals {
 							Collection<String> result1 = null;
 							Collection<String> result2 = null;
 							try {
-								result1 = findGlobalsFromJava(source);
+								result1 = ScriptPackagePaser.findGlobalsFromJava6(source);
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
