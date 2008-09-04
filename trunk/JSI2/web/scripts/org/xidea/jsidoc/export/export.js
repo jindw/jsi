@@ -14,8 +14,17 @@ function Exporter(){
 }
 Exporter.prototype = {
     addImport : function(path){
-        this.imports.push(path);
-        addDependenceInfo(new DependenceInfo(path),this.result,this.cachedInfos)
+    	if(/.\*$/.test(path)){
+    		var packageName = path.replace(/\//g,'.').replace(".*",':');
+    		var packagePath = packageName.replace(/[\.:]/g,'/');
+    		var packageObject = $import(packageName);
+    		for(var fileName in packageObject.scriptObjectMap){
+    			this.addImport(packagePath + fileName);
+    		}
+    	}else{
+            this.imports.push(path);
+            addDependenceInfo(new DependenceInfo(path),this.result,this.cachedInfos)
+    	}
     },
     getResult : function(){
         return this.result;
