@@ -57,7 +57,7 @@ public class DefaultJSIExportorFactory implements JSIExportorFactory {
 
 class SimpleExporter implements JSIExportor {
 
-	public String export(JSILoadContext context,Map<String, Object> config) {
+	public String export(JSILoadContext context,Map<String, String> config) {
 		StringBuilder result = new StringBuilder();
 		List<ScriptLoader> scriptList = context.getScriptList();
 		for (ScriptLoader entry : scriptList) {
@@ -71,7 +71,7 @@ class SimpleExporter implements JSIExportor {
 
 class XMLExporter implements JSIExportor {
 
-	public String export(JSILoadContext context,Map<String, Object> config) {
+	public String export(JSILoadContext context,Map<String, String> config) {
 		StringBuilder content = new StringBuilder(
 				"<properties>\n<entry key='#export'>");
 		boolean first = true;
