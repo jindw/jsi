@@ -11,5 +11,5 @@ public interface JSIExportor {
 	public static final String KEY_INTERNAL_PREFIX = "#internalPrefix";//"__$"
 	public static final String KEY_PRESERVE_IMPORTABLE = "#preserveImportable";
 
-	public String export(JSILoadContext context,Map<String, Object> config);
+	public String export(JSILoadContext context,Map<String, String> config);
 }

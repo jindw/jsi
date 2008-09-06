@@ -7,7 +7,7 @@
 // 3.JSIDoc系列工具支持
 //
 $encoding = "UTF-8";
-$exportService = "http://ue:8080/platform/scripts/export.action";
+$exportService = "http://localhost:88/scripts/export.action";
 ?>
 <?php
 echo("/");

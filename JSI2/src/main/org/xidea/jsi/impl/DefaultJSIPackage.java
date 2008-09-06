@@ -1,6 +1,5 @@
 package org.xidea.jsi.impl;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -53,8 +52,8 @@ public class DefaultJSIPackage implements JSIPackage {
 		List<String> objects = new ArrayList<String>();
 		if (objectNames instanceof String) {
 			objects.add((String) objectNames);
-		} else if (objectNames instanceof List) {
-			for (Iterator<Object> it2 = ((List<Object>) objectNames).iterator(); it2
+		} else if (objectNames instanceof Collection) {
+			for (Iterator<Object> it2 = ((Collection<Object>) objectNames).iterator(); it2
 					.hasNext();) {
 				objects.add((String) it2.next());
 			}

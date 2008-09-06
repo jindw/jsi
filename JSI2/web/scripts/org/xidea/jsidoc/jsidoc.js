@@ -52,8 +52,7 @@ var JSIDoc = {
     prepare:function(){
         window.onload = onload;
         var search = window.location.search;
-        var packageGroup = [];
-        this.packageGroupMap = [];
+        var packageGroupMap = this.packageGroupMap = [];
         if(search && search.length>2){
             var exp = /([^\?=&]*)=([^=&]*)/g;
             var match;
@@ -72,16 +71,15 @@ var JSIDoc = {
                 }else if(name == "group"){
                     value = JSON.parse(value);
                     for(name in value){
-                        packageGroup.push(name)
-                        packageGroup[name] = value[name];
+                        packageGroupMap.push(name)
+                        packageGroupMap[name] = value[name];
                     }
                 }else if(name = name.replace(/^group\.(.*)|.*/,'$1')){//old 
-                    packageGroup.push(name)
-                    packageGroup[name] = value.split(',');
+                    packageGroupMap.push(name)
+                    packageGroupMap[name] = value.split(',');
                 }
             }
         }
-        return packageGroup;
     },
     /**
      * @public
@@ -89,6 +87,7 @@ var JSIDoc = {
      * @param findDependence 是否查找依赖，来收集其他包
      */
     addPackageMap : function(packageGroupMap,findDependence){
+    	this.waitExternalScript = false;
         this.rootInfo = PackageInfo.requireRoot();
         this.packageInfoGroupMap = this.packageInfoGroupMap || [];
         this.packageInfoMap = this.packageInfoMap || {};
