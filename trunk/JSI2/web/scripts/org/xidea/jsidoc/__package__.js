@@ -3,7 +3,7 @@
  */
 this.addScript("jsidoc.js",['JSIDoc']
                 ,["org.xidea.jsidoc.util:Template","org.xidea.jsidoc.util:Request","PackageInfo","SourceEntry"]
-                ,["org.xidea.jsidoc.util:JSON","org.xidea.jsidoc.export:ExportUI","org.xidea.jsidoc.export:findPackages","org.xidea.jsidoc.export:loadTextByURL"]);
+                ,["org.xidea.jsidoc.util:JSON","org.xidea.jsidoc.export:ExportUI","org.xidea.jsidoc.util:loadTextByURL"]);
 
 this.addScript('package-info.js','PackageInfo'
                 ,'FileInfo')
@@ -37,7 +37,7 @@ this.addScript('type-info.js',['TypeInfo','ParamInfo'])
 
 this.addScript("menu.js",'MenuUI');
 //createPrototypeStack
-this.addScript("fn.js",['createPrototypeStack','accessOrder','findSupperInfo','scrollOut']);
+this.addScript("fn.js",['createPrototypeStack','accessOrder','findSupperInfo','scrollOut','findPackages']);
 
 this.addDependence("*","fn.js");
 this.addDependence("*","*",true);

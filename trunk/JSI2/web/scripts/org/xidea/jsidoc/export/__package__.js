@@ -6,12 +6,7 @@
 this.addScript("dependence-info.js",'DependenceInfo');
 
 this.addScript("export.js",['Exporter']
-              ,['DependenceInfo','org.xidea.jsidoc.util:JSON']
-              ,["fn.js",'findGlobals']);
+              ,['DependenceInfo','org.xidea.jsidoc.util:*']);
 this.addScript("export-ui.js",['ExportUI']
-              ,['Exporter','DependenceInfo','org.xidea.jsidoc.util:Template',"org.xidea.jsidoc.util:Request"]
-              ,["fn.js",'findGlobals']);
+              ,['Exporter','DependenceInfo','org.xidea.jsidoc.util:*']);
 
-this.addScript("fn.js",['findPackages','xmlReplacer','loadTextByURL']);
-//findGlobalsAsList 是为java提供的接口的。
-this.addScript("find-globals.js",['findGlobals','findGlobalsAsList']);

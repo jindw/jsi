@@ -694,8 +694,7 @@ var $import = function(freeEval,cachedScripts){
                 if(objectNames == '*'){
                     $log.trace("部署后不应出现的配置，需要压缩处理掉相关问题！！！");
                     objectNames = doObjectImport(
-                        findPackage("org.xidea.jsidoc.export",
-                        true),"findGlobals")(loadTextByURL(scriptBase+"?path="+this.name.replace(/\.|$/g,'/')+scriptPath));
+                        findPackage("org.xidea.jsidoc.util",true),"findGlobals")(loadTextByURL(scriptBase+"?path="+this.name.replace(/\.|$/g,'/')+scriptPath));
                     
                 }
             }
