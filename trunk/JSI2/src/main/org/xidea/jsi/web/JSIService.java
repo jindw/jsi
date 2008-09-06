@@ -124,8 +124,11 @@ public class JSIService {
 				this.absoluteScriptBase));
 		StringWriter out = new StringWriter();
 		if (packageList.isEmpty()) {
-			out
-					.append("<html><body> 未发现任何托管脚本包，无法显示JSIDoc。<br /> 请添加脚本包，并在包目录下正确添加相应的包定义文件 。</body><html>");
+			out.append("<html><body> 未发现任何托管脚本包，无法显示JSIDoc。<br /> ");
+			out.append("请添加脚本包，并在包目录下正确添加相应的包定义文件 。");
+			out.append("<a href='org/xidea/jsidoc/index.html?group={\"example\":[\"example\",\"example.internal\",\"org.xidea.jsidoc\"]}'>");
+			out.append("察看示例</a>");
+			out.append("</body><html>");
 		} else {
 
 			out.append("<html><frameset rows='100%'>");
