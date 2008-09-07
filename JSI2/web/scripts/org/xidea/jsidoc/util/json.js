@@ -64,8 +64,9 @@ function charReplacer(item) {
 function serialize(value) {
     switch (typeof value) {
         case 'string':
+            stringRegexp.lastIndex = 0;
             return '"' + (stringRegexp.test(value) ?
-                            value.replace(new RegExp(stringRegexp),charReplacer) :
+                            value.replace(stringRegexp,charReplacer) :
                             value)
                        + '"';
         case 'object':
