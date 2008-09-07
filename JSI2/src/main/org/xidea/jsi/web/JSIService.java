@@ -9,9 +9,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSIExportorFactory;
@@ -88,7 +91,7 @@ public class JSIService {
 
 	public String export(String content) throws IOException {
 		if (content != null) {
-			JSIRoot root = new DataJSIRoot(content);
+			final DataJSIRoot root = new DataJSIRoot(content);
 			String type = root.loadText(null, "#type");
 			JSIExportor exportor;
 			if ("report".equals(type)) {
@@ -111,7 +114,11 @@ public class JSIService {
 					root.$import(item, context);
 				}
 			}
-			return exportor.export(context, null);
+			return exportor.export(context, new HashMap<String, String>(){
+				@Override
+				public String get(Object key) {
+					return root.loadText(null,String.valueOf(key));
+				}});
 		}else{
 			return exportorFactory.createConfuseExplorter() == null?null:"";
 		}

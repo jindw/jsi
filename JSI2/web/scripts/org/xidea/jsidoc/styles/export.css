@@ -88,7 +88,7 @@ legend{
     font-weight:bold;
 }
 fieldset label{
-    padding-left:18px;
+    padding-left:4px;
     font-weight:bold;
 }
 #fileOutput,#objectOutput{
@@ -98,6 +98,6 @@ fieldset label{
 }
 #jsidocURL{
     font-size:11px;
-    height:12px;
+    height:18px;
     width:200px;
 }
