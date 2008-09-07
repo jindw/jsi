@@ -111,6 +111,7 @@ public class JSIFilter extends JSIService implements Filter {
 			if(result == null){
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			}else{
+				response.addHeader("Content-Type", "text/paint;charset="+(this.encoding == null ? "utf-8" : this.encoding));
 				response.getWriter().print(result);
 			}
 			return true;
