@@ -205,7 +205,7 @@ function encodeReplacer(c){
 }
 function appendEntry(content,path,text){
 	content.push("<entry key='",path,"'>") ;
-    content.push(text.indexOf(']]>')<0?
+    content.push(/[<>&]/.test(text) && text.indexOf(']]>')<0?
 	    "<![CDATA["+text + ']]>'
 	    :text.replace(/[<>&]/g,xmlReplacer));
     content.push("</entry>\n");
