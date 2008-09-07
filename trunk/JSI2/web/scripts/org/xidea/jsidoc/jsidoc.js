@@ -303,8 +303,10 @@ var JSIDoc = {
         if(cache && cache.constructor == String){
             return cache;
         }else{
-            var result = loadTextByURL($JSI.scriptBase + filePath);
+            var result = loadTextByURL($JSI.scriptBase +"?path="+ filePath);
             if(result !=null){
+            	preload(filePath.replace(/\/[^\/]+$/,'').replace(/\//g,'.'),
+            	    filePath.replace(/.*\//,''),result)
                 return result;
             }else if(cache){
                 return cache.toString();
@@ -370,7 +372,7 @@ function preload(pkg,file2dataMap,value){
     }
 
 };
-
+$JSI.preload = preload;
 /**
  * @internal
  */
