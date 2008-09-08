@@ -151,6 +151,7 @@ public class JSIFilter extends JSIService implements Filter {
 			scriptBase = "/scripts/";
 		}
 		this.scriptBase = scriptBase;
-		this.absoluteScriptBase = context.getRealPath(this.scriptBase);
+		this.scriptBaseDirectory = new File(context.getRealPath(this.scriptBase));
+		this.scriptBaseDirectory = new File(context.getRealPath(this.scriptBase));
 	}
 }

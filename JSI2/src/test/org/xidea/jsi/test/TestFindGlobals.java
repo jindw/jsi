@@ -21,7 +21,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.UnsupportedSyntaxException;
-import org.xidea.jsi.impl.ScriptPackagePaser;
+import org.xidea.jsi.impl.Java6ScriptPackagePaser;
 
 public class TestFindGlobals {
 	public static final ScriptEngine engine = new javax.script.ScriptEngineManager()
@@ -29,7 +29,7 @@ public class TestFindGlobals {
 	public static final String FIND_GLOBALS = "findGlobalsAsList";
 
 	static {
-		InputStream in = ScriptPackagePaser.class.getResourceAsStream(
+		InputStream in = Java6ScriptPackagePaser.class.getResourceAsStream(
 				"/org/xidea/jsidoc/export/find-globals.js"
 				// "find-globals.js"
 				);
@@ -96,7 +96,7 @@ public class TestFindGlobals {
 							Collection<String> result1 = null;
 							Collection<String> result2 = null;
 							try {
-								result1 = ScriptPackagePaser.findGlobalsFromJava6(source);
+								result1 = Java6ScriptPackagePaser.findGlobalsFromJava6(source);
 							} catch (Exception e) {
 								e.printStackTrace();
 							}

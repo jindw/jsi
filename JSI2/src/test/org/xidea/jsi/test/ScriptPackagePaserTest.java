@@ -9,7 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.impl.DefaultJSIPackage;
-import org.xidea.jsi.impl.ScriptPackagePaser;
+import org.xidea.jsi.impl.Java6ScriptPackagePaser;
 
 public class ScriptPackagePaserTest extends AbstractFileJSIRootTest {
 
@@ -30,7 +30,7 @@ public class ScriptPackagePaserTest extends AbstractFileJSIRootTest {
 	}
 	@Test
 	public void testParse() {
-		ScriptPackagePaser paser = new ScriptPackagePaser();
+		Java6ScriptPackagePaser paser = new Java6ScriptPackagePaser();
 		paser
 				.parse("this.addScript('a.js',['Class1','Class2'],'xxx','Base');"
 						+ "this.addDependence('a.js','b.js');"
