@@ -26,16 +26,16 @@ public abstract class AbstractJSIRoot implements JSIRoot {
 			for (Iterator<String> it = pkg.getScriptObjectMap().keySet()
 					.iterator(); it.hasNext();) {
 				String fileName = it.next();
-				context.loadScript(pkg, fileName, null,true);
+				context.loadScript(pkg, fileName, null, true);
 			}
 		} else if (pkg.getScriptObjectMap().get(path) != null) {
 			// file
-			context.loadScript(pkg, path, null,true);
+			context.loadScript(pkg, path, null, true);
 		} else {
 			// object
 			String script = pkg.getObjectScriptMap().get(path);
 			if (script != null) {
-				context.loadScript(pkg, script, path,true);
+				context.loadScript(pkg, script, path, true);
 			} else {
 				throw new RuntimeException("无效脚本路径:" + path);
 			}
@@ -74,9 +74,8 @@ public abstract class AbstractJSIRoot implements JSIRoot {
 				return null;
 			}
 		}
-	
-	}
 
+	}
 
 	private synchronized JSIPackage findPackage(String name, boolean exact) {
 		do {
@@ -87,19 +86,25 @@ public abstract class AbstractJSIRoot implements JSIRoot {
 			JSIPackage pkg = null;
 			if (source != null) {
 				pkg = new DefaultJSIPackage(this, name);
-				buildParser(source).setup( pkg);
+				buildParser(source).setup(pkg);
 			}
 			packageMap.put(name, pkg);
 			return pkg;
 		} while ((name = name.replace("\\.?[^\\.]+$", "")).length() > 0);
 	}
-	private PackageParser buildParser(String source){
+
+	private PackageParser buildParser(String source) {
 		PackageParser parser = new RegexpPackagePaser();
-		try{
+		try {
 			parser.parse(source);
-		}catch (Exception e) {
-			parser = new ScriptPackagePaser();
+		} catch (Exception e) {
+			try {
+				parser = new RhinoScriptPackagePaser();
+			} catch (Throwable ex) {
+				parser = new Java6ScriptPackagePaser();
+			}
 			parser.parse(source);
+
 		}
 		return parser;
 	}

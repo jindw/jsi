@@ -9,12 +9,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSIExportorFactory;
@@ -26,7 +31,8 @@ import org.xidea.jsi.impl.JSIUtil;
 
 public class JSIService {
 	protected String scriptBase;
-	protected String absoluteScriptBase;
+	protected File scriptBaseDirectory;
+	protected File externalLibraryDirectory;
 	/**
 	 * 只有默认的encoding没有设置的时候，才会设置
 	 */
@@ -42,12 +48,12 @@ public class JSIService {
 		this.scriptBase = scriptBase;
 	}
 
-	public String getAbsoluteScriptBase() {
-		return absoluteScriptBase;
+	public File getScriptBaseDirectory() {
+		return scriptBaseDirectory;
 	}
 
-	public void setAbsoluteScriptBase(String absoluteScriptBase) {
-		this.absoluteScriptBase = absoluteScriptBase;
+	public void setScriptBaseDirectory(File scriptBaseFile) {
+		this.scriptBaseDirectory = scriptBaseFile;
 	}
 
 	public String getEncoding() {
@@ -56,6 +62,14 @@ public class JSIService {
 
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
+	}
+
+	public File getExternalLibraryDirectory() {
+		return externalLibraryDirectory;
+	}
+
+	public void setExternalLibraryDirectory(File externalLibraryFilr) {
+		this.externalLibraryDirectory = externalLibraryFilr;
 	}
 
 	public JSIService() {
@@ -114,26 +128,27 @@ public class JSIService {
 					root.$import(item, context);
 				}
 			}
-			return exportor.export(context, new HashMap<String, String>(){
+			return exportor.export(context, new HashMap<String, String>() {
 				@Override
 				public String get(Object key) {
-					return root.loadText(null,String.valueOf(key));
-				}});
-		}else{
-			return exportorFactory.createConfuseExplorter() == null?null:"";
+					return root.loadText(null, String.valueOf(key));
+				}
+			});
+		} else {
+			return exportorFactory.createConfuseExplorter() == null ? null : "";
 		}
 
-		
 	}
 
 	public String document() {
-		List<String> packageList = JSIUtil.findPackageList(new File(
-				this.absoluteScriptBase));
+		List<String> packageList = JSIUtil
+				.findPackageList(this.scriptBaseDirectory);
 		StringWriter out = new StringWriter();
 		if (packageList.isEmpty()) {
 			out.append("<html><body> 未发现任何托管脚本包，无法显示JSIDoc。<br /> ");
 			out.append("请添加脚本包，并在包目录下正确添加相应的包定义文件 。");
-			out.append("<a href='org/xidea/jsidoc/index.html?group={\"example\":[\"example\",\"example.internal\",\"org.xidea.jsidoc\"]}'>");
+			out
+					.append("<a href='org/xidea/jsidoc/index.html?group={\"example\":[\"example\",\"example.internal\",\"org.xidea.jsidoc\"]}'>");
 			out.append("察看示例</a>");
 			out.append("</body><html>");
 		} else {
@@ -163,31 +178,60 @@ public class JSIService {
 	}
 
 	public InputStream getResourceStream(String path) {
-		InputStream in = this.getClass().getClassLoader().getResourceAsStream(
-				path);
-		if (in == null) {
-			File dir = new File(absoluteScriptBase);
-			File file = new File(dir, path);
-			if (file.exists()) {
-				try {
-					return new FileInputStream(file);
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
+		File file = new File(this.scriptBaseDirectory, path);
+		if (file.exists()) {
+			try {
+				return new FileInputStream(file);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
 			}
-			File[] list = dir.listFiles(new FilenameFilter() {
-				public boolean accept(File dir, String name) {
-					return false;
-				}
-			});
-			if (list != null) {
-				int i = list.length;
-				while (i-- > 0) {
-					in = findByXML(list[i], path);
+		}
+		File[] list = this.scriptBaseDirectory.listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				return name.toLowerCase().endsWith(".xml");
+			}
+		});
+		if (list != null) {
+			int i = list.length;
+			while (i-- > 0) {
+				InputStream in = findByXML(list[i], path);
+				if (in != null) {
+					return in;
 				}
 			}
 		}
-		return in;
+		if (this.externalLibraryDirectory != null) {
+			list = this.externalLibraryDirectory
+					.listFiles(new FilenameFilter() {
+						public boolean accept(File dir, String name) {
+							name = name.toLowerCase();
+							return name.endsWith(".jar")
+									|| name.endsWith(".zip");
+						}
+					});
+			if (list != null) {
+				int i = list.length;
+				while (i-- > 0) {
+					InputStream in = findByJAR(list[i], path);
+					if (in != null) {
+						return in;
+					}
+				}
+			}
+		}
+		return this.getClass().getClassLoader().getResourceAsStream(path);
+	}
+
+	protected InputStream findByJAR(File file, String path) {
+		try {
+			JarFile jarFile = new JarFile(file);
+			ZipEntry ze = jarFile.getEntry(path.substring(1));
+			if (ze != null) {
+				return jarFile.getInputStream(ze);
+			}
+		} catch (IOException e) {
+		}
+		return null;
 	}
 
 	protected InputStream findByXML(File file, String path) {

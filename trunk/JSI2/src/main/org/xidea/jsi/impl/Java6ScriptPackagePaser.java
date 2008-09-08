@@ -9,20 +9,25 @@ import java.util.Collection;
 import java.util.HashSet;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptException;
 
 import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.PackageParser;
 import org.xidea.jsi.UnsupportedSyntaxException;
 
-public class ScriptPackagePaser implements PackageParser {
+import sun.org.mozilla.javascript.internal.CompilerEnvirons;
+import sun.org.mozilla.javascript.internal.ErrorReporter;
+import sun.org.mozilla.javascript.internal.EvaluatorException;
+import sun.org.mozilla.javascript.internal.Parser;
+import sun.org.mozilla.javascript.internal.ScriptOrFnNode;
+
+public class Java6ScriptPackagePaser implements PackageParser {
 
 	public static final ScriptEngine engine = new javax.script.ScriptEngineManager()
 			.getEngineByExtension("js");
 
 	private static final String BIND_SCRIPT ;
 	static{
-		InputStream in1 = ScriptPackagePaser.class.getResourceAsStream("package-parser.js");
+		InputStream in1 = Java6ScriptPackagePaser.class.getResourceAsStream("package-parser.js");
 		try {
 			InputStreamReader reader = new InputStreamReader(in1,"utf-8");
 			StringWriter out = new StringWriter();
@@ -38,16 +43,16 @@ public class ScriptPackagePaser implements PackageParser {
 		}
 	}
 	public static Collection<String> findGlobalsFromJava6(String source) {
-		sun.org.mozilla.javascript.internal.CompilerEnvirons env = new sun.org.mozilla.javascript.internal.CompilerEnvirons();
+		CompilerEnvirons env = new CompilerEnvirons();
 		env.setReservedKeywordAsIdentifier(true);
-		sun.org.mozilla.javascript.internal.Parser parser = new sun.org.mozilla.javascript.internal.Parser(
-				env, new sun.org.mozilla.javascript.internal.ErrorReporter() {
+		Parser parser = new Parser(
+				env, new ErrorReporter() {
 
 					public void error(String arg0, String arg1, int arg2,
 							String arg3, int arg4) {
 					}
 
-					public sun.org.mozilla.javascript.internal.EvaluatorException runtimeError(
+					public EvaluatorException runtimeError(
 							String arg0, String arg1, int arg2, String arg3,
 							int arg4) {
 						return null;
@@ -59,7 +64,7 @@ public class ScriptPackagePaser implements PackageParser {
 					}
 
 				});
-		sun.org.mozilla.javascript.internal.ScriptOrFnNode node = parser.parse(
+		ScriptOrFnNode node = parser.parse(
 				source, "<>", 0);
 		HashSet<String> result = new HashSet<String>();
 		result.addAll(Arrays.asList(node.getParamAndVarNames()));
@@ -142,19 +147,5 @@ public class ScriptPackagePaser implements PackageParser {
 			return packageObject.loadText(scriptName);
 		}
 
-//		private Object convertArray(Object object) {
-//			if (object instanceof sun.org.mozilla.javascript.internal.NativeArray) {
-//				sun.org.mozilla.javascript.internal.NativeArray source = ((sun.org.mozilla.javascript.internal.NativeArray) object);
-//				int len = (int) source.getLength();
-//				ArrayList<String> result = new ArrayList<String>(len);
-//				for (int i = 0; i < len; i++) {
-//					result.add((String) source.get(i, null));
-//				}
-//				return result;
-//			} else {
-//				// throw new RuntimeException("不支持的数据格式");
-//				return (String) object;
-//			}
-//		}
 	}
 }
