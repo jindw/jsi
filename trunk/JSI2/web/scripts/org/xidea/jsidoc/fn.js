@@ -191,6 +191,55 @@ function sortPackages(sourcePackageNames,allPackageNames){
     return result;
 }
 
+
+//compute scriptBase
+var rootMatcher = /(^\w+:((\/\/\/\w\:)|(\/\/[^\/]*))?)/;
+//var rootMatcher = /^\w+:(?:(?:\/\/\/\w\:)|(?:\/\/[^\/]*))?/;
+var homeFormater = /(^\w+:\/\/[^\/#\?]*$)/;
+//var homeFormater = /^\w+:\/\/[^\/#\?]*$/;
+var urlTrimer = /[#\?].*$/;
+var dirTrimer = /[^\/\\]*([#\?].*)?$/;
+var forwardTrimer = /[^\/]+\/\.\.\//;
+var base = document.location.href.
+        replace(homeFormater,"$1/").
+        replace(dirTrimer,"");
+var baseTags = document.getElementsByTagName("base");
+var scripts = document.getElementsByTagName("script");
+/*
+ * 计算绝对地址
+ * @public
+ * @param <string>url 原url
+ * @return <string> 绝对URL
+ * @static
+ */
+function computeURL(url){
+    var purl = url.replace(urlTrimer,'').replace(/\\/g,'/');
+    var surl = url.substr(purl.length);
+    //prompt(rootMatcher.test(purl),[purl , surl])
+    if(rootMatcher.test(purl)){
+        return purl + surl;
+    }else if(purl.charAt(0) == '/'){
+        return rootMatcher.exec(base)[0]+purl + surl;
+    }
+    purl = base + purl;
+    while(purl.length >(purl = purl.replace(forwardTrimer,'')).length){
+        //alert(purl)
+    }
+    return purl + surl;
+}
+//处理HTML BASE 标记
+if(baseTags){
+    for(var i=baseTags.length-1;i>=0;i--){
+        var href = baseTags[i].href;
+        if(href){
+            base = computeURL(href.replace(homeFormater,"$1/").replace(dirTrimer,""));
+            break;
+        }
+    }
+}
+
+
+
 /*
  * Dependence = [0            , 1             , 2               , 3            ,4         ,5    ]
  * Dependence = [targetPackage, targetFileName, ,thisObjectName, afterLoad,names]

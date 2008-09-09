@@ -429,7 +429,7 @@ function parseDocumentType(node,context){
 //    }
 /**
  */
-function parseNotationfunction(node,context){
+function parseNotation(node,context){
     return true;//not support
 }
 
