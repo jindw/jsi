@@ -18,6 +18,24 @@
 			</fileset>
 		</jar>
 	</target>
+	<target name="JSA">
+		<!--  classname="org.jside.jsi.tools.web.SimpleWebServer"-->
+		<java classname="org.jside.jsi.tools.export.ExportorAction">
+			<classpath>
+				<fileset dir="../JST/dest">
+					<include name="*.jar" />
+				</fileset>
+				<fileset dir="../JST/lib/jsunit">
+					<include name="*.jar" />
+				</fileset>
+			</classpath>
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-ascii" />
+			<arg value="false" />
+			<arg value="org.xidea.jsidoc.*" />
+		</java>
+	</target>
 	<target name="buildExample" depends="jar">
 		<war destfile="build/dest/JSI-empty-${version}.war" webxml="web/WEB-INF/web.xml">
 			<zipfileset file="JSI.jar" dir="build/dest" prefix="WEB-INF/lib/" />
