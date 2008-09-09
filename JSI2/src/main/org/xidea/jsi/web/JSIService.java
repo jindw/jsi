@@ -22,7 +22,6 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
 import org.xidea.jsi.JSIExportor;
-import org.xidea.jsi.JSIExportorFactory;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.impl.DataJSIRoot;
@@ -37,8 +36,7 @@ public class JSIService {
 	 * 只有默认的encoding没有设置的时候，才会设置
 	 */
 	protected String encoding = null;
-	protected final static JSIExportorFactory exportorFactory = JSIUtil
-			.getExportorFactory();
+
 
 	public String getScriptBase() {
 		return scriptBase;
@@ -109,12 +107,12 @@ public class JSIService {
 			String type = root.loadText(null, "#type");
 			JSIExportor exportor;
 			if ("report".equals(type)) {
-				exportor = exportorFactory.createReportExplorter();
+				exportor = JSIUtil.getExportor(JSIExportor.TYPE_REPORT);
 			} else if ("confuse".equals(type)) {
 				// String prefix = root.loadText(null, "#prefix");
-				exportor = exportorFactory.createConfuseExplorter();// confuseUnimported
+				exportor = JSIUtil.getExportor(JSIExportor.TYPE_CONFUSE);// confuseUnimported
 			} else {
-				exportor = exportorFactory.createSimpleExplorter();
+				exportor = JSIUtil.getExportor(JSIExportor.TYPE_SIMPLE);
 			}
 			if (exportor == null) {
 				return null;
@@ -135,7 +133,7 @@ public class JSIService {
 				}
 			});
 		} else {
-			return exportorFactory.createConfuseExplorter() == null ? null : "";
+			return JSIUtil.getExportor(JSIExportor.TYPE_CONFUSE) == null ? null : "";
 		}
 
 	}

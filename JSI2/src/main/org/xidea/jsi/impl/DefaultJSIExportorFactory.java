@@ -6,22 +6,35 @@ import java.util.Map;
 
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSILoadContext;
-import org.xidea.jsi.JSIExportorFactory;
 import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.ScriptLoader;
 
 /**
  * @author jindw
  */
-public class DefaultJSIExportorFactory implements JSIExportorFactory {
+public class DefaultJSIExportorFactory {
+
+	private String type = JSIExportor.TYPE_SIMPLE;
+
+	public DefaultJSIExportorFactory(String type) {
+		this.type = type;
+	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see org.xidea.jsi.impl.JSIExportorFactory#createJSIDocExplorter()
 	 */
-	public JSIExportor createJSIDocExplorter() {
-		return null;//throw new UnsupportedOperationException("不支持导出方式");
+	public JSIExportor createExplorter() {
+		if (JSIExportor.TYPE_SIMPLE.equals(type)) {
+			return createSimpleExplorter();
+		}else if (JSIExportor.TYPE_CONFUSE.equals(type)) {
+			return createConfuseExplorter();
+		}else if (JSIExportor.TYPE_XML.equals(type)) {
+			return createXMLExplorter();
+		}else if (JSIExportor.TYPE_REPORT.equals(type)) {
+			return createReportExplorter();
+		}
+		return null;
 	}
 
 	/*
@@ -43,21 +56,21 @@ public class DefaultJSIExportorFactory implements JSIExportorFactory {
 	}
 
 	/**
-	 * @see org.xidea.jsi.JSIExportorFactory#createConfuseExplorter(java.lang.String,
+	 * @see org.xidea.jsi.impl.JSIExportorFactory#createConfuseExplorter(java.lang.String,
 	 *      java.lang.String, boolean)
 	 */
 	public JSIExportor createConfuseExplorter() {
-		return null;//throw new UnsupportedOperationException("不支持导出方式");
+		return null;// throw new UnsupportedOperationException("不支持导出方式");
 	}
 
 	public JSIExportor createReportExplorter() {
-		return null;//throw new UnsupportedOperationException("不支持导出方式");
+		return null;// throw new UnsupportedOperationException("不支持导出方式");
 	}
 }
 
 class SimpleExporter implements JSIExportor {
 
-	public String export(JSILoadContext context,Map<String, String> config) {
+	public String export(JSILoadContext context, Map<String, String> config) {
 		StringBuilder result = new StringBuilder();
 		List<ScriptLoader> scriptList = context.getScriptList();
 		for (ScriptLoader entry : scriptList) {
@@ -71,7 +84,7 @@ class SimpleExporter implements JSIExportor {
 
 class XMLExporter implements JSIExportor {
 
-	public String export(JSILoadContext context,Map<String, String> config) {
+	public String export(JSILoadContext context, Map<String, String> config) {
 		StringBuilder content = new StringBuilder(
 				"<properties>\n<entry key='#export'>");
 		boolean first = true;
