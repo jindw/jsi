@@ -27,7 +27,7 @@ function Template(data,type){
             var i = data.length;
             while(i--){
                 var item = data[i];
-                while(item.length && item[item.length-1] == undefined){
+                while(item instanceof Array && item.length && item[item.length-1] == undefined){
                     item.pop();
                 }
             }
