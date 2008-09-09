@@ -39,7 +39,7 @@ FunctionInfo.prototype.getConstructorInfo = function(){
     return function(){
         if(!functionInfo){
             functionInfo = {}
-            for(n in ConstructorInfo.prototype){
+            for(var n in ConstructorInfo.prototype){
                 functionInfo[n] = ConstructorInfo.prototype[n];
             }
             functionInfo.object = Function;

@@ -94,12 +94,10 @@ function collectScripts(){
     }
     //alert(freeScript.join('\n'))
     for(var i=0;i<freeScript.length;i++){
-        freeScript[i] = CommonUtil.computeURL(freeScript[i]).replace($JSI.scriptBase,'');
+        freeScript[i] = computeURL(freeScript[i]).replace($JSI.scriptBase,'');
     }
     return freeScript;
 }
-
-
 
 /**
  * @public

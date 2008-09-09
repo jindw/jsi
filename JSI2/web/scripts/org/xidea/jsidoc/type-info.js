@@ -27,7 +27,7 @@ ParamInfo.prototype.toString = function(){
 function TypeInfo(text,avaliableObjectInfoMap){
     var m = /^\s*([\w\$]+)?\s*(\{|<)/.exec(text);
     if(m){
-        i = m[0].length;
+        var i = m[0].length;
         if(m[0][i-1] == '{'){
             var j = searchEnd(text,i,'{','}')
         }else{

@@ -130,7 +130,7 @@ function compileEL(el){
     })
 }
 
-function parseFor(){
+function parseFor(el){
     //与CT相差太远
     try{
         new Function(el);

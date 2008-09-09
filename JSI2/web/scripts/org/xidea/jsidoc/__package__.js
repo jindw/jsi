@@ -37,7 +37,7 @@ this.addScript('type-info.js',['TypeInfo','ParamInfo'])
 
 this.addScript("menu.js",'MenuUI');
 //createPrototypeStack
-this.addScript("fn.js",['createPrototypeStack','accessOrder','findSupperInfo','scrollOut','findPackages']);
+this.addScript("fn.js",['computeURL','createPrototypeStack','accessOrder','findSupperInfo','scrollOut','findPackages']);
 
 this.addDependence("*","fn.js");
 this.addDependence("*","*",true);
