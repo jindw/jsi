@@ -13,17 +13,18 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyContent;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.xidea.jsi.JSIExportorFactory;
+import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.impl.DefaultJSIExportorFactory;
 import org.xidea.jsi.impl.DefaultJSILoadContext;
+import org.xidea.jsi.impl.JSIUtil;
 
 public class ExportTag extends javax.servlet.jsp.tagext.BodyTagSupport {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 13434L;
-	private JSIExportorFactory exportorFactory = new DefaultJSIExportorFactory();
+	private JSIExportor exportor = JSIUtil.getExportor(JSIExportor.TYPE_SIMPLE);
 
 	@Override
 	public int doEndTag() throws JspException {
@@ -38,7 +39,7 @@ public class ExportTag extends javax.servlet.jsp.tagext.BodyTagSupport {
 				root.$import(item, context);
 			}
 		}
-		String result = exportorFactory.createSimpleExplorter().export(context,
+		String result = exportor.export(context,
 				null);
 		try {
 			this.pageContext.getOut().write(result);

@@ -3,13 +3,17 @@ package org.xidea.jsi.impl;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import org.xidea.jsi.JSIExportorFactory;
+import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSIPackage;
 
 public abstract class JSIUtil {
-	
+	private static Map<String, JSIExportor> exportorFactoryMap = new HashMap<String, JSIExportor>();
+	private final static String JSI_EXPORTOR_FACTORY_CLASS = "org.jside.jsi.tools.export.JSAExportorFactory";
+
 	public static final String PRELOAD_CONTENT_POSTFIX = "\n}";
 	public static final String PRELOAD_CONTENT_PREFIX = "function(){eval(this.varText);";
 	public static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
@@ -31,24 +35,30 @@ public abstract class JSIUtil {
 		return (PRELOAD_CONTENT_POSTFIX + PRELOAD_POSTFIX);
 	}
 
-	private static JSIExportorFactory exportorFactory;
-	public final static String JSI_EXPORTOR_FACTORY_CLASS = "org.jside.jsi.tools.export.JSAExportorFactory";
-
-	public static JSIExportorFactory getExportorFactory() {
-		if (exportorFactory == null) {
-			try{
-				exportorFactory = (JSIExportorFactory) Class.forName(JSI_EXPORTOR_FACTORY_CLASS).newInstance();
-			}catch (Exception e) {
-				exportorFactory = new DefaultJSIExportorFactory();
-			}
+	public static JSIExportor getExportor(String type) {
+		if (exportorFactoryMap.containsKey(type)) {
+			return exportorFactoryMap.get(type);
 		}
-		return exportorFactory;
+		DefaultJSIExportorFactory exportorFactory = null;
+		try {
+			exportorFactory = (DefaultJSIExportorFactory) Class.forName(
+					JSI_EXPORTOR_FACTORY_CLASS).getConstructor(String.class)
+					.newInstance(type);
+
+		} catch (Exception e) {
+			exportorFactory = new DefaultJSIExportorFactory(type);
+		}
+		JSIExportor exportor = exportorFactory.createExplorter();
+		exportorFactoryMap.put(type, exportor);
+		return exportor;
 	}
+
 	public static List<String> findPackageList(File root) {
 		ArrayList<String> result = new ArrayList<String>();
 		walkPackageTree(root, null, result);
 		return result;
 	}
+
 	private static void walkPackageTree(final File dir, String prefix,
 			final List<String> result) {
 		final String subPrefix;
@@ -75,9 +85,7 @@ public abstract class JSIUtil {
 			}
 		});
 	}
-	public static void main(String args[]) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
-		System.out.println(getExportorFactory().createConfuseExplorter());
-		System.out.println(exportorFactory = (JSIExportorFactory) Class.forName(JSI_EXPORTOR_FACTORY_CLASS).newInstance());
-	}
+
+
 
 }
