@@ -1,15 +1,11 @@
 package org.xidea.jsi.impl;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRoot;
 
 public class FileJSIRoot extends AbstractJSIRoot implements JSIRoot {

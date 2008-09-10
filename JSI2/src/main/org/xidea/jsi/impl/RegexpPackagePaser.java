@@ -1,23 +1,18 @@
 package org.xidea.jsi.impl;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.PackageParser;
 import org.xidea.jsi.UnsupportedSyntaxException;
 
-public class RegexpPackagePaser implements PackageParser {
+public class RegexpPackagePaser extends PackageParser {
 
 	private static final String COMMENT = "/\\*[\\s\\S]*?\\*/|//.*";
 	private static final String THIS_INVOKE = "this\\s*\\.\\s*(\\w+)\\(([^\\(\\)]*)\\)";
 	private static final String OTHER = "(\\w+)?";
-	private List<List<Object>> addDependenceCall;
-	private List<List<Object>> addScriptCall;
-	private String implementation;
 
 	/*
 	 * (non-Javadoc)
@@ -25,13 +20,11 @@ public class RegexpPackagePaser implements PackageParser {
 	 * @see org.xidea.jsi.PackageParser#parse(java.lang.String,
 	 *      org.xidea.jsi.JSIPackage)
 	 */
-	public void parse(String source) {
+	public void parse(JSIPackage packageObject) {
+		String source = packageObject.loadText(JSIPackage.PACKAGE_FILE_NAME);
 		Pattern regexp = Pattern.compile(COMMENT + '|' + THIS_INVOKE + '|'
 				+ OTHER);
 		Matcher matcher = regexp.matcher(source);
-		List<List<Object>> addScriptCall = new ArrayList<List<Object>>();
-		List<List<Object>> addDependenceCall = new ArrayList<List<Object>>();
-		String implementation = null;
 		while (matcher.find()) {
 			String method = matcher.group(1);
 			String content = matcher.group(2);
@@ -60,7 +53,7 @@ public class RegexpPackagePaser implements PackageParser {
 						throw new UnsupportedSyntaxException("正则解析器不支持复杂定义"
 								+ matcher.group(0) + "#" + other);
 					}
-					addScriptCall.add(arguments);
+					addScript((String)arguments.get(0),arguments.get(1),arguments.get(2),arguments.get(3));
 				} else if (ADD_DEPENDENCE.equals(method)) {
 					switch (arguments.size()) {
 					case 2:
@@ -70,45 +63,20 @@ public class RegexpPackagePaser implements PackageParser {
 					default:
 						throw new RuntimeException("无效参数");
 					}
-					addDependenceCall.add(arguments);
+					addDependence((String)arguments.get(0),arguments.get(1),(Boolean)arguments.get(2));
 				} else if (SET_IMPLEMENTATION.equals(method)) {
 					if (arguments.size() != 1) {
 						throw new RuntimeException("无效参数");
 					}
-					if (implementation == null) {
-						implementation = (String) arguments.get(0);
-					} else {
-						throw new RuntimeException("不能多次设置实现包");
-					}
+					this.setImplementation((String)arguments.get(0));
 				} else {
 					throw new RuntimeException("正则解析器不支持复杂定义;method = "
 							+ method);
 				}
 			}
 		}
-		this.implementation = implementation;
-		this.addScriptCall = addScriptCall;
-		this.addDependenceCall = addDependenceCall;
 	}
 
-	public void setup(JSIPackage pkg) {
-		if (this.implementation != null) {
-			pkg.setImplementation(implementation);
-		} else {
-			for (Iterator<List<Object>> it = addScriptCall.iterator(); it
-					.hasNext();) {
-				List<Object> item = it.next();
-				pkg.addScript((String) item.get(0), item.get(1), item.get(2),
-						item.get(3));
-			}
-			for (Iterator<List<Object>> it = addDependenceCall.iterator(); it
-					.hasNext();) {
-				List<Object> item = it.next();
-				pkg.addDependence((String) item.get(0), item.get(1),
-						(Boolean) item.get(2));
-			}
-		}
-	}
 
 	/**
 	 * @param content

@@ -3,11 +3,8 @@ package org.xidea.jsi.web;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -20,12 +17,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xidea.jsi.JSIExportor;
-import org.xidea.jsi.JSILoadContext;
-import org.xidea.jsi.JSIRoot;
-import org.xidea.jsi.impl.DataJSIRoot;
-import org.xidea.jsi.impl.DefaultJSIExportorFactory;
-import org.xidea.jsi.impl.DefaultJSILoadContext;
 import org.xidea.jsi.impl.JSIUtil;
 
 /**

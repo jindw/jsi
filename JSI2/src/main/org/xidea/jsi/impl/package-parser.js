@@ -7,10 +7,6 @@
  */
 
 this.addScript = function(){
-    if(arguments[1] == "*"){
-        arguments[1] = $this.findGlobals(arguments[0]);// || findGlobals($this.getSource(arguments[0])+'');
-    }
-    //println([arguments[2]? arguments[2]:null,arguments[2]? 123:null,typeof arguments[2],typeof arguments[3],null,arguments[2] || null,arguments[3] || null])
     $this.addScript(arguments[0],toJavaObject(arguments[1]),toJavaObject(arguments[2]), toJavaObject(arguments[3]));
 };
 this.addDependence = function(){
