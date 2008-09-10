@@ -31,11 +31,19 @@ public class ScriptPackagePaserTest extends AbstractFileJSIRootTest {
 	@Test
 	public void testParse() {
 		Java6ScriptPackagePaser paser = new Java6ScriptPackagePaser();
+		DefaultJSIPackage pkg = new DefaultJSIPackage(null, "pkg.test"){
+			@Override
+			public String loadText(String fileName){
+				return "this.addScript('a.js',['Class1','Class2'],'xxx','Base');"
+				+ "this.addDependence('a.js','b.js');"
+				+ "if(/is/.test(this.navigator))this.setImplementation(\"_v1_2\")";
+			}
+		};
 		paser
-				.parse("this.addScript('a.js',['Class1','Class2'],'xxx','Base');"
-						+ "this.addDependence('a.js','b.js');"
-						+ "if(/is/.test(this.navigator))this.setImplementation(\"_v1_2\")");
-		paser.setup(new DefaultJSIPackage(null, "pkg.test"));
+				.parse(pkg);
+		paser.setup(pkg
+				);
 	}
 
 }
+

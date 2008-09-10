@@ -96,7 +96,7 @@ public class TestFindGlobals {
 							Collection<String> result1 = null;
 							Collection<String> result2 = null;
 							try {
-								result1 = new Java6ScriptPackagePaser().findGlobals(source);
+								result1 = new Java6ScriptPackagePaser().findGlobals(source,"*");
 							} catch (Exception e) {
 								e.printStackTrace();
 							}
