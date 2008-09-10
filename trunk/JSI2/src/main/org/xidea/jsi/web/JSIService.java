@@ -19,7 +19,7 @@ import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.impl.DataJSIRoot;
 import org.xidea.jsi.impl.DefaultJSILoadContext;
-import org.xidea.jsi.impl.JSIUtil;
+import org.xidea.jsi.impl.JSIUtils;
 
 public class JSIService {
 	protected String scriptBase;
@@ -70,9 +70,9 @@ public class JSIService {
 	public boolean printResource(String path, OutputStream out)
 			throws IOException {
 		boolean isPreload = false;
-		if (path.endsWith(JSIUtil.PRELOAD_FILE_POSTFIX)) {
+		if (path.endsWith(JSIUtils.PRELOAD_FILE_POSTFIX)) {
 			isPreload = true;
-			path = path.replaceFirst(JSIUtil.PRELOAD_FILE_POSTFIX + "$", ".js");
+			path = path.replaceFirst(JSIUtils.PRELOAD_FILE_POSTFIX + "$", ".js");
 		}
 		InputStream in = this.getResourceStream(path);
 		if (in != null) {
@@ -86,9 +86,9 @@ public class JSIService {
 	protected void printResource(String path, boolean isPreload,
 			InputStream in, OutputStream out) throws IOException {
 		if (isPreload) {
-			out.write(JSIUtil.buildPreloadPerfix(path).getBytes());
+			out.write(JSIUtils.buildPreloadPerfix(path).getBytes());
 			output(in, out);
-			out.write(JSIUtil.buildPreloadPostfix().getBytes());
+			out.write(JSIUtils.buildPreloadPostfix().getBytes());
 		} else {
 			output(in, out);
 		}
@@ -100,12 +100,12 @@ public class JSIService {
 			String type = root.loadText(null, "#type");
 			JSIExportor exportor;
 			if ("report".equals(type)) {
-				exportor = JSIUtil.getExportor(JSIExportor.TYPE_REPORT);
+				exportor = JSIUtils.getExportor(JSIExportor.TYPE_REPORT);
 			} else if ("confuse".equals(type)) {
 				// String prefix = root.loadText(null, "#prefix");
-				exportor = JSIUtil.getExportor(JSIExportor.TYPE_CONFUSE);// confuseUnimported
+				exportor = JSIUtils.getExportor(JSIExportor.TYPE_CONFUSE);// confuseUnimported
 			} else {
-				exportor = JSIUtil.getExportor(JSIExportor.TYPE_SIMPLE);
+				exportor = JSIUtils.getExportor(JSIExportor.TYPE_SIMPLE);
 			}
 			if (exportor == null) {
 				return null;
@@ -126,13 +126,13 @@ public class JSIService {
 				}
 			});
 		} else {
-			return JSIUtil.getExportor(JSIExportor.TYPE_CONFUSE) == null ? null : "";
+			return JSIUtils.getExportor(JSIExportor.TYPE_CONFUSE) == null ? null : "";
 		}
 
 	}
 
 	public String document() {
-		List<String> packageList = JSIUtil
+		List<String> packageList = JSIUtils
 				.findPackageList(this.scriptBaseDirectory);
 		StringWriter out = new StringWriter();
 		if (packageList.isEmpty()) {

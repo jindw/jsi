@@ -8,14 +8,14 @@ import javax.servlet.jsp.tagext.BodyContent;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.impl.DefaultJSILoadContext;
-import org.xidea.jsi.impl.JSIUtil;
+import org.xidea.jsi.impl.JSIUtils;
 
 public class ExportTag extends javax.servlet.jsp.tagext.BodyTagSupport {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 13434L;
-	private JSIExportor exportor = JSIUtil.getExportor(JSIExportor.TYPE_SIMPLE);
+	private JSIExportor exportor = JSIUtils.getExportor(JSIExportor.TYPE_SIMPLE);
 
 	@Override
 	public int doEndTag() throws JspException {
