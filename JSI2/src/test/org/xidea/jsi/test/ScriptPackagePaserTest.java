@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.xidea.jsi.impl.DefaultJSIPackage;
 import org.xidea.jsi.impl.Java6ScriptPackagePaser;
 
-public class ScriptPackagePaserTest extends AbstractFileJSIRootTest {
+public class ScriptPackagePaserTest extends FileJSIRootTest {
 
 	@Before
 	public void setUp() throws Exception {
