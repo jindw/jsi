@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="GBK"?>
 <project name="JSI" default="build" basedir="../">
 	<property name="version" value="2.5-preview-2008-04-30" />
-	<taskdef resource="jst-task.properties" classpath="build/lib/JSA.jar" />
 	<target name="init">
 		<delete dir="build/temp">
 		</delete>
@@ -19,7 +18,6 @@
 		</jar>
 	</target>
 	<target name="compress">
-		<!--  classname="org.jside.jsi.tools.web.SimpleWebServer"-->
 		<java classname="org.jside.jsi.tools.export.ExportorAction">
 			<classpath>
 				<path location="../JST/classes"></path>
