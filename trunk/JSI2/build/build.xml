@@ -22,17 +22,26 @@
 		<!--  classname="org.jside.jsi.tools.web.SimpleWebServer"-->
 		<java classname="org.jside.jsi.tools.export.ExportorAction">
 			<classpath>
-				<fileset dir="../JST/dest">
-					<include name="*.jar" />
-				</fileset>
-				<fileset dir="../JST/lib/jsunit">
-					<include name="*.jar" />
+				<path location="../JST/classes"></path>
+				<fileset dir="../JST/lib">
+					<include name="**/*.jar" />
 				</fileset>
 			</classpath>
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
+			<arg value="-outputBoot" />
+			<arg value="${basedir}/build/dest/boot.js" />
+			<arg value="-bootCached" />
+			<arg value="example.*" />
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/exported.js" />
+			<arg value="-outputXML" />
+			<arg value="${basedir}/build/dest/exported.xml"/>
+			<arg value="-outputJAR" />
+			<arg value="${basedir}/build/dest/exported.jar" />
 			<arg value="-ascii" />
 			<arg value="false" />
+			<arg value="example.*" />
 			<arg value="org.xidea.jsidoc.*" />
 		</java>
 	</target>

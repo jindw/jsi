@@ -6,7 +6,7 @@
 this.addScript("dependence-info.js",'DependenceInfo');
 
 this.addScript("export.js",['Exporter']
-              ,['DependenceInfo','org.xidea.jsidoc.util:*','org.xidea.jsidoc:findPackages']);
+              ,['DependenceInfo','org.xidea.jsidoc.util:xmlReplacer','org.xidea.jsidoc.util:JSON','org.xidea.jsidoc.util:loadTextByURL','org.xidea.jsidoc:findPackages']);
 this.addScript("export-ui.js",['ExportUI']
-              ,['Exporter','DependenceInfo','org.xidea.jsidoc.util:*','org.xidea.jsidoc:findPackages']);
+              ,['Exporter','DependenceInfo','org.xidea.jsidoc.util:Template','org.xidea.jsidoc:findPackages']);
 
