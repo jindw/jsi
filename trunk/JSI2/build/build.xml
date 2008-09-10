@@ -18,7 +18,7 @@
 			</fileset>
 		</jar>
 	</target>
-	<target name="JSA">
+	<target name="compress">
 		<!--  classname="org.jside.jsi.tools.web.SimpleWebServer"-->
 		<java classname="org.jside.jsi.tools.export.ExportorAction">
 			<classpath>
@@ -72,13 +72,6 @@
 			</fileset>
 		</ftp>
 	</target>
-	<target name="packageDoc" depends="init">
-		<zip destfile="build/dest/JSI-doc-${version}.zip">
-			<zipfileset dir="web/doc">
-				<include name="**/*.*" />
-			</zipfileset>
-		</zip>
-	</target>
 	<target name="buildJSIDoc" depends="init">
 		<delete file="build/dest/JSI-JSIDoc-${version}.zip">
 		</delete>
@@ -107,83 +100,21 @@
 		<delete file="build/dest/JSI-${version}.tar">
 		</delete>
 		<tar destfile="build/dest/JSI-${version}.tar" compression="gzip">
-			<tarfileset dir="build/temp">
-				<include name="scripts/**/*.*" />
-				<exclude name="**/*.db" />
-			</tarfileset>
 			<tarfileset dir="web">
-				<exclude name="scripts/**/*.*" />
-				<exclude name="WEB-INF/**/*.*" />
-				<exclude name="**/*.db" />
 				<include name="**/*.*" />
+				<include name="scripts/**/*.*" />
+				<exclude name="WEB-INF/classes/**/*.*" />
+				<exclude name="**/*.db" />
 			</tarfileset>
 		</tar>
 		<zip destfile="build/dest/JSI-${version}.zip" compress="true">
-			<zipfileset dir="build/temp">
-				<include name="scripts/**/*.*" />
-				<exclude name="**/*.db" />
-			</zipfileset>
 			<zipfileset dir="web">
-				<exclude name="scripts/**/*.*" />
-				<exclude name="WEB-INF/**/*.*" />
-				<exclude name="**/*.db" />
 				<include name="**/*.*" />
+				<include name="scripts/**/*.*" />
+				<exclude name="WEB-INF/classes/**/*.*" />
+				<exclude name="**/*.db" />
 			</zipfileset>
 		</zip>
-	</target>
-	<target name="buildFull">
-		<zip destfile="build/dest/JSI-full-${version}.zip">
-			<zipfileset src="build/dest/JSI-${version}.zip" />
-			<zipfileset src="build/lib/JSI-thirdparty-2007-05-09.zip" />
-		</zip>
-	</target>
-	<target name="compress" depends="init">
-		<jsicompile syntaxcompression="false" destDir="build/temp/scripts" charset="utf-8">
-			<fileset dir="web/scripts">
-				<include name="*/**/*.*" />
-				<include name="*.*" />
-				<exclude name="*rhino*" />
-				<exclude name="preload/**" />
-			</fileset>
-			<preloadgroup path="code-decorator.js">
-				<fileset dir="web/scripts">
-					<include name='js/io/__$package.js' />
-					<include name='js/io/request.js' />
-					<include name='js/io/writer.js' />
-					<include name='js/xml/__$package.js' />
-					<include name='js/xml/template.js' />
-					<include name='js/xml/tag.js' />
-					<include name='js/util/__$package.js' />
-					<include name='js/util/collections.js' />
-					<include name='org/xidea/syntax/__$package.js' />
-					<include name='org/xidea/syntax/syntax-parser.js' />
-					<include name='org/xidea/decorator/__$package.js' />
-					<include name='org/xidea/decorator/code.js' />
-				</fileset>
-			</preloadgroup>
-		</jsicompile>
-	</target>
-	<target name="compressAllInOne">
-		<delete dir="build/temp/scripts2" />
-		<mkdir dir="build/temp/scripts2" />
-		<jsicompile syntaxcompression="false" textcompression="false" destDir="build/temp/scripts2" rebuildboot="true" charset="utf-8">
-			<fileset dir="web/scripts">
-				<include name="*/**/*.*" />
-				<include name="*.*" />
-				<exclude name="*rhino*" />
-				<exclude name="org/**/*.*" />
-				<exclude name="preload/**" />
-			</fileset>
-			<preloadgroup>
-				<fileset dir="web/scripts">
-					<include name="*/**/*.*" />
-					<include name="*.*" />
-					<exclude name="*rhino*" />
-					<exclude name="org/**/*.*" />
-					<exclude name="preload/**" />
-				</fileset>
-			</preloadgroup>
-		</jsicompile>
 	</target>
 
 </project>
