@@ -6,14 +6,14 @@
  * @version $Id: fn.js,v 1.5 2008/02/24 08:58:15 jindw Exp $
  */
 
-this.addScript = function(){
-    $this.addScript(arguments[0],toJavaObject(arguments[1]),toJavaObject(arguments[2]), toJavaObject(arguments[3]));
+this.addScript = function(scriptPath, objectNames, beforeLoadDependences, afterLoadDependences){
+    $this.addScript(scriptPath,toJavaObject(objectNames),toJavaObject(beforeLoadDependences), toJavaObject(afterLoadDependences));
 };
-this.addDependence = function(){
-    $this.addDependence(arguments[0],arguments[1],!!arguments[2])
+this.addDependence = function(thisPath,targetPath,afterLoad){
+    $this.addDependence(thisPath,toJavaObject(targetPath),!!afterLoad)
 };
-this.setImplementation = function(){
-    $this.setImplementation(arguments[0])
+this.setImplementation = function(implementation){
+    $this.setImplementation(implementation)
 };
 
 function toJavaObject(object) {
