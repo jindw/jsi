@@ -13,10 +13,8 @@ import org.xidea.jsi.JSIPackage;
 public abstract class JSIUtils {
 	public static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
 	
-	private static final String PRELOAD_CONTENT_POSTFIX = "\n}";
-	private static final String PRELOAD_CONTENT_PREFIX = "function(){eval(this.varText);";
-	private static final String PRELOAD_POSTFIX = ")";
-	private static final String PRELOAD_PREFIX = "$JSI.preload(";
+	public static final String PRELOAD_PREFIX = "$JSI.preload(";
+	public static final String PRELOAD_CONTENT_PREFIX = "eval(this.varText);";
 
 	private static Map<String, JSIExportor> exportorFactoryMap = new HashMap<String, JSIExportor>();
 	private final static String JSI_EXPORTOR_FACTORY_CLASS = "org.jside.jsi.tools.export.JSAExportorFactory";
@@ -27,13 +25,18 @@ public abstract class JSIUtils {
 		StringBuffer buf = new StringBuffer();
 		buf.append(JSIUtils.PRELOAD_PREFIX);
 		buf.append("'" + pkg + "',");
-		buf.append("'" + file + "',");
+		buf.append("'" + file + "',function(){");
 		buf.append(JSIUtils.PRELOAD_CONTENT_PREFIX);
 		return buf.toString();
 	}
 
-	public static String buildPreloadPostfix() {
-		return (PRELOAD_CONTENT_POSTFIX + PRELOAD_POSTFIX);
+	public static String buildPreloadPostfix(String content) {
+		int pos1 = content.lastIndexOf("//");
+		if(content.indexOf('\n',pos1)>0 || content.indexOf('\r',pos1)>0){
+			return "\n})";
+		}else{
+			return "})";
+		}
 	}
 
 	public static JSIExportor getExportor(String type) {

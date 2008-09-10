@@ -88,7 +88,7 @@ public class JSIService {
 		if (isPreload) {
 			out.write(JSIUtils.buildPreloadPerfix(path).getBytes());
 			output(in, out);
-			out.write(JSIUtils.buildPreloadPostfix().getBytes());
+			out.write(JSIUtils.buildPreloadPostfix("//").getBytes());
 		} else {
 			output(in, out);
 		}
