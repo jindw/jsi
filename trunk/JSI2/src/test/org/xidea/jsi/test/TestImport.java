@@ -6,7 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.jsi.ScriptLoader;
 
-public class TestImport extends AbstractFileJSIRootTest{
+public class TestImport extends FileJSIRootTest{
 	@Test
 	public void testImport() {
 		fileRoot.$import("org.xidea.jsidoc.JSIDoc", loadContext);
