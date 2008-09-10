@@ -17,7 +17,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xidea.jsi.impl.JSIUtil;
+import org.xidea.jsi.impl.JSIUtils;
 
 /**
  * 该类为方便调试开发，发布时可编译脚本，能后去掉此类。 Servlet 2.4 +
@@ -45,9 +45,9 @@ public class JSIFilter extends JSIService implements Filter {
 				path = req.getParameter("path");
 			}
 			boolean isPreload = false;
-			if (path.endsWith(JSIUtil.PRELOAD_FILE_POSTFIX)) {
+			if (path.endsWith(JSIUtils.PRELOAD_FILE_POSTFIX)) {
 				isPreload = true;
-				path = path.replaceFirst(JSIUtil.PRELOAD_FILE_POSTFIX + "$",
+				path = path.replaceFirst(JSIUtils.PRELOAD_FILE_POSTFIX + "$",
 						".js");
 			}
 			InputStream in = getResourceStream(path);

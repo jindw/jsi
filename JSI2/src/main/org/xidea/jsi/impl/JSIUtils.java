@@ -10,24 +10,25 @@ import java.util.Map;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSIPackage;
 
-public abstract class JSIUtil {
+public abstract class JSIUtils {
+	public static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
+	
+	private static final String PRELOAD_CONTENT_POSTFIX = "\n}";
+	private static final String PRELOAD_CONTENT_PREFIX = "function(){eval(this.varText);";
+	private static final String PRELOAD_POSTFIX = ")";
+	private static final String PRELOAD_PREFIX = "$JSI.preload(";
+
 	private static Map<String, JSIExportor> exportorFactoryMap = new HashMap<String, JSIExportor>();
 	private final static String JSI_EXPORTOR_FACTORY_CLASS = "org.jside.jsi.tools.export.JSAExportorFactory";
-
-	public static final String PRELOAD_CONTENT_POSTFIX = "\n}";
-	public static final String PRELOAD_CONTENT_PREFIX = "function(){eval(this.varText);";
-	public static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
-	public static final String PRELOAD_POSTFIX = ")";
-	public static final String PRELOAD_PREFIX = "$JSI.preload(";
 
 	public final static String buildPreloadPerfix(String path) {
 		String pkg = path.substring(0, path.lastIndexOf('/')).replace('/', '.');
 		String file = path.substring(pkg.length() + 1);
 		StringBuffer buf = new StringBuffer();
-		buf.append(JSIUtil.PRELOAD_PREFIX);
+		buf.append(JSIUtils.PRELOAD_PREFIX);
 		buf.append("'" + pkg + "',");
 		buf.append("'" + file + "',");
-		buf.append(JSIUtil.PRELOAD_CONTENT_PREFIX);
+		buf.append(JSIUtils.PRELOAD_CONTENT_PREFIX);
 		return buf.toString();
 	}
 
