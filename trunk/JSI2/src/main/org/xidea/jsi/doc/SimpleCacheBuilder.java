@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
 
-import org.xidea.jsi.impl.FileJSIRoot;
 import org.xidea.jsi.impl.JSIUtil;
 
 public class SimpleCacheBuilder {

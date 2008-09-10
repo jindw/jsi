@@ -11,7 +11,6 @@ import java.util.HashSet;
 import javax.script.ScriptEngine;
 
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.PackageParser;
 import org.xidea.jsi.UnsupportedSyntaxException;
 
 import sun.org.mozilla.javascript.internal.CompilerEnvirons;
@@ -20,7 +19,7 @@ import sun.org.mozilla.javascript.internal.EvaluatorException;
 import sun.org.mozilla.javascript.internal.Parser;
 import sun.org.mozilla.javascript.internal.ScriptOrFnNode;
 
-public class Java6ScriptPackagePaser implements PackageParser {
+public class Java6ScriptPackagePaser extends PackageParser {
 
 	public static final ScriptEngine engine = new javax.script.ScriptEngineManager()
 			.getEngineByExtension("js");
@@ -42,7 +41,29 @@ public class Java6ScriptPackagePaser implements PackageParser {
 			throw new RuntimeException(e);
 		}
 	}
-	public static Collection<String> findGlobalsFromJava6(String source) {
+	
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xidea.jsi.PackageParser#parse(java.lang.String,
+	 *      org.xidea.jsi.JSIPackage)
+	 */
+	public void parse(JSIPackage packageObject) {
+		String source = packageObject.loadText(JSIPackage.PACKAGE_FILE_NAME);
+		javax.script.SimpleBindings binds = new javax.script.SimpleBindings();
+		try {
+			binds.put("$this", this);
+			engine.eval(BIND_SCRIPT, binds);
+			engine.eval(source, binds);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new UnsupportedSyntaxException(e);
+		}
+	}
+	
+	@Override
+	public Collection<String> findGlobals(String source,String pattern) {
 		CompilerEnvirons env = new CompilerEnvirons();
 		env.setReservedKeywordAsIdentifier(true);
 		Parser parser = new Parser(
@@ -77,75 +98,6 @@ public class Java6ScriptPackagePaser implements PackageParser {
 		}
 		return result;
 	}
-	private String source;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xidea.jsi.PackageParser#parse(java.lang.String,
-	 *      org.xidea.jsi.JSIPackage)
-	 */
-	public void parse(String source) {
-		this.source = source;
-	}
-
-	public void setup(JSIPackage packageObject) {
-		javax.script.SimpleBindings binds = new javax.script.SimpleBindings();
-		try {
-			binds.put("$this", new PackageWapper(packageObject));
-			engine.eval(BIND_SCRIPT, binds);
-			engine.eval(source, binds);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new UnsupportedSyntaxException(e);
-		}
-	}
-
-	public static final class PackageWapper {
-		private JSIPackage packageObject;
-
-		public PackageWapper(JSIPackage packageObject) {
-			this.packageObject = packageObject;
-		}
-		public Collection<String> findGlobals(String scriptName){
-			String source = this.getSource(scriptName);
-			return findGlobalsFromJava6(source);
-		}
 
 
-		public void addScript(String scriptName, Object objectNames,
-				Object beforeLoadDependences, Object afterLoadDependences) {
-			try {
-
-				packageObject.addScript(scriptName, (objectNames),
-						(beforeLoadDependences),
-						(afterLoadDependences));
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new UnsupportedSyntaxException(e);
-			}
-		}
-
-		public void addDependence(String thisPath, Object targetPath,
-				boolean afterLoad) {
-			try {
-				packageObject.addDependence(thisPath, (targetPath),
-						afterLoad);
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.out.println(Arrays.asList(thisPath,
-						(targetPath), afterLoad));
-				throw new UnsupportedSyntaxException(e);
-			}
-		}
-
-		public void setImplementation(String implementation) {
-			packageObject.setImplementation(implementation);
-		}
-		
-		public String getSource(String scriptName){
-			return packageObject.loadText(scriptName);
-		}
-
-	}
 }

@@ -18,12 +18,9 @@ import org.mozilla.javascript.ScriptOrFnNode;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.PackageParser;
 import org.xidea.jsi.UnsupportedSyntaxException;
 
-class RhinoScriptPackagePaser implements PackageParser {
-
-
+class RhinoScriptPackagePaser extends PackageParser {
 	private static final String BIND_SCRIPT ;
 	static{
 		InputStream in1 = RhinoScriptPackagePaser.class.getResourceAsStream("package-parser.js");
@@ -41,7 +38,32 @@ class RhinoScriptPackagePaser implements PackageParser {
 			throw new RuntimeException(e);
 		}
 	}
-	public static Collection<String> findGlobalsFromJava6(String source) {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xidea.jsi.PackageParser#parse(java.lang.String,
+	 *      org.xidea.jsi.JSIPackage)
+	 */
+	public void parse(final JSIPackage packageObject) {
+		final String source = packageObject.loadText(JSIPackage.PACKAGE_FILE_NAME);
+		try {
+			Object result = Context.call(new ContextAction() {
+				public Object run(final Context cx) {
+					Scriptable scope = ScriptRuntime.getGlobal(cx);
+					scope.put("$this", scope, Context.toObject(this, scope));
+					cx.evaluateString(scope, BIND_SCRIPT, "<package-wrapper.js>", 1, null);
+					cx.evaluateString(scope,source, packageObject.getName().replace('.', '/')+"/__package__.js", 1, null);
+					return null;
+				}
+			});
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new UnsupportedSyntaxException(e);
+		}
+	}
+
+	@Override
+	public Collection<String> findGlobals(String source,String pattern) {
 		CompilerEnvirons env = new CompilerEnvirons();
 		env.setReservedKeywordAsIdentifier(true);
 		Parser parser = new Parser(
@@ -76,80 +98,7 @@ class RhinoScriptPackagePaser implements PackageParser {
 		}
 		return result;
 	}
-	private String source;
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xidea.jsi.PackageParser#parse(java.lang.String,
-	 *      org.xidea.jsi.JSIPackage)
-	 */
-	public void parse(String source) {
-		this.source = source;
-	}
-
-	public void setup(final JSIPackage packageObject) {
-		try {
-			Object result = Context.call(new ContextAction() {
-				public Object run(final Context cx) {
-					Scriptable scope = ScriptRuntime.getGlobal(cx);
-					scope.put("$this", scope, Context.toObject(new PackageWapper(packageObject), scope));
-					cx.evaluateString(scope, BIND_SCRIPT, "<package-wrapper.js>", 1, null);
-					cx.evaluateString(scope,source, packageObject.getName().replace('.', '/')+"/__package__.js", 1, null);
-					return null;
-				}
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new UnsupportedSyntaxException(e);
-		}
-	}
-
-	public static final class PackageWapper {
-		private JSIPackage packageObject;
-
-		public PackageWapper(JSIPackage packageObject) {
-			this.packageObject = packageObject;
-		}
-		public Collection<String> findGlobals(String scriptName){
-			String source = this.getSource(scriptName);
-			return findGlobalsFromJava6(source);
-		}
 
 
-		public void addScript(String scriptName, Object objectNames,
-				Object beforeLoadDependences, Object afterLoadDependences) {
-			try {
-
-				packageObject.addScript(scriptName, (objectNames),
-						(beforeLoadDependences),
-						(afterLoadDependences));
-			} catch (Exception e) {
-				e.printStackTrace();
-				throw new UnsupportedSyntaxException(e);
-			}
-		}
-
-		public void addDependence(String thisPath, Object targetPath,
-				boolean afterLoad) {
-			try {
-				packageObject.addDependence(thisPath, (targetPath),
-						afterLoad);
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.out.println(Arrays.asList(thisPath,
-						(targetPath), afterLoad));
-				throw new UnsupportedSyntaxException(e);
-			}
-		}
-
-		public void setImplementation(String implementation) {
-			packageObject.setImplementation(implementation);
-		}
-		
-		public String getSource(String scriptName){
-			return packageObject.loadText(scriptName);
-		}
-
-	}
+	
 }
