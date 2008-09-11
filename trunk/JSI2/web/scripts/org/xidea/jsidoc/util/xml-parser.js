@@ -28,7 +28,7 @@ XMLParser.prototype.load = function(url){
 	    var xhr = new XMLHttpRequest();
 	    xhr.open("GET",pos+1?url.substr(0,pos):url,false)
 	    xhr.send('');
-	    if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
+	    if(/\bxml\b/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
 	        var doc = xhr.responseXML;
 	    }else{
 	        var doc = toDoc(xhr.responseText)

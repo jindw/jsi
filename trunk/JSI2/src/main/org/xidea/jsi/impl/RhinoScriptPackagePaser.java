@@ -50,7 +50,7 @@ class RhinoScriptPackagePaser extends PackageParser {
 			Object result = Context.call(new ContextAction() {
 				public Object run(final Context cx) {
 					Scriptable scope = ScriptRuntime.getGlobal(cx);
-					scope.put("$this", scope, Context.toObject(this, scope));
+					scope.put("$this", scope, Context.toObject(RhinoScriptPackagePaser.this, scope));
 					cx.evaluateString(scope, BIND_SCRIPT, "<package-wrapper.js>", 1, null);
 					cx.evaluateString(scope,source, packageObject.getName().replace('.', '/')+"/__package__.js", 1, null);
 					return null;
