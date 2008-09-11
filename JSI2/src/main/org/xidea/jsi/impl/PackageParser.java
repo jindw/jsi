@@ -35,6 +35,7 @@ public abstract class PackageParser {
 				objectNames = findGlobals(scriptName,pattern);
 			}
 		}
+		checkStrings(objectNames);
 		addScriptCall.add(Arrays.asList(scriptName, objectNames,
 				beforeLoadDependences, afterLoadDependences));
 
@@ -42,6 +43,7 @@ public abstract class PackageParser {
 
 	public void addDependence(String thisPath, Object targetPath,
 			boolean afterLoad) {
+		checkStrings(targetPath);
 		addDependenceCall.add(Arrays.asList(thisPath, targetPath, afterLoad));
 	}
 
