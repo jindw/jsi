@@ -14,9 +14,9 @@ public abstract class PackageParser {
 	public static final String ADD_SCRIPT = "addScript";
 	public static final String ADD_DEPENDENCE = "addDependence";
 	
-	private List<List<Object>> addScriptCall = new ArrayList<List<Object>>();
-	private List<List<Object>> addDependenceCall = new ArrayList<List<Object>>();
-	private String implementation;
+	protected List<List<Object>> addScriptCall = new ArrayList<List<Object>>();
+	protected List<List<Object>> addDependenceCall = new ArrayList<List<Object>>();
+	protected String implementation;
 
 	public PackageParser() {
 	}
