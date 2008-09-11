@@ -17,7 +17,6 @@ import org.xidea.jsi.JSIRoot;
  * 
  */
 public class DefaultJSIDependence implements JSIDependence {
-	protected Map<String, List<String>> targetMap = new HashMap<String, List<String>>();
 	protected final JSIPackage targetPackage;
 	protected String targetFileName;
 	protected String targetObjectName;
@@ -46,7 +45,12 @@ public class DefaultJSIDependence implements JSIDependence {
 		this.targetObjectName = targetObjectName;
 	}
 
-	public DefaultJSIDependence instanceFor(String thisObjectName) {
+	/**
+	 * 在包初始化时。用来创建具体实例（×匹配）
+	 * @param thisObjectName
+	 * @return
+	 */
+	DefaultJSIDependence instanceFor(String thisObjectName) {
 		DefaultJSIDependence instance = new DefaultJSIDependence(this.root,
 				this.targetPackage, this.targetFileName, this.targetObjectName,
 				this.afterLoad);
