@@ -21,12 +21,9 @@ public class DefaultJSIDependence implements JSIDependence {
 	protected String targetFileName;
 	protected String targetObjectName;
 	protected String thisObjectName;
-	protected JSIRoot root;
 	protected boolean afterLoad;
 
 	/**
-	 * @param root
-	 *            JSI上下文
 	 * @param sourcePackage
 	 *            依赖源包
 	 * @param sourceObject
@@ -36,9 +33,8 @@ public class DefaultJSIDependence implements JSIDependence {
 	 * @param requiredBefore
 	 *            装在前依赖
 	 */
-	public DefaultJSIDependence(JSIRoot root, JSIPackage targetPackage,
+	public DefaultJSIDependence(JSIPackage targetPackage,
 			String targetFileName, String targetObjectName, boolean afterLoad) {
-		this.root = root;
 		this.afterLoad = afterLoad;
 		this.targetPackage = targetPackage;
 		this.targetFileName = targetFileName;
@@ -51,7 +47,7 @@ public class DefaultJSIDependence implements JSIDependence {
 	 * @return
 	 */
 	DefaultJSIDependence instanceFor(String thisObjectName) {
-		DefaultJSIDependence instance = new DefaultJSIDependence(this.root,
+		DefaultJSIDependence instance = new DefaultJSIDependence(
 				this.targetPackage, this.targetFileName, this.targetObjectName,
 				this.afterLoad);
 		instance.thisObjectName = thisObjectName;

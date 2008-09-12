@@ -15,13 +15,35 @@
 			<fileset dir="src/main">
 				<include name="**/*.java" />
 			</fileset>
-			<manifest file="src/main/taglib.tld"></manifest>
+			<manifest file="src/main/taglib.tld">
+			</manifest>
 		</jar>
+	</target>
+	<target name="packageOptimize">
+		<java classname="org.jside.jsi.tools.generator.JSIPackageGenerator">
+			<classpath>
+				<path location="../JSA-CORE/classes">
+				</path>
+				<path location="../JST/classes">
+				</path>
+				<fileset dir="../JST/lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+			<arg value="-scriptsBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-output" />
+			<arg value="${basedir}/build/dest/package.js" />
+			<arg value="org.xidea.jsidoc" />
+			<arg value="org.xidea.jsidoc.util" />
+			<arg value="org.xidea.jsidoc.export" />
+		</java>
 	</target>
 	<target name="compress">
 		<java classname="org.jside.jsi.tools.export.ExportorAction">
 			<classpath>
-				<path location="../JST/classes"></path>
+				<path location="../JST/classes">
+				</path>
 				<fileset dir="../JST/lib">
 					<include name="**/*.jar" />
 				</fileset>
@@ -35,7 +57,7 @@
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/exported.js" />
 			<arg value="-outputXML" />
-			<arg value="${basedir}/build/dest/exported.xml"/>
+			<arg value="${basedir}/build/dest/exported.xml" />
 			<arg value="-outputJAR" />
 			<arg value="${basedir}/build/dest/exported.jar" />
 			<arg value="-ascii" />
@@ -64,10 +86,10 @@
 		</war>
 	</target>
 	<target name="ftp">
-		<ftp password="jindw@163.com" server="upload.sourceforge.net" userid="anonymous" action="put"  remotedir="/incoming">
+		<ftp password="jindw@163.com" server="upload.sourceforge.net" userid="anonymous" action="put" remotedir="/incoming">
 			<fileset file="build/dest/">
-                <include name="*${version}.war"/>
-                <include name="JSI.jar"/>
+				<include name="*${version}.war" />
+				<include name="JSI.jar" />
 			</fileset>
 		</ftp>
 	</target>
