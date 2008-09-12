@@ -15,6 +15,7 @@
 			<fileset dir="src/main">
 				<include name="**/*.java" />
 			</fileset>
+			<manifest file="src/main/taglib.tld"></manifest>
 		</jar>
 	</target>
 	<target name="compress">
