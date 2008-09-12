@@ -126,6 +126,9 @@ public class DefaultJSIPackage implements JSIPackage {
 	}
 
 
+	/**
+	 * 检查状态,确保尚未初始化，依然可以修改
+	 */
 	private void checkState(){
 		if(unparsedDependenceList == null){
 			throw new IllegalStateException("已初始化的包，不能再次修改");

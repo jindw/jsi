@@ -8,18 +8,14 @@
     <display-name>JSI Tag Library</display-name>
     <description>JSI - see http://www.xidea.org/project/jsi</description>
     <tag>
-        <name>import</name>
-        <tag-class>org.xidea.jsi.servlet.ImportTag</tag-class>
-        <description>A tag to import scripts</description>
+        <name>export</name>
+        <tag-class>org.xidea.jsi.web.ExportTag</tag-class>
+        <description>A tag to export scripts</description>
         <attribute>
-            <name>value</name>
+            <name>printSource</name>
             <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-        </attribute>
-        <attribute>
-            <name>boot</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
+            <rtexprvalue>false</rtexprvalue>
+            <type>boolean</type>
         </attribute>
     </tag>
 </taglib>

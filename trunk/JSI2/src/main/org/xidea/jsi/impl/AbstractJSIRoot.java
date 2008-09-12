@@ -10,7 +10,7 @@ import org.xidea.jsi.JSIRoot;
 
 public abstract class AbstractJSIRoot implements JSIRoot {
 
-	private Map<String, JSIPackage> packageMap = new HashMap<String, JSIPackage>();
+	protected Map<String, JSIPackage> packageMap = new HashMap<String, JSIPackage>();
 
 	public abstract String loadText(String pkgName, String scriptName);
 
@@ -76,7 +76,7 @@ public abstract class AbstractJSIRoot implements JSIRoot {
 
 	}
 
-	private synchronized JSIPackage findPackage(String name, boolean exact) {
+	protected synchronized JSIPackage findPackage(String name, boolean exact) {
 		do {
 			if (packageMap.containsKey(name)) {
 				return packageMap.get(name);
@@ -92,7 +92,7 @@ public abstract class AbstractJSIRoot implements JSIRoot {
 		} while ((name = name.replace("\\.?[^\\.]+$", "")).length() > 0);
 	}
 
-	private PackageParser createPackageParser(JSIPackage pkg) {
+	protected PackageParser createPackageParser(JSIPackage pkg) {
 		PackageParser parser = new RegexpPackagePaser();
 		try {
 			parser.parse(pkg);
