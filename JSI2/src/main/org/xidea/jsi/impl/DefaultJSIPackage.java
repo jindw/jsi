@@ -28,7 +28,10 @@ public class DefaultJSIPackage implements JSIPackage {
 		this.root = root;
 		this.name = name;
 	}
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIPackage2#initialize()
 	 */
 	public void initialize() {
@@ -36,25 +39,32 @@ public class DefaultJSIPackage implements JSIPackage {
 			// parse unparsedDependenceList
 			parseDependence();
 			unparsedDependenceList = null;
-			this.scriptObjectMap = Collections.unmodifiableMap(this.scriptObjectMap);
-			this.objectScriptMap = Collections.unmodifiableMap(this.objectScriptMap);
+			this.scriptObjectMap = Collections
+					.unmodifiableMap(this.scriptObjectMap);
+			this.objectScriptMap = Collections
+					.unmodifiableMap(this.objectScriptMap);
 			this.loaderMap = Collections.unmodifiableMap(this.loaderMap);
-			this.dependenceMap = Collections.unmodifiableMap(this.dependenceMap);
+			this.dependenceMap = Collections
+					.unmodifiableMap(this.dependenceMap);
 		}
 	}
-	/* (non-Javadoc)
-	 * @see org.xidea.jsi.impl.JSIPackage2#addScript(java.lang.String, java.lang.Object, java.lang.Object, java.lang.Object)
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xidea.jsi.impl.JSIPackage2#addScript(java.lang.String,
+	 *      java.lang.Object, java.lang.Object, java.lang.Object)
 	 */
 	public void addScript(String scriptName, Object objectNames,
 			Object beforeLoadDependences, Object afterLoadDependences) {
 		checkState();
-		loaderMap.put(scriptName, new DefaultScriptLoader(this,scriptName));
+		loaderMap.put(scriptName, new DefaultScriptLoader(this, scriptName));
 		List<String> objects = new ArrayList<String>();
 		if (objectNames instanceof String) {
 			objects.add((String) objectNames);
 		} else if (objectNames instanceof Collection) {
-			for (Iterator<Object> it2 = ((Collection<Object>) objectNames).iterator(); it2
-					.hasNext();) {
+			for (Iterator<Object> it2 = ((Collection<Object>) objectNames)
+					.iterator(); it2.hasNext();) {
 				objects.add((String) it2.next());
 			}
 		}
@@ -66,7 +76,7 @@ public class DefaultJSIPackage implements JSIPackage {
 		for (Iterator<String> it2 = objects.iterator(); it2.hasNext();) {
 			String item = it2.next();
 			if (objectScriptMap.containsKey(item)) {
-				System.out.println("重复的脚本元素定义:"+item);
+				System.out.println("重复的脚本元素定义:" + item);
 			}
 			objectScriptMap.put(item, scriptName);
 			item = item.replace("\\..*$", "");
@@ -82,8 +92,11 @@ public class DefaultJSIPackage implements JSIPackage {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.xidea.jsi.impl.JSIPackage2#addDependence(java.lang.String, java.lang.Object, boolean)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xidea.jsi.impl.JSIPackage2#addDependence(java.lang.String,
+	 *      java.lang.Object, boolean)
 	 */
 	public void addDependence(String thisPath, Object targetPath,
 			boolean afterLoad) {
@@ -95,8 +108,8 @@ public class DefaultJSIPackage implements JSIPackage {
 			}
 		}
 		if (targetPath instanceof Collection) {
-			for (Iterator<Object> it = ((Collection<Object>) targetPath).iterator(); it
-					.hasNext();) {
+			for (Iterator<Object> it = ((Collection<Object>) targetPath)
+					.iterator(); it.hasNext();) {
 				// JSI js 做了展开优化
 				this.addDependence(thisPath, it.next(), afterLoad);
 			}
@@ -108,7 +121,10 @@ public class DefaultJSIPackage implements JSIPackage {
 			unparsedDependenceList.add(args);
 		}
 	}
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIPackage2#setImplementation(java.lang.String)
 	 */
 	public void setImplementation(String implementation) {
@@ -125,15 +141,15 @@ public class DefaultJSIPackage implements JSIPackage {
 		this.implementation = implementation;
 	}
 
-
 	/**
 	 * 检查状态,确保尚未初始化，依然可以修改
 	 */
-	private void checkState(){
-		if(unparsedDependenceList == null){
+	private void checkState() {
+		if (unparsedDependenceList == null) {
 			throw new IllegalStateException("已初始化的包，不能再次修改");
 		}
 	}
+
 	private void parseDependence() {
 		if (unparsedDependenceList != null) {
 			for (Iterator<List<Object>> iterator = unparsedDependenceList
@@ -155,7 +171,9 @@ public class DefaultJSIPackage implements JSIPackage {
 					if (allSource) {
 						thisFileMap = this.scriptObjectMap.keySet();
 					} else {
-						String file = this.objectScriptMap.get(thisPath);//file -> thisFile
+						String file = this.objectScriptMap.get(thisPath);// file
+																			// ->
+																			// thisFile
 						if (file != null) {
 							thisObjectName = thisPath;
 						} else {
@@ -169,12 +187,14 @@ public class DefaultJSIPackage implements JSIPackage {
 						} else {
 							targetPackage = this.root
 									.findPackageByPath(targetPath);
-							targetPackage = root.requirePackage(
-									targetPackage.getName(), true);
+							targetPackage = root.requirePackage(targetPackage
+									.getName(), true);
 						}
-						targetFileMap = targetPackage.getScriptObjectMap().keySet();
+						targetFileMap = targetPackage.getScriptObjectMap()
+								.keySet();
 					} else {
-						String file = this.objectScriptMap.get(targetPath);//file targetFile
+						String file = this.objectScriptMap.get(targetPath);// file
+																			// targetFile
 						if (file != null) {
 							targetObjectName = targetPath;
 						} else if (this.scriptObjectMap.containsKey(targetPath)) {
@@ -184,10 +204,10 @@ public class DefaultJSIPackage implements JSIPackage {
 									.findPackageByPath(targetPath);
 							targetPath = targetPath.substring(targetPackage
 									.getName().length() + 1);
-							targetPackage = root.requirePackage(
-									targetPackage.getName(), true);
-							file = targetPackage.getObjectScriptMap()
-									.get(targetPath);
+							targetPackage = root.requirePackage(targetPackage
+									.getName(), true);
+							file = targetPackage.getObjectScriptMap().get(
+									targetPath);
 							if (file != null) {
 								targetObjectName = targetPath;
 							} else {
@@ -198,15 +218,15 @@ public class DefaultJSIPackage implements JSIPackage {
 					}
 					for (String targetFile : targetFileMap) {
 						DefaultJSIDependence dep = new DefaultJSIDependence(
-								this.root, targetPackage, targetFile,
-								targetObjectName, afterLoad);
+								targetPackage, targetFile, targetObjectName,
+								afterLoad);
 						for (String thisFile : thisFileMap) {
 							if (!(samePackage && thisFile.equals(targetFile))) {
 								saveDependence(dep, thisFile, thisObjectName);
 							}
 						}
 					}
-				} else {//单挑
+				} else {// 单挑
 					String thisFile = this.objectScriptMap.get(thisPath);
 					if (thisFile != null) {
 						thisObjectName = thisPath;
@@ -220,23 +240,21 @@ public class DefaultJSIPackage implements JSIPackage {
 					} else if (this.scriptObjectMap.containsKey(targetPath)) {
 						file = targetPath;
 					} else {
-						targetPackage = this.root
-								.findPackageByPath(targetPath);
+						targetPackage = this.root.findPackageByPath(targetPath);
 						targetPath = targetPath.substring(targetPackage
 								.getName().length() + 1);
 						targetPackage = root.requirePackage(targetPackage
 								.getName(), true);
-						file = targetPackage.getObjectScriptMap()
-								.get(targetPath);
+						file = targetPackage.getObjectScriptMap().get(
+								targetPath);
 						if (file != null) {
 							targetObjectName = targetPath;
 						} else {
 							file = targetPath;
 						}
 					}
-					DefaultJSIDependence dep = new DefaultJSIDependence(this.root,
-							targetPackage, file, targetObjectName,
-							afterLoad);
+					DefaultJSIDependence dep = new DefaultJSIDependence(
+							targetPackage, file, targetObjectName, afterLoad);
 					saveDependence(dep, thisFile, thisObjectName);
 				}
 
@@ -253,52 +271,64 @@ public class DefaultJSIPackage implements JSIPackage {
 		}
 		depList.add(dep.instanceFor(thisObject));
 	}
-	
 
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIPackage2#getName()
 	 */
 	public String getName() {
 		return name;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIPackage2#getImplementation()
 	 */
 	public String getImplementation() {
 		return implementation;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIPackage2#getScriptObjectMap()
 	 */
 	public Map<String, List<String>> getScriptObjectMap() {
 		return this.scriptObjectMap;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIPackage2#getObjectScriptMap()
 	 */
 	public Map<String, String> getObjectScriptMap() {
 		return this.objectScriptMap;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIPackage2#getLoaderMap()
 	 */
 	public Map<String, ScriptLoader> getLoaderMap() {
 		return loaderMap;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIPackage2#getDependenceMap()
 	 */
 	public Map<String, List<JSIDependence>> getDependenceMap() {
 		return dependenceMap;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIPackage2#loadText(java.lang.String)
 	 */
 	public String loadText(String scriptName) {
