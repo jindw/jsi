@@ -69,7 +69,7 @@ var JSIDoc = {
                     }
                     return value;//???
                 }else if(name == "group"){
-                    value = JSON.parse(value);
+                    value = JSON.decode(value);
                     for(name in value){
                         packageGroupMap.push(name)
                         packageGroupMap[name] = value[name];

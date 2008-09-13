@@ -67,18 +67,8 @@
 		</java>
 	</target>
 	<target name="buildExample" depends="jar">
-		<war destfile="build/dest/JSI-empty-${version}.war" webxml="web/WEB-INF/web.xml">
-			<zipfileset file="JSI.jar" dir="build/dest" prefix="WEB-INF/lib/" />
-			<zipfileset dir="web" prefix="scripts">
-				<exclude name="*.*" />
-				<exclude name="*/**" />
-			</zipfileset>
-			<zipfileset dir="web">
-				<include name="WEB-INF/lib/**/*.*" />
-			</zipfileset>
-		</war>
 		<war destfile="build/dest/JSI-example-${version}.war" webxml="web/WEB-INF/web.xml" description="http://localhost/JSI-example-${version}/scripts/jsidoc">
-			<zipfileset file="JSI.jar" dir="build/dest" prefix="WEB-INF/lib/" />
+			<zipfileset dir="build/dest" file="JSI.jar" prefix="WEB-INF/lib/" />
 			<zipfileset dir="web">
 				<include name="scripts/example/**/*.*" />
 				<include name="WEB-INF/lib/**/*.*" />

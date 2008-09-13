@@ -15,7 +15,7 @@ var JSON = {
      * @public 解析
      * @owner JSON
      */
-    parse : function(data){
+    decode : function(data){
         return window.eval("("+data+")")
     },
     /**
@@ -25,7 +25,7 @@ var JSON = {
      * @param <Object> value
      * @return <String> json 表达式
      */
-    serialize : serialize
+    encode : serialize
 }
 /**
  * IE 好像容易出问题，可能是线程不安全导致。

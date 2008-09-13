@@ -152,7 +152,7 @@ Exporter.prototype = {
         content.push("preText && preText.parentNode.removeChild(preText);");
         content.push("}</script><textarea onfocus='this.select()' onclick='this.select()' wrap='off' readonly='true' style='position:absolute;top:10px;right:3%;width:40%;height:60px;overflow:hidden;'>/* */");
         content.push("JSIDoc.cacheScript(");
-        content.push(JSON.serialize(packageMap).replace(/[<&>]|--/g,encodeReplacer));
+        content.push(JSON.encode(packageMap).replace(/[<&>]|--/g,encodeReplacer));
         content.push(")\r\n");
         content.push("//</textarea>");
         
@@ -220,7 +220,7 @@ function defaultTemplateFilter(text,path){
             try{
                 var object = loader.hook(template);
                 if(object && object.compileData){
-                    object = JSON.serialize(object.compileData);
+                    object = JSON.encode(object.compileData);
                     return "new Template"+"("+object+")";
                 }
             }catch(e){$log.error("替换出错：",template)}
