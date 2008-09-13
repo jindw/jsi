@@ -12,6 +12,9 @@ public class RegexpPackagePaser extends PackageParser {
 	private static final String COMMENT = "/\\*[\\s\\S]*?\\*/|//.*";
 	private static final String THIS_INVOKE = "this\\s*\\.\\s*(\\w+)\\(([^\\(\\)]*)\\)";
 	private static final String OTHER = "(\\w+)?";
+	public RegexpPackagePaser(JSIPackage packageObject){
+		parse(packageObject);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -19,7 +22,7 @@ public class RegexpPackagePaser extends PackageParser {
 	 * @see org.xidea.jsi.PackageParser#parse(java.lang.String,
 	 *      org.xidea.jsi.JSIPackage)
 	 */
-	public void parse(JSIPackage packageObject) {
+	private void parse(JSIPackage packageObject) {
 		String source = packageObject.loadText(JSIPackage.PACKAGE_FILE_NAME);
 		Pattern regexp = Pattern.compile(COMMENT + '|' + THIS_INVOKE + '|'
 				+ OTHER);

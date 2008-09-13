@@ -33,10 +33,10 @@
 			<arg value="-scriptsBase" />
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-output" />
-			<arg value="${basedir}/build/dest/package.js" />
+			<arg value="${basedir}/build/dest/package-gen.js" />
+			<arg value="org.xidea.jsidoc.export" />
 			<arg value="org.xidea.jsidoc" />
 			<arg value="org.xidea.jsidoc.util" />
-			<arg value="org.xidea.jsidoc.export" />
 		</java>
 	</target>
 	<target name="compress">
@@ -66,6 +66,31 @@
 			<arg value="org.xidea.jsidoc.*" />
 		</java>
 	</target>
+	<target name="compress-all-xml">
+		<java classname="org.jside.jsi.tools.export.ExportorAction">
+			<classpath>
+				<path location="../JST/classes">
+				</path>
+				<fileset dir="../JST/lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="${basedir}/build/dest/exported-all.xml" />
+			<arg value="-ascii" />
+			<arg value="false" />
+			<arg value="example.*" />
+			<arg value="example.dependence.*" />
+			<arg value="example.internal.*" />
+			<arg value="org.xidea.jsidoc.*" />
+			<arg value="org.xidea.jsidoc.export.*" />
+			<arg value="org.xidea.jsidoc.html.*" />
+			<arg value="org.xidea.jsidoc.styles.*" />
+			<arg value="org.xidea.jsidoc.util.*" />
+		</java>
+	</target>
+
 	<target name="buildExample" depends="jar">
 		<war destfile="build/dest/JSI-example-${version}.war" webxml="web/WEB-INF/web.xml" description="http://localhost/JSI-example-${version}/scripts/jsidoc">
 			<zipfileset dir="build/dest" file="JSI.jar" prefix="WEB-INF/lib/" />
