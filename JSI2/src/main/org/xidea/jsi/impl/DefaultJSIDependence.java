@@ -1,14 +1,11 @@
 package org.xidea.jsi.impl;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.xidea.jsi.JSIDependence;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.JSIRoot;
 
 /**
  * 初定该实现的依赖只能时一个文件，可能时该文件的全部脚本，也可能时某个确定脚本
