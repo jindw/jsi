@@ -18,26 +18,9 @@ import org.mozilla.javascript.ScriptOrFnNode;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.UnsupportedSyntaxException;
 
 class RhinoScriptPackagePaser extends PackageParser {
-	private static final String BIND_SCRIPT ;
-	static{
-		InputStream in1 = RhinoScriptPackagePaser.class.getResourceAsStream("package-parser.js");
-		try {
-			InputStreamReader reader = new InputStreamReader(in1,"utf-8");
-			StringWriter out = new StringWriter();
-			char[] cbuf = new char[1024];
-			int count;
-			while((count = reader.read(cbuf))>=0){
-				out.write(cbuf, 0, count);
-			}
-			out.flush();
-			BIND_SCRIPT = out.toString();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+	private JSIPackage packageObject;
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -45,6 +28,7 @@ class RhinoScriptPackagePaser extends PackageParser {
 	 *      org.xidea.jsi.JSIPackage)
 	 */
 	public void parse(final JSIPackage packageObject) {
+		this.packageObject = packageObject;
 		final String source = packageObject.loadText(JSIPackage.PACKAGE_FILE_NAME);
 		try {
 			Object result = Context.call(new ContextAction() {
@@ -63,7 +47,8 @@ class RhinoScriptPackagePaser extends PackageParser {
 	}
 
 	@Override
-	public Collection<String> findGlobals(String source,String pattern) {
+	public Collection<String> findGlobals(String scriptName,String pattern) {
+		String source = this.packageObject.loadText(scriptName);
 		CompilerEnvirons env = new CompilerEnvirons();
 		env.setReservedKeywordAsIdentifier(true);
 		Parser parser = new Parser(

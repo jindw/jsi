@@ -1,5 +1,9 @@
 package org.xidea.jsi.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,13 +11,28 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.UnsupportedSyntaxException;
 
 public abstract class PackageParser {
 	public static final String SET_IMPLEMENTATION = "setImplementation";
 	public static final String ADD_SCRIPT = "addScript";
 	public static final String ADD_DEPENDENCE = "addDependence";
-	
+	static final String BIND_SCRIPT ;
+	static{
+		InputStream in1 = Java6ScriptPackagePaser.class.getResourceAsStream("package-parser.js");
+		try {
+			InputStreamReader reader = new InputStreamReader(in1,"utf-8");
+			StringWriter out = new StringWriter();
+			char[] cbuf = new char[1024];
+			int count;
+			while((count = reader.read(cbuf))>=0){
+				out.write(cbuf, 0, count);
+			}
+			out.flush();
+			BIND_SCRIPT = out.toString();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	protected List<List<Object>> addScriptCall = new ArrayList<List<Object>>();
 	protected List<List<Object>> addDependenceCall = new ArrayList<List<Object>>();
 	protected String implementation;

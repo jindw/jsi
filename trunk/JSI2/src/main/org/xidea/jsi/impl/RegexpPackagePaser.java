@@ -6,7 +6,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.UnsupportedSyntaxException;
 
 public class RegexpPackagePaser extends PackageParser {
 

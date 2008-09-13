@@ -8,10 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -20,7 +17,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.jsi.UnsupportedSyntaxException;
 import org.xidea.jsi.impl.Java6ScriptPackagePaser;
 
 public class TestFindGlobals {
@@ -39,7 +35,7 @@ public class TestFindGlobals {
 				engine.eval(source);
 			} catch (Exception e) {
 				e.printStackTrace();
-				throw new UnsupportedSyntaxException(e);
+				throw new RuntimeException(e);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);

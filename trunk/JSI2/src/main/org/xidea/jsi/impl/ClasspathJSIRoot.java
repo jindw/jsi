@@ -33,6 +33,9 @@ public class ClasspathJSIRoot extends AbstractJSIRoot implements JSIRoot {
 				path = '/'+scriptName;
 			}
 			InputStream in = loader == null?String.class.getResourceAsStream(path):loader.getResourceAsStream(path); 
+			if(in == null){
+				return null;
+			}
 			Reader reader = new InputStreamReader(in,this.encoding);
 			StringBuilder buf = new StringBuilder();
 			char[] cbuf = new char[1024];

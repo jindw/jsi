@@ -35,7 +35,7 @@ public class SimpleCacheBuilder {
 			//System.out.println(dir);
 			File[] files = dir.listFiles(new FilenameFilter() {
 				public boolean accept(File dir, String name) {
-					return name.endsWith(".js") || name.endsWith(".xhtml");
+					return name.endsWith(".xhtml");
 				}
 			});
 			if (files!=null && files.length > 0) {

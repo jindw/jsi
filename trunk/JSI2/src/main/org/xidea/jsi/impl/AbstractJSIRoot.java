@@ -44,7 +44,9 @@ public abstract class AbstractJSIRoot implements JSIRoot {
 
 	public JSIPackage requirePackage(String name, boolean exact) {
 		JSIPackage pkg = findPackage(name, exact);
-		if (pkg.getImplementation() == null) {
+		if(pkg == null){
+			return null;
+		}else if (pkg.getImplementation() == null) {
 			return pkg;
 		} else {
 			return this.requirePackage(pkg.getImplementation(), exact);
@@ -82,14 +84,15 @@ public abstract class AbstractJSIRoot implements JSIRoot {
 				return packageMap.get(name);
 			}
 			String source = this.loadText(name, JSIPackage.PACKAGE_FILE_NAME);
-			JSIPackage pkg = null;
 			if (source != null) {
-				pkg = new DefaultJSIPackage(this, name);
+				JSIPackage pkg  = new DefaultJSIPackage(this, name);
 				createPackageParser(pkg).setup(pkg);
+				packageMap.put(name, pkg);
+				return pkg;
 			}
-			packageMap.put(name, pkg);
-			return pkg;
-		} while ((name = name.replace("\\.?[^\\.]+$", "")).length() > 0);
+		//} while ((name = name.replace("\\.?[^\\.]+$", "")).length() > 0);
+		} while (!exact && (name = name.substring(0,Math.max(name.lastIndexOf('.'), 0))).length() > 0);
+		return null;
 	}
 
 	protected PackageParser createPackageParser(JSIPackage pkg) {
