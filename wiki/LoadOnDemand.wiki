@@ -1,0 +1,138 @@
+= 何谓安需装载？=
+
+    脚本程序一般都是下载后执行，当脚本库非常庞大时，一次性下载起来非常费时，传统的解决方式是，按功能模块把脚本写在不同的文件中，页面上手动加入 script标签装载指定内容，但是这有一些缺点，类库的使用者需要知道没个脚本之间的关系，顺序要求等等，而不可能要求每个类库使用者都对其非常熟悉，出错的可能性很大。于是很多框架开始支持导入指令，想使用什么一个导入函数就完了，不必一堆堆的script文件，不用小心翼翼的关注着他们的依赖关系。
+
+= 安需装载的困境：= 
+    早期安需装载（即时同步按需装载）有一个致命的弱点，浏览器阻塞问题。当按需装载某些类库时，通常通过XMLHttpRequest同步装载脚本文件实现，这种情况下，在资源下载完成之前，浏览器将停止响应用户事件、停止页面重画操作。如果网速很慢，这段时间将非常让人讨厌，就像是死机似的。
+
+    以前的解决办法是，将常用类库资源直接打包到框架文件中，而按需导入就成了一个宣传的幌子，没有太多实际的价值。
+= 安需装载可分如下三种模式：= 
+
+  * 即时同步按需装载 （阻塞，JSI、JSVM、dojo）。
+最简单的按需装载实现，通过XMLHttpRequest同步装载脚本文件实现。问题是，浏览器使用这种方式同步获取资源时将导致浏览器阻塞：停止响应用户事件、停止页面重画操作。所以，虽然编程最为简单，但是用户体验最差。
+
+
+  * 异步按需装载（无阻塞，JSI2.0+）。
+异步导入，不必多做解释，用户体验好，但是因为其异步特征，处理起来比较麻烦。
+
+
+  * 延迟同步按需装载（无阻塞，JSI2.0+）。
+JSI通过动态预装载功能实现的一种同步获取资源的方法，虽然也是同步，但没有阻塞，可以算时兼顾易用性和用户体验的解决方按。缺点时有一定延迟，当前脚本标签中不可用。
+
+      
+
+ 
+= 使用方法 =
+
+    以一个JavaScript 对象显示函数为例：
+
+
+类库位置：example/dependence/show-detail.js
+
+实现代码：
+{{{
+/**
+ * 利用jsidoc中定义的JSON库（org.xidea.jsidoc.util.JSON）实现的一个用于显示对象细节的函数。
+ * @param object 想查看的对象
+ */
+function showDetail(object){
+	var buf = ["对象信息如下：\n\n"];
+	buf.push(JSON.encode(object));
+	confirm(buf.join("\n"));
+}
+}}}
+ 
+包定义代码：
+{{{
+this.addScript('show-detail.js','showDetail'
+               //装载前需要先装载JSON类库（事实上此处可以定义为装载后，先不理会那些复杂的优化手法吧^_^）
+               ,"org.xidea.jsidoc.util:JSON"
+               );
+}}}
+
+* 即时同步按需装载
+
+{{{
+$import("example.dependence.showDetail");
+
+var person= {}
+person.name='张三';
+person.location='北京';
+person.project='http://www.xidea.org/project/jsi/';
+showDetail(person)
+
+}}}
+* 异步按需装载
+
+{{{
+$import("example.dependence.showDetail",function(Code){
+    var person= {}
+    person.name='张三';
+    person.location='北京';
+    person.project='http://www.xidea.org/project/jsi/';
+    showDetail(person)
+})   
+
+}}}
+ 
+
+* 延迟同步按需装载（无阻塞，JSI2.0+）。
+{{{
+<script>"../scripts/boot.js"></script>   
+<script>   
+$import("example.dependence.showDetail");
+</script>   
+<script>   
+var person= {}
+person.name='张三';
+person.location='北京';
+person.project='http://www.xidea.org/project/jsi/';
+showDetail(person)  
+</script>   
+}}}
+
+
+
+== JSI 导入函数参考 ==
+
+ 
+{{{
+public <void|object|Package>  $import (<string>path , <Function|boolean|Object>targetocol , <boolean|Function>col)
+
+      导入指定元素（脚本、函数、类、变量）至指定目标,默认方式为同步导入，默认目标为全局对象（Global == window(html)）。
+
+        //Example:
+        $import("com.yourcompany.ClassA")//即时装载--通过指定对象
+        $import("com/yourcompany/class-a.js")//即时装载--通过指定文件
+        $import("example.ClassA",MyNamespace)//指定装载目标
+        $import("example.ClassA",function(ClassA){alert("callback:"+ClassA)})//异步装载
+        $import("example/class-a.js",true)//延迟装载(可获得良好特性,需要编译支持或者服务端支持)
+
+      实现步骤：
+          o 若元素未装载或依赖未装载，且为异步装载模式，先缓存需要的脚本资源
+          o 若元素未装载或依赖未装载，且为同步非阻塞装载模式，打印预装载脚本（当前script标签的其他脚本可能继续运行，浏览器不同表现略有不同）; 并且等待预装载脚本执行之后继续以下步骤
+          o 若元素未装载或依赖未装载，装载之
+          o 将该元素声明为指定目标的属性(默认目标为全局对象，这时相当于声明了全局变量)
+      全局对象的特殊性说明:
+
+            全局对象的属性同时也是全局变量，可以在任何地方直接使用，
+            也就是说：
+            $import函数调用时，默认（未指定target）导入成全局对象属性，等价于声明了一个全局变量。
+
+      该方法为最终用户设计（页面上的脚本）,不推荐类库开发者（托管脚本）使用该函数,除非确实需要（如需要动态导入时）。类库开发者可在包中定义脚本依赖完成类似功能。
+
+
+
+=== 参数 ===
+
+      path
+
+      (package:Object|package.Object|package:*|package.*| scriptPath)
+      targetocol
+
+      可选参数，指定导入容器。 当该参数未指定时，target为全局变量容器,这种情况等价于直接声明的全局变量。 当未指定第三个参数时，且target为函数或者boolean值时,target作为col参数处理，而target本身等价为未指定。 当该参数为有效对象时(instanceof Object && not instanceof Function)，导入的元素将赋值成其属性；
+      col
+
+      callbackOrLazyLoad 可选参数,默认为null。 如果其值为函数，表示异步导入模式； 如果其值为真，表示延迟同步导入模式，否则为即时同步导入（默认如此）。
+
+}}}
