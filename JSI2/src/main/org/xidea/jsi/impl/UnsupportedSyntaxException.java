@@ -1,6 +1,6 @@
-package org.xidea.jsi;
+package org.xidea.jsi.impl;
 
-public class UnsupportedSyntaxException extends RuntimeException {
+class UnsupportedSyntaxException extends RuntimeException {
 
 	public UnsupportedSyntaxException() {
 		super();

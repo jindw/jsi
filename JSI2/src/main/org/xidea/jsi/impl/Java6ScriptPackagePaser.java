@@ -11,7 +11,6 @@ import java.util.HashSet;
 import javax.script.ScriptEngine;
 
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.UnsupportedSyntaxException;
 
 import sun.org.mozilla.javascript.internal.CompilerEnvirons;
 import sun.org.mozilla.javascript.internal.ErrorReporter;
@@ -24,23 +23,7 @@ public class Java6ScriptPackagePaser extends PackageParser {
 	public static final ScriptEngine engine = new javax.script.ScriptEngineManager()
 			.getEngineByExtension("js");
 
-	private static final String BIND_SCRIPT ;
-	static{
-		InputStream in1 = Java6ScriptPackagePaser.class.getResourceAsStream("package-parser.js");
-		try {
-			InputStreamReader reader = new InputStreamReader(in1,"utf-8");
-			StringWriter out = new StringWriter();
-			char[] cbuf = new char[1024];
-			int count;
-			while((count = reader.read(cbuf))>=0){
-				out.write(cbuf, 0, count);
-			}
-			out.flush();
-			BIND_SCRIPT = out.toString();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
+	private JSIPackage packageObject;
 	
 
 	/*
@@ -50,6 +33,7 @@ public class Java6ScriptPackagePaser extends PackageParser {
 	 *      org.xidea.jsi.JSIPackage)
 	 */
 	public void parse(JSIPackage packageObject) {
+		this.packageObject = packageObject;
 		String source = packageObject.loadText(JSIPackage.PACKAGE_FILE_NAME);
 		javax.script.SimpleBindings binds = new javax.script.SimpleBindings();
 		try {
@@ -63,7 +47,8 @@ public class Java6ScriptPackagePaser extends PackageParser {
 	}
 	
 	@Override
-	public Collection<String> findGlobals(String source,String pattern) {
+	public Collection<String> findGlobals(String scriptName,String pattern) {
+		String source = this.packageObject.loadText(scriptName);
 		CompilerEnvirons env = new CompilerEnvirons();
 		env.setReservedKeywordAsIdentifier(true);
 		Parser parser = new Parser(
