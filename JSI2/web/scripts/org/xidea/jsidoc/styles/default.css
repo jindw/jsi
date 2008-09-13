@@ -2,10 +2,19 @@ body *{
 	font-size:100%;
 	filter: expression(document.execCommand('BackgroundImageCache', false, true));
 }
-/* a:link{color:#0055ff}   	*/
-/* a:visited{color:#0099cc}	*/
-/* a:hover{color:#ff9900} 	*/
-/* a:active{color:#ff6600} 	*/
+
+* html pre,* html code {
+    word-wrap: break-word; /* Internet Explorer 5.5+ */
+    white-space : pre ; /* Internet Explorer 5.5+ */
+}
+pre,code {
+    white-space : pre
+    white-space: pre-wrap; /* css-3 */
+    white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+    white-space: -pre-wrap; /* Opera 4-6 */
+    white-space: -o-pre-wrap; /* Opera 7 */
+}
+
 
 .closehandle,.openhandle{
 	width:12px;height:12px;

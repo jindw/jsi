@@ -17,7 +17,6 @@ function ParamInfo(params,avaliableObjectInfoMap){
     }
     this.length = data.length;
 }
-ParamInfo.prototype = [];
 ParamInfo.prototype.toString = function(){
     return "("+this.data.join(" , ")+")";
 }
