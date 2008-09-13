@@ -29,7 +29,9 @@ this.addScript('member-info.js','MemberInfo'
                             ,['DocEntry','ObjectInfo','createPrototypeStack']
                             ,['accessOrder'])
 
-this.addScript("menu.js",'MenuUI');
+this.addScript("menu.js",'MenuUI'
+                ,0
+                ,'org.xidea.jsidoc:JSIDoc');
 
 this.addScript('object-info.js',['ObjectInfo','UnknowInfo']
                             ,['DocEntry','createPrototypeStack']

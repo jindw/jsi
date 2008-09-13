@@ -44,6 +44,8 @@
 			<classpath>
 				<path location="../JST/classes">
 				</path>
+				<path location="../JSI2/web/WEB-INF/classes">
+				</path>
 				<fileset dir="../JST/lib">
 					<include name="**/*.jar" />
 				</fileset>
@@ -63,12 +65,19 @@
 			<arg value="-ascii" />
 			<arg value="false" />
 			<arg value="example.*" />
+			<arg value="example.dependence.*" />
+			<arg value="org.xidea.jsidoc.export.*" />
+			<!--
+			<arg value="example.*" />
 			<arg value="org.xidea.jsidoc.*" />
+			-->
 		</java>
 	</target>
 	<target name="compress-all-xml">
 		<java classname="org.jside.jsi.tools.export.ExportorAction">
 			<classpath>
+				<path location="../JSI2/web/WEB-INF/classes">
+				</path>
 				<path location="../JST/classes">
 				</path>
 				<fileset dir="../JST/lib">
@@ -77,16 +86,16 @@
 			</classpath>
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
+			<arg value="-outputXML" />
 			<arg value="${basedir}/build/dest/exported-all.xml" />
 			<arg value="-ascii" />
 			<arg value="false" />
 			<arg value="example.*" />
 			<arg value="example.dependence.*" />
+			<arg value="example.alias.*"/>
 			<arg value="example.internal.*" />
 			<arg value="org.xidea.jsidoc.*" />
 			<arg value="org.xidea.jsidoc.export.*" />
-			<arg value="org.xidea.jsidoc.html.*" />
-			<arg value="org.xidea.jsidoc.styles.*" />
 			<arg value="org.xidea.jsidoc.util.*" />
 		</java>
 	</target>

@@ -24,8 +24,8 @@ public class DataJSIRootTest {
 
 	private DataJSIRoot root;
 	private String packageName = this.getClass().getPackage().getName();
-	private File destDir;
-	{
+	private static File destDir;
+	static{
 		File file = new File(DataJSIRootTest.class.getResource("/").getFile());
 		file = file.getParentFile()// WEB-INF
 				.getParentFile()// web
@@ -47,18 +47,16 @@ public class DataJSIRootTest {
 
 	@Test
 	public void testDataRoot() throws UnsupportedEncodingException, IOException {
-		String source = loadDestText("exported.xml");
+		String source = loadDestText("exported-all.xml");
 		JSIRoot root = new DataJSIRoot(source);
 		JSILoadContext loadContext = new DefaultJSILoadContext();
 		root.$import("example.*", loadContext);
-		root.$import("example.alias.*", loadContext);
-		root.$import("example.dependence.*", loadContext);
-		root.$import("example.internal.*", loadContext);
-		root.$import("org.xidea.jsidoc.*", loadContext);
-		root.$import("org.xidea.jsidoc.export.*", loadContext);
-		root.$import("org.xidea.jsidoc.html.*", loadContext);
-		root.$import("org.xidea.jsidoc.styles.*", loadContext);
-		root.$import("org.xidea.jsidoc.util.*", loadContext);
+		//root.$import("example.alias.*", loadContext);
+//		root.$import("example.dependence.*", loadContext);
+//		root.$import("example.internal.*", loadContext);
+//		root.$import("org.xidea.jsidoc.*", loadContext);
+//		root.$import("org.xidea.jsidoc.export.*", loadContext);
+//		root.$import("org.xidea.jsidoc.util.*", loadContext);
 		StringBuilder buf = new StringBuilder();
 		for (ScriptLoader file : loadContext.getScriptList()) {
 			if (buf.length() > 0) {

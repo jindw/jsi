@@ -18,25 +18,25 @@ public abstract class AbstractJSIRoot implements JSIRoot {
 		return $import(path, new DefaultJSILoadContext());
 	}
 
-	public JSILoadContext $import(String path, JSILoadContext context) {
-		JSIPackage pkg = findPackageByPath(path);
-		path = path.substring(pkg.getName().length() + 1);
-		if ("*".equals(path)) {
+	public JSILoadContext $import(String  path, JSILoadContext context) {
+		JSIPackage pkg = findPackageByPath( path);
+		String fileNames  =  path.substring(pkg.getName().length() + 1);
+		if ("*".equals( fileNames)) {
 			for (Iterator<String> it = pkg.getScriptObjectMap().keySet()
 					.iterator(); it.hasNext();) {
 				String fileName = it.next();
 				context.loadScript(pkg, fileName, null, true);
 			}
-		} else if (pkg.getScriptObjectMap().get(path) != null) {
+		} else if (pkg.getScriptObjectMap().get( fileNames) != null) {
 			// file
-			context.loadScript(pkg, path, null, true);
+			context.loadScript(pkg,  fileNames, null, true);
 		} else {
 			// object
-			String script = pkg.getObjectScriptMap().get(path);
+			String script = pkg.getObjectScriptMap().get( fileNames);
 			if (script != null) {
-				context.loadScript(pkg, script, path, true);
+				context.loadScript(pkg, script,  fileNames, true);
 			} else {
-				throw new RuntimeException("无效脚本路径:" + path);
+				throw new RuntimeException("无效脚本路径:" +  path);
 			}
 		}
 		return context;

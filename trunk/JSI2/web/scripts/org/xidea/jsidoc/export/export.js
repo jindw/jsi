@@ -15,9 +15,9 @@ function Exporter(){
 Exporter.prototype = {
     addImport : function(path){
     	if(/.\*$/.test(path)){
-    		var packageName = path.replace(/\//g,'.').replace(".*",':');
-    		var packagePath = packageName.replace(/[\.:]/g,'/');
-    		var packageObject = $import(packageName);
+    		var packageName = path.substr(0,path.length-2).replace(/\//g,'.');
+    		var packageObject = $import(packageName+':');
+    		var packagePath = packageObject.name.replace(/\./g,'/')+'/';
     		for(var fileName in packageObject.scriptObjectMap){
     			this.addImport(packagePath + fileName);
     		}
