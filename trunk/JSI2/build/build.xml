@@ -54,8 +54,10 @@
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-outputBoot" />
 			<arg value="${basedir}/build/dest/boot.js" />
+			<!--
 			<arg value="-bootCached" />
 			<arg value="example.*" />
+			-->
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/exported.js" />
 			<arg value="-outputXML" />
