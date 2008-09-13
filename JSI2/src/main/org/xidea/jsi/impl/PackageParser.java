@@ -16,15 +16,16 @@ public abstract class PackageParser {
 	public static final String SET_IMPLEMENTATION = "setImplementation";
 	public static final String ADD_SCRIPT = "addScript";
 	public static final String ADD_DEPENDENCE = "addDependence";
-	static final String BIND_SCRIPT ;
-	static{
-		InputStream in1 = Java6ScriptPackagePaser.class.getResourceAsStream("package-parser.js");
+	static final String BIND_SCRIPT;
+	static {
+		InputStream in1 = Java6ScriptPackagePaser.class
+				.getResourceAsStream("package-parser.js");
 		try {
-			InputStreamReader reader = new InputStreamReader(in1,"utf-8");
+			InputStreamReader reader = new InputStreamReader(in1, "utf-8");
 			StringWriter out = new StringWriter();
 			char[] cbuf = new char[1024];
 			int count;
-			while((count = reader.read(cbuf))>=0){
+			while ((count = reader.read(cbuf)) >= 0) {
 				out.write(cbuf, 0, count);
 			}
 			out.flush();
@@ -40,20 +41,28 @@ public abstract class PackageParser {
 	public PackageParser() {
 	}
 
-
-	public Collection<String> findGlobals(String scriptName,String pattern) {
+	public Collection<String> findGlobals(String scriptName, String pattern) {
 		throw new UnsupportedSyntaxException("不支持包定义格式");
 	}
 
 	public void addScript(String scriptName, Object objectNames,
 			Object beforeLoadDependences, Object afterLoadDependences) {
-		if(objectNames instanceof String){
-			String pattern = (String)objectNames;
-			if(pattern.indexOf('*')>=0){
-				objectNames = findGlobals(scriptName,pattern);
+		if (objectNames instanceof String) {
+			String pattern = (String) objectNames;
+			if (pattern.indexOf('*') >= 0) {
+				objectNames = findGlobals(scriptName, pattern);
 			}
 		}
-		checkStrings(objectNames);
+		objectNames = filterStrings(objectNames);
+		try {
+			beforeLoadDependences = filterStrings(beforeLoadDependences);
+			afterLoadDependences = filterStrings(afterLoadDependences);
+		} catch (RuntimeException e) {
+			System.out.println(beforeLoadDependences);
+			System.out.println(afterLoadDependences);
+			e.printStackTrace();
+			throw e;
+		}
 		addScriptCall.add(Arrays.asList(scriptName, objectNames,
 				beforeLoadDependences, afterLoadDependences));
 
@@ -61,18 +70,25 @@ public abstract class PackageParser {
 
 	public void addDependence(String thisPath, Object targetPath,
 			boolean afterLoad) {
-		checkStrings(targetPath);
+		targetPath = filterStrings(targetPath);
 		addDependenceCall.add(Arrays.asList(thisPath, targetPath, afterLoad));
 	}
 
-	private void checkStrings(Object object) {// check type...
+	private Object filterStrings(Object object) {// check type...
 		try {
 			if (object instanceof Collection) {
 				for (String o : (Collection<String>) object)
 					;
-				return;
+				return object;
 			}
-			object = (String) object;
+			if (Boolean.FALSE.equals(object)) {
+				return null;
+			} else if(object instanceof Number){
+				if(((Number)object).floatValue() == 0){//js double number
+					return null;
+				}
+			}
+			return (String) object;
 		} catch (Exception ex) {
 			throw new UnsupportedSyntaxException("非法参数：" + object);
 		}

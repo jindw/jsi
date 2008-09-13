@@ -55,7 +55,9 @@ public class RegexpPackagePaser extends PackageParser {
 						throw new UnsupportedSyntaxException("正则解析器不支持复杂定义"
 								+ matcher.group(0) + "#" + other);
 					}
-					addScript((String)arguments.get(0),arguments.get(1),arguments.get(2),arguments.get(3));
+					Object beforeDependences = arguments.get(2);
+					Object afterDependences = arguments.get(3);
+					addScript((String)arguments.get(0),arguments.get(1),beforeDependences,afterDependences);
 				} else if (ADD_DEPENDENCE.equals(method)) {
 					switch (arguments.size()) {
 					case 2:
@@ -150,7 +152,7 @@ public class RegexpPackagePaser extends PackageParser {
 				if (list.get(index) != null) {
 					throw new IllegalStateException();
 				}
-				list.set(index, Boolean.TRUE);
+				list.set(index, Boolean.FALSE);
 				break;
 			case ',':
 				index++;
