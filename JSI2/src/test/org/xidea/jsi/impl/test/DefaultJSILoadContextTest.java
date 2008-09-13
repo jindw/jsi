@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.impl.ClasspathJSIRoot;
+import static org.xidea.jsi.impl.test.AbstractJSIRootTest.*;
 
 public class DefaultJSILoadContextTest {
 
@@ -20,52 +21,31 @@ public class DefaultJSILoadContextTest {
 
 	@Test
 	public void testLoadScript() {
+		fail("麻烦：（");
 
 	}
 
 	@Test
 	public void testGetExportMap() {
-		HashMap<String, String> exampleMap = new HashMap<String, String>();
-		exampleMap.put("sayHello", "example");
 		JSILoadContext context = root.$import("example.sayHello");
-		assertEquals(exampleMap,context.getExportMap());
-		
+		assertEquals(createObjectPackageMap("example","sayHello"),context.getExportMap());
 
-		HashMap<String, String> exampleInternalMap = new HashMap<String, String>();
-		exampleInternalMap.put("Jindw", "example.internal");
-		exampleInternalMap.put("Guest", "example.internal");
-		exampleInternalMap.put("buildMessage", "example.internal");
 		context = root.$import("example.internal.*");
-		assertEquals(exampleInternalMap,context.getExportMap());
+		assertEquals(ALL_EXAMPLE_INTERNAL_MAP,context.getExportMap());
 		
-		HashMap<String, String> exampleDependenceMap = new HashMap<String, String>();
-		exampleDependenceMap.put("showDetail", "example.dependence");
 		context = root.$import("example.dependence.*");
-		assertEquals(exampleDependenceMap,context.getExportMap());
+		assertEquals(ALL_EXAMPLE_DEPENDENCE_MAP,context.getExportMap());
 	}
 
 	@Test
 	public void testGetScriptList() {
-		HashMap<String, String> exampleMap = new HashMap<String, String>();
-		exampleMap.put("sayHello", "example");
-		exampleMap.put("message", "example");
 		JSILoadContext context = root.$import("example.*");
-		//assertEquals(exampleMap,context.getExportMap());
 		assertEquals(1,context.getScriptList().size());
 		
-
-		HashMap<String, String> exampleInternalMap = new HashMap<String, String>();
-		exampleInternalMap.put("Jindw", "example.internal");
-		exampleInternalMap.put("Guest", "example.internal");
-		exampleInternalMap.put("buildMessage", "example.internal");
 		context = root.$import("example.internal.*");
-		//assertEquals(exampleInternalMap,context.getExportMap());
 		assertEquals(2,context.getScriptList().size());
 		
-		HashMap<String, String> exampleDependenceMap = new HashMap<String, String>();
-		exampleDependenceMap.put("showDetail", "example.dependence");
 		context = root.$import("example.dependence.*");
-		//assertEquals(exampleInternalMap,context.getExportMap());
 		assertEquals(2,context.getScriptList().size());
 	}
 
