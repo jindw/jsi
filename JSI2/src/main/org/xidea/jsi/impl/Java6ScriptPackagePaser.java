@@ -25,6 +25,10 @@ public class Java6ScriptPackagePaser extends PackageParser {
 
 	private JSIPackage packageObject;
 	
+	public Java6ScriptPackagePaser(JSIPackage packageObject){
+		this.packageObject = packageObject;
+		parse(packageObject);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -32,7 +36,7 @@ public class Java6ScriptPackagePaser extends PackageParser {
 	 * @see org.xidea.jsi.PackageParser#parse(java.lang.String,
 	 *      org.xidea.jsi.JSIPackage)
 	 */
-	public void parse(JSIPackage packageObject) {
+	private void parse(JSIPackage packageObject) {
 		this.packageObject = packageObject;
 		String source = packageObject.loadText(JSIPackage.PACKAGE_FILE_NAME);
 		javax.script.SimpleBindings binds = new javax.script.SimpleBindings();

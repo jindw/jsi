@@ -96,16 +96,14 @@ public abstract class AbstractJSIRoot implements JSIRoot {
 	}
 
 	protected PackageParser createPackageParser(JSIPackage pkg) {
-		PackageParser parser = new RegexpPackagePaser();
+		PackageParser parser;
 		try {
-			parser.parse(pkg);
+			parser  = new RegexpPackagePaser(pkg);
 		} catch (Exception e) {
 			try {
-				parser = new RhinoScriptPackagePaser();
-				parser.parse(pkg);
+				parser = new RhinoScriptPackagePaser(pkg);
 			} catch (Throwable ex) {
-				parser = new Java6ScriptPackagePaser();
-				parser.parse(pkg);
+				parser = new Java6ScriptPackagePaser(pkg);
 			}
 		}
 		return parser;

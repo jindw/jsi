@@ -19,16 +19,20 @@ import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.xidea.jsi.JSIPackage;
 
-class RhinoScriptPackagePaser extends PackageParser {
+public class RhinoScriptPackagePaser extends PackageParser {
 	private JSIPackage packageObject;
+	public RhinoScriptPackagePaser(JSIPackage packageObject){
+		this.packageObject = packageObject;
+		parse(packageObject);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.xidea.jsi.PackageParser#parse(java.lang.String,
 	 *      org.xidea.jsi.JSIPackage)
 	 */
-	public void parse(final JSIPackage packageObject) {
-		this.packageObject = packageObject;
+	private void parse(final JSIPackage packageObject) {
 		final String source = packageObject.loadText(JSIPackage.PACKAGE_FILE_NAME);
 		try {
 			Object result = Context.call(new ContextAction() {

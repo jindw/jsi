@@ -35,12 +35,11 @@ public abstract class PackageParser {
 	}
 	protected List<List<Object>> addScriptCall = new ArrayList<List<Object>>();
 	protected List<List<Object>> addDependenceCall = new ArrayList<List<Object>>();
-	protected String implementation;
+	public String implementation;
 
 	public PackageParser() {
 	}
 
-	public abstract void parse(JSIPackage packageObject);
 
 	public Collection<String> findGlobals(String scriptName,String pattern) {
 		throw new UnsupportedSyntaxException("不支持包定义格式");
