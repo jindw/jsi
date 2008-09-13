@@ -22,11 +22,16 @@ public abstract class JSIUtils {
 	public final static String buildPreloadPerfix(String path) {
 		String pkg = path.substring(0, path.lastIndexOf('/')).replace('/', '.');
 		String file = path.substring(pkg.length() + 1);
+		if(JSIPackage.PACKAGE_FILE_NAME.equals(file)){
+			file= "";
+		}
 		StringBuffer buf = new StringBuffer();
 		buf.append(JSIUtils.PRELOAD_PREFIX);
 		buf.append("'" + pkg + "',");
 		buf.append("'" + file + "',function(){");
-		buf.append(JSIUtils.PRELOAD_CONTENT_PREFIX);
+		if(file.length()>0){
+			buf.append(JSIUtils.PRELOAD_CONTENT_PREFIX);
+		}
 		return buf.toString();
 	}
 
