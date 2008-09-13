@@ -139,7 +139,7 @@ public class JSIService {
 			out.append("<html><body> 未发现任何托管脚本包，无法显示JSIDoc。<br /> ");
 			out.append("请添加脚本包，并在包目录下正确添加相应的包定义文件 。");
 			out
-					.append("<a href='org/xidea/jsidoc/index.html?group={\"example\":[\"example\",\"example.internal\",\"org.xidea.jsidoc\"]}'>");
+					.append("<a href='org/xidea/jsidoc/index.html?group={\"example\":[\"example\",\"example.internal\",\"example.dependence\",\"org.xidea.jsidoc.util\"]}'>");
 			out.append("察看示例</a>");
 			out.append("</body><html>");
 		} else {
