@@ -8,6 +8,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.SequenceInputStream;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
