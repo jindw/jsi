@@ -3,6 +3,7 @@ package org.xidea.jsi.web;
 import java.io.IOException;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 
@@ -52,7 +53,7 @@ public class ExportTag extends javax.servlet.jsp.tagext.BodyTagSupport {
 				for (ScriptLoader loader : context.getScriptList()) {
 
 					out.write("<script src='");
-					out.write(this.pageContext.getServletContext()
+					out.write(((HttpServletRequest)this.pageContext.getRequest())
 							.getContextPath());
 					out.write(scriptBase);
 					out.write(loader.getPath());
