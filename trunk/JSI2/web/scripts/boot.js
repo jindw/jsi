@@ -21,9 +21,6 @@
  */
 if(":debug"){
     var $JSI= {
-        debugAttribute:{
-            showTime:false
-        }
     };
     /**
      * 调试友好支持
@@ -873,7 +870,7 @@ var $import = function(freeEval,cachedScripts){
                 alert('包对象不能为空:'+arguments.callee)
             }
         }
-        while(packageObject.implementation){
+        while(packageObject && packageObject.implementation){
             packageObject = findPackage(packageObject.implementation,true);
         }
         return packageObject;
@@ -1205,10 +1202,8 @@ var $import = function(freeEval,cachedScripts){
                     }
                     col($import(path,target));
                     if(":debug"){
-                        if($JSI.debugAttribute.showTime){
-                            $log.debug("异步装载("+path+")：前期依赖计算时间、缓存时间、装载时间 分别为："
+                        $log.trace("异步装载("+path+")：前期依赖计算时间、缓存时间、装载时间 分别为："
                                 ,t2-t1,t3-t2,new Date()-t3);
-                        }
                     }
                 }
                 next();
@@ -1248,10 +1243,8 @@ var $import = function(freeEval,cachedScripts){
                         }
                         $import(path,target)
                         if(":debug"){
-                            if($JSI.debugAttribute.showTime){
-                                $log.debug("延迟装载("+path+")：前期依赖计算时间、缓存时间、装载时间 分别为："
+                            $log.trace("延迟装载("+path+")：前期依赖计算时间、缓存时间、装载时间 分别为："
                                     ,t2-t1,t3-t2,new Date()-t3);
-                            }
                         }
                     });
                 document.write(lazyScript);
