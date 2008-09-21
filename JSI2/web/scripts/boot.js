@@ -1140,39 +1140,43 @@ var $import = function(freeEval,cachedScripts){
     }
     if("org.xidea.jsi.boot:col"){
         var lazyCacheFileMap = {};
-        function wrapCallback(callback,pkg,file){
-            return function wrapper(){
-                if(getCachedScript(pkg,file)==null){
-                     setTimeout(wrapper,15);
-                }else{
-                    callback();
-                }
-            }
-        }
         function appendCacheScript(path,callback){
-            var pkg = path.replace(/\/[^\/]+$/,'').replace(/\//g,'.');
-            var file = path.substr(pkg.length+1);
-            callback = wrapCallback(callback,pkg,file);
-            if(getCachedScript(pkg,file)==null){//谨防 ''
-                pkg = document.createElement("script");
-                (document.body||document.documentElement).appendChild(pkg);
-                function onload(){//complete
-                    if(callback && (this.readyState==null || /complete|loaded/.test(this.readyState))){
-                        callback();
-                        callback = null;
-                    }
+            //callback = wrapCallback(callback,pkg,file);
+            var script = document.createElement("script");
+            (document.body||document.documentElement).appendChild(script);
+            function onload(){//complete
+                if(callback && (this.readyState==null || /complete|loaded/.test(this.readyState))){
+                    callback();
+                    callback = null;
                 }
-                pkg.onload = onload;
-                pkg.onreadystatechange = onload;
-                if(":debug"){
-                    pkg.src=scriptBase +"?path="+ path.replace(/\.js$/,'__preload__.js');
-                }else{
-                    pkg.src=scriptBase + path.replace(/\.js$/,'__preload__.js');
-                }
-                pkg = null;
-            }else{
-                callback();
             }
+            script.onload = onload;
+            script.onreadystatechange = onload;
+            if(":debug"){
+                script.src=scriptBase +"?path="+ path.replace(/\.js$/,'__preload__.js');
+            }else{
+                script.src=scriptBase + path.replace(/\.js$/,'__preload__.js');
+            }
+            script = null;
+        }
+       
+        function doAsynLoad(path,target,col,requiredCache){
+            (function asynLoad(){
+                //$log.error(document.documentElement.innerHTML)
+                if(requiredCache.length){
+                    while(getCachedScript.apply(0,requiredCache[0])!=null){
+                        if(requiredCache.length > 1){
+                            requiredCache[0] = requiredCache.pop()
+                        }else{
+                            col($import(path,target));
+                            return;
+                        }
+                    }
+                    setTimeout(asynLoad,15);
+                }else{
+                    col($import(path,target));
+                }
+            })()
         }
         function lazyImport(path,target,col){
             var pkg = findPackageByPath(path);
@@ -1204,17 +1208,26 @@ var $import = function(freeEval,cachedScripts){
                         list.push(filePath);
                     }
                 }
+                cacheFileMap = [];
                 function next(){
                     if(filePath = list.pop()){
-                        return appendCacheScript(filePath,next);
-                    }
-                    if(":debug"){
-                        var t3 = new Date();
-                    }
-                    col($import(path,target));
-                    if(":debug"){
-                        $log.trace("异步装载("+path+")：前期依赖计算时间、缓存时间、装载时间 分别为："
-                                ,t2-t1,t3-t2,new Date()-t3);
+                        var pkg = filePath.replace(/\/[^\/]+$/,'').replace(/\//g,'.');
+                        var file = filePath.substr(pkg.length+1);
+                        if(getCachedScript(pkg,file)==null){//谨防 ''
+                            appendCacheScript(filePath,next);
+                            cacheFileMap.push([pkg,file]);
+                        }else{
+                            next();
+                        }
+                    }else{//complete..
+                        if(":debug"){
+                            var t3 = new Date();
+                        }
+                        doAsynLoad(path,target,col,cacheFileMap)
+                        if(":debug"){
+                            $log.trace("异步装载("+path+")：前期依赖计算时间、缓存时间、装载时间 分别为："
+                                    ,t2-t1,t3-t2,new Date()-t3);
+                        }
                     }
                 }
                 next();
