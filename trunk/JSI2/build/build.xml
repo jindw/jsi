@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="GBK"?>
 <project name="JSI" default="build" basedir="../">
-	<property name="version" value="2.5-preview-2008-04-30" />
+	<tstamp>
+		<format property="version" pattern="yyyyMMdd" />
+	</tstamp>
 	<target name="init">
 		<delete dir="build/temp">
 		</delete>
@@ -8,15 +10,19 @@
 		<mkdir dir="build/dest" />
 	</target>
 	<target name="jar">
-		<jar destfile="build/dest/JSI.jar">
+		<jar destfile="build/dest/JSI.jar" >
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
 			</fileset>
 			<fileset dir="src/main">
 				<include name="**/*.java" />
 			</fileset>
-			<manifest file="src/main/taglib.tld">
-			</manifest>
+			<fileset dir="build/dest/">
+				<include name="exported.xml" />
+			</fileset>
+			<zipfileset dir="src/main" prefix="META-INF">
+				<include name="*.tld" />
+			</zipfileset>
 		</jar>
 	</target>
 	<target name="packageOptimize">
@@ -94,7 +100,7 @@
 			<arg value="false" />
 			<arg value="example.*" />
 			<arg value="example.dependence.*" />
-			<arg value="example.alias.*"/>
+			<arg value="example.alias.*" />
 			<arg value="example.internal.*" />
 			<arg value="org.xidea.jsidoc.*" />
 			<arg value="org.xidea.jsidoc.export.*" />
@@ -143,7 +149,7 @@
 			</zipfileset>
 		</zip>
 	</target>
-	<target name="build" depends="compress">
+	<target name="build" depends="compress,jar">
 		<delete file="build/dest/JSI-${version}.tar">
 		</delete>
 		<tar destfile="build/dest/JSI-${version}.tar" compression="gzip">
