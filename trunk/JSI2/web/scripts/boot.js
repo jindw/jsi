@@ -1139,16 +1139,16 @@ var $import = function(freeEval,cachedScripts){
         }
     }
     if("org.xidea.jsi.boot:col"){
+        var lazyCacheFileMap = {};
         function wrapCallback(callback,pkg,file){
-            return function(){
+            return function wrapper(){
                 if(getCachedScript(pkg,file)==null){
-                     setTimeout(arguments.callee,15);
+                     setTimeout(wrapper,15);
                 }else{
                     callback();
                 }
             }
         }
-        var lazyCacheFileMap = {};
         function appendCacheScript(path,callback){
             var pkg = path.replace(/\/[^\/]+$/,'').replace(/\//g,'.');
             var file = path.substr(pkg.length+1);
