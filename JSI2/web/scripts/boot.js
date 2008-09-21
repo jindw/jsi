@@ -1139,17 +1139,23 @@ var $import = function(freeEval,cachedScripts){
         }
     }
     if("org.xidea.jsi.boot:col"){
+        function wrapCallback(callback,pkg,file){
+            return function(){
+                if(getCachedScript(pkg,file)==null){
+                     setTimeout(arguments.callee,15);
+                }else{
+                    callback();
+                }
+            }
+        }
         var lazyCacheFileMap = {};
-        function appendCacheScript(filePath,callback){
-            var pkg = filePath.replace(/\/[^\/]+$/,'').replace(/\//g,'.');
-            if(getCachedScript(pkg,filePath.substr(pkg.length+1))==null){//谨防 ''
+        function appendCacheScript(path,callback){
+            var pkg = path.replace(/\/[^\/]+$/,'').replace(/\//g,'.');
+            var file = path.substr(pkg.length+1);
+            callback = wrapCallback(callback,pkg,file);
+            if(getCachedScript(pkg,file)==null){//谨防 ''
                 pkg = document.createElement("script");
                 (document.body||document.documentElement).appendChild(pkg);
-                if(":debug"){
-                    pkg.src=scriptBase +"?path="+ filePath.replace(/\.js$/,'__preload__.js');
-                }else{
-                    pkg.src=scriptBase + filePath.replace(/\.js$/,'__preload__.js');
-                }
                 function onload(){//complete
                     if(callback && (this.readyState==null || /complete|loaded/.test(this.readyState))){
                         callback();
@@ -1158,6 +1164,11 @@ var $import = function(freeEval,cachedScripts){
                 }
                 pkg.onload = onload;
                 pkg.onreadystatechange = onload;
+                if(":debug"){
+                    pkg.src=scriptBase +"?path="+ path.replace(/\.js$/,'__preload__.js');
+                }else{
+                    pkg.src=scriptBase + path.replace(/\.js$/,'__preload__.js');
+                }
                 pkg = null;
             }else{
                 callback();
