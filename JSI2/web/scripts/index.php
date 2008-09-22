@@ -203,7 +203,7 @@ if($path != null){
         $externalScript = findPackageList(realpath("."));
     }
     header("Content-Type:text/html;charset=$encoding");
-    echo("<html><frameset rows='100%'><frame src='index.php/org/xidea/jsidoc/index.html?group.All%20Scripts=$externalScript'></frame></html>");
+    echo("<html><frameset rows='100%'><frame src='index.php/org/xidea/jsidoc/index.html?group.All%20Scripts=$externalScript'></frame></frameset></html>");
 }
 return;
 ?>/**/

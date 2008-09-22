@@ -310,7 +310,7 @@ function createExpression(e){
     return function(_){
             with(_){//
 	            try{
-	                return (_.eval||window.eval)(e,_);
+	                return _.eval?_.eval(e) : window.eval(e,_);
 	            }catch(x){
 	            	//$log.error(x,this,c.constructor,1,e)
 	            }
