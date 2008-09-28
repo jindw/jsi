@@ -7,10 +7,6 @@
  */
 //parse
 
-
-
-
-
 //add as default
 function TextParser(){
     this.parserList = this.parserList.concat([]);

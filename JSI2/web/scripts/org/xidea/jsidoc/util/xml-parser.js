@@ -20,25 +20,30 @@ XMLParser.prototype.parse = function(url){
     return this.reuslt;
 }
 XMLParser.prototype.load = function(url){
-	if(/^[\s\ufeff]*</.test(url)){
-        var doc =toDoc(url)
-		//alert([data,doc.documentElement.tagName])
-    }else{
-	    var pos = url.indexOf('#');
-	    var xhr = new XMLHttpRequest();
-	    xhr.open("GET",pos+1?url.substr(0,pos):url,false)
-	    xhr.send('');
-	    if(/\bxml\b/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
-	        var doc = xhr.responseXML;
+	try{
+		if(/^[\s\ufeff]*</.test(url)){
+	        var doc =toDoc(url)
+			//alert([data,doc.documentElement.tagName])
 	    }else{
-	        var doc = toDoc(xhr.responseText)
-	    }
-	    if(pos>0){
-	        doc = selectNodes(doc,url.substr(pos+1));
-	    }
-	    this.url = url;
+		    var pos = url.indexOf('#');
+		    var xhr = new XMLHttpRequest();
+		    xhr.open("GET",pos+1?url.substr(0,pos):url,false)
+		    xhr.send('');
+		    if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
+		        var doc = xhr.responseXML;
+		    }else{
+		        var doc = toDoc(xhr.responseText)
+		    }
+		    if(pos>0){
+		        doc = selectNodes(doc,url.substr(pos+1));
+		    }
+		    this.url = url;
+		}
+		return doc;
+	}catch(e){
+		$log.error("文档解析失败")
+		throw e;
 	}
-	return doc;
 }
 /**
  * 解析函数集
