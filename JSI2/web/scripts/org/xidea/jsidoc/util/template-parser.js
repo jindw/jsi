@@ -6,6 +6,18 @@
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 //parse
+var EL_TYPE = 0;
+var VAR_TYPE = 1;//":set"://var
+var IF_TYPE = 2;//":if":
+var ELSE_TYPE = 3;//":else":
+var FOR_TYPE = 4;//":for":
+
+var ATTRIBUTE_TYPE = 6;//":attribute":
+
+
+var FOR_KEY = "_[5]";
+
+
 
 //add as default
 function TemplateParser(){

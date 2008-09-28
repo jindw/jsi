@@ -69,6 +69,8 @@ function serialize(value) {
                             value.replace(stringRegexp,charReplacer) :
                             value)
                        + '"';
+        case 'function':
+            return value.toString();
         case 'object':
             if (!value) {
                 return 'null';
