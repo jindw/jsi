@@ -7,6 +7,10 @@
  */
 //parse
 
+
+
+
+
 //add as default
 function TextParser(){
     this.parserList = this.parserList.concat([]);
@@ -70,7 +74,7 @@ function parseText(text,unescape){
                 try{
                     var expression = text.substring(expressionBegin ,expressionEnd );
                     expression = parseEL(fn,expression);
-                    buf.push([0,expression,unescape])
+                    buf.push([EL_TYPE,expression,unescape])
                     text = text.substr(expressionEnd+1);
                     pattern = text && new RegExp(pattern);
                     //continue seach;
@@ -109,21 +113,51 @@ function parseEL(fn,expression){
     }else{
         var el2 = expression.replace(/for\s*\./g,"_.");
         new Function(el2);
+        
         if(expression != el2){
             expression = compileEL(expression)
+        }
+        if(/^[_$a-zA-Z](?:[\w\_\.\s]|\[(?:"[^"]*?"|'[^']*?')|\d+\])*$/.test(expression)){
+            expression = expression.replace(/\s+/g,'');
+            expression = expression.match(/\w+|"[^"]*?"|'[^']*?')/g);
+            if(expression.length ==0){
+                return expression[0];
+            }
+            var i = expression.length;
+            while(i--){
+                expression[i] = expression[i].replace(/^['"]|['"]$/g,'');
+            }
+            return expression;
+        }
+        expression = expression.replace(/^\s+|[\s;]+$/g,'');//trim
+        var pos = expression.length;
+        while((pos = expression.lastIndexOf(';',pos-1))>0){
+            try{
+                new Function(expression.substr(0,pos));
+                new Function(expression.substr(pos));
+                break;
+            }catch(e){}
+        }
+        pos++;
+        var source = "with(_){"+expression.substr(0,pos)+"return "+expression.substr(pos)+"}";
+        expression = new Function("_",source);
+        //$log.trace(expression)
+        expression.toString = function(){
+            return "function(_){"+source+"}";
         }
         return expression;
     }
 }
 
+
 function compileEL(el){
     if(!/'"\//.test(el)){
-        return el.replace(/\bfor\s*\./g,"this.$for.")
+        return el.replace(/\bfor\s*\./g,FOR_KEY+'.')
     }
     //好复杂的一段，这里还不够完善
     el.replace(/(\bfor\s*\.)||'[\\.]*?'|"[\\.]*?"|[\s\S]*?/g,function(code,_for){
         if(_for){
-            return "this.$for."
+            return FOR_KEY+'.';
         }else{
             return code;
         }

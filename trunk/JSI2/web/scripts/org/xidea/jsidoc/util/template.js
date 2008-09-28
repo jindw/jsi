@@ -16,7 +16,7 @@
  */
 function Template(data,type){
     if("org.jside.template:compile"){
-        if(data.constructor == String){
+        if(!(data instanceof Array)){
             var inlineClass = {
                 'xml':"org.xidea.jsidoc.util:XMLParser",
                 'text':"org.xidea.jsidoc.util:TextParser"
@@ -51,23 +51,24 @@ function Template(data,type){
  */
 Template.prototype.render = function(context){
     var buf = [];
-//    function c(){}
-//    c.prototype = context;
-//    context = new c()
-    renderList(this,context,this.data,buf)
+    renderList(new Context(context),this.data,buf)
     return buf.join("");
 }
-
-
+function Context(context){
+    for(var n in context){
+        this[n] = context[n];
+    }
+}
+Context.prototype = window;
 /**
  * 模版渲染函数
  * @internal
  */
-function renderList(thisObject,context,data,buf){
+function renderList(context,data,buf){
     for(var i=0;i<data.length;i++){
         var item = data[i];
         if(item instanceof Function){
-            item.call(thisObject,context,buf)
+            item(context,buf)
         }else{
             buf.push(item);
         }
@@ -97,7 +98,17 @@ function compile(items){
     }
     return itemsStack[0];
 }
+/*
+var EL_TYPE = 0;
+var VAR_TYPE = 1;//":set"://var
+var IF_TYPE = 2;//":if":
+var ELSE_TYPE = 3;//":else":
+var FOR_TYPE = 4;//":for":
 
+var ATTRIBUTE_TYPE = 6;//":attribute":
+
+var FOR_KEY = "_[4]";
+ */
 /**
  * 模板单元编译函数
  * @internal
@@ -106,18 +117,17 @@ function compileItem(object,itemsStack){
     switch(object[0]){
         case 0://":el":
             return buildExpression(object,itemsStack);
-        case 1://":attribute":
-            return buildAttribute(object,itemsStack);
+        case 1://":set"://var
+            return buildVar(object,itemsStack);
         case 2://":if":
             return buildIf(object,itemsStack);
-        case 3://":else-if":
-            return buildElseIf(object,itemsStack);
-        case 4://":else":
+        case 3://":else-if":":else":
             return buildElse(object,itemsStack);
-        case 5://":for":
+        case 4://":for":
             return buildFor(object,itemsStack);
-        case 6://":set"://var
-            return buildVar(object,itemsStack);
+            
+        case 6://":attribute":
+            return buildAttribute(object,itemsStack);
         default://:end
             itemsStack.shift();
             //return $import(type,null,null)(object)
@@ -126,17 +136,16 @@ function compileItem(object,itemsStack){
 
 /**
  * 构建表达式
- * el             [0,expression,unescape]
+ * el             [EL_TYPE,expression,unescape]
  * @internal
  */
 function buildExpression(data,itemsStack){
-    //var type = data[0];
     var el = data[1];
     var escape = !data[2];
     //if(data[0]){//==1
     el = createExpression(el)
     itemsStack[0].push(function(context,result){
-        var value = el.call(this,context);
+        var value = el(context);
         if(escape && value!=null ){
             value = String(value).replace(/[<>&'"]/g,xmlReplacer)
         }
@@ -146,7 +155,7 @@ function buildExpression(data,itemsStack){
 
 /**
  * 构建标记属性
- * attribute      [1,name,expression]             //表达式
+ * attribute      [ATTRIBUTE_TYPE,name,expression]             //表达式
  * name="${}"
  * name = "${123}1230"?? 不可能出现，所以只能是i ==1
  * @internal
@@ -155,7 +164,7 @@ function buildAttribute(data,itemsStack){
     var prefix = " "+data[1]+'="';
     var data = createExpression(data[2]);
     itemsStack[0].push(function(context,result){
-        var buf = data.call(this,context);
+        var buf = data(context);
         //alert(buf)
         if(buf!=null){
             result.push(prefix,String(buf).replace(/[<>&'"]/g,xmlReplacer)+'"');
@@ -165,7 +174,7 @@ function buildAttribute(data,itemsStack){
 
 /**
  * 构建If处理
- * if             [2,expression]                  //
+ * if             [IF_TYPE,expression]                  //
  * @internal
  */
 function buildIf(data,itemsStack){
@@ -175,48 +184,28 @@ function buildIf(data,itemsStack){
         var test = data(context);
         //alert(buf)
         if(test){
-            renderList(this,context,children,result);
+            renderList(context,children,result);
         }
-        this.$if = test;
+        context[2] = test;//if passed(一定要放下来，确保覆盖)
     })
     itemsStack.unshift(children);
 }
 
 /**
  * 构建Else If处理
- * else if        [3,expression]                  //
- * @internal
- */
-function buildElseIf(data,itemsStack){
-    itemsStack.shift();
-    var data = createExpression(data[1]);
-    var children = [];
-    itemsStack[0].push(function(context,result){
-        if(!this.$if){
-            var test = data.call(this,context);
-            //alert(buf)
-            if(test){
-                renderList(this,context,children,result);
-            }
-            this.$if = test;
-        }
-    })
-    itemsStack.unshift(children);
-}
-
-/**
- * 构建Else处理
- * else           [4]                             //
+ * else if        [ELSE_TYPE,expression]                  //
  * @internal
  */
 function buildElse(data,itemsStack){
     itemsStack.shift();
+    var data = data[1] == null ? null:createExpression(data[1]);
     var children = [];
     itemsStack[0].push(function(context,result){
-        if(!this.$if){
-            //alert(buf)
-            renderList(this,context,children,result);
-            //delete this.test;//留着也无妨
+        if(!context[2]){
+            if(!data || data(context)){//if key
+                renderList(context,children,result);
+                context[2] = true;//if passed(不用要放下去，另一分支已正常)
+            }
         }
     })
     itemsStack.unshift(children);
@@ -225,45 +214,45 @@ function buildElse(data,itemsStack){
 /**
  * 构建循环处理
  * @internal
- * for:[5,var,itemExpression,status]
+ * for:[FOR_TYPE ,var,itemExpression,status]
  */
 function buildFor(data,itemsStack){
     var varName = data[1];    var itemExpression = createExpression(data[2]);
     var statusName = data[3];
     var children = [];
     itemsStack[0].push(function(context,result){
-        data = itemExpression.call(this,context);
+        data = itemExpression(context);
         //alert(data.constructor)
         if(!(data instanceof Array)){
             //hack $for as buf
-            $for = [];
+            forStatus = [];
             //hack len as key
             for(var len in data){
-                $for.push(len);
+                forStatus.push(len);
             }
-            data = $for;
+            data = forStatus;
         }
-        var preiousStatus = this.$for;
+        var preiousStatus = context[4];
         var i = 0;
         var len = data.length;
-        var $for = this.$for = {end:len-1};
+        var forStatus = context[4] = {end:len-1};
         //prepareFor(this);
-        statusName && (context[statusName] = $for);
+        statusName && (context[statusName] = forStatus);
         for(;i<len;i++){
-            $for.index = i;
+            forStatus.index = i;
             context[varName] = data[i];
-            renderList(this,context,children,result);
+            renderList(context,children,result);
         }
         statusName && (context[statusName] = preiousStatus);
-        this.$for = preiousStatus;
-        this.$if = len;
+        context[4] = preiousStatus;//for key
+        context[2] = len;//if key
     });
     itemsStack.unshift(children);
 }
 
 /**
  * 构建申明处理
- * var            [6,name,expression]             //设置某个变量（el||string）
+ * var            [VAR_TYPE,name,expression]             //设置某个变量（el||string）
  * @internal
  */
 function buildVar(data,itemsStack){
@@ -272,14 +261,14 @@ function buildVar(data,itemsStack){
     if(data){
         data = createExpression(data);
         itemsStack[0].push(function(context,result){
-            context[name] = data.call(this,context);
+            context[name] = data(context);
         })
     }else{
         //hack reuse data for hack
         data = [];
         itemsStack[0].push(function(context,result){
             result = [];
-            renderList(this,context,data,result);
+            renderList(context,data,result);
             context[name] = result.join('');
         })
         itemsStack.unshift(data);//#end
@@ -300,20 +289,30 @@ function xmlReplacer(c){
           return '&#34;';
     }
 }
-
-function createExpression(e){
-	/*
-	 * /^[\w_\$]+$/.test(e)? function(context){
-            return (e in context) ? context[e] : window[e];
-        }:
-	 */
-    return function(_){
-            with(_){//
-	            try{
-	                return _.eval?_.eval(e) : window.eval(e,_);
-	            }catch(x){
-	            	//$log.error(x,this,c.constructor,1,e)
-	            }
+function createExpression(el){
+	switch(el.constructor){
+    case String:
+	    return function(_){
+	        return _[el];
+	    }
+	case Array:
+	    return function(_){
+            try{
+    	        var i = el.length;
+    	        while(i--){
+    	            _ = _[el[i]]
+    	        }
+    	        return _;
+	        }catch(e){
+               $log.trace(e);
             }
-        }
+	    }
+	}
+	return function(_){
+         try{
+             return el(_);
+         }catch(e){
+             $log.trace(e);
+         }
+     };
 }
