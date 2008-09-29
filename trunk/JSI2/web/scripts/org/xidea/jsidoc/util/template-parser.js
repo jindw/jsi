@@ -15,7 +15,7 @@ var FOR_TYPE = 4;//":for":
 var ATTRIBUTE_TYPE = 6;//":attribute":
 
 
-var FOR_KEY = "_[5]";
+var FOR_KEY = "_[4]";
 
 
 

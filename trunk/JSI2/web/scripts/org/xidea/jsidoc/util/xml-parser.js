@@ -354,7 +354,7 @@ function parseAttribute(node,context){
             }
             buf = buf[1];
         }
-        context.append( [1,name,buf]);
+        context.append( [ATTRIBUTE_TYPE,name,buf]);
         return true;
     }
     context.append(" "+name+'="');
