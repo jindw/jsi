@@ -41,30 +41,32 @@ if($path == 'export.action'){
     }
     return;
 }
+function isValidFile($dir,$path){
+    if(preg_match('/\\\\|\\//',$path) || $path == "lazy-trigger.js"
+         || filesize(realpath("$dir/$path"))>200){
+        return true;///[\/\\]/
+    }
+    return false;
 
+}
 function printEntry($path){
     global $encoding;
-    if(file_exists(realpath("./$path"))){
-        header("Content-Type:".findMimiType($path).";charset=$encoding");
-        readfile(realpath("./$path"));
-    }else{
-        if(!findEntry(".",$path,"findFromXML")){
-		    $classpath = array(
-		        "../WEB-INF/classes"
-		        //,"../../../JSI2/web/scripts/"//这里可以定义其他类路径
-		    );
-	        foreach ($classpath as $dir){
-		        if(file_exists(realpath("$dir/$path"))){
-		            header("Content-Type:".findMimiType($path).";charset=$encoding");
-		            readfile(realpath("$dir/$path"));
-		            return;
-		        }
-		    }
-		    if(!findEntry("../WEB-INF/lib/",$path,"findFromZip")){
-		        header("HTTP/1.0 404 Not Found");
-		    }
+    if(!findEntry(".",$path,"findFromXML")){
+	    $classpath = array(
+		    './',
+	        "../WEB-INF/classes"
+	        //,"../../../JSI2/web/scripts/"//这里可以定义其他类路径
+	    );
+        foreach ($classpath as $dir){
+	        if(file_exists(realpath("$dir/$path")) && isValidFile($dir,$path)){
+	            header("Content-Type:".findMimiType($path).";charset=$encoding");
+	            readfile(realpath("$dir/$path"));
+	            return;
+	        }
 	    }
-        
+	    if(!findEntry("../WEB-INF/lib/",$path,"findFromZip")){
+	        header("HTTP/1.0 404 Not Found");
+	    }
     }
 }
 function findEntry($base,$path,$action){
@@ -111,11 +113,11 @@ function findFromXML($file,$path){
     global $encoding;
 	if(preg_match('/.*\.xml$/i',$file)){
 	    $xml = simplexml_load_file($file);
-	    $result = $xml->xpath("//entry[@key='$path']");
+	    $result = $xml->xpath("//entry[@key='$path' or @key='$path#base64']");
 	    if($result){
 	        $contentType = findMimiType($path);
 			while(list( $key, $node) = each($result)) {
-			    if(preg_match('/^image\//i',$contentType)){
+			    if(preg_match('/#base64$/i',$node['key'])){
                     header("Content-Type:$contentType;");
 			        echo base64_decode($node);
 			    }else{
