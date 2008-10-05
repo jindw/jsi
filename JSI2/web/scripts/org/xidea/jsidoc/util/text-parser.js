@@ -67,7 +67,7 @@ function parseText(text,encodeXML){
                 try{
                     var expression = text.substring(expressionBegin ,expressionEnd );
                     expression = parseEL(expression);
-                    buf.push([encodeXML ? EL_TYPE_ESCAPE : EL_TYPE,expression]);
+                    buf.push([encodeXML ? EL_TYPE_XML_TEXT : EL_TYPE,expression]);
                     text = text.substr(expressionEnd+1);
                     pattern = text && new RegExp(pattern);
                     //continue seach;
@@ -119,7 +119,7 @@ function parseEL(expression){
         return window.eval(expression);
     } else if(/^(?:"[^"]*?"|'[^']*?')$/.test()){
         return expression;
-    } else if(/^[_$a-zA-Z](?:[\.\s\w\_]+|\[(?:"[^"]*?"|'[^']*?'|\d+)\])*$/.test(expression)){
+    } else if(/^[_$a-zA-Z](?:[\.\s\w\_]|\[(?:"[^"]*?"|'[^']*?'|\d+)\])*$/.test(expression)){
         expression = expression.replace(/\s+/g,'');
         expression = expression.match(/[\w_\$]+|"[^"]*?"|'[^']*?'/g).reverse();
         if(expression.length ==0){

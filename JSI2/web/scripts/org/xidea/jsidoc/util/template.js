@@ -119,10 +119,10 @@ function compileItem(object,itemsStack){
             buildExpression(object,itemsStack);
             break;
         case 6://":encode_el":
-            buildAttribute(object,itemsStack);
+            buildExpression(object,itemsStack);
             break;
         case 7://":attribute":
-            buildExpression(object,itemsStack,true);
+            buildAttribute(object,itemsStack,true);
             break;
         case 1://":set"://var
             buildVar(object,itemsStack);

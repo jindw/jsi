@@ -11,6 +11,7 @@ this.addScript('xml-parser.js',"XMLParser"
 
 
 
+this.addDependence('template.js',"xml-parser.js");
 
 this.addScript("fn.js",['xmlReplacer','loadTextByURL']);
 
