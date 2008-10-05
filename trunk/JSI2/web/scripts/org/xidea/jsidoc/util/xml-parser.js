@@ -13,13 +13,13 @@ function XMLParser(){
     this.result = [];
 }
 
-function isTemplateNS(name,shortAvaliable){
+function isTemplateNS(value,shortAvaliable){
     return shortAvaliable && (value=="#" || value=="#core") || TEMPLATE_NS_REG.test(value);
 }
 XMLParser.prototype = new TextParser()
 XMLParser.prototype.parse = function(url){
-    var pos = url.indexOf('#');
-    var data = this.load( pos+1?url.substr(0,pos):url,url.substr(pos+1));
+    var pos = url.indexOf('#')+1;
+    var data = this.load( pos?url.substr(0,pos-1):url,pos && url.substr(pos));
     this.parseNode(data);
     return this.reuslt;
 }
@@ -115,7 +115,7 @@ XMLParser.prototype.addParser(function(node,context){
 XMLParser.prototype.addParser(function(node,context){//for
     if(node.nodeType ==1){
         var tagName = node.tagName.toLowerCase();
-        if(isTemplateNS(tagName,node.namespaceURI)){
+        if(isTemplateNS(node.namespaceURI,/^c\:/i.test(tagName))){
             switch(tagName.substr(2)){
             case 'if':
                 parseIfTag(node,context);
@@ -207,7 +207,7 @@ function processIncludeTag(node,context){
 }
 function parseIfTag(node,context){
     var next = node.firstChild;
-    var test = getBooleanAttribute(node,'test');
+    var test = getAttribute(node,'test',true,true);
     context.append([IF_TYPE,test]);
     if(next){
         do{
@@ -220,7 +220,7 @@ function parseIfTag(node,context){
 function parseElseIfTag(node,context){
     context.removeLastEnd();
     var next = node.firstChild;
-    var test = getBooleanAttribute(node,'test');
+    var test = getAttribute(node,'test',true,false);
     context.append([ELSE_TYPE,test]);
     if(next){
         do{
