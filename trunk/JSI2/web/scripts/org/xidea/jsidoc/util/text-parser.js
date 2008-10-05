@@ -21,7 +21,7 @@ function TextParser(){
  * 解析函数集
  * @private
  */
-TextParser.prototype = new TemplateParser();
+TextParser.prototype = new Parser();
 TextParser.prototype.parse = function(url){
     var xhr = new XMLHttpRequest();
     xhr.open("get",url,true)
@@ -32,7 +32,7 @@ TextParser.prototype.parse = function(url){
 //parse text
 TextParser.prototype.addParser(function(node,context){
     if(node.constructor == String){
-        context.append.apply(context,parseText(node,true));
+        context.append.apply(context,parseText(node,false));
         return true;
     }
 })
@@ -40,12 +40,12 @@ TextParser.prototype.addParser(function(node,context){
 
 
 
-function parseText(text,unescape){
+function parseText(text,encodeXML){
     if(!text){
         return [];
     }
     var buf = [];
-    var pattern = new RegExp(/(\\*)\$([a-zA-Z!]{0,5}\{|end)/g)  //允许$for{} $if{} $end ...  see CT????
+    var pattern = new RegExp(/(\\*)\$([a-zA-Z!]{0,5}\{)/g)  //允许$for{} $if{} $end ...  see CT????
     //var pattern = /(\\*)\$\{/g
     var match ;
     //seach:
@@ -58,19 +58,16 @@ function parseText(text,unescape){
         begin && buf.push(text.substr(0,begin));
         
         if(match[1].length & 1){//转义后，打印转义结果，跳过
-            buf.push(match[1].substr(0,parseInt(match[1].length / 2)))
-            begin = expressionBegin;
-        }else if(fn == 'end'){//结束标签
-            buf.push([]);
-            begin = expressionBegin;
+            buf.push(match[1].substr(0,parseInt(match[1].length / 2)) + '$')
+            text = text.substr(expressionBegin+1);
         }else{
             fn = fn.substr(0,fn.length-1);
             //expression:
             while((expressionEnd = text.indexOf("}",expressionEnd+1))>0){
                 try{
                     var expression = text.substring(expressionBegin ,expressionEnd );
-                    expression = parseEL(fn,expression);
-                    buf.push([EL_TYPE,expression,unescape])
+                    expression = parseEL(expression);
+                    buf.push([encodeXML ? EL_TYPE_ESCAPE : EL_TYPE,expression]);
                     text = text.substr(expressionEnd+1);
                     pattern = text && new RegExp(pattern);
                     //continue seach;
@@ -81,11 +78,14 @@ function parseText(text,unescape){
     }
     text && buf.push(text);
     //hack reuse begin as index
-    if(!unescape){
+    if(encodeXML){
         var begin = buf.length;
         while(begin--){
             //hack match reuse match as item
             var match = buf[begin];
+            if(match == ''){
+            	buf.splice(begin,1);
+            }
             if(match.constructor == String){
                 buf[begin] = match.replace(/[<>&'"]/g,xmlReplacer);
             }
@@ -94,54 +94,59 @@ function parseText(text,unescape){
     return buf;
 }
 
-
-
-/**
- * 异常一定要抛出去，让parseText做回退处理
- */
-function parseEL(fn,expression){
+function parseFN(fn,expression){
     if(fn){
         switch(fn){
             case 'for':
             //parseFor();
         }
         throw new Error("不支持指令："+fn);
-    }else{
-        var el2 = expression.replace(/for\s*\./g,"_.");
-        new Function(el2);
-        
-        if(expression != el2){
-            expression = compileEL(expression)
-        }
-        expression = expression.replace(/^\s+|[\s]+$/g,'');//trim
-        if(/^(?:true|false|"[^"]*?"|'[^']*?')$/.test()){
-            return buildFunction(expression);
-        }
-        if(/^[_$a-zA-Z](?:[\w\_\.\s]|\[(?:"[^"]*?"|'[^']*?'|\d+)\])*$/.test(expression)){
-            expression = expression.replace(/\s+/g,'');
-            expression = expression.match(/\w+|"[^"]*?"|'[^']*?'/g).reverse();
-            if(expression.length ==0){
-                return expression[0];
-            }
-            var i = expression.length;
-            while(i--){
-                expression[i] = expression[i].replace(/^['"]|['"]$/g,'');
-            }
-            return expression;
-        }
-        expression = expression.replace(/[\s;]+$/g,'');//
-        var pos = expression.length;
-        while((pos = expression.lastIndexOf(';',pos-1))>0){
-            try{
-                new Function(expression.substr(0,pos));
-                new Function(expression.substr(pos));
-                break;
-            }catch(e){}
-        }
-        pos++;
-        expression = "with(_){"+expression.substr(0,pos)+"return "+expression.substr(pos)+"}";
-        return buildFunction(expression);
     }
+}
+
+/**
+ * 异常一定要抛出去，让parseText做回退处理
+ */
+function parseEL(expression){
+    var el2 = expression.replace(/for\s*\./g,"_.");
+    new Function(el2);
+    
+    if(expression != el2){
+        expression = compileEL(expression)
+    }
+    expression = expression.replace(/^\s+|[\s]+$/g,'');//trim
+    if(/^(?:true|false|[\d\.]+)$/.test()){
+        return window.eval(expression);
+    } else if(/^(?:"[^"]*?"|'[^']*?')$/.test()){
+        return expression;
+    } else if(/^[_$a-zA-Z](?:[\.\s\w\_]+|\[(?:"[^"]*?"|'[^']*?'|\d+)\])*$/.test(expression)){
+        expression = expression.replace(/\s+/g,'');
+        expression = expression.match(/[\w_\$]+|"[^"]*?"|'[^']*?'/g).reverse();
+        if(expression.length ==0){
+            return expression[0];
+        }
+        var i = expression.length;
+        while(i--){
+        	var item = expression[i];
+        	if(/['"]/.test(item)){
+        		item = window.eval(item);
+        	}
+            expression[i] = item;
+        }
+        return expression;
+    }
+    expression = expression.replace(/[\s;]+$/g,'');//
+    var pos = expression.length;
+    while((pos = expression.lastIndexOf(';',pos-1))>0){
+        try{
+            new Function(expression.substr(0,pos));
+            new Function(expression.substr(pos));
+            break;
+        }catch(e){}
+    }
+    pos++;
+    expression = "with(_){"+expression.substr(0,pos)+"return "+expression.substr(pos)+"}";
+    return buildFunction(expression);
 }
 function buildFunction(source){
     var expression = new Function("_",source);
@@ -176,16 +181,6 @@ function parseFor(el){
         new Function(el = '['+el+']');
     }
 }
-
-
-
-//html
-var specialRegExp = [
-            //'/(?:\\\\.|[^/\\n\\r])+/',     //regexp 有bug   /\/(?:\\.|[^/\n\r])+\//
-            '/(?:\\\\.|(?:\\[\\\\.|[^\\n\\r]\\])|[^/\\n\\r])+/[gim]*',     //regexp 好复杂啊   /\/(?:\\.|(?:\[\\.|[^\n\r]\])|[^/\n\r])+\/[gim]*/
-            '"(?:\\\\(?:.|\n|\r\n?)|[^"\\n\\r])*"',
-            "'(?:\\\\(?:.|\n|\r\n?)|[^'\\n\\r])*'"    //string
-            ].join('|'); 
 
 
 

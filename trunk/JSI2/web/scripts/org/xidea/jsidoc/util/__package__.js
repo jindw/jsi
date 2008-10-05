@@ -2,11 +2,15 @@ this.addScript("request.js",["Request"]);
 this.addScript("json.js",['JSON']);
 
 this.addScript('template.js',"Template");
-this.addScript('template-parser.js',["TemplateParser","EL_TYPE","VAR_TYPE","IF_TYPE","ELSE_TYPE","FOR_TYPE","ATTRIBUTE_TYPE","FOR_KEY"]);
+this.addScript('parser.js',["Parser","EL_TYPE","VAR_TYPE","IF_TYPE","ELSE_TYPE","FOR_TYPE","ATTRIBUTE_TYPE","EL_TYPE_XML_TEXT","FOR_KEY","TEMPLATE_NS_REG"]);
 this.addScript('text-parser.js',["TextParser","parseText","parseEL"]
-               ,["TemplateParser","EL_TYPE","VAR_TYPE","IF_TYPE","ELSE_TYPE","FOR_TYPE","ATTRIBUTE_TYPE","FOR_KEY"]);
+               ,["Parser","EL_TYPE","VAR_TYPE","IF_TYPE","ELSE_TYPE","FOR_TYPE","ATTRIBUTE_TYPE","EL_TYPE_XML_TEXT","FOR_KEY","TEMPLATE_NS_REG"]);
 this.addScript('xml-parser.js',"XMLParser"
-               ,["TextParser","parseText","parseEL","EL_TYPE","VAR_TYPE","IF_TYPE","ELSE_TYPE","FOR_TYPE","ATTRIBUTE_TYPE","FOR_KEY"]); 
+               ,["TextParser","parseText","parseEL","EL_TYPE","VAR_TYPE","IF_TYPE","ELSE_TYPE","FOR_TYPE","ATTRIBUTE_TYPE","EL_TYPE_XML_TEXT","FOR_KEY","TEMPLATE_NS_REG"]); 
+               
+
+
+
 
 this.addScript("fn.js",['xmlReplacer','loadTextByURL']);
 
