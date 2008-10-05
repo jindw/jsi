@@ -116,18 +116,26 @@ var FOR_KEY = "_[4]";
 function compileItem(object,itemsStack){
     switch(object[0]){
         case 0://":el":
-            return buildExpression(object,itemsStack);
+            buildExpression(object,itemsStack);
+            break;
+        case 6://":encode_el":
+            buildAttribute(object,itemsStack);
+            break;
+        case 7://":attribute":
+            buildExpression(object,itemsStack,true);
+            break;
         case 1://":set"://var
-            return buildVar(object,itemsStack);
+            buildVar(object,itemsStack);
+            break;
         case 2://":if":
-            return buildIf(object,itemsStack);
+            buildIf(object,itemsStack);
+            break;
         case 3://":else-if":":else":
-            return buildElse(object,itemsStack);
+            buildElse(object,itemsStack);
+            break;
         case 4://":for":
-            return buildFor(object,itemsStack);
-            
-        case 6://":attribute":
-            return buildAttribute(object,itemsStack);
+            buildFor(object,itemsStack);
+            break;
         default://:end
             itemsStack.shift();
             //return $import(type,null,null)(object)
@@ -139,14 +147,13 @@ function compileItem(object,itemsStack){
  * el             [EL_TYPE,expression,unescape]
  * @internal
  */
-function buildExpression(data,itemsStack){
+function buildExpression(data,itemsStack,encode){
     var el = data[1];
-    var escape = !data[2];
     //if(data[0]){//==1
     el = createExpression(el)
     itemsStack[0].push(function(context,result){
         var value = el(context);
-        if(escape && value!=null ){
+        if(encode && value!=null ){
             value = String(value).replace(/[<>&'"]/g,xmlReplacer)
         }
         result.push(value);
@@ -307,12 +314,16 @@ function createExpression(el){
                $log.trace(e);
             }
 	    }
+	case Function:
+		return function(_){
+	         try{
+	             return el(_);
+	         }catch(e){
+	             $log.trace(e);
+	         }
+	     };
 	}
 	return function(_){
-         try{
-             return el(_);
-         }catch(e){
-             $log.trace(e);
-         }
+         return el;
      };
 }

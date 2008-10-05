@@ -12,15 +12,16 @@ var IF_TYPE = 2;//":if":
 var ELSE_TYPE = 3;//":else":
 var FOR_TYPE = 4;//":for":
 
-var ATTRIBUTE_TYPE = 6;//":attribute":
+var EL_TYPE_XML_TEXT = 6;
+var ATTRIBUTE_TYPE = 7;//":attribute":
 
 
 var FOR_KEY = "_[4]";
-
+var TEMPLATE_NS_REG = /^http:\/\/www.xidea.org\/ns\/template\/.*/;
 
 
 //add as default
-function TemplateParser(){
+function Parser(){
     this.parserList = this.parserList.concat([]);
     this.result = [];
 }
@@ -29,7 +30,7 @@ function TemplateParser(){
 /**
  * @private
  */
-TemplateParser.prototype = {
+Parser.prototype = {
     parserList : [],
     /**
      * 添加新解析函数
@@ -73,7 +74,7 @@ TemplateParser.prototype = {
         var result = this.result;
         var item;
         while((item = result.pop())!=null){
-            if(item.length ==0){//end
+            if(item instanceof Array && item.length ==0){//end
                 break;
             }
         }

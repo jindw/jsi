@@ -6,36 +6,39 @@
  * @version $Id: template.js,v 1.4 2008/02/28 14:39:06 jindw Exp $
  */
 //parse
-
 //add as default
 function XMLParser(){
     var list = this.parserList.concat([]);
     this.parserList = list;
     this.result = [];
 }
+
+function isTemplateNS(name,shortAvaliable){
+    return shortAvaliable && (value=="#" || value=="#core") || TEMPLATE_NS_REG.test(value);
+}
 XMLParser.prototype = new TextParser()
 XMLParser.prototype.parse = function(url){
-    var data = this.load(url);
+    var pos = url.indexOf('#');
+    var data = this.load( pos+1?url.substr(0,pos):url,url.substr(pos+1));
     this.parseNode(data);
     return this.reuslt;
 }
-XMLParser.prototype.load = function(url){
+XMLParser.prototype.load = function(url,xpath){
 	try{
 		if(/^[\s\ufeff]*</.test(url)){
 	        var doc =toDoc(url)
 			//alert([data,doc.documentElement.tagName])
 	    }else{
-		    var pos = url.indexOf('#');
 		    var xhr = new XMLHttpRequest();
-		    xhr.open("GET",pos+1?url.substr(0,pos):url,false)
+		    xhr.open("GET",url,false)
 		    xhr.send('');
 		    if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
 		        var doc = xhr.responseXML;
 		    }else{
 		        var doc = toDoc(xhr.responseText)
 		    }
-		    if(pos>0){
-		        doc = selectNodes(doc,url.substr(pos+1));
+		    if(xpath){
+		        doc = selectNodes(doc,xpath);
 		    }
 		    this.url = url;
 		}
@@ -112,7 +115,7 @@ XMLParser.prototype.addParser(function(node,context){
 XMLParser.prototype.addParser(function(node,context){//for
     if(node.nodeType ==1){
         var tagName = node.tagName.toLowerCase();
-        if(/^c\:/.test(tagName)){
+        if(isTemplateNS(tagName,node.namespaceURI)){
             switch(tagName.substr(2)){
             case 'if':
                 parseIfTag(node,context);
@@ -158,13 +161,26 @@ XMLParser.prototype.addParser(function(node,context){//for
  * 
  */
 function processIncludeTag(node,context){
-    var attributes = loadAttribute(node,{'var':0,path:0,xpath:0});
-    var doc = node.ownerDocument;
+    var var_ = getAttribute(node,'var');
+    var path = getAttribute(node,'path');
+    var xpath = getAttribute(node,'xpath');
+    var name = getAttribute(node,'name');
+    var doc = node.ownerDocument || node;
     var parentURL = context.url;
 	try{
-	    if(attributes['var']){
+		if(name){
+			var docFragment = doc.createDocumentFragment();
+			var next = node.firstChild;
+            if(next){
+                do{
+                    docFragment.appendChild(next)
+                }while(next = next.nextSibling)
+            }
+            context['#'+name] = docFragment;
+		}
+	    if(var_){
             var next = node.firstChild;
-            context.append([VAR_TYPE,attributes['var']]);
+            context.append([VAR_TYPE,var_]);
             if(next){
                 do{
                     context.parseNode(next,context)
@@ -172,12 +188,17 @@ function processIncludeTag(node,context){
             }
             context.append([]);
 	    }
-	    if(attributes.path!=null){
-	        var url = parentURL.replace(/[^\/]*(?:[#\?].*)?$/,attributes.path);
-	        var doc = context.load(url)
+	    if(path!=null){
+	    	if(path.charAt() == '#'){
+	    		doc = context['#'+name];
+	    		context.url = doc.documentURI;
+	    	}else{
+		        var url = parentURL.replace(/[^\/]*(?:[#\?].*)?$/,path);
+		        var doc = context.load(url);
+	    	}
 	    }
-	    if(attributes.xpath!=null){
-	        doc = selectNodes(doc,attributes.xpath);
+	    if(xpath!=null){
+	        doc = selectNodes(doc,xpath);
 	    }
 	    context.parseNode(doc,context)
     }finally{
@@ -186,8 +207,8 @@ function processIncludeTag(node,context){
 }
 function parseIfTag(node,context){
     var next = node.firstChild;
-    var attributes = loadAttribute(node,{test:3});
-    context.append([IF_TYPE,attributes.test]);
+    var test = getBooleanAttribute(node,'test');
+    context.append([IF_TYPE,test]);
     if(next){
         do{
             context.parseNode(next,context)
@@ -199,8 +220,8 @@ function parseIfTag(node,context){
 function parseElseIfTag(node,context){
     context.removeLastEnd();
     var next = node.firstChild;
-    var attributes = loadAttribute(node,{test:3});
-    context.append([ELSE_TYPE,attributes.test]);
+    var test = getBooleanAttribute(node,'test');
+    context.append([ELSE_TYPE,test]);
     if(next){
         do{
             context.parseNode(next,context)
@@ -213,7 +234,6 @@ function parseElseIfTag(node,context){
 function parseElseTag(node,context){
     context.removeLastEnd();
     var next = node.firstChild;
-    var attributes = loadAttribute(node,{});
     context.append([ELSE_TYPE]);
     if(next){
         do{
@@ -233,7 +253,6 @@ function parseChooseTag(node,context){
     if(next){
         do{
         	if(next.tagName == whenTag){
-        		var n = next.parentNode.firstChild;
         		if(first){
         			first = false;
         			parseIfTag(next,context);
@@ -252,8 +271,11 @@ function parseChooseTag(node,context){
 
 function parseForTag(node,context){
     var next = node.firstChild;
-    var attributes = loadAttribute(node,{items:3,'var':1,begin:0,end:0,status:0});
-    context.append([FOR_TYPE,attributes['var'],attributes.items,attributes.status]);
+    var items = getAttribute(node,'items',true);
+    var var_ = getAttribute(node,'var');
+    var status = getAttribute(node,'status');
+    
+    context.append([FOR_TYPE,var_,items,status]);
     if(next){
         do{
             context.parseNode(next,context)
@@ -262,13 +284,24 @@ function parseForTag(node,context){
     context.append([]);
 }
 function parseVarTag(node,context){
-    var attributes = loadAttribute(node,{name:1,value:0});
-    var valueEl = attributes.value
-    if(valueEl){
-        context.append([VAR_TYPE,attributes.name,toEL(valueEl)]);
+    var name = getAttribute(node,'name');
+    var value = getAttribute(node,'value');
+    if(value){
+    	var value = parseText(value,false);
+    	if(value.length == 1){
+    		value = value[0];
+    		if(value instanceof Array){
+    			value = value[1];
+    		}
+    		context.append([VAR_TYPE,name,value]);
+    	}else{
+    		context.append([VAR_TYPE,name]);
+	        context.append.apply(context,value)
+	        context.append([]);
+    	}
     }else{
         var next = node.firstChild;
-        context.append([VAR_TYPE,attributes.name]);
+        context.append([VAR_TYPE,name]);
         if(next){
             do{
                 context.parseNode(next,context)
@@ -279,23 +312,10 @@ function parseVarTag(node,context){
 }
 
 function parseOutTag(node,context){
-    var attributes = loadAttribute(node,{value:3});
-    context.append([EL_TYPE,attributes.value,true]);
+    var value = getAttribute(node,"value");
+    value = parseText(value,false);
+    context.append.apply(context,value);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //parser element
 /*
@@ -323,7 +343,10 @@ function parseElement(node,context){
 function parseAttribute(node,context){
     var name = node.name;
     var value = node.value;
-    var buf = parseText(value);
+	if(isTemplateNS(value, name.toLowerCase() == "xmlns:c")){
+		return true;
+	}
+    var buf = parseText(value,true);
     var isStatic;
     var isDynamic;
     //hack parseText is void 
@@ -346,20 +369,16 @@ function parseAttribute(node,context){
         //context.append(" "+name+'=""');
         if(buf.length > 1){
             //TODO:....
-            throw Error();
+            throw new Error("属性内只能有单一EL表达式！！");
         }else{//只考虑单一EL表达式的情况
             buf = buf[0];
-            if(buf[0] != 0){
-                throw Error("属性内只能有单一EL表达式！！");
-            }
-            buf = buf[1];
+	        context.append( [ATTRIBUTE_TYPE,name,buf[1]]);
+	        return true;
         }
-        context.append( [ATTRIBUTE_TYPE,name,buf]);
-        return true;
     }
     context.append(" "+name+'="');
     if(/^xmlns$/i.test(name)){
-        if(buf[0] == 'http://www.xidea.org/taglib/xhtml'){
+        if(buf[0] == 'http://www.xidea.org/ns/template/xhtml'){
             buf[0] = 'http://www.w3.org/1999/xhtml'
         }
     }
@@ -369,13 +388,13 @@ function parseAttribute(node,context){
 }
 function parseTextNode(node,context){
     var data = node.data;
-    context.append.apply(context,parseText(data.replace(/^\s+|\s+$/g,' ')))
+    context.append.apply(context,parseText(data.replace(/^\s+|\s+$/g,' '),true))
     return true;
 }
 
 function parseCDATA(node,context){
     context.append("<![CDATA[");
-    context.append.apply(context,parseText(node.data,true));
+    context.append.apply(context,parseText(node.data));
     context.append("]]>");
     return true;
 }
@@ -396,6 +415,7 @@ function parseDocument(node,context){
     for(var n = node.firstChild;n!=null;n = n.nextSibling){
         context.parseNode(n);
     }
+    return true;
 }
 /**
  * @protected
@@ -473,65 +493,33 @@ function charReplacer(item) {
     return '\\u00' + (c.length>1?c:'0'+c);
 }
 
-
-/**
- * 1   必要
- * 2   EL属性
- * 从XML属性集中载入需要的属性集合，同时报告缺失和冗余
- */
-function loadAttribute(node,setting){
-	var attributes =node.attributes
-	var tagName = node.tagName;
-    var i = attributes.length;
-    var data = {};
-    while(i--){
-        var item = attributes[i];//item 不行 htmlunit
-        var key = item.name;
-        if(key in setting){
-            data[key] = item.value.replace(/^\s+|\s+$/g,'');
-        }else{
-        	if(!/^xmlns(?:\:.+)/.test(key)){
-                $log.error("未知属性：", key, tagName);
-        	}
-        }
-    }
-    for(var key in setting){
-        var type = setting[key];
-        if(type & 1){
-            var value = data[key];
-            if(value == null){
-                $log.error("缺少必要属性：", key, tagName);
-            }
-        }
-        if(type & 2){
-            if(value){
-                var value2 = value.replace(/^\s*\$\{\s*(\S[\S\s]*)\}\s*$/,'$1')
-                if(value2 != value){
-                    data[key] = parseEL('',value2);
-                }else{
-                    $log.error("属性需要为表达式（${...}）：", key,value,type,tagName);
-                }
-            }
-        }
-    }
-    return data;
+function getAttribute(node,key,isEL,required){
+	var value = node.getAttribute(key);
+	if(value){
+		if(isEL){
+	         return findFirstEL(value);
+		}else{
+			return value.replace(/^\s+|\s+$/g,'');
+		}
+	}else if(required){
+		$log.error("属性"+key+"为必须值");
+		throw new Error();
+	}
 }
-
-function toEL(value,type){
-    var value2 = value.replace(/^\s*\$\{\s*(\S[\S\s]*)\}\s*$/,'$1')
-    if(value2 != value){
-        return parseEL('',value2);
-    }else{
-        if(type == Number){//int
-            
-        }else{//String
-            value = '"' + (stringRegexp.test(value) ?
+function findFirstEL(value){
+	var els = parseText(value,false);
+	var i = els.length;
+	while(i--) {
+		var el = els[i];
+		if(el instanceof Array){//el
+		    return el[1];
+		}else if(el){
+			return '"' + (stringRegexp.test(value) ?
                             value.replace(stringRegexp,charReplacer) :
                             value)
                        + '"';
-        }
-        return value;
-    }
+		}
+	}
 }
 
 /**
@@ -547,13 +535,36 @@ function toDoc(text){
     }
     return doc;
 }
+function getNamespaceMap(node){
+	var attributes = node.attributes;
+	var map = {};
+	for(var i = 0;i<attributes.length;i++){
+		var attribute = attributes[i];
+		var name = attribute.name;
+		if(/^xmlns(:.*)?$/.test(name)){
+			var value = attribute.value;
+			var prefix = name.substr(6) || value.replace(/^.*\/([^\/]+)\/?$/,'$1');
+			map[prefix] = value;
+		}
+	}
+	return map;
+}
+
 /**
  * TODO:貌似需要importNode
  */
-function selectNodes(doc,xpath){
+function selectNodes(currentNode,xpath){
+	var doc = currentNode.ownerDocument || currentNode;
     var docFragment = doc.createDocumentFragment();
+    var nsMap = getNamespaceMap(doc.documentElement);
     try{
-        var nodes = doc.selectNodes(xpath);
+    	var buf = [];
+    	for(var n in nsMap){
+    		buf.append(n+'="'+nsMap[n]+'"')
+    	}
+    	doc.setProperty("SelectionNamespaces",buf,join(' '));
+    	doc.setProperty("SelectionLanguage","XPath");
+        var nodes = currentNode.selectNodes(xpath);
         var buf = [];
         for (var i=0; i<nodes.length; i++) {
             buf.push(nodes.item(i))
@@ -562,8 +573,8 @@ function selectNodes(doc,xpath){
     }
     if(!buf){
         var xpe = doc.evaluate? doc: new XPathEvaluator();
-        var nsResolver = xpe.createNSResolver(doc.documentElement);
-        var result = xpe.evaluate(xpath, doc.documentElement, nsResolver, 5, null);
+        //var nsResolver = xpe.createNSResolver(doc.documentElement);
+        var result = xpe.evaluate(xpath, currentNode, function(prefix){return nsMap[prefix]}, 5, null);
         var node;
         var buf = [];
         while (node = result.iterateNext()){
