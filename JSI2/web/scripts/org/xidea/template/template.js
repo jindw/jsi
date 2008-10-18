@@ -18,8 +18,8 @@ function Template(data,type){
     if("org.jside.template:compile"){
         if(!(data instanceof Array)){
             var inlineClass = {
-                'xml':"org.xidea.jsidoc.util:XMLParser",
-                'text':"org.xidea.jsidoc.util:TextParser"
+                'xml':"org.jside.template:XMLParser",
+                'text':"org.jside.template:TextParser"
             }
             var parser = new ($import(inlineClass[type || 'xml'] ||type))();
             parser.parse(data);
@@ -58,6 +58,7 @@ function Context(context){
     for(var n in context){
         this[n] = context[n];
     }
+    this["this"] = this;
 }
 Context.prototype = window;
 /**
@@ -265,7 +266,7 @@ function buildFor(data,itemsStack){
 function buildVar(data,itemsStack){
     var name = data[1];
     var data = data[2];
-    if(data){
+    if(data!=null){
         data = createExpression(data);
         itemsStack[0].push(function(context,result){
             context[name] = data(context);
@@ -317,7 +318,7 @@ function createExpression(el){
 	case Function:
 		return function(_){
 	         try{
-	             return el(_);
+	             return el.call(_);
 	         }catch(e){
 	             $log.trace(e);
 	         }
