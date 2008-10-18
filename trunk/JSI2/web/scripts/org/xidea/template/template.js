@@ -18,8 +18,8 @@ function Template(data,type){
     if("org.jside.template:compile"){
         if(!(data instanceof Array)){
             var inlineClass = {
-                'xml':"org.jside.template:XMLParser",
-                'text':"org.jside.template:TextParser"
+                'xml':"org.xidea.template:XMLParser",
+                'text':"org.xidea.template:TextParser"
             }
             var parser = new ($import(inlineClass[type || 'xml'] ||type))();
             parser.parse(data);
