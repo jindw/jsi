@@ -115,16 +115,13 @@ function parseEL(expression){
         expression = compileEL(expression)
     }
     expression = expression.replace(/^\s+|[\s]+$/g,'');//trim
-    if(/^(?:true|false|[\d\.]+)$/.test()){
+    if(/^(?:true|false|[\d\.]+)$/.test(expression)){
         return window.eval(expression);
-    } else if(/^(?:"[^"]*?"|'[^']*?')$/.test()){
-        return expression;
+    } else if(/^(?:"[^"]*?"|'[^']*?')$/.test(expression)){
+        return buildFunction("return " + expression);
     } else if(/^[_$a-zA-Z](?:[\.\s\w\_]|\[(?:"[^"]*?"|'[^']*?'|\d+)\])*$/.test(expression)){
         expression = expression.replace(/\s+/g,'');
         expression = expression.match(/[\w_\$]+|"[^"]*?"|'[^']*?'/g).reverse();
-        if(expression.length ==0){
-            return expression[0];
-        }
         var i = expression.length;
         while(i--){
         	var item = expression[i];
@@ -145,14 +142,14 @@ function parseEL(expression){
         }catch(e){}
     }
     pos++;
-    expression = "with(_){"+expression.substr(0,pos)+"return "+expression.substr(pos)+"}";
+    expression = "with(this){"+expression.substr(0,pos)+"return "+expression.substr(pos)+"}";
     return buildFunction(expression);
 }
 function buildFunction(source){
-    var expression = new Function("_",source);
+    var expression = new Function(source);
     //$log.trace(expression)
     expression.toString = function(){
-        return "function(_){"+source+"}";
+        return "function(){"+source+"}";
     }
     return expression;
 }

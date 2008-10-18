@@ -14,7 +14,7 @@ function XMLParser(){
 }
 
 function isTemplateNS(value,shortAvaliable){
-    return shortAvaliable && (value=="#" || value=="#core") || TEMPLATE_NS_REG.test(value);
+    return shortAvaliable && (value=="#" || value=="#core" || value ==null) || TEMPLATE_NS_REG.test(value);
 }
 XMLParser.prototype = new TextParser()
 XMLParser.prototype.parse = function(url){
@@ -44,7 +44,7 @@ XMLParser.prototype.load = function(url,xpath){
 		}
 		return doc;
 	}catch(e){
-		$log.error("文档解析失败")
+		$log.error("文档解析失败",e)
 		throw e;
 	}
 }
@@ -560,9 +560,9 @@ function selectNodes(currentNode,xpath){
     try{
     	var buf = [];
     	for(var n in nsMap){
-    		buf.append(n+'="'+nsMap[n]+'"')
+    		buf.push("xmlns:"+n+'="'+nsMap[n]+'"')
     	}
-    	doc.setProperty("SelectionNamespaces",buf,join(' '));
+    	doc.setProperty("SelectionNamespaces",buf.join(' '));
     	doc.setProperty("SelectionLanguage","XPath");
         var nodes = currentNode.selectNodes(xpath);
         var buf = [];
@@ -570,8 +570,6 @@ function selectNodes(currentNode,xpath){
             buf.push(nodes.item(i))
         }
     }catch(e){
-    }
-    if(!buf){
         var xpe = doc.evaluate? doc: new XPathEvaluator();
         //var nsResolver = xpe.createNSResolver(doc.documentElement);
         var result = xpe.evaluate(xpath, currentNode, function(prefix){return nsMap[prefix]}, 5, null);

@@ -16,7 +16,7 @@ var EL_TYPE_XML_TEXT = 6;
 var ATTRIBUTE_TYPE = 7;//":attribute":
 
 
-var FOR_KEY = "_[4]";
+var FOR_KEY = "this["+FOR_TYPE+"]";
 var TEMPLATE_NS_REG = /^http:\/\/www.xidea.org\/ns\/template.*/;
 
 
