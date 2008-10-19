@@ -20,7 +20,7 @@ public class Template {
 	public static final int IF_TYPE = 2;
 	public static final int VAR_TYPE = 1;
 
-	public static final String FOR_KEY = "_[4]";
+	public static final String FOR_KEY = "4";
 
 	// private static ExpressionFactory propertyExpressionFactory = new
 	// PropertyExpressionFactory();
@@ -43,10 +43,11 @@ public class Template {
 		renderList(context, items, out);
 	}
 
+	@SuppressWarnings("unchecked")
 	protected Map<Object, Object> createContextMap(Object context) {
 		Map<Object, Object> map;
 		if (context instanceof Map) {
-			map = (Map<Object, Object>) context;
+		    map = (Map<Object, Object>) context;
 		} else {
 			map = PropertyExpression.map(context);
 		}
@@ -130,7 +131,7 @@ public class Template {
 	}
 
 	public static class ForStatus {
-		int index = 0;
+		int index = -1;
 		final int end;
 
 		public ForStatus(int end) {
@@ -264,6 +265,7 @@ public class Template {
 		final String statusName = (String) data[3];
 		final ArrayList<Object> children = new ArrayList<Object>();
 		pushToTop(itemsStack, new TemplateItem() {
+			@SuppressWarnings("unchecked")
 			public void render(Map<Object, Object> context, Writer out) {
 				Object list = itemExpression.evaluate(context);
 				List<Object> items;
@@ -271,12 +273,14 @@ public class Template {
 				if (list instanceof Object[]) {
 					items = Arrays.asList(list);
 				} else {
+					
 					items = (List<Object>) list;
 				}
 				ForStatus preiousStatus = (ForStatus) context.get(FOR_KEY);
 				int len = items.size();
 				ForStatus forStatus = new ForStatus(len - 1);
 				context.put(FOR_KEY, forStatus);
+				context.put("for", forStatus);
 				// prepareFor(this);
 				if (statusName != null) {
 					context.put(statusName, forStatus);
@@ -289,7 +293,8 @@ public class Template {
 				if (statusName != null) {
 					context.put(statusName, preiousStatus);
 				}
-				context.put(statusName, preiousStatus);// for key
+				context.put("for", preiousStatus);
+				context.put(FOR_KEY, preiousStatus);// for key
 				context.put(IF_TYPE, len > 0);// if key
 			}
 		});
