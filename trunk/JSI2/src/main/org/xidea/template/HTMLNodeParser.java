@@ -59,9 +59,10 @@ public class HTMLNodeParser implements XMLNodeParser {
 					return parseCloneBooleanInput(el, context);
 				} else if (EL_SELECT.equals(localName)) {
 					context.put(SELECT_KEY, el);
-					this.parser.parseNode(el, context);
-					context.remove(SELECT_KEY);
-					return true;
+					//this.parser.parseNode(el, context);
+					//context.remove(SELECT_KEY);
+					//return true;
+					return false;
 				} else if (EL_OPTION.equals(localName)) {
 					return parseCloneBooleanInput(el, context);
 				} else {
