@@ -52,12 +52,11 @@ public abstract class TempateServlet extends GenericServlet {
 	public void service(ServletRequest req, ServletResponse resp)
 			throws ServletException, IOException {
 		HttpServletRequest request = (HttpServletRequest) req;
-		String path = request.getRequestURI();
+		String path = request.getServletPath();
 		String decoratorPath = decoratorMapper.getDecotatorPage(path);
 		Template template = getTemplate(path, decoratorPath);
 		template.render(createDefaultModel(request), resp.getWriter());
 	}
-
 	protected Template getTemplate(String pagePath, String decoratorPath) {
 		// TODO:do cache
 		ServletContext context = this.getServletContext();
