@@ -22,6 +22,7 @@ function replaceSpecialEntry(source){
     var p1
     outer:
     while(p1 = specialRegExp.exec(tail)){
+    //for(;p1 = specialRegExp.exec(tail);specialRegExp.index=0,specialRegExp.lastIndex=0){
         var p2 = p1.index + p1[0].length;
         var p1 = p1.index;
         if(tail.charAt(p1) == '/'){
@@ -29,7 +30,7 @@ function replaceSpecialEntry(source){
                 case '/':
                 case '*':
                     head += tail.substr(0,p1);
-                    tail = tail.substr(p2+1);
+                    tail = tail.substr(p2);
                     continue outer;
             }
             try{//试探正则
@@ -59,7 +60,7 @@ function replaceSpecialEntry(source){
             }
         }else{
             head += tail.substr(0,p1)+'""';
-            tail = tail.substr(p2+1);
+            tail = tail.substr(p2);
             continue outer;
         }
     }
