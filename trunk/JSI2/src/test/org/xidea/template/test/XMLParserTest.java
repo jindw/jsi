@@ -8,7 +8,7 @@ import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.jsel.Java6JSExpressionFactory;
+import org.xidea.jsel.JSExpressionFactory;
 import org.xidea.template.Template;
 import org.xidea.template.XMLParser;
 public class XMLParserTest {
@@ -42,7 +42,7 @@ public class XMLParserTest {
 
 	@Test
 	public void testIfElse() throws IOException {
-		parser.setExpressionFactory(new Java6JSExpressionFactory());
+		parser.setExpressionFactory(new JSExpressionFactory());
 		test("<xml xmlns:c='http://www.xidea.org/ns/template'>" +
 				"<c:if test='${test}'>${!value}</c:if>" +
 				"<c:else test='${test}'>${value}</c:else>" +
@@ -52,7 +52,7 @@ public class XMLParserTest {
 
 	@Test
 	public void testForElse() throws IOException {
-		parser.setExpressionFactory(new Java6JSExpressionFactory());
+		parser.setExpressionFactory(new JSExpressionFactory());
 		test("<xml xmlns:c='http://www.xidea.org/ns/template'>" +
 				"<c:for var='value' items='${[1,2,3,4]}'>${value}</c:for>" +
 				"<c:else test='${test}'>${value}</c:else>" +

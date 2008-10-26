@@ -28,20 +28,16 @@ public class ExpressionImpl implements Expression {
 		while (it.hasNext()) {
 			item = (ExpressionToken) it.next();
 			if (item instanceof OperatorToken) {
-				if(calculater.compute((OperatorToken) item, stack, it)){
-//					//do skip
-//					int itemCount = 0;
-//					while(true){
-//					    Object skipItem = it.next();
-//						if (skipItem instanceof OperatorToken) {
-//							itemCount -= ((OperatorToken) item).getLength();
-//						} else {
-//							itemCount++;
-//							if(itemCount == 2){
-//								aStack.push(skipItem);
-//							}
-//						}
-//					}
+				Object arg1 = stack.pop();
+				Object arg2 = null;
+				if(((OperatorToken)item).getLength()>1){
+					arg2 = stack.pop();
+				}
+				Object result = calculater.compute((OperatorToken) item,arg1,arg2);
+				if(result == Calculater.EVAL){
+					
+				}else{
+					stack.push(result);
 				}
 			} else{
 				if(item instanceof VarToken){
