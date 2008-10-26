@@ -3,20 +3,12 @@ package org.xidea.template;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.AbstractMap;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.script.ScriptEngineManager;
 
 public class PropertyExpression implements Expression{
 
@@ -45,6 +37,7 @@ public class PropertyExpression implements Expression{
 		return key instanceof Number?((Number)key).intValue():Integer.valueOf(String.valueOf(key));
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Object getValue(Object context, Object key) {
 		if (context != null) {
 			try{
@@ -115,7 +108,6 @@ class PropertyEntry implements Entry<Object , Object>{
 	public PropertyEntry(String key,Object source){
 		this.source = source;
 		this.key = key;
-		this.value = value;
 	}
 
 	public Object getKey() {

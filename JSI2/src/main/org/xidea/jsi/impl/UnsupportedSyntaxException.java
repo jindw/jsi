@@ -2,6 +2,11 @@ package org.xidea.jsi.impl;
 
 class UnsupportedSyntaxException extends RuntimeException {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public UnsupportedSyntaxException() {
 		super();
 	}

@@ -6,6 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 
 public class ParseContext extends HashMap<Object, Object>{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private URL currentURL;
 	private ArrayList<Object> result = new ArrayList<Object>();
 

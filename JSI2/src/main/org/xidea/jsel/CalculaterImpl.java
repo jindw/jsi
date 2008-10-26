@@ -4,7 +4,6 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +30,7 @@ public class CalculaterImpl implements Calculater {
 		return propertyMap;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Object getValue(Object context, Object key) {
 		if (context != null) {
 			try{
@@ -93,7 +93,6 @@ public class CalculaterImpl implements Calculater {
 	public boolean compute(OperatorToken op, ValueStack stack,Iterator<ExpressionToken> it) {
 		Object arg1 = null;
 		Object arg2 = null;
-		Object arg3 = null;
 		switch (op.getType()) {
 		case ExpressionToken.TYPE_NOT:
 			stack.push(!toBoolean(stack.pop()));
