@@ -8,8 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import org.w3c.dom.Element;
-
 public class Template {
 	public static final int EL_TYPE_XML_TEXT = 6;
 	public static final int ATTRIBUTE_TYPE = 7;

@@ -131,7 +131,6 @@ public class TextParser implements Parser {
 			return -1;
 		}
 		int next = p;
-		char pc = 0;
 		char stringChar = 0;
 		int depth = 0;
 		do {

@@ -1,16 +1,12 @@
 package org.xidea.template;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.Map;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import static org.xidea.template.Template.*;
 

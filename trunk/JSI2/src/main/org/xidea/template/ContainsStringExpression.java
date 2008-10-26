@@ -12,6 +12,7 @@ public class ContainsStringExpression implements Expression {
 		this.collectionEL = collectionEL;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object evaluate(Map<Object, Object> context) {
 		Object collection = collectionEL.evaluate(context);
 		Object value = valueEL.evaluate(context);

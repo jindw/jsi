@@ -31,6 +31,7 @@ public class RhinoScriptPackagePaser extends PackageParser {
 	private void parse(final JSIPackage packageObject) {
 		final String source = packageObject.loadText(JSIPackage.PACKAGE_FILE_NAME);
 		try {
+			@SuppressWarnings("unused")
 			Object result = Context.call(new ContextAction() {
 				public Object run(final Context cx) {
 					Scriptable scope = ScriptRuntime.getGlobal(cx);

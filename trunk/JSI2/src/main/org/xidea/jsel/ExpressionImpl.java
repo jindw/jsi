@@ -1,8 +1,6 @@
 package org.xidea.jsel;
 
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 
 import org.xidea.template.Expression;

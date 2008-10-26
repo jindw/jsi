@@ -55,6 +55,7 @@ public class DefaultJSIPackage implements JSIPackage {
 	 * @see org.xidea.jsi.impl.JSIPackage2#addScript(java.lang.String,
 	 *      java.lang.Object, java.lang.Object, java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
 	public void addScript(String scriptName, Object objectNames,
 			Object beforeLoadDependences, Object afterLoadDependences) {
 		checkState();
@@ -98,6 +99,7 @@ public class DefaultJSIPackage implements JSIPackage {
 	 * @see org.xidea.jsi.impl.JSIPackage2#addDependence(java.lang.String,
 	 *      java.lang.Object, boolean)
 	 */
+	@SuppressWarnings("unchecked")
 	public void addDependence(String thisPath, Object targetPath,
 			boolean afterLoad) {
 		checkState();

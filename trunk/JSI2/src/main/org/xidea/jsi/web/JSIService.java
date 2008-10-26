@@ -8,7 +8,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.SequenceInputStream;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
@@ -121,6 +120,11 @@ public class JSIService {
 				}
 			}
 			return exportor.export(context, new HashMap<String, String>() {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
 				@Override
 				public String get(Object key) {
 					return root.loadText(null, String.valueOf(key));

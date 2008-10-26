@@ -1,11 +1,8 @@
 package org.xidea.jsel;
 
 import java.io.InputStreamReader;
-import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 
-import javax.script.Bindings;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -35,6 +32,7 @@ public class Java6JSExpressionFactory implements ExpressionFactory {
 			final String el = (String) ((Invocable) engine).invokeFunction(
 					"__compile_EL__",  value);
 			return new Expression() {
+				@SuppressWarnings("unchecked")
 				public Object evaluate(Map<Object, Object> context) {
 					try {
 						Map map = (Map)context;

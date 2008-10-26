@@ -20,12 +20,10 @@ import javax.xml.xpath.XPathExpressionException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
-import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xidea.template.dtd.DefaultEntityResolver;
-import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -142,6 +140,7 @@ public class XMLParser extends TextParser {
 				throw new UnsupportedOperationException("xpath not use");
 			}
 
+			@SuppressWarnings("unchecked")
 			public Iterator getPrefixes(String namespaceURI) {
 				throw new UnsupportedOperationException("xpath not use");
 			}
