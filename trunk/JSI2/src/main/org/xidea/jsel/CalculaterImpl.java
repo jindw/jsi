@@ -3,11 +3,11 @@ package org.xidea.jsel;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class CalculaterImpl implements Calculater {
+	private static final Object SKIP_QUESTION = new Object();
 
 	private static Map<Class<?>, Map<String, PropertyDescriptor>> classPropertyMap = new HashMap<Class<?>, Map<String, PropertyDescriptor>>();
 
@@ -128,45 +128,31 @@ public class CalculaterImpl implements Calculater {
 
 			/* and or */
 		case ExpressionToken.TYPE_AND:
-			if (arg2 == VarToken.LazyToken) {
-				if (toBoolean(arg1)) {
-					return EVAL;// 进一步判断
-				} else {// false
-					return arg1;// //skip
-				}
-			} else {
-				if (toBoolean(arg1)) {// 1 true
-					return arg2;
-				} else {// 1 false
-					return arg1;
-				}
+			if (toBoolean(arg1)) {
+				return arg2;// 进一步判断
+			} else {// false
+				return arg1;// //skip
 			}
+
 		case ExpressionToken.TYPE_OR:
-			if (arg2 == VarToken.LazyToken) {
-				if (toBoolean(arg1)) {
-					return arg1;// //skip
-				} else {
-					return EVAL;
-				}
+			if (toBoolean(arg1)) {
+				return arg1;
 			} else {
-				if (toBoolean(arg1)) {
-					return arg1;
-				} else {
-					return arg2;
-				}
+				return arg2;
 			}
 		case ExpressionToken.TYPE_QUESTION:// a?b:c -> a?:bc -- >a?b:c
 			if (toBoolean(arg1)) {// 取值1
-				if (arg2 == VarToken.LazyToken) {
-					return EVAL;// //skip
-				} else {
-					return arg2;
-				}
+				return arg2;
 			} else {// 跳过 取值2
-				return EVAL_NEXT;
+				return SKIP_QUESTION;
 			}
 		case ExpressionToken.TYPE_QUESTION_SELECT:
-			return EVAL_NEXT;
+			if(arg1 == SKIP_QUESTION){
+				return arg2;
+			}else{
+				return arg1;
+			}
+			
 		case ExpressionToken.TYPE_GET_PROP:
 			return getValue(arg1, arg2);
 		case ExpressionToken.TYPE_GET_GLOBAL_METHOD:

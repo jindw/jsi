@@ -14,8 +14,8 @@ public class OperatorToken implements ExpressionToken {
 		lengthMap.put(TYPE_POS, 1);
 		lengthMap.put(TYPE_NEG, 1);
 		lengthMap.put(TYPE_GET_GLOBAL_METHOD, 1);
-		lengthMap.put(TYPE_QUESTION,1);
-		lengthMap.put(TYPE_QUESTION_SELECT,3);
+		lengthMap.put(TYPE_QUESTION,2);
+		lengthMap.put(TYPE_QUESTION_SELECT,2);
 	}
 
 	public static OperatorToken getToken(final int type) {

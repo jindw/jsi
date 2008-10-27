@@ -1,12 +1,12 @@
 package org.xidea.jsel;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 public class LazyToken implements ExpressionToken {
-	private int step = -1;
-	public static final ExpressionToken LAZY_TOKEN_END = new ExpressionToken() {
-		public int getType() {
-			return SKIP_END;
-		}
-	};
+
+	private ExpressionToken[] children;
 
 	public LazyToken() {
 	}
@@ -15,27 +15,14 @@ public class LazyToken implements ExpressionToken {
 		return SKIP_BEGIN;
 	}
 
-	public int getStep() {
-		return step;
+	public ExpressionToken[] getChildren() {
+		return this.children;
+	}
+	public void setChildren(ExpressionToken[] children) {
+		this.children = children;
+	}
+	public String toString() {
+		return "#" + Arrays.asList(this.children);
 	}
 
-	public void setStep(int step) {
-		this.step = step;
-	}
-
-	@Override
-	public boolean equals(Object object) {
-		if (object instanceof LazyToken) {
-			return step == ((LazyToken) object).getStep();
-		}
-		return false;
-	}
-
-	@Override
-	public int hashCode() {
-		return step;
-	}
-	public String toString(){
-		return "#"+this.step;
-	}
 }
