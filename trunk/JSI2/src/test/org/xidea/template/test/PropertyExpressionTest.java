@@ -1,6 +1,6 @@
 package org.xidea.template.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import javax.script.ScriptEngineManager;
 

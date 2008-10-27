@@ -1,10 +1,9 @@
 package org.xidea.jsi.impl.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.jsi.impl.AbstractJSIRoot;
 import org.xidea.jsi.impl.ClasspathJSIRoot;
 
 public class ClasspathJSIRootTest {

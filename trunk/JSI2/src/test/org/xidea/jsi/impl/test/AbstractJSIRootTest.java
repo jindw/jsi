@@ -1,17 +1,16 @@
 package org.xidea.jsi.impl.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.ScriptLoader;
 import org.xidea.jsi.impl.AbstractJSIRoot;
 import org.xidea.jsi.impl.ClasspathJSIRoot;
 import org.xidea.jsi.impl.DefaultJSILoadContext;
