@@ -1,6 +1,5 @@
 package org.xidea.template.test;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,7 +9,6 @@ import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
@@ -44,7 +42,7 @@ public class NamedIncludeTest {
 	}
 
 	public void removeDefaultNamespace(Node node){
-		TransformerFactory transformerFactory = javax.xml.transform.TransformerFactory.newInstance();
+		//TransformerFactory transformerFactory = javax.xml.transform.TransformerFactory.newInstance();
 	}
 	@Test
 	public void testXpath() throws Exception {
@@ -90,7 +88,7 @@ public class NamedIncludeTest {
 				return null;
 			}
 
-			public Iterator getPrefixes(String namespaceURI) {
+			public Iterator<?> getPrefixes(String namespaceURI) {
 				if(defaultNamespaceURI.equals(namespaceURI )){
 				return Arrays.asList(null,"","ns").iterator();
 				}

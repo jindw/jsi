@@ -9,16 +9,13 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.ScriptLoader;
-import org.xidea.jsi.impl.ClasspathJSIRoot;
 import org.xidea.jsi.impl.DataJSIRoot;
 import org.xidea.jsi.impl.DefaultJSILoadContext;
-import org.xidea.jsi.impl.FileJSIRoot;
 
 public class DataJSIRootTest {
 
@@ -33,6 +30,7 @@ public class DataJSIRootTest {
 		destDir = new File(destDir, "build/dest");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
 		HashMap data = new HashMap();

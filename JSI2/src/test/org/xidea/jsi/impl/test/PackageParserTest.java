@@ -1,6 +1,10 @@
 package org.xidea.jsi.impl.test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.xidea.jsi.impl.test.AbstractJSIRootTest.ALL_EXAMPLE_DEPENDENCE_MAP;
+import static org.xidea.jsi.impl.test.AbstractJSIRootTest.ALL_EXAMPLE_INTERNAL_MAP;
+import static org.xidea.jsi.impl.test.AbstractJSIRootTest.ALL_EXAMPLE_MAP;
+import static org.xidea.jsi.impl.test.AbstractJSIRootTest.createObjectPackageMap;
 
 import java.util.Map;
 
@@ -11,9 +15,6 @@ import org.xidea.jsi.impl.ClasspathJSIRoot;
 import org.xidea.jsi.impl.DefaultJSIPackage;
 import org.xidea.jsi.impl.Java6ScriptPackagePaser;
 import org.xidea.jsi.impl.PackageParser;
-import org.xidea.jsi.impl.RhinoScriptPackagePaser;
-
-import static org.xidea.jsi.impl.test.AbstractJSIRootTest.*;
 
 public class PackageParserTest {
 

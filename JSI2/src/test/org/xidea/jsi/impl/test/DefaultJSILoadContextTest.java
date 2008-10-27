@@ -1,14 +1,15 @@
 package org.xidea.jsi.impl.test;
 
-import static org.junit.Assert.*;
-
-import java.util.HashMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.xidea.jsi.impl.test.AbstractJSIRootTest.ALL_EXAMPLE_DEPENDENCE_MAP;
+import static org.xidea.jsi.impl.test.AbstractJSIRootTest.ALL_EXAMPLE_INTERNAL_MAP;
+import static org.xidea.jsi.impl.test.AbstractJSIRootTest.createObjectPackageMap;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.impl.ClasspathJSIRoot;
-import static org.xidea.jsi.impl.test.AbstractJSIRootTest.*;
 
 public class DefaultJSILoadContextTest {
 

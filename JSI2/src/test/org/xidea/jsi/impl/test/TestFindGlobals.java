@@ -17,7 +17,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.impl.DefaultJSIPackage;
 import org.xidea.jsi.impl.Java6ScriptPackagePaser;
 
@@ -57,6 +56,7 @@ public class TestFindGlobals {
 		return out.toString();
 	}
 
+	@SuppressWarnings("unchecked")
 	private Collection<String> findGlobalsFromScript(String source) {
 		try {
 			return (Collection<String>) ((Invocable) engine).invokeFunction(
@@ -99,6 +99,7 @@ public class TestFindGlobals {
 							System.out.println(file);
 							long p1 = System.currentTimeMillis();
 							Collection<String> result1 = null;
+							@SuppressWarnings("unused")
 							Collection<String> result2 = null;
 							try {
 								result1 = parser.findGlobals(source,"*");
