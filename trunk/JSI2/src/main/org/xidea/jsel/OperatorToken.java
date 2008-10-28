@@ -6,26 +6,29 @@ import java.util.Map;
 public class OperatorToken implements ExpressionToken {
 	private int type;
 	private int length;
+	private Object param;
 	private static Map<Integer, OperatorToken> operatorMap = new HashMap<Integer, OperatorToken>();
 	private static Map<Integer, Integer> lengthMap = new HashMap<Integer, Integer>();
 
 	static {
 		lengthMap.put(TYPE_NOT, 1);
 		lengthMap.put(TYPE_POS, 1);
-		lengthMap.put(TYPE_NEG, 1);
 		lengthMap.put(TYPE_GET_STATIC_METHOD, 1);
-		//lengthMap.put(TYPE_INVOKE_STATIC_METHOD, 2);
-		//lengthMap.put(TYPE_QUESTION,2);
-		//lengthMap.put(TYPE_QUESTION_SELECT,2);
+		lengthMap.put(TYPE_NEW_LIST, 0);
+		lengthMap.put(TYPE_NEW_MAP, 0);
 	}
 
+	public static ExpressionToken createToken(int type,
+			Object param) {
+		return new OperatorToken(type,param);
+	}
 	public static OperatorToken getToken(final int type) {
 		OperatorToken token = operatorMap.get(type);
 		if (token == null) {
 			synchronized (operatorMap) {
 				token = operatorMap.get(type);
 				if (token == null) {
-					token = new OperatorToken(type);
+					token = new OperatorToken(type,null);
 					operatorMap.put(type, token);
 				}
 			}
@@ -33,8 +36,9 @@ public class OperatorToken implements ExpressionToken {
 		return token;
 	}
 
-	private OperatorToken(int type) {
+	private OperatorToken(int type,Object param) {
 		this.type = type;
+		this.param = param;
 		Integer length = lengthMap.get(type);
 		this.length = length == null ? 2 : length;
 	}
@@ -45,6 +49,9 @@ public class OperatorToken implements ExpressionToken {
 
 	public int getLength() {
 		return length;
+	}
+	public Object getParam() {
+		return param;
 	}
 
 	public void setLength(int length) {
@@ -66,4 +73,5 @@ public class OperatorToken implements ExpressionToken {
 		}
 		return op;
 	}
+
 }

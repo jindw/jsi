@@ -1,7 +1,6 @@
 package org.xidea.jsel;
 
 public class VarToken implements ExpressionToken{
-	public static final VarToken LazyToken = new VarToken("#"); 
 	private String value;
 	public VarToken(String value){
 		this.value = value;

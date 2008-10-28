@@ -9,25 +9,15 @@ public abstract interface ExpressionToken {
 	public static final int TYPE_CONSTANTS = 0;//'c';
 	public static final int TYPE_VAR = 1;//'n';
 
-	public static final int BRACKET_BEGIN = 2;//'(';
-	public static final int BRACKET_END = 3;//')';
-	
-	//与list共享字面值[] -> .()
-	//public static final int BRACKET_PROP_BEGIN = 4;//'[';
-	//public static final int BRACKET_PROP_END = 5;//']';
-	//public static final int TYPE_PROP = 16;//'.';
+	public static final int BRACKET_BEGIN = 2;//'('[{;
+	public static final int BRACKET_END = 3;//')']};
 
-	//[a,b,c] -> #list(a,b,c)
-	//public static final int BRACKET_LIST_BEGIN = 101;//'[';
-	//public static final int BRACKET_LIST_END = 102;//']';
+	public static final int TYPE_NEW_MAP = 115;//{;
+	public static final int TYPE_NEW_LIST = 1135;//[;
 	
-	//{a:1,b:2,c:3} -> #map(a <set> 1,b <set>2 ,c <set> 3)
-	//public static final int BRACKET_OBJECT_BEGIN = 103;//'{';
-	//public static final int BRACKET_OBJECT_END = 104;//'}';
-
 	//与三元运算符共享字面值
-	public static final int TYPE_OBJECT_SETTER = 4;//':';
-	public static final int TYPE_PARAM_JOIN = 5;//('('<<8) + ')';
+	public static final int TYPE_PARAM_JOIN = 5;//,
+	public static final int TYPE_MAP_PUSH = 6;//:,
 	
 	//与正负符号共享字面值
 	public static final int TYPE_ADD = 9;//'+';

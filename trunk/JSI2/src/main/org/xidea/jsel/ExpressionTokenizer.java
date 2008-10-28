@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.xidea.template.ExpressionSyntaxException;
+
 public class ExpressionTokenizer extends ExpressionTokenizerBase {
 	public static final ExpressionToken LAZY_TOKEN_END = new ExpressionToken() {
 		public int getType() {
@@ -121,7 +123,7 @@ class ExpressionTokenizerBase {
 	private int status = STATUS_BEGIN;
 	private int previousType = STATUS_BEGIN;
 
-	protected List<ExpressionToken> tokens = new ArrayList<ExpressionToken>();
+	protected ArrayList<ExpressionToken> tokens = new ArrayList<ExpressionToken>();
 	protected List<ExpressionToken> expression;
 	protected static Map<Integer, Integer> PRIORITY_MAP = new HashMap<Integer, Integer>();
 	private static Map<String, Integer> OP_TYPE_MAP = new HashMap<String, Integer>();
@@ -166,6 +168,8 @@ class ExpressionTokenizerBase {
 		addOperator(ExpressionToken.TYPE_GET_STATIC_METHOD, 12, null, ops);
 		addOperator(ExpressionToken.TYPE_INVOKE_METHOD, 12, null, ops);
 		addOperator(ExpressionToken.TYPE_INVOKE_STATIC_METHOD, 12, null, ops);
+		addOperator(ExpressionToken.TYPE_NEW_LIST, 12, "[", ops);
+		addOperator(ExpressionToken.TYPE_NEW_MAP, 12, "{", ops);
 
 		addOperator(ExpressionToken.TYPE_NOT, 8, "!", ops);
 		addOperator(ExpressionToken.TYPE_POS, 8, "+", ops);
@@ -191,7 +195,7 @@ class ExpressionTokenizerBase {
 		addOperator(ExpressionToken.TYPE_QUESTION, -4, "?", ops);
 		addOperator(ExpressionToken.TYPE_QUESTION_SELECT, -4, ":", ops);// !!
 
-		addOperator(ExpressionToken.TYPE_OBJECT_SETTER, -7, ":", ops);// !!
+		addOperator(ExpressionToken.TYPE_MAP_PUSH, -7, ":", ops);// !!
 		addOperator(ExpressionToken.TYPE_PARAM_JOIN, -8, ",", ops);
 
 		OPS = ops.toArray(new String[ops.size()]);
@@ -240,13 +244,14 @@ class ExpressionTokenizerBase {
 			} else if (type == ExpressionToken.BRACKET_END) {
 				depth++;
 			}
-			if (depth == -1) {// <getGloablMethod> '#map' <callStaticMethod>(
-				if (i >= 3) {
-					ExpressionToken token1 = tokens.get(i - 3);
-					ExpressionToken token3 = tokens.get(i - 1);
+			if (depth == -1) {// ( <getGloablMethod> '#map' <callStaticMethod>
+								// null
+				if (i + 3 < tokens.size()) {
+					ExpressionToken token1 = tokens.get(i + 1);
+					ExpressionToken token3 = tokens.get(i + 3);
 					if (token1.getType() == ExpressionToken.TYPE_GET_STATIC_METHOD
 							&& token3.getType() == ExpressionToken.TYPE_INVOKE_STATIC_METHOD) {
-						ExpressionToken token2 = tokens.get(i - 2);
+						ExpressionToken token2 = tokens.get(i + 2);
 						if (token2 instanceof ConstantsToken) {
 							return ExpressionToken.INTERNAL_METHOD_MAP
 									.equals(((ConstantsToken) token2)
@@ -259,39 +264,25 @@ class ExpressionTokenizerBase {
 		}
 		return false;
 	}
-
 	private void parse() {
 		skipSpace();
 		while (start < end) {
 			char c = value.charAt(start);
 			if (c == '"' || c == '\'') {
 				String text = findString();
-				addToken(new ConstantsToken(text));
+				addKeyOrObject(text,false);
 			} else if (c >= '0' && c <= '9') {
 				Number number = findNumber();
-				addToken(new ConstantsToken(number));
+				addKeyOrObject(number,false);
 			} else if (Character.isJavaIdentifierStart(c)) {
 				String id = findId();
 				ExpressionToken constains = CONSTAINS_MAP.get(id);
 				if (constains == null) {
 					skipSpace();
-					if (start < end && '(' == value.charAt(start)) {// method
-						// call
-						if (previousType == ExpressionToken.TYPE_GET_PROP) {
-							addToken(OperatorToken
-									.getToken(ExpressionToken.TYPE_GET_METHOD));
-						} else {
-							addToken(OperatorToken
-									.getToken(ExpressionToken.TYPE_GET_STATIC_METHOD));
-
-						}
-					} else if (previousType == ExpressionToken.TYPE_GET_PROP) {
-						addToken(new ConstantsToken(id));
-					} else if (previousType == ExpressionToken.TYPE_PARAM_JOIN
-							&& isMapMethod()) {// object key
+					if (previousType == ExpressionToken.TYPE_GET_PROP) {
 						addToken(new ConstantsToken(id));
 					} else {
-						addToken(new VarToken(id));
+						addKeyOrObject(id,true);
 					}
 				} else {
 					addToken(constains);
@@ -305,25 +296,19 @@ class ExpressionTokenizerBase {
 						if (op.length() == 1) {
 							switch (op.charAt(0)) {
 							case '(':// method 已近简单处理了。不支持变量式函数
+								if (status == STATUS_EXPRESSION) {
+									boolean isStatic = insertAndReturnIsStatic();
+									addToken(OperatorToken
+											.getToken(isStatic ? ExpressionToken.TYPE_INVOKE_STATIC_METHOD
+													: ExpressionToken.TYPE_INVOKE_METHOD));
+								}
 								addToken(OperatorToken
 										.getToken(ExpressionToken.BRACKET_BEGIN));
 								break;
 							case '[':
-								if (status == STATUS_BEGIN || status == STATUS_OPERATOR) {// list
-									addToken(OperatorToken
-											.getToken(ExpressionToken.BRACKET_BEGIN));
-									addToken(OperatorToken
-											.getToken(ExpressionToken.TYPE_GET_STATIC_METHOD));
-									addToken(new ConstantsToken(
-											ExpressionToken.INTERNAL_METHOD_LIST));
-									addToken(OperatorToken
-											.getToken(ExpressionToken.TYPE_INVOKE_STATIC_METHOD));
-									addToken(new ConstantsToken(Collections.EMPTY_LIST));
-									skipSpace();
-									if (!value.startsWith("]", start)) {
-										addToken(OperatorToken
-												.getToken(ExpressionToken.TYPE_PARAM_JOIN));
-									}
+								if (status == STATUS_BEGIN
+										|| status == STATUS_OPERATOR) {// list
+									addListConstuctor();
 
 								} else if (status == STATUS_EXPRESSION) {// getProperty
 									addToken(OperatorToken
@@ -331,21 +316,12 @@ class ExpressionTokenizerBase {
 									addToken(OperatorToken
 											.getToken(ExpressionToken.BRACKET_BEGIN));
 								} else {
-									throw new RuntimeException("语法错误:" + value
-											+ "@" + start);
+									throw new ExpressionSyntaxException("语法错误:"
+											+ value + "@" + start);
 								}
 								break;
 							case '{':
-								addToken(OperatorToken
-										.getToken(ExpressionToken.BRACKET_END));
-								addToken(OperatorToken
-										.getToken(ExpressionToken.TYPE_GET_STATIC_METHOD));
-								addToken(new ConstantsToken(
-										ExpressionToken.INTERNAL_METHOD_MAP));
-								addToken(OperatorToken
-										.getToken(ExpressionToken.TYPE_INVOKE_STATIC_METHOD));
-								addToken(OperatorToken
-										.getToken(ExpressionToken.BRACKET_BEGIN));
+								addMapConstructor();
 								break;
 							case '}':
 							case ']':
@@ -365,21 +341,23 @@ class ExpressionTokenizerBase {
 												: ExpressionToken.TYPE_SUB));
 								// addToken(OperatorToken.getToken(ExpressionToken.SKIP_AND));
 								break;
-							case ':':// object_setter and ?:
-								if (isMapMethod()) {
-									addToken(OperatorToken
-											.getToken(ExpressionToken.TYPE_OBJECT_SETTER));
-								} else {
-									addToken(OperatorToken
-											.getToken(ExpressionToken.TYPE_QUESTION_SELECT));
-									addToken(new LazyToken());
-								}
-								break;
 							case '?':// ?:
 								addToken(OperatorToken
 										.getToken(ExpressionToken.TYPE_QUESTION));
 								// addToken(OperatorToken.getToken(ExpressionToken.SKIP_QUESTION));
 								addToken(new LazyToken());
+								break;
+							case ':':// :(object_setter is skiped)
+								addToken(OperatorToken
+											.getToken(ExpressionToken.TYPE_QUESTION_SELECT));
+								addToken(new LazyToken());
+								break;
+							case ',':// :(object_setter is skiped,',' should be skip)
+								if (!isMapMethod()) {
+									addToken(OperatorToken
+											.getToken(ExpressionToken.TYPE_QUESTION_SELECT));
+
+								}
 								break;
 							default:
 								addToken(OperatorToken.getToken(OP_TYPE_MAP
@@ -403,11 +381,72 @@ class ExpressionTokenizerBase {
 					}
 				}
 				if (missed) {
-					throw new RuntimeException("语法错误:" + value + "@" + start);
+					throw new ExpressionSyntaxException("语法错误:" + value + "@"
+							+ start);
 				}
 			}
 			skipSpace();
 		}
+	}
+
+	private void addKeyOrObject(Object object,boolean isVar){
+		if (skipSpace(':') && isMapMethod()) {// object key
+			addToken(OperatorToken.createToken(ExpressionToken.TYPE_MAP_PUSH, object));
+		}else{
+			addToken(new ConstantsToken(object));
+		}
+	}
+
+	private boolean insertAndReturnIsStatic() {
+		int index = tokens.size() - 1;
+		ExpressionToken token = tokens.get(index);
+		if (token.getType() == ExpressionToken.BRACKET_END) {
+			int depth = 1;
+			index--;
+			while (index > 0) {
+				int type = token.getType();
+				if (type == ExpressionToken.BRACKET_BEGIN) {
+					depth--;
+					if (depth == 0) {
+						return insertAndReturnIsStatic(index - 1);
+					}
+				} else if (type == ExpressionToken.BRACKET_END) {
+					depth++;
+				}
+				index--;
+			}
+		} else if (token instanceof VarToken) {
+			return insertAndReturnIsStatic(index - 1);
+		} else if (token instanceof ConstantsToken) {
+			return insertAndReturnIsStatic(index - 1);
+		}
+		throw new ExpressionSyntaxException("无效方法调用语法");
+	}
+
+	private boolean insertAndReturnIsStatic(int index) {
+		if (index > 0
+				&& tokens.get(index).getType() == ExpressionToken.TYPE_GET_PROP) {
+			tokens.set(index, OperatorToken
+					.getToken(ExpressionToken.TYPE_GET_METHOD));
+			return false;
+		} else {
+			tokens.add(index, OperatorToken
+					.getToken(ExpressionToken.TYPE_GET_STATIC_METHOD));
+			return true;
+		}
+	}
+
+	private void addListConstuctor() {
+		addToken(OperatorToken.getToken(ExpressionToken.BRACKET_BEGIN));
+		addToken(OperatorToken.getToken(ExpressionToken.TYPE_NEW_LIST));
+		if (!skipSpace(']')) {
+			addToken(OperatorToken.getToken(ExpressionToken.TYPE_PARAM_JOIN));
+		}
+	}
+
+	private void addMapConstructor() {
+		addToken(OperatorToken.getToken(ExpressionToken.BRACKET_BEGIN));
+		addToken(OperatorToken.getToken(ExpressionToken.TYPE_NEW_MAP));
 	}
 
 	private Number findNumber() {
@@ -481,7 +520,7 @@ class ExpressionTokenizerBase {
 			}
 			return (value.substring(start, start = p));
 		}
-		throw new RuntimeException();
+		throw new ExpressionSyntaxException();
 
 	}
 
@@ -553,12 +592,21 @@ class ExpressionTokenizerBase {
 		return null;
 	}
 
-	private void skipSpace() {
+	private boolean skipSpace(int... nextChars) {
 		while (start < end) {
 			if (!Character.isWhitespace(value.charAt(start))) {
 				break;
 			}
 			start++;
 		}
+		if(nextChars.length>0 && start<end){
+			int next = value.charAt(start);
+			for(int i :nextChars){
+				if(i == next){
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }

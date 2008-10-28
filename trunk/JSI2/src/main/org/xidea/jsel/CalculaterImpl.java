@@ -1,8 +1,7 @@
 package org.xidea.jsel;
 
-import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,12 +100,11 @@ public class CalculaterImpl implements Calculater {
 		case ExpressionToken.TYPE_GET_PROP:
 			return ReflectUtil.getValue(arg1, arg2);
 		case ExpressionToken.TYPE_GET_STATIC_METHOD:
-			return ReflectUtil.getGlobalMethod(String.valueOf(arg1));
+			return new Invoker(null,String.valueOf(arg1));
 		case ExpressionToken.TYPE_GET_METHOD:
-			return ReflectUtil.getMemberMethod(arg1, String.valueOf(arg2));
-
+			return new Invoker(arg1, String.valueOf(arg2));
 		case ExpressionToken.TYPE_INVOKE_METHOD:
-			return ReflectUtil.getMemberMethod(arg1, String.valueOf(arg2));
+			return ((Invoker)arg1).invoke((Object[])arg2);
 		case ExpressionToken.TYPE_INVOKE_STATIC_METHOD:
 			try {
 				return ((Method) arg1).invoke(null, ((List) arg2).toArray());
@@ -114,21 +112,16 @@ public class CalculaterImpl implements Calculater {
 				e.printStackTrace();
 				return null;
 			}
+		case ExpressionToken.TYPE_NEW_LIST:
+			return new ArrayList<Object>();
+		case ExpressionToken.TYPE_NEW_MAP:
+			return new HashMap<Object,Object>();
 		case ExpressionToken.TYPE_PARAM_JOIN:
 			((List) arg1).add(arg2);
 			return arg1;
-		case ExpressionToken.TYPE_OBJECT_SETTER:
-			return new Map.Entry<Object, Object>() {
-				public Object getKey() {
-					return arg1;
-				}
-				public Object getValue() {
-					return arg2;
-				}
-				public Object setValue(Object value) {
-					return null;
-				}
-			};
+		case ExpressionToken.TYPE_MAP_PUSH:
+			((Map) arg1).put(null,arg2);
+			return arg1;
 		}
 		throw new RuntimeException("不支持的操作符" + op.getType());
 
