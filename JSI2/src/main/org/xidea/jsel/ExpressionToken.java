@@ -55,9 +55,10 @@ public abstract interface ExpressionToken {
 	public static final int TYPE_POS = 26;//('+'<<8) + 'p';//負數
 	public static final int TYPE_NEG = 27;//('-'<<8) + 'n';//負數
 
-	public static final int TYPE_GET_MEMBER_METHOD = 28;//('.'<<16) + ('('<<8) + ')';
-	public static final int TYPE_GET_GLOBAL_METHOD = 29;//('('<<8) + ')';
-	public static final int TYPE_CALL_METHOD = 30;
+	public static final int TYPE_GET_METHOD = 28;//('.'<<16) + ('('<<8) + ')';
+	public static final int TYPE_GET_STATIC_METHOD = 29;//('('<<8) + ')';
+	public static final int TYPE_INVOKE_METHOD = 30;
+	public static final int TYPE_INVOKE_STATIC_METHOD = 31;
 
 	public static final int SKIP_BEGIN = 100;
 	public static final int SKIP_END = 101;

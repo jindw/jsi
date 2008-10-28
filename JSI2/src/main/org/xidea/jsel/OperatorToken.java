@@ -13,9 +13,10 @@ public class OperatorToken implements ExpressionToken {
 		lengthMap.put(TYPE_NOT, 1);
 		lengthMap.put(TYPE_POS, 1);
 		lengthMap.put(TYPE_NEG, 1);
-		lengthMap.put(TYPE_GET_GLOBAL_METHOD, 1);
-		lengthMap.put(TYPE_QUESTION,2);
-		lengthMap.put(TYPE_QUESTION_SELECT,2);
+		lengthMap.put(TYPE_GET_STATIC_METHOD, 1);
+		//lengthMap.put(TYPE_INVOKE_STATIC_METHOD, 2);
+		//lengthMap.put(TYPE_QUESTION,2);
+		//lengthMap.put(TYPE_QUESTION_SELECT,2);
 	}
 
 	public static OperatorToken getToken(final int type) {
@@ -50,6 +51,19 @@ public class OperatorToken implements ExpressionToken {
 		this.length = length;
 	}
 	public String toString(){
-		return ExpressionTokenizer.getOperator(type);
+		String op = ExpressionTokenizer.getOperator(type);
+		if(op == null){
+			switch(type){
+			case ExpressionToken.TYPE_GET_METHOD:
+				return "#getMethod";
+			case ExpressionToken.TYPE_GET_STATIC_METHOD:
+				return "#getStaticMethod";
+			case ExpressionToken.TYPE_INVOKE_METHOD:
+				return "#invoke";
+			case ExpressionToken.TYPE_INVOKE_STATIC_METHOD:
+				return "#staticInvoke";
+			}
+		}
+		return op;
 	}
 }

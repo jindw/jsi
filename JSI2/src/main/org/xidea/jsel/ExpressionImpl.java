@@ -17,7 +17,8 @@ public class ExpressionImpl implements Expression {
 		this.expression = expressionTokens.toArray();
 	}
 
-	public Object evaluate(Map<Object, Object> context) {
+	@SuppressWarnings("unchecked")
+	public Object evaluate(Map context) {
 		ValueStack stack = new ValueStack();
 		evaluate(stack, expression, context);
 		return stack.pop();

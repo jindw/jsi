@@ -1,6 +1,7 @@
 package org.xidea.jsel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -76,10 +77,10 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 		case ExpressionToken.TYPE_AND:
 		case ExpressionToken.TYPE_QUESTION:
 		case ExpressionToken.TYPE_QUESTION_SELECT:
-			 List<ExpressionToken> children = rightStack.pop();
-			 List<ExpressionToken> list = rightStack.getFirst();
-			 LazyToken token = (LazyToken) list.get(list.size()-1);
-			 token.setChildren(toArray(children));
+			List<ExpressionToken> children = rightStack.pop();
+			List<ExpressionToken> list = rightStack.getFirst();
+			LazyToken token = (LazyToken) list.get(list.size() - 1);
+			token.setChildren(toArray(children));
 		}
 		addToken(rightStack, operator);
 	}
@@ -92,9 +93,10 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 		}
 		list.add(token);
 	}
-	private ExpressionToken[] toArray(List<ExpressionToken> list){
+
+	private ExpressionToken[] toArray(List<ExpressionToken> list) {
 		ExpressionToken[] expression = new ExpressionToken[list.size()];
-		int i = expression.length-1;
+		int i = expression.length - 1;
 		for (ExpressionToken expressionToken : list) {
 			expression[i--] = expressionToken;
 		}
@@ -110,14 +112,14 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 }
 
 class ExpressionTokenizerBase {
-	private static final int BEGIN = -100;
-	private static final int EXPRESSION = -101;
-	private static final int OPERATOR = -102;
+	private static final int STATUS_BEGIN = -100;
+	private static final int STATUS_EXPRESSION = -101;
+	private static final int STATUS_OPERATOR = -102;
 	private String value;
 	private int start;
 	private final int end;
-	private int status = BEGIN;
-	private int previousType = BEGIN;
+	private int status = STATUS_BEGIN;
+	private int previousType = STATUS_BEGIN;
 
 	protected List<ExpressionToken> tokens = new ArrayList<ExpressionToken>();
 	protected List<ExpressionToken> expression;
@@ -129,17 +131,19 @@ class ExpressionTokenizerBase {
 	private static void addOperator(int type, int priopity, String key,
 			List<String> ops) {
 		PRIORITY_MAP.put(type, priopity);
-		TYPE_OP_MAP.put(type, key);
-		if (OP_TYPE_MAP.containsKey(key)) {
-			OP_TYPE_MAP.put(key, -1);
-		} else {
-			OP_TYPE_MAP.put(key, type);
-		}
-		if (key.length() == 1) {
-			ops.add(key);
-		} else if (key.length() == 2) {
-			// 当前只有二个字符的操作符，以后需要扩展
-			ops.add(0, key);
+		if (key != null) {
+			TYPE_OP_MAP.put(type, key);
+			if (OP_TYPE_MAP.containsKey(key)) {
+				OP_TYPE_MAP.put(key, -1);
+			} else {
+				OP_TYPE_MAP.put(key, type);
+			}
+			if (key.length() == 1) {
+				ops.add(key);
+			} else if (key.length() == 2) {
+				// 当前只有二个字符的操作符，以后需要扩展
+				ops.add(0, key);
+			}
 		}
 	}
 
@@ -158,9 +162,10 @@ class ExpressionTokenizerBase {
 		addOperator(ExpressionToken.BRACKET_END, Integer.MIN_VALUE, ")", ops);
 
 		addOperator(ExpressionToken.TYPE_GET_PROP, 12, ".", ops);
-		addOperator(ExpressionToken.TYPE_GET_MEMBER_METHOD, 12, "", ops);
-		addOperator(ExpressionToken.TYPE_GET_GLOBAL_METHOD, 12, "", ops);
-		addOperator(ExpressionToken.TYPE_CALL_METHOD, 12, "", ops);
+		addOperator(ExpressionToken.TYPE_GET_METHOD, 12, null, ops);
+		addOperator(ExpressionToken.TYPE_GET_STATIC_METHOD, 12, null, ops);
+		addOperator(ExpressionToken.TYPE_INVOKE_METHOD, 12, null, ops);
+		addOperator(ExpressionToken.TYPE_INVOKE_STATIC_METHOD, 12, null, ops);
 
 		addOperator(ExpressionToken.TYPE_NOT, 8, "!", ops);
 		addOperator(ExpressionToken.TYPE_POS, 8, "+", ops);
@@ -208,15 +213,15 @@ class ExpressionTokenizerBase {
 	private void addToken(ExpressionToken token) {
 		switch (token.getType()) {
 		case ExpressionToken.BRACKET_BEGIN:
-			status = BEGIN;
+			status = STATUS_BEGIN;
 			break;
 		case ExpressionToken.TYPE_CONSTANTS:
 		case ExpressionToken.TYPE_VAR:
 		case ExpressionToken.BRACKET_END:
-			status = EXPRESSION;
+			status = STATUS_EXPRESSION;
 			break;
 		default:
-			status = OPERATOR;
+			status = STATUS_OPERATOR;
 			break;
 		}
 		// previousType2 = previousType;
@@ -235,12 +240,12 @@ class ExpressionTokenizerBase {
 			} else if (type == ExpressionToken.BRACKET_END) {
 				depth++;
 			}
-			if (depth == -1) {// <getGloablMethod> '#map' <callMethod>(
+			if (depth == -1) {// <getGloablMethod> '#map' <callStaticMethod>(
 				if (i >= 3) {
 					ExpressionToken token1 = tokens.get(i - 3);
 					ExpressionToken token3 = tokens.get(i - 1);
-					if (token1.getType() == ExpressionToken.TYPE_GET_GLOBAL_METHOD
-							&& token3.getType() == ExpressionToken.TYPE_CALL_METHOD) {
+					if (token1.getType() == ExpressionToken.TYPE_GET_STATIC_METHOD
+							&& token3.getType() == ExpressionToken.TYPE_INVOKE_STATIC_METHOD) {
 						ExpressionToken token2 = tokens.get(i - 2);
 						if (token2 instanceof ConstantsToken) {
 							return ExpressionToken.INTERNAL_METHOD_MAP
@@ -274,10 +279,11 @@ class ExpressionTokenizerBase {
 						// call
 						if (previousType == ExpressionToken.TYPE_GET_PROP) {
 							addToken(OperatorToken
-									.getToken(ExpressionToken.TYPE_GET_MEMBER_METHOD));
+									.getToken(ExpressionToken.TYPE_GET_METHOD));
 						} else {
 							addToken(OperatorToken
-									.getToken(ExpressionToken.TYPE_GET_GLOBAL_METHOD));
+									.getToken(ExpressionToken.TYPE_GET_STATIC_METHOD));
+
 						}
 					} else if (previousType == ExpressionToken.TYPE_GET_PROP) {
 						addToken(new ConstantsToken(id));
@@ -303,29 +309,41 @@ class ExpressionTokenizerBase {
 										.getToken(ExpressionToken.BRACKET_BEGIN));
 								break;
 							case '[':
-								if (status == BEGIN) {// list
+								if (status == STATUS_BEGIN || status == STATUS_OPERATOR) {// list
 									addToken(OperatorToken
-											.getToken(ExpressionToken.TYPE_GET_GLOBAL_METHOD));
+											.getToken(ExpressionToken.BRACKET_BEGIN));
+									addToken(OperatorToken
+											.getToken(ExpressionToken.TYPE_GET_STATIC_METHOD));
 									addToken(new ConstantsToken(
 											ExpressionToken.INTERNAL_METHOD_LIST));
 									addToken(OperatorToken
-											.getToken(ExpressionToken.TYPE_CALL_METHOD));
-								} else if (status == EXPRESSION) {// getProperty
+											.getToken(ExpressionToken.TYPE_INVOKE_STATIC_METHOD));
+									addToken(new ConstantsToken(Collections.EMPTY_LIST));
+									skipSpace();
+									if (!value.startsWith("]", start)) {
+										addToken(OperatorToken
+												.getToken(ExpressionToken.TYPE_PARAM_JOIN));
+									}
+
+								} else if (status == STATUS_EXPRESSION) {// getProperty
+									addToken(OperatorToken
+											.getToken(ExpressionToken.TYPE_GET_PROP));
+									addToken(OperatorToken
+											.getToken(ExpressionToken.BRACKET_BEGIN));
 								} else {
 									throw new RuntimeException("语法错误:" + value
 											+ "@" + start);
 								}
-								addToken(OperatorToken
-										.getToken(ExpressionToken.BRACKET_BEGIN));
-
 								break;
 							case '{':
 								addToken(OperatorToken
-										.getToken(ExpressionToken.TYPE_GET_GLOBAL_METHOD));
+										.getToken(ExpressionToken.BRACKET_END));
+								addToken(OperatorToken
+										.getToken(ExpressionToken.TYPE_GET_STATIC_METHOD));
 								addToken(new ConstantsToken(
 										ExpressionToken.INTERNAL_METHOD_MAP));
 								addToken(OperatorToken
-										.getToken(ExpressionToken.TYPE_CALL_METHOD));
+										.getToken(ExpressionToken.TYPE_INVOKE_STATIC_METHOD));
 								addToken(OperatorToken
 										.getToken(ExpressionToken.BRACKET_BEGIN));
 								break;
@@ -337,13 +355,13 @@ class ExpressionTokenizerBase {
 								break;
 							case '+'://
 								addToken(OperatorToken
-										.getToken(status == OPERATOR ? ExpressionToken.TYPE_POS
+										.getToken(status == STATUS_OPERATOR ? ExpressionToken.TYPE_POS
 												: ExpressionToken.TYPE_ADD));
 								// addToken(OperatorToken.getToken(ExpressionToken.SKIP_AND));
 								break;
 							case '-':
 								addToken(OperatorToken
-										.getToken(status == OPERATOR ? ExpressionToken.TYPE_NEG
+										.getToken(status == STATUS_OPERATOR ? ExpressionToken.TYPE_NEG
 												: ExpressionToken.TYPE_SUB));
 								// addToken(OperatorToken.getToken(ExpressionToken.SKIP_AND));
 								break;

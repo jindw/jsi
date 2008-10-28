@@ -1,6 +1,7 @@
 package org.xidea.jsel;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -8,63 +9,6 @@ import java.util.Map;
 
 public class CalculaterImpl implements Calculater {
 	private static final Object SKIP_QUESTION = new Object();
-
-	private static Map<Class<?>, Map<String, PropertyDescriptor>> classPropertyMap = new HashMap<Class<?>, Map<String, PropertyDescriptor>>();
-
-	private static Map<String, PropertyDescriptor> getPropertyMap(Class<?> clazz) {
-		Map<String, PropertyDescriptor> propertyMap = classPropertyMap
-				.get(clazz);
-		if (propertyMap == null) {
-			try {
-				propertyMap = new HashMap<String, PropertyDescriptor>();
-				classPropertyMap.put(clazz, propertyMap);
-				PropertyDescriptor[] properties = java.beans.Introspector
-						.getBeanInfo(clazz).getPropertyDescriptors();
-				for (int i = 0; i < properties.length; i++) {
-					PropertyDescriptor property = properties[i];
-					propertyMap.put(property.getName(), property);
-				}
-			} catch (Exception e) {
-			}
-		}
-		return propertyMap;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static Object getValue(Object context, Object key) {
-		if (context != null) {
-			try {
-				if (context instanceof Object[]) {
-					return ((Object[]) context)[toIndex(key)];
-				} else if (context instanceof List) {
-					return ((List<Object>) context).get(toIndex(key));
-				}
-			} catch (Exception ex) {
-
-			}
-			if (context instanceof Map) {
-				return ((Map) context).get(key);
-			}
-			Map<String, PropertyDescriptor> pm = getPropertyMap(context
-					.getClass());
-			PropertyDescriptor pd = pm.get(key);
-			if (pd != null) {
-				Method method = pd.getReadMethod();
-				if (method != null) {
-					try {
-						return method.invoke(context);
-					} catch (Exception e) {
-					}
-				}
-			}
-		}
-		return null;
-	}
-
-	private static int toIndex(Object key) {
-		return key instanceof Number ? ((Number) key).intValue() : Integer
-				.valueOf(String.valueOf(key));
-	}
 
 	protected boolean toBoolean(Object value) {
 		if (value instanceof Number) {
@@ -94,7 +38,8 @@ public class CalculaterImpl implements Calculater {
 		return offset > 0 ? 1 : offset == 0 ? 0 : -1;
 	}
 
-	public Object compute(OperatorToken op, Object arg1, Object arg2) {
+	@SuppressWarnings("unchecked")
+	public Object compute(OperatorToken op, final Object arg1, final Object arg2) {
 		switch (op.getType()) {
 		case ExpressionToken.TYPE_NOT:
 			return !toBoolean(arg1);
@@ -147,16 +92,43 @@ public class CalculaterImpl implements Calculater {
 				return SKIP_QUESTION;
 			}
 		case ExpressionToken.TYPE_QUESTION_SELECT:
-			if(arg1 == SKIP_QUESTION){
+			if (arg1 == SKIP_QUESTION) {
 				return arg2;
-			}else{
+			} else {
 				return arg1;
 			}
-			
-		case ExpressionToken.TYPE_GET_PROP:
-			return getValue(arg1, arg2);
-		case ExpressionToken.TYPE_GET_GLOBAL_METHOD:
 
+		case ExpressionToken.TYPE_GET_PROP:
+			return ReflectUtil.getValue(arg1, arg2);
+		case ExpressionToken.TYPE_GET_STATIC_METHOD:
+			return ReflectUtil.getGlobalMethod(String.valueOf(arg1));
+		case ExpressionToken.TYPE_GET_METHOD:
+			return ReflectUtil.getMemberMethod(arg1, String.valueOf(arg2));
+
+		case ExpressionToken.TYPE_INVOKE_METHOD:
+			return ReflectUtil.getMemberMethod(arg1, String.valueOf(arg2));
+		case ExpressionToken.TYPE_INVOKE_STATIC_METHOD:
+			try {
+				return ((Method) arg1).invoke(null, ((List) arg2).toArray());
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+		case ExpressionToken.TYPE_PARAM_JOIN:
+			((List) arg1).add(arg2);
+			return arg1;
+		case ExpressionToken.TYPE_OBJECT_SETTER:
+			return new Map.Entry<Object, Object>() {
+				public Object getKey() {
+					return arg1;
+				}
+				public Object getValue() {
+					return arg2;
+				}
+				public Object setValue(Object value) {
+					return null;
+				}
+			};
 		}
 		throw new RuntimeException("不支持的操作符" + op.getType());
 
