@@ -31,10 +31,11 @@ public class ExpressionImpl implements Expression {
 			if (item instanceof OperatorToken) {
 				Object arg2 = null;
 				Object arg1 = null;
-				if(((OperatorToken)item).getLength()>1){
+				int length = ((OperatorToken)item).getLength();
+				if(length>1){
 					arg2 = stack.pop();
 					arg1 = stack.pop();
-				}else{
+				}else if(length == 1){
 					arg1 = stack.pop();
 				}
 				Object result = calculater.compute((OperatorToken) item,arg1,arg2);
@@ -56,5 +57,4 @@ public class ExpressionImpl implements Expression {
 			}
 		}
 	}
-	
 }

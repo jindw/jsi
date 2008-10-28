@@ -8,6 +8,7 @@ public interface Calculater {
 	/**
 	 * @param it 
 	 * @return skip next value
+	 * @see CalculaterImpl
 	 */
 	public Object compute(OperatorToken op,Object arg1,Object arg2) ;
 }

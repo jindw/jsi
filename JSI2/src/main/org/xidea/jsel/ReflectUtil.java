@@ -2,24 +2,14 @@ package org.xidea.jsel;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ReflectUtil {
-	private static Map<String, Method> globalMethodMap = new HashMap<String, Method>();
-	private static Map<Class<?>, Map<String, Method>> staticMethodMap = new HashMap<Class<?>, Map<String, Method>>();
 	private static Map<Class<?>, Map<String, PropertyDescriptor>> classPropertyMap = new HashMap<Class<?>, Map<String, PropertyDescriptor>>();
 
-	static{
-		try {
-			globalMethodMap.put("#list",ReflectUtil.class.getDeclaredMethod("createList"));
-			globalMethodMap.put("#map",ReflectUtil.class.getDeclaredMethod("createMap"));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+
 	private static Map<String, PropertyDescriptor> getPropertyMap(Class<?> clazz) {
 		Map<String, PropertyDescriptor> propertyMap = classPropertyMap
 				.get(clazz);
@@ -39,12 +29,6 @@ public class ReflectUtil {
 		return propertyMap;
 	}
 
-	public static List<Object> createList(){
-		return new ArrayList<Object>();
-	}
-	public static Map<String, Object> createMap(){
-		return new HashMap<String, Object>();
-	}
 	private static int toIndex(Object key) {
 		return key instanceof Number ? ((Number) key).intValue() : Integer
 				.valueOf(String.valueOf(key));
@@ -77,13 +61,6 @@ public class ReflectUtil {
 				}
 			}
 		}
-		return null;
-	}
-	public static Method getGlobalMethod(String path){
-		return globalMethodMap.get(path);
-	}
-
-	public static Method getMemberMethod(Object object, String value) {
 		return null;
 	}
 

@@ -39,7 +39,22 @@ public class ExpressionImplTest {
 		Map<String, Object> context = new HashMap<String, Object>();
 		context.put("var1", Arrays.asList(1,2));
 		test("var1[0]+1+var1[1]",4,context);
+	}
+	@Test
+	public void testListConstructor() {
+		Map<String, Object> context = new HashMap<String, Object>();
 		test("[1,2,3][1]",2,context);
-		test("{aaa:123}['aaa']",123,context);
+	}
+	@Test
+	public void testMapConstructor() {
+		Map<String, Object> context = new HashMap<String, Object>();
+		test("{aaa:1,'bb':2}['aaa']",1,context);
+		test("{aaa:1,bb:2}['bb']",2,context);
+	}
+	@Test
+	public void testMethod() {
+		Map<String, Object> context = new HashMap<String, Object>();
+		test("'123'.startsWith('12')",true,context);
+		test("'123'.endsWith('12')",false,context);
 	}
 }
