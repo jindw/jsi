@@ -1,4 +1,4 @@
-package org.xidea.jsel.test;
+package org.xidea.el.test;
 
 import static org.junit.Assert.assertEquals;
 
