@@ -1,4 +1,4 @@
-package org.xidea.jsel;
+package org.xidea.el.parser;
 
 public abstract interface ExpressionToken {
 
@@ -48,7 +48,7 @@ public abstract interface ExpressionToken {
 	public static final int TYPE_GET_METHOD = 28;//('.'<<16) + ('('<<8) + ')';
 	public static final int TYPE_GET_STATIC_METHOD = 29;//('('<<8) + ')';
 	public static final int TYPE_INVOKE_METHOD = 30;
-	public static final int TYPE_INVOKE_STATIC_METHOD = 31;
+//	public static final int TYPE_INVOKE_STATIC_METHOD = TYPE_INVOKE_METHOD;
 
 	public static final int SKIP_BEGIN = 100;
 	public static final int SKIP_END = 101;

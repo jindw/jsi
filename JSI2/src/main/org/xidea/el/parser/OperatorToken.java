@@ -1,4 +1,4 @@
-package org.xidea.jsel;
+package org.xidea.el.parser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,8 +67,6 @@ public class OperatorToken implements ExpressionToken {
 				return "#getStaticMethod";
 			case ExpressionToken.TYPE_INVOKE_METHOD:
 				return "#invoke";
-			case ExpressionToken.TYPE_INVOKE_STATIC_METHOD:
-				return "#staticInvoke";
 			}
 		}
 		return op;

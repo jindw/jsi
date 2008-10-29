@@ -1,4 +1,4 @@
-package org.xidea.jsel;
+package org.xidea.el;
 
 import org.xidea.template.Expression;
 

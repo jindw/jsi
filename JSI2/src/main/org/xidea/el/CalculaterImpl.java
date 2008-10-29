@@ -1,10 +1,14 @@
-package org.xidea.jsel;
+package org.xidea.el;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.xidea.el.parser.ExpressionToken;
+import org.xidea.el.parser.OperatorToken;
+import org.xidea.template.ReflectUtil;
 
 public class CalculaterImpl implements Calculater {
 	private static final Object SKIP_QUESTION = new Object();
@@ -104,10 +108,8 @@ public class CalculaterImpl implements Calculater {
 		case ExpressionToken.TYPE_GET_METHOD:
 			return new Invoker(arg1, String.valueOf(arg2));
 		case ExpressionToken.TYPE_INVOKE_METHOD:
-			return ((Invoker)arg1).invoke((Object[])arg2);
-		case ExpressionToken.TYPE_INVOKE_STATIC_METHOD:
 			try {
-				return ((Method) arg1).invoke(null, ((List) arg2).toArray());
+				return ((Invoker)arg1).invoke(((List) arg2).toArray());
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
@@ -120,7 +122,7 @@ public class CalculaterImpl implements Calculater {
 			((List) arg1).add(arg2);
 			return arg1;
 		case ExpressionToken.TYPE_MAP_PUSH:
-			((Map) arg1).put(null,arg2);
+			((Map) arg1).put(op.getParam(),arg2);
 			return arg1;
 		}
 		throw new RuntimeException("不支持的操作符" + op.getType());

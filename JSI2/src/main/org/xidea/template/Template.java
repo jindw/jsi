@@ -47,7 +47,7 @@ public class Template {
 		if (context instanceof Map) {
 		    map = (Map<Object, Object>) context;
 		} else {
-			map = PropertyExpression.map(context);
+			map = ReflectUtil.map(context);
 		}
 		return new ContextWrapper(map);
 	}
