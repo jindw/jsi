@@ -18,7 +18,7 @@ class ContextWrapper implements Map<Object, Object>{
 		if(stack!=null && stack.containsKey(key)){
 			return stack.get(key);
 		}
-		return PropertyExpression.getValue(context, key);
+		return ReflectUtil.getValue(context, key);
 	}
 
 	public Object put(Object key, Object value) {

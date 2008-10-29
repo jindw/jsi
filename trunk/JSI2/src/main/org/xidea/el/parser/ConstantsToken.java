@@ -1,20 +1,24 @@
-package org.xidea.jsel;
+package org.xidea.el.parser;
 
-public class VarToken implements ExpressionToken{
-	private String value;
-	public VarToken(String value){
+public class ConstantsToken implements ExpressionToken {
+	private Object value;
+
+	public ConstantsToken(Object value) {
 		this.value = value;
 	}
+
 	public int getType() {
 		return TYPE_CONSTANTS;
 	}
-	public String getValue(){
+
+	public Object getValue() {
 		return value;
 	}
+
 	@Override
 	public boolean equals(Object object) {
-		if(object instanceof VarToken){
-			Object target = ((VarToken)object).getValue();
+		if(object instanceof ConstantsToken){
+			Object target = ((ConstantsToken)object).getValue();
 			if(this.value !=null ){
 				return this.value.equals(target);
 			}else{
@@ -29,6 +33,7 @@ public class VarToken implements ExpressionToken{
 		return value == null?0:value.hashCode();
 	}
 	public String toString(){
-		return this.value;
+		return String.valueOf(this.value);
 	}
+	
 }

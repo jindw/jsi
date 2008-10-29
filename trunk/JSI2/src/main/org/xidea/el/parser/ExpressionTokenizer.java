@@ -1,4 +1,4 @@
-package org.xidea.jsel;
+package org.xidea.el.parser;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -167,7 +167,6 @@ class ExpressionTokenizerBase {
 		addOperator(ExpressionToken.TYPE_GET_METHOD, 12, null, ops);
 		addOperator(ExpressionToken.TYPE_GET_STATIC_METHOD, 12, null, ops);
 		addOperator(ExpressionToken.TYPE_INVOKE_METHOD, 12, null, ops);
-		addOperator(ExpressionToken.TYPE_INVOKE_STATIC_METHOD, 12, null, ops);
 		addOperator(ExpressionToken.TYPE_NEW_LIST, 12, "[", ops);
 		addOperator(ExpressionToken.TYPE_NEW_MAP, 12, "{", ops);
 
@@ -244,19 +243,12 @@ class ExpressionTokenizerBase {
 			} else if (type == ExpressionToken.BRACKET_END) {
 				depth++;
 			}
-			if (depth == -1) {// ( <getGloablMethod> '#map' <callStaticMethod>
-								// null
-				if (i + 3 < tokens.size()) {
+			if (depth == -1) {// ( <#newMap> <#push>
+				// null
+				if (i + 1 < tokens.size()) {
 					ExpressionToken token1 = tokens.get(i + 1);
-					ExpressionToken token3 = tokens.get(i + 3);
-					if (token1.getType() == ExpressionToken.TYPE_GET_STATIC_METHOD
-							&& token3.getType() == ExpressionToken.TYPE_INVOKE_STATIC_METHOD) {
-						ExpressionToken token2 = tokens.get(i + 2);
-						if (token2 instanceof ConstantsToken) {
-							return ExpressionToken.INTERNAL_METHOD_MAP
-									.equals(((ConstantsToken) token2)
-											.getValue());
-						}
+					if (token1.getType() == ExpressionToken.TYPE_NEW_MAP) {
+						return true;
 					}
 				}
 				break;
@@ -264,16 +256,17 @@ class ExpressionTokenizerBase {
 		}
 		return false;
 	}
+
 	private void parse() {
 		skipSpace();
 		while (start < end) {
 			char c = value.charAt(start);
 			if (c == '"' || c == '\'') {
 				String text = findString();
-				addKeyOrObject(text,false);
+				addKeyOrObject(text, false);
 			} else if (c >= '0' && c <= '9') {
 				Number number = findNumber();
-				addKeyOrObject(number,false);
+				addKeyOrObject(number, false);
 			} else if (Character.isJavaIdentifierStart(c)) {
 				String id = findId();
 				ExpressionToken constains = CONSTAINS_MAP.get(id);
@@ -282,7 +275,7 @@ class ExpressionTokenizerBase {
 					if (previousType == ExpressionToken.TYPE_GET_PROP) {
 						addToken(new ConstantsToken(id));
 					} else {
-						addKeyOrObject(id,true);
+						addKeyOrObject(id, true);
 					}
 				} else {
 					addToken(constains);
@@ -295,15 +288,22 @@ class ExpressionTokenizerBase {
 						start += op.length();
 						if (op.length() == 1) {
 							switch (op.charAt(0)) {
-							case '(':// method 已近简单处理了。不支持变量式函数
+							case '(':
 								if (status == STATUS_EXPRESSION) {
-									boolean isStatic = insertAndReturnIsStatic();
+									insertAndReturnIsStatic();
 									addToken(OperatorToken
-											.getToken(isStatic ? ExpressionToken.TYPE_INVOKE_STATIC_METHOD
-													: ExpressionToken.TYPE_INVOKE_METHOD));
-								}
-								addToken(OperatorToken
+											.getToken(ExpressionToken.TYPE_INVOKE_METHOD));
+									
+									if(skipSpace(')')){
+										addToken(new ConstantsToken(Collections.EMPTY_LIST));
+									}else{
+										addListConstuctor();
+									}
+									
+								}else{
+								    addToken(OperatorToken
 										.getToken(ExpressionToken.BRACKET_BEGIN));
+								}
 								break;
 							case '[':
 								if (status == STATUS_BEGIN
@@ -349,13 +349,14 @@ class ExpressionTokenizerBase {
 								break;
 							case ':':// :(object_setter is skiped)
 								addToken(OperatorToken
-											.getToken(ExpressionToken.TYPE_QUESTION_SELECT));
+										.getToken(ExpressionToken.TYPE_QUESTION_SELECT));
 								addToken(new LazyToken());
 								break;
-							case ',':// :(object_setter is skiped,',' should be skip)
+							case ',':// :(object_setter is skiped,',' should
+								// be skip)
 								if (!isMapMethod()) {
 									addToken(OperatorToken
-											.getToken(ExpressionToken.TYPE_QUESTION_SELECT));
+											.getToken(ExpressionToken.TYPE_PARAM_JOIN));
 
 								}
 								break;
@@ -389,9 +390,13 @@ class ExpressionTokenizerBase {
 		}
 	}
 
-	private void addKeyOrObject(Object object,boolean isVar){
+	private void addKeyOrObject(Object object, boolean isVar) {
 		if (skipSpace(':') && isMapMethod()) {// object key
-			addToken(OperatorToken.createToken(ExpressionToken.TYPE_MAP_PUSH, object));
+			addToken(OperatorToken.createToken(ExpressionToken.TYPE_MAP_PUSH,
+					object));
+			this.start++;//skip :
+		} else if(isVar){
+			addToken(new VarToken((String)object));
 		}else{
 			addToken(new ConstantsToken(object));
 		}
@@ -599,10 +604,10 @@ class ExpressionTokenizerBase {
 			}
 			start++;
 		}
-		if(nextChars.length>0 && start<end){
+		if (nextChars.length > 0 && start < end) {
 			int next = value.charAt(start);
-			for(int i :nextChars){
-				if(i == next){
+			for (int i : nextChars) {
+				if (i == next) {
 					return true;
 				}
 			}

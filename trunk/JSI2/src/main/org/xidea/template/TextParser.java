@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.xidea.el.JSExpressionFactory;
+
 
 public class TextParser implements Parser {
 	private static final Pattern FN_PATTERN = Pattern.compile("^[\\w]+\\s*$");
 
-	private static ExpressionFactory defaultExpressionFactory = new PropertyExpressionFactory();
+	private static ExpressionFactory defaultExpressionFactory = new JSExpressionFactory();
 
 	private ExpressionFactory expressionFactory = defaultExpressionFactory;
 
