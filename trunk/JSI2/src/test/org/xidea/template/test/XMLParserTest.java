@@ -8,7 +8,7 @@ import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.jsel.JSExpressionFactory;
+import org.xidea.el.JSExpressionFactory;
 import org.xidea.template.Template;
 import org.xidea.template.XMLParser;
 public class XMLParserTest {

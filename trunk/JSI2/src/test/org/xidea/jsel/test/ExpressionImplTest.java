@@ -8,7 +8,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.jsel.ExpressionImpl;
+import org.xidea.el.ExpressionImpl;
 
 public class ExpressionImplTest {
 
@@ -23,6 +23,7 @@ public class ExpressionImplTest {
 	@Test
 	public void testIntMath() {
 		test("1+2",3,null);
+		test("1/2",0.5,null);
 		test("1+2*2",5,null);
 		test("(1+2)*2",6,null);
 		test("(1-2)*2",-2,null);
@@ -50,6 +51,13 @@ public class ExpressionImplTest {
 		Map<String, Object> context = new HashMap<String, Object>();
 		test("{aaa:1,'bb':2}['aaa']",1,context);
 		test("{aaa:1,bb:2}['bb']",2,context);
+	}
+	@Test
+	public void testListMap() {
+		Map<String, Object> context = new HashMap<String, Object>();
+		test("{aaa:1,'bb':[1,3,2]}['bb'][0]",1,context);
+		test("{aaa:1,'bb':[1,3,2]}['bb']['1']",3,context);
+		test("[1,{aa:2}][1]['aa']",2,context);
 	}
 	@Test
 	public void testMethod() {
