@@ -1,6 +1,7 @@
 package org.xidea.el;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,101 +13,179 @@ import org.xidea.template.ReflectUtil;
 public class CalculaterImpl extends NumberArithmetic implements Calculater {
 	private static final Object SKIP_QUESTION = new Object();
 
-	protected boolean toBoolean(Object value) {
-		if (value instanceof Number) {
-			if (((Number) value).floatValue() == 0) {
-				return false;
+	/**
+	 * 
+	 * @param <T>
+	 * @param value
+	 * @param expectedType
+	 * @see <a href="http://www.ecma-international.org/publications/standards/Ecma-262.htm">Ecma262</a>
+	 * @return  <null|Number|Boolean|String>
+	 */
+	@SuppressWarnings("unchecked")
+	public Object ToPrimitive(Object value, Class<?> expectedType) {
+		boolean toString;
+		if (expectedType == Number.class){
+			toString = false;
+		}else if (expectedType == String.class){
+			toString = true;
+		}else if(expectedType == null){
+			toString =!(value instanceof Date);
+		}else{
+			throw new IllegalArgumentException("expectedType 只能是 Number或者String");
+		}
+		if(value == null){
+			return null;
+		}else if (value instanceof Boolean) {
+			return value;
+		} else if (value instanceof Number) {
+			return value;
+		} else if (value instanceof String) {
+			return value;
+		}
+		
+		if (toString) {
+			return String.valueOf(value);
+		} else{
+			if (value instanceof Date) {
+				return new Long(((Date) value).getTime());
+			} else {
+				return String.valueOf(value);
 			}
+			
 		}
-		return value != null && !Boolean.FALSE.equals(value)
-				&& !"".equals(value);
 	}
-
-	protected boolean compare(int type, Object arg1, Object arg2) {
-		switch (type) {
-		case ExpressionToken.TYPE_GT:
-			return compare(arg1, arg2) > 0;
-		case ExpressionToken.TYPE_GTEQ:
-			return compare(arg1, arg2) >= 0;
-		case ExpressionToken.TYPE_EQ:
-			return compare(arg1, arg2) == 0;
-		case ExpressionToken.TYPE_LT:
-			return compare(arg1, arg2) < 0;
-		case ExpressionToken.TYPE_LTEQ:
-			return compare(arg1, arg2) <= 0;
+	/**
+	 * @param value
+	 * @see <a href="http://www.ecma-international.org/publications/standards/Ecma-262.htm">Ecma262</a>
+	 * @return
+	 */
+	public boolean ToBoolean(Object value) {
+		if( value == null){
+			return false;
+		}else if (value instanceof Number) {
+			if(value instanceof Float || value instanceof Double){
+				return ((Number) value).floatValue() != 0;
+			}else if(value instanceof Long){
+				return ((Number) value).longValue() != 0;
+			}else {
+				return ((Number) value).intValue() != 0;
+			}
+		}else if(value instanceof String){
+			return ((String)value).length() > 0;
+		}else if(value instanceof Boolean){
+			return (Boolean)value;
+		}else{
+			return true;
 		}
-		throw new RuntimeException("怎么可能？？？");
 	}
-
-	protected int compare(Object arg1, Object arg2) {
-		if (arg1 instanceof Comparable<?> && arg2 instanceof Comparable<?>) {
-			@SuppressWarnings("unchecked")
-			Comparable<Object> comparable = ((Comparable<Object>) arg1);
-			return comparable.compareTo((Comparable<?>) arg2);
-		}
-		double offset = toFloat(arg1) - toFloat(arg2);
-		return offset > 0 ? 1 : offset == 0 ? 0 : -1;
-	}
-
-	protected Number toNumber(Object arg1, boolean force) {
-		if (arg1 == null) {
+	/**
+	 * @param arg1
+	 * @param force
+	 * @see <a href="http://www.ecma-international.org/publications/standards/Ecma-262.htm">Ecma262</a>
+	 * @return
+	 */
+	private Number ToNumber(Object value) {
+		value = ToPrimitive(value,String.class);
+		if(value == null){
 			return 0;
-		} else if (arg1 instanceof Boolean) {
-			return (Boolean) arg1 ? 1 : 0;
-		} else if (arg1 instanceof Number) {
-			return (Number) arg1;
-		} else if (force) {
-			String n = String.valueOf(arg1);
+		}else if (value instanceof Boolean) {
+			return ((Boolean)value)?1:0;
+		} else if (value instanceof Number) {
+			return (Number)value;
+		}else{
+			String text = (String)value;
 			try {
-				if (n.indexOf('.') >= 0) {
-					return Double.parseDouble(n);
+				if (text.indexOf('.') >= 0) {
+					return Float.parseFloat(text);
 				}
-				if (n.startsWith("0x")) {
-					return Long.parseLong(n.substring(2),16);
-				} else if (n.startsWith("0")) {
-					return Long.parseLong(n.substring(1),8);
+				if (text.startsWith("0x")) {
+					return Long.parseLong(text.substring(2), 16);
+				} else if (text.startsWith("0")) {
+					return Integer.parseInt(text.substring(1), 8);
 				} else {
-					return Long.parseLong(n.substring(1),10);
+					return Integer.parseInt(text.substring(1), 10);
 				}
 			} catch (NumberFormatException ex) {
 				return Double.NaN;
 			}
-		} else {
-			return null;
 		}
 	}
+
+	protected boolean compare(int type, Object arg1, Object arg2) {
+		switch (type) {
+		case ExpressionToken.TYPE_EQ:
+			return compare(arg1, arg2,-1) == 0;
+		case ExpressionToken.TYPE_NOTEQ:
+			return compare(arg1, arg2,0) != 0;
+		case ExpressionToken.TYPE_GT:
+			return compare(arg1, arg2,-1) > 0;
+		case ExpressionToken.TYPE_GTEQ:
+			return compare(arg1, arg2,-1) >= 0;
+		case ExpressionToken.TYPE_LT:
+			return compare(arg1, arg2,1) < 0;
+		case ExpressionToken.TYPE_LTEQ:
+			return compare(arg1, arg2,1) <= 0;
+		}
+		throw new RuntimeException("怎么可能？？？");
+	}
+
+	/**
+	 * @param arg1
+	 * @param arg2
+	 * @see <a href="http://www.ecma-international.org/publications/standards/Ecma-262.htm">Ecma262</a>
+	 * @return
+	 */
+	protected int compare(Object arg1, Object arg2,int validReturn) {
+		if(arg1 == null){
+			if(arg2 == null){
+				return 0;
+			}
+		}else if(arg1.equals(arg2)){
+			return 0;
+		}
+		arg1 = ToPrimitive(arg1, Number.class);
+		arg2 = ToPrimitive(arg2, Number.class);
+		if(arg1 instanceof String && arg2 instanceof String){
+			return ((String)arg1).compareTo((String)arg2);
+		}
+		Number n1 = ToNumber(arg1);
+		Number n2 = ToNumber(arg2);
+		return this.compare(n1,n2,validReturn);
+	}
+
 
 	@SuppressWarnings("unchecked")
 	public Object compute(OperatorToken op, final Object arg1, final Object arg2) {
 		final int type = op.getType();
 		switch (type) {
 		case ExpressionToken.TYPE_NOT:
-			return !toBoolean(arg1);
+			return !ToBoolean(arg1);
 		case ExpressionToken.TYPE_POS:
-			return toNumber(arg1,true);
+			return ToNumber(arg1);
 		case ExpressionToken.TYPE_NEG:
-			return this.subtract(0,toNumber(arg1,true));
+			return this.subtract(0, ToNumber(arg1));
 			/* +-*%/ */
 		case ExpressionToken.TYPE_ADD:
-			Number n1 = toNumber(arg1,false);
-			Number n2 = toNumber(arg2,false);
-			if(n1 != null && n2 != null){
-				return this.add(n1,n2);
-			}else{
-				return String.valueOf(arg1)+String.valueOf(arg2);
+			Object p1 = ToPrimitive(arg1, String.class);
+			Object p2 = ToPrimitive(arg2, String.class);
+			if (p1 instanceof String && p2 instanceof String) {
+				return String.valueOf(p1) + p2;
+			} else {
+				return this.add(ToNumber(p1), ToNumber(p2));
 			}
 		case ExpressionToken.TYPE_SUB:
-			return this.subtract(toNumber(arg1,true),toNumber(arg2,true));
+			return this.subtract(ToNumber(arg1), ToNumber(arg2));
 		case ExpressionToken.TYPE_MUL:
-			return this.multiply(toNumber(arg1,true),toNumber(arg2,true));
+			return this.multiply(ToNumber(arg1), ToNumber(arg2));
 		case ExpressionToken.TYPE_DIV:
-			return this.divide(toNumber(arg1,true),toNumber(arg2,true));
+			return this.divide(ToNumber(arg1), ToNumber(arg2));
 		case ExpressionToken.TYPE_MOD:
-			return this.modulus(toNumber(arg1,true),toNumber(arg2,true));
+			return this.modulus(ToNumber(arg1), ToNumber(arg2));
 
 			/* boolean */
 		case ExpressionToken.TYPE_GT:
 		case ExpressionToken.TYPE_GTEQ:
+		case ExpressionToken.TYPE_NOTEQ:
 		case ExpressionToken.TYPE_EQ:
 		case ExpressionToken.TYPE_LT:
 		case ExpressionToken.TYPE_LTEQ:
@@ -114,20 +193,20 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 
 			/* and or */
 		case ExpressionToken.TYPE_AND:
-			if (toBoolean(arg1)) {
+			if (ToBoolean(arg1)) {
 				return arg2;// 进一步判断
 			} else {// false
 				return arg1;// //skip
 			}
 
 		case ExpressionToken.TYPE_OR:
-			if (toBoolean(arg1)) {
+			if (ToBoolean(arg1)) {
 				return arg1;
 			} else {
 				return arg2;
 			}
 		case ExpressionToken.TYPE_QUESTION:// a?b:c -> a?:bc -- >a?b:c
-			if (toBoolean(arg1)) {// 取值1
+			if (ToBoolean(arg1)) {// 取值1
 				return arg2;
 			} else {// 跳过 取值2
 				return SKIP_QUESTION;
