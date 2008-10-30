@@ -506,7 +506,7 @@ class ExpressionTokenizerBase {
 		if (text.startsWith("0x")) {
 			return Integer.parseInt(text.substring(2), 16);
 		} else if (text.indexOf('.') >= 0) {
-			return Double.parseDouble(text);
+			return Float.parseFloat(text);
 		} else if (text.charAt(0) == '0' && text.length() > 1) {
 			return Integer.parseInt(text.substring(1), 8);
 		} else {
