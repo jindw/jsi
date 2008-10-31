@@ -2,15 +2,18 @@ package org.xidea.el;
 
 import java.lang.reflect.Method;
 
-public class Invoker {
+public class InvokerImp implements Invocable {
 	private Object object;
 	private String name;
 	
-	public Invoker(Object object, String name) {
+	public InvokerImp(Object object, String name) {
 		this.object = object;
 		this.name = name;
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.xidea.el.Invocable#invoke(java.lang.Object)
+	 */
 	public Object invoke(Object... args) {
 		try {
 			Class<?> clazz =null;

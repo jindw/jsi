@@ -40,7 +40,7 @@ TextParser.prototype.addParser(function(node,context){
 
 
 
-function parseText(text,encodeXML){
+function parseText(text,xmlText,xmlAttr){
     if(!text){
         return [];
     }
@@ -67,7 +67,12 @@ function parseText(text,encodeXML){
                 try{
                     var expression = text.substring(expressionBegin ,expressionEnd );
                     expression = parseEL(expression);
-                    buf.push([encodeXML ? EL_TYPE_XML_TEXT : EL_TYPE,expression]);
+                    if(xmlAttr){
+                    	buf.push([ATTRIBUTE_TYPE,expression]);
+                    }else{
+                    	buf.push([xmlText ? EL_TYPE_XML_TEXT : EL_TYPE,expression]);
+                    }
+                    
                     text = text.substr(expressionEnd+1);
                     pattern = text && new RegExp(pattern);
                     //continue seach;
@@ -78,7 +83,7 @@ function parseText(text,encodeXML){
     }
     text && buf.push(text);
     //hack reuse begin as index
-    if(encodeXML){
+    if(xmlText||xmlAttr){
         var begin = buf.length;
         while(begin--){
             //hack match reuse match as item
@@ -87,7 +92,7 @@ function parseText(text,encodeXML){
             	buf.splice(begin,1);
             }
             if(match.constructor == String){
-                buf[begin] = match.replace(/[<>&'"]/g,xmlReplacer);
+                buf[begin] = match.replace(xmlAttr?/[<>&'"]/g:/[<>&]/g,xmlReplacer);
             }
         }
     }
@@ -115,22 +120,25 @@ function parseEL(expression){
         expression = compileEL(expression)
     }
     expression = expression.replace(/^\s+|[\s]+$/g,'');//trim
-    if(/^(?:true|false|[\d\.]+)$/.test(expression)){
-        return window.eval(expression);
-    } else if(/^(?:"[^"]*?"|'[^']*?')$/.test(expression)){
-        return buildFunction("return " + expression);
-    } else if(/^[_$a-zA-Z](?:[\.\s\w\_]|\[(?:"[^"]*?"|'[^']*?'|\d+)\])*$/.test(expression)){
-        expression = expression.replace(/\s+/g,'');
-        expression = expression.match(/[\w_\$]+|"[^"]*?"|'[^']*?'/g).reverse();
-        var i = expression.length;
+    if(/^(?:true|false|[\d\.]+|(?:"[^"]*?"|'[^']*?'))$/.test(expression)){//true,false,number,string
+        return [window.eval(expression)];
+    } else if(/^[_$a-zA-Z](?:[\.\s\w\_]|\[(?:"[^"]*?"|'[^']*?'|\d+)\])*$/.test(expression)){//array[1.2];这类格式不处理
+        var tokens = expression.match(/[\w_\$]+|"[^"]*?"|'[^']*?'/g).reverse();//[\d\.]+|
+        var i = tokens.length;
         while(i--){
-        	var item = expression[i];
+        	var item = tokens[i];
         	if(/['"]/.test(item)){
         		item = window.eval(item);
+        		if(item.indexOf('.')>=0){
+        			tokens = null;
+        			break;
+        		}
         	}
-            expression[i] = item;
+            tokens[i] = item;
         }
-        return expression;
+        if(tokens){
+            return tokens.join('.');
+        }
     }
     expression = expression.replace(/[\s;]+$/g,'');//
     var pos = expression.length;

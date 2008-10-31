@@ -13,7 +13,7 @@ public class ContainsStringExpression implements Expression {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Object evaluate(Map<Object, Object> context) {
+	public Object evaluate(Map context) {
 		Object collection = collectionEL.evaluate(context);
 		Object value = valueEL.evaluate(context);
 		if (value != null) {

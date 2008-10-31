@@ -8,7 +8,6 @@ import org.xidea.el.parser.ExpressionTokenizer;
 import org.xidea.el.parser.LazyToken;
 import org.xidea.el.parser.OperatorToken;
 import org.xidea.el.parser.VarToken;
-import org.xidea.template.Expression;
 
 public class ExpressionImpl implements Expression {
 	private static final Calculater DEFAULT_CALCULATER = new CalculaterImpl();
@@ -52,7 +51,8 @@ public class ExpressionImpl implements Expression {
 				}
 			} else{
 				if(item instanceof VarToken){
-					stack.push(context.get(((VarToken)item).getValue()));
+					String value = ((VarToken)item).getValue();
+					stack.push("this".equals(value)?context:context.get(value));
 				}else if(item instanceof ConstantsToken){
 					stack.push(((ConstantsToken)item).getValue());
 				}else if(item instanceof LazyToken){
