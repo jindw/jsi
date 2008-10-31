@@ -2,10 +2,6 @@ package org.xidea.el.parser;
 
 public abstract interface ExpressionToken {
 
-	public static final String INTERNAL_METHOD_MAP = "#map";
-	public static final String INTERNAL_METHOD_LIST = "#list";
-	
-	
 	public static final int TYPE_CONSTANTS = 0;//'c';
 	public static final int TYPE_VAR = 1;//'n';
 
@@ -48,15 +44,10 @@ public abstract interface ExpressionToken {
 	public static final int TYPE_GET_METHOD = 28;//('.'<<16) + ('('<<8) + ')';
 	public static final int TYPE_GET_STATIC_METHOD = 29;//('('<<8) + ')';
 	public static final int TYPE_INVOKE_METHOD = 30;
-//	public static final int TYPE_INVOKE_STATIC_METHOD = TYPE_INVOKE_METHOD;
 
 	public static final int SKIP_BEGIN = 100;
 	public static final int SKIP_END = 101;
 	
-	
-//	public static final int SKIP_OR = -10;
-//	public static final int SKIP_AND = -11;
-//	public static final int SKIP_QUESTION = -12;
 	
 	
 	

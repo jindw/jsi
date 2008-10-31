@@ -51,16 +51,21 @@ function Template(data,type){
  */
 Template.prototype.render = function(context){
     var buf = [];
-    renderList(new Context(context),this.data,buf)
+    var context2 = {};
+    for(var n in context){
+        context2[n] = context[n];
+    }
+    //context2["this"] = context2;
+    renderList(context2,this.data,buf)
     return buf.join("");
 }
-function Context(context){
-    for(var n in context){
-        this[n] = context[n];
-    }
-    this["this"] = this;
-}
-Context.prototype = window;
+//function Context(context){
+//    for(var n in context){
+//        this[n] = context[n];
+//    }
+//    this["this"] = this;
+//}
+//Context.prototype = window;
 /**
  * 模版渲染函数
  * @internal
@@ -120,10 +125,10 @@ function compileItem(object,itemsStack){
             buildExpression(object,itemsStack);
             break;
         case 6://":encode_el":
-            buildExpression(object,itemsStack);
+            buildExpression(object,itemsStack,true);
             break;
         case 7://":attribute":
-            buildAttribute(object,itemsStack,true);
+            buildAttribute(object,itemsStack);
             break;
         case 1://":set"://var
             buildVar(object,itemsStack);
@@ -145,7 +150,7 @@ function compileItem(object,itemsStack){
 
 /**
  * 构建表达式
- * el             [EL_TYPE,expression,unescape]
+ * el             [EL_TYPE,expression]
  * @internal
  */
 function buildExpression(data,itemsStack,encode){
@@ -155,7 +160,7 @@ function buildExpression(data,itemsStack,encode){
     itemsStack[0].push(function(context,result){
         var value = el(context);
         if(encode && value!=null ){
-            value = String(value).replace(/[<>&'"]/g,xmlReplacer)
+            value = String(value).replace(/[<>&]/g,xmlReplacer)
         }
         result.push(value);
     });
@@ -163,21 +168,31 @@ function buildExpression(data,itemsStack,encode){
 
 /**
  * 构建标记属性
- * attribute      [ATTRIBUTE_TYPE,name,expression]             //表达式
+ * attribute      [ATTRIBUTE_TYPE,expression,name]             //表达式
  * name="${}"
  * name = "${123}1230"?? 不可能出现，所以只能是i ==1
  * @internal
  */
 function buildAttribute(data,itemsStack){
-    var prefix = " "+data[1]+'="';
-    var data = createExpression(data[2]);
-    itemsStack[0].push(function(context,result){
-        var buf = data(context);
-        //alert(buf)
-        if(buf!=null){
-            result.push(prefix,String(buf).replace(/[<>&'"]/g,xmlReplacer)+'"');
-        }
-    });
+    var prefix = data[2];
+    var data = createExpression(data[1]);
+    if(prefix){
+    	prefix = " "+prefix+'="';
+    	itemsStack[0].push(function(context,result){
+	        var buf = data(context);
+	        if(buf!=null){
+	        	buf = String(buf);
+	        	if(buf.length){
+	        	    result.push(prefix,buf.replace(/[<>&"]/g,xmlReplacer)+'"');
+	        	}
+	        }
+	    });
+    }else{
+	    itemsStack[0].push(function(context,result){
+	        var buf = data(context);
+	    	result.push(String(buf).replace(/[<>&'"]/g,xmlReplacer));
+	    });
+    }
 }
 
 /**
@@ -229,7 +244,7 @@ function buildFor(data,itemsStack){
     var statusName = data[3];
     var children = [];
     itemsStack[0].push(function(context,result){
-        data = itemExpression(context);
+        var data = itemExpression(context);
         //alert(data.constructor)
         if(!(data instanceof Array)){
             //hack $for as buf
@@ -243,15 +258,19 @@ function buildFor(data,itemsStack){
         var preiousStatus = context[4];
         var i = 0;
         var len = data.length;
-        var forStatus = context[4] = {end:len-1};
+        var forStatus = context[4] = {lastIndex:len-1,depth:preiousStatus?preiousStatus.depth+1:0};
         //prepareFor(this);
-        statusName && (context[statusName] = forStatus);
+        if(statusName){
+        	context[statusName] = forStatus;
+        }
         for(;i<len;i++){
             forStatus.index = i;
             context[varName] = data[i];
             renderList(context,children,result);
         }
-        statusName && (context[statusName] = preiousStatus);
+        if(statusName){
+            context[statusName] = preiousStatus;
+        }
         context[4] = preiousStatus;//for key
         context[2] = len;//if key
     });
@@ -300,13 +319,14 @@ function xmlReplacer(c){
 function createExpression(el){
 	switch(el.constructor){
     case String:
-	    return function(_){
-	        return _[el];
-	    }
-	case Array:
+        el = el.split('.')
 	    return function(_){
             try{
-    	        var i = el.length;
+    	        var i = el.length-1;
+    	        var v = el[i];
+    	        if(v!='this'){
+    	            _=(v in _ ? _:this)[v];
+    	        }
     	        while(i--){
     	            _ = _[el[i]]
     	        }
@@ -323,8 +343,11 @@ function createExpression(el){
 	             $log.trace(e);
 	         }
 	     };
+	case Array:
+	    //el.length>0...预留吧，用于以后解释执行
+	    el = el[0];
 	}
 	return function(_){
          return el;
-     };
+    };
 }

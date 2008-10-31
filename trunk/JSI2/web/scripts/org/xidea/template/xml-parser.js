@@ -261,10 +261,11 @@ function parseChooseTag(node,context){
         		}
         	}else if(next.tagName == elseTag){
         		parseElseTag(next,context);
-        	}else if(next.tagName){
-        		$log.error("choose 只接受 when，otherwise 节点");
         	}
-        	context.parseNode(next,context)
+        	//else if(next.tagName){
+        	//	$log.error("choose 只接受 when，otherwise 节点");
+        	//}
+        	//context.parseNode(next,context)//
 		}while(next = next.nextSibling)
     }
 }
@@ -346,7 +347,7 @@ function parseAttribute(node,context){
 	if(isTemplateNS(value, name.toLowerCase() == "xmlns:c")){
 		return true;
 	}
-    var buf = parseText(value,true);
+    var buf = parseText(value,true,true);
     var isStatic;
     var isDynamic;
     //hack parseText is void 
@@ -372,7 +373,7 @@ function parseAttribute(node,context){
             throw new Error("属性内只能有单一EL表达式！！");
         }else{//只考虑单一EL表达式的情况
             buf = buf[0];
-	        context.append( [ATTRIBUTE_TYPE,name,buf[1]]);
+	        context.append( [ATTRIBUTE_TYPE,buf[1],name]);
 	        return true;
         }
     }
@@ -382,8 +383,8 @@ function parseAttribute(node,context){
             buf[0] = 'http://www.w3.org/1999/xhtml'
         }
     }
-    context.append.apply(context,buf)
-    context.append('"')
+    context.append.apply(context,buf);
+    context.append('"');
     return true;
 }
 function parseTextNode(node,context){

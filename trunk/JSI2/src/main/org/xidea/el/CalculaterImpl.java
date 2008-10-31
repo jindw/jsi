@@ -221,12 +221,12 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 		case ExpressionToken.TYPE_GET_PROP:
 			return ReflectUtil.getValue(arg1, arg2);
 		case ExpressionToken.TYPE_GET_STATIC_METHOD:
-			return new Invoker(null, String.valueOf(arg1));
+			return createInvocable(null, String.valueOf(arg1));
 		case ExpressionToken.TYPE_GET_METHOD:
-			return new Invoker(arg1, String.valueOf(arg2));
+			return createInvocable(arg1, String.valueOf(arg2));
 		case ExpressionToken.TYPE_INVOKE_METHOD:
 			try {
-				return ((Invoker) arg1).invoke(((List) arg2).toArray());
+				return ((Invocable) arg1).invoke(((List) arg2).toArray());
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
@@ -244,5 +244,9 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 		}
 		throw new RuntimeException("不支持的操作符" + op.getType());
 
+	}
+
+	private Invocable createInvocable(final Object thisObject, final String name) {
+		return new InvokerImp(thisObject, name);
 	}
 }
