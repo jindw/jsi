@@ -2,6 +2,8 @@ package org.xidea.template;
 
 import java.util.Map;
 
+import org.xidea.el.Expression;
+
 
 public class ConstantExpression implements Expression {
 	private Object value;

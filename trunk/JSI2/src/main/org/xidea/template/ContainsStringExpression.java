@@ -3,6 +3,8 @@ package org.xidea.template;
 import java.util.Collection;
 import java.util.Map;
 
+import org.xidea.el.Expression;
+
 public class ContainsStringExpression implements Expression {
 	private Expression valueEL;
 	private Expression collectionEL;
