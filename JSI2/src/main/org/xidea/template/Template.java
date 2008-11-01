@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.xidea.el.Expression;
+
 
 public class Template {
 	public static final int EL_TYPE = 0;

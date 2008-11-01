@@ -1,5 +1,10 @@
 package org.xidea.template;
 
+import static org.xidea.template.Template.ELSE_TYPE;
+import static org.xidea.template.Template.FOR_TYPE;
+import static org.xidea.template.Template.IF_TYPE;
+import static org.xidea.template.Template.VAR_TYPE;
+
 import java.net.URL;
 import java.util.List;
 
@@ -7,8 +12,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-
-import static org.xidea.template.Template.*;
+import org.xidea.el.Expression;
 
 public class CoreXMLNodeParser implements XMLNodeParser {
 

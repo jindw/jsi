@@ -1,5 +1,6 @@
 package org.xidea.template;
 
+import org.xidea.el.Expression;
 import org.xidea.el.ExpressionImpl;
 
 public class ExpressionFactoryImpl  implements ExpressionFactory{
