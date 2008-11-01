@@ -2,7 +2,7 @@ package org.xidea.el;
 
 import java.util.Map;
 
-interface Expression {
+public interface Expression {
 	@SuppressWarnings("unchecked")
 	public Object evaluate(Map context);
 }
