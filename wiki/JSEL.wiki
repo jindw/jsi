@@ -8,10 +8,31 @@ JSEL是一个基于逆波兰式结构，采用JS运算规则的简单的表达�
 ==== 用途 ====
   * 语法上基于前端开发人员比较熟悉的JavaScript，可以用于模板引擎的表达式实现。
   * 他同时还是JSON解释引擎的超集，可以用于解释JSON数据源。
-  * 由于引擎本身的机器简单的实现。程序体积非常小，只有22k（OGNL 168k）。
-  * 适合于嵌入其他对文件大小要求苛刻环境，如需要下载的webstart小程序。
+  * 简单的运算接口，可以方便的重新定义运算规则。
+  * 由于引擎本身的机器简单的实现，程序体积非常小，只有22k（OGNL 168k）；适合于嵌入其他对文件大小要求苛刻环境，如需要下载的webstart小程序。
 
-
+==== 用法 ====
+{{{
+import org.xidea.el.Expression;
+import org.xidea.el.ExpressionImpl;
+import java.util.HashMap;
+public class Test{
+    public static void main(String[] args){
+        Expression el = new ExpressionImpl("var1 +2 * var2");
+        //Expression el = new ExpressionImpl("var1 +2 * var2",new CalculaterImpl());//你也可以定义你自己的运算规则
+        HashMap context = new HashMap();
+        context.put("var1",111);
+        context.put("var2",222);
+        Object result1 = el.evaluate(context);//555
+        context.put("var2",333);
+        Object result2 = el.evaluate(context);//777
+        System.out.println("result1:");
+        System.out.println(result1);
+        System.out.println("result2:");
+        System.out.println(result2);
+    }
+}
+}}}
 ==== 语法====
 {{{
 四则运算：
