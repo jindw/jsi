@@ -13,6 +13,7 @@ import org.xidea.el.test.json.JSONWriter;
 import org.junit.Test;
 
 public class JSONTest {
+
 	static String getText(String file) {
 		try {
 			InputStreamReader in = new InputStreamReader(JSONTest.class

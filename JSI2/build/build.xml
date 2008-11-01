@@ -25,6 +25,23 @@
 			</zipfileset>
 		</jar>
 	</target>
+	<target name="jar-el">
+		<jar destfile="build/dest/JSEL.jar" compress="true">
+			<fileset dir="web/WEB-INF/classes">
+				<include name="org/xidea/el/**/*.class" />
+				<exclude name="**/test/**/*.*" />
+			</fileset>
+		</jar>
+		<jar destfile="build/dest/JSEL-source.jar" >
+			<fileset dir="web/WEB-INF/classes">
+				<include name="org/xidea/el/**/*.class" />
+				<exclude name="**/test/**/*.*" />
+			</fileset>
+			<fileset dir="src/main">
+				<include name="org/xidea/el/**/*.java" />
+			</fileset>
+		</jar>
+	</target>
 	<target name="packageOptimize">
 		<java classname="org.jside.jsi.tools.generator.JSIPackageGenerator">
 			<classpath>
