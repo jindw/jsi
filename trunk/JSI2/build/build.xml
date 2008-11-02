@@ -26,6 +26,8 @@
 		</jar>
 	</target>
 	<target name="jar-el">
+		<!--javadoc sourcePath="src/main" packagelist="org.xidea.el" destdir="build/dest/jsel/javadoc">
+		</javadoc-->
 		<jar destfile="build/dest/JSEL.jar" compress="true">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="org/xidea/el/**/*.class" />

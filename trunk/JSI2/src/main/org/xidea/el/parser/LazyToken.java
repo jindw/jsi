@@ -10,13 +10,13 @@ public class LazyToken implements ExpressionToken {
 	}
 
 	public int getType() {
-		return SKIP_BEGIN;
+		return VALUE_LAZY;
 	}
 
 	public ExpressionToken[] getChildren() {
 		return this.children;
 	}
-	public void setChildren(ExpressionToken[] children) {
+	void setChildren(ExpressionToken[] children) {
 		this.children = children;
 	}
 	public String toString() {

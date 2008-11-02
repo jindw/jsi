@@ -7,8 +7,10 @@ import java.io.StringWriter;
 import java.util.Collections;
 
 import org.xidea.el.ExpressionImpl;
-import org.xidea.el.test.json.JSONReader;
+import org.xidea.el.test.json.JSONReader;//StringTree實現還是不錯的
 import org.xidea.el.test.json.JSONWriter;
+
+//import org.json.JSONTokener;//這個實現比較差勁，不考慮吧
 
 import org.junit.Test;
 
@@ -31,10 +33,11 @@ public class JSONTest {
 		}
 	}
 	@Test
-	public void testComment(){
+	public void testComment() throws Exception{
 		String text = "{//ddd\n\"aa\":1}";
-//		JSONReader reader = new JSONReader();
-//		Object o1 = reader.read(text);//這裡有死循環
+		//JSONReader reader = new JSONReader();
+		//Object o1 = reader.read(text);//這裡有死循環
+		//new JSONTokener(text).nextValue();
 		ExpressionImpl el = new ExpressionImpl(text);
 		Object o1 = el.evaluate(Collections.EMPTY_MAP);
 		Object o2 = new ExpressionImpl("{\"aa\":1}//ddd\n\n    ").evaluate(Collections.EMPTY_MAP);
@@ -50,7 +53,7 @@ public class JSONTest {
 	}
 
 	@Test
-	public void testTime() {
+	public void testTime() throws Exception {
 		String[] tests = new String[]{"test-number.json","test-array.json","test.json"};
 		for(int i=0;i<tests.length;i++){
 			String file = tests[i];
@@ -65,8 +68,10 @@ public class JSONTest {
 			for (int j = 0; j < 10; j++) {
 				long t1 = System.currentTimeMillis();
 				JSONReader reader = new JSONReader();
+				//JSONTokener reader = new JSONTokener(json);
 				long t2 = System.currentTimeMillis();
 				jso = reader.read(json);
+				//jso = reader.nextValue();
 
 				long t3 = System.currentTimeMillis();
 				ExpressionImpl el = new ExpressionImpl(json);
@@ -84,7 +89,7 @@ public class JSONTest {
 			System.out.println("jsr-elr:" + jsr + "-" + elr);
 			System.out.println("js-el:" + (jsc + jsr) + "-" + (elc + elr));
 			JSONWriter writer = new JSONWriter();
-			assertEquals(writer.write(jso), writer.write(elo));
+			//assertEquals(writer.write(jso), writer.write(elo));
 		}
 	}
 
