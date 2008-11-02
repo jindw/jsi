@@ -2,7 +2,7 @@ package org.xidea.el;
 
 import java.util.Map;
 
-import org.xidea.el.parser.ConstantsToken;
+import org.xidea.el.parser.ValueToken;
 import org.xidea.el.parser.ExpressionToken;
 import org.xidea.el.parser.ExpressionTokenizer;
 import org.xidea.el.parser.LazyToken;
@@ -53,8 +53,8 @@ public class ExpressionImpl implements Expression {
 				if(item instanceof VarToken){
 					String value = ((VarToken)item).getValue();
 					stack.push("this".equals(value)?context:context.get(value));
-				}else if(item instanceof ConstantsToken){
-					stack.push(((ConstantsToken)item).getValue());
+				}else if(item instanceof ValueToken){
+					stack.push(((ValueToken)item).getValue());
 				}else if(item instanceof LazyToken){
 					stack.push(item);
 				}else{

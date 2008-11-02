@@ -1,8 +1,6 @@
 package org.xidea.el;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +9,8 @@ import org.xidea.el.parser.OperatorToken;
 import org.xidea.template.ReflectUtil;
 
 public class CalculaterImpl extends NumberArithmetic implements Calculater {
-	private static final Object SKIP_QUESTION = new Object();
+	protected static final Object SKIP_QUESTION = new Object();
+	private static final Object[] EMPTY_ARGS = new Object[0];
 
 	/**
 	 * 
@@ -113,17 +112,17 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 
 	protected boolean compare(int type, Object arg1, Object arg2) {
 		switch (type) {
-		case ExpressionToken.TYPE_EQ:
+		case ExpressionToken.OP_EQ:
 			return compare(arg1, arg2,-1) == 0;
-		case ExpressionToken.TYPE_NOTEQ:
+		case ExpressionToken.OP_NOTEQ:
 			return compare(arg1, arg2,0) != 0;
-		case ExpressionToken.TYPE_GT:
+		case ExpressionToken.OP_GT:
 			return compare(arg1, arg2,-1) > 0;
-		case ExpressionToken.TYPE_GTEQ:
+		case ExpressionToken.OP_GTEQ:
 			return compare(arg1, arg2,-1) >= 0;
-		case ExpressionToken.TYPE_LT:
+		case ExpressionToken.OP_LT:
 			return compare(arg1, arg2,1) < 0;
-		case ExpressionToken.TYPE_LTEQ:
+		case ExpressionToken.OP_LTEQ:
 			return compare(arg1, arg2,1) <= 0;
 		}
 		throw new RuntimeException("怎么可能？？？");
@@ -158,87 +157,87 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 	public Object compute(OperatorToken op, final Object arg1, final Object arg2) {
 		final int type = op.getType();
 		switch (type) {
-		case ExpressionToken.TYPE_NOT:
+		case ExpressionToken.OP_NOT:
 			return !ToBoolean(arg1);
-		case ExpressionToken.TYPE_POS:
+		case ExpressionToken.OP_POS:
 			return ToNumber(arg1);
-		case ExpressionToken.TYPE_NEG:
+		case ExpressionToken.OP_NEG:
 			return this.subtract(0, ToNumber(arg1));
 			/* +-*%/ */
-		case ExpressionToken.TYPE_ADD:
+		case ExpressionToken.OP_ADD:
 			Object p1 = ToPrimitive(arg1, String.class);
 			Object p2 = ToPrimitive(arg2, String.class);
-			if (p1 instanceof String && p2 instanceof String) {
+			if (p1 instanceof String || p2 instanceof String) {
 				return String.valueOf(p1) + p2;
 			} else {
 				return this.add(ToNumber(p1), ToNumber(p2));
 			}
-		case ExpressionToken.TYPE_SUB:
+		case ExpressionToken.OP_SUB:
 			return this.subtract(ToNumber(arg1), ToNumber(arg2));
-		case ExpressionToken.TYPE_MUL:
+		case ExpressionToken.OP_MUL:
 			return this.multiply(ToNumber(arg1), ToNumber(arg2));
-		case ExpressionToken.TYPE_DIV:
+		case ExpressionToken.OP_DIV:
 			return this.divide(ToNumber(arg1), ToNumber(arg2));
-		case ExpressionToken.TYPE_MOD:
+		case ExpressionToken.OP_MOD:
 			return this.modulus(ToNumber(arg1), ToNumber(arg2));
 
 			/* boolean */
-		case ExpressionToken.TYPE_GT:
-		case ExpressionToken.TYPE_GTEQ:
-		case ExpressionToken.TYPE_NOTEQ:
-		case ExpressionToken.TYPE_EQ:
-		case ExpressionToken.TYPE_LT:
-		case ExpressionToken.TYPE_LTEQ:
+		case ExpressionToken.OP_GT:
+		case ExpressionToken.OP_GTEQ:
+		case ExpressionToken.OP_NOTEQ:
+		case ExpressionToken.OP_EQ:
+		case ExpressionToken.OP_LT:
+		case ExpressionToken.OP_LTEQ:
 			return compare(type, arg1, arg2);
 
 			/* and or */
-		case ExpressionToken.TYPE_AND:
+		case ExpressionToken.OP_AND:
 			if (ToBoolean(arg1)) {
 				return arg2;// 进一步判断
 			} else {// false
 				return arg1;// //skip
 			}
 
-		case ExpressionToken.TYPE_OR:
+		case ExpressionToken.OP_OR:
 			if (ToBoolean(arg1)) {
 				return arg1;
 			} else {
 				return arg2;
 			}
-		case ExpressionToken.TYPE_QUESTION:// a?b:c -> a?:bc -- >a?b:c
+		case ExpressionToken.OP_QUESTION:// a?b:c -> a?:bc -- >a?b:c
 			if (ToBoolean(arg1)) {// 取值1
 				return arg2;
 			} else {// 跳过 取值2
 				return SKIP_QUESTION;
 			}
-		case ExpressionToken.TYPE_QUESTION_SELECT:
+		case ExpressionToken.OP_QUESTION_SELECT:
 			if (arg1 == SKIP_QUESTION) {
 				return arg2;
 			} else {
 				return arg1;
 			}
 
-		case ExpressionToken.TYPE_GET_PROP:
+		case ExpressionToken.OP_GET_PROP:
 			return ReflectUtil.getValue(arg1, arg2);
-		case ExpressionToken.TYPE_GET_STATIC_METHOD:
+		case ExpressionToken.OP_GET_STATIC_METHOD:
 			return createInvocable(null, String.valueOf(arg1));
-		case ExpressionToken.TYPE_GET_METHOD:
+		case ExpressionToken.OP_GET_METHOD:
 			return createInvocable(arg1, String.valueOf(arg2));
-		case ExpressionToken.TYPE_INVOKE_METHOD:
+		case ExpressionToken.OP_INVOKE_METHOD:
 			try {
-				return ((Invocable) arg1).invoke(((List) arg2).toArray());
+				Object[] arguments = EMPTY_ARGS;
+				if(arg2 instanceof List){
+					arguments = ((List) arg2).toArray();
+				}
+				return ((Invocable) arg1).invoke(arguments);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return null;
 			}
-		case ExpressionToken.TYPE_NEW_LIST:
-			return new ArrayList<Object>();
-		case ExpressionToken.TYPE_NEW_MAP:
-			return new HashMap<Object, Object>();
-		case ExpressionToken.TYPE_PARAM_JOIN:
+		case ExpressionToken.OP_PARAM_JOIN:
 			((List) arg1).add(arg2);
 			return arg1;
-		case ExpressionToken.TYPE_MAP_PUSH:
+		case ExpressionToken.OP_MAP_PUSH:
 			((Map) arg1).put(op.getParam(), arg2);
 			return arg1;
 		}
