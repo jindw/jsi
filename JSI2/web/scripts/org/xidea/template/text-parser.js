@@ -123,7 +123,7 @@ function parseEL(expression){
     if(/^(?:true|false|[\d\.]+|(?:"[^"]*?"|'[^']*?'))$/.test(expression)){//true,false,number,string
         return [window.eval(expression)];
     } else if(/^[_$a-zA-Z](?:[\.\s\w\_]|\[(?:"[^"]*?"|'[^']*?'|\d+)\])*$/.test(expression)){//array[1.2];这类格式不处理
-        var tokens = expression.match(/[\w_\$]+|"[^"]*?"|'[^']*?'/g).reverse();//[\d\.]+|
+        var tokens = expression.match(/[\w_\$]+|"[^"]*?"|'[^']*?'/g);//[\d\.]+|
         var i = tokens.length;
         while(i--){
         	var item = tokens[i];
@@ -137,7 +137,10 @@ function parseEL(expression){
             tokens[i] = item;
         }
         if(tokens){
-            return tokens.join('.');
+            if(tokens[0]=='this' && tokens[1]=='for'){
+                tokens.shift();
+            }
+            return tokens.reverse().join('.');
         }
     }
     expression = expression.replace(/[\s;]+$/g,'');//
