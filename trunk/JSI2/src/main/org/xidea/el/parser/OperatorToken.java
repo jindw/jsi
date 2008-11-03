@@ -1,8 +1,5 @@
 package org.xidea.el.parser;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class OperatorToken implements ExpressionToken {
 	private int type;
 	private int length = 2;
