@@ -65,7 +65,7 @@ public class DefaultXMLNodeParser implements XMLNodeParser {
 	private boolean parseCDATA(Node node, ParseContext context) {
 		context.append("<![CDATA[");
 		context.append(this.parser.parseText(((CDATASection) node).getData(),
-				false, 0));
+				false, false,0));
 		context.append("]]>");
 		return true;
 	}
@@ -118,7 +118,7 @@ public class DefaultXMLNodeParser implements XMLNodeParser {
 
 	private boolean parseTextNode(Node node, ParseContext context) {
 		String text = ((Text) node).getData();
-		context.append(this.parser.parseText(text, true, 0));
+		context.append(this.parser.parseText(text, true,false, 0));
 		return true;
 	}
 
@@ -131,7 +131,7 @@ public class DefaultXMLNodeParser implements XMLNodeParser {
 				|| TEMPLATE_NAMESPACE.matcher(value).find()) {
 			return true;
 		}
-		List<Object> buf = this.parser.parseText(value, true, '"');
+		List<Object> buf = this.parser.parseText(value, true,true, '"');
 		boolean isStatic = false;
 		boolean isDynamic = false;
 		// hack parseText is void
@@ -157,8 +157,8 @@ public class DefaultXMLNodeParser implements XMLNodeParser {
 				throw new RuntimeException("只能有单个EL表达式");
 			} else {// 只考虑单一EL表达式的情况
 				Object[] el = (Object[]) buf.get(0);
-				context.append(new Object[] { Template.ATTRIBUTE_TYPE, name,
-						el[1] });
+				context.append(new Object[] { Template.ATTRIBUTE_TYPE, 
+						el[1], name});
 				return true;
 			}
 		}

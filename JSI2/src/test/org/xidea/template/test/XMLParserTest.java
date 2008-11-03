@@ -11,73 +11,83 @@ import org.junit.Test;
 import org.xidea.template.ExpressionFactoryImpl;
 import org.xidea.template.Template;
 import org.xidea.template.XMLParser;
+
 public class XMLParserTest {
 
 	private XMLParser parser;
+
 	@Before
 	public void setUp() throws Exception {
 		parser = new XMLParser();
 	}
-	public void test(String template,String value){
-		Template t = new Template(template,parser);
+
+	public void test(String template, String value) {
+		Template t = new Template(template, parser);
 		StringWriter out = new StringWriter();
 		HashMap<Object, Object> model = new HashMap<Object, Object>();
-		model.put("test",true);
-		model.put("value",true);
+		model.put("test", true);
+		model.put("value", true);
 		try {
 			t.render(model, out);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		assertEquals(value,out.toString());
+		assertEquals(value, out.toString());
+	}
+
+	@Test
+	public void testAttrbutes() throws IOException {
+		test("<xml attr=\"${test}\"/>", "<xml attr=\"true\"></xml>");
+		test("<xml attr=\"${test}-\"/>", "<xml attr=\"true-\"></xml>");
+		test("<xml attr=\"${false}\"/>", "<xml attr=\"false\"></xml>");
+		test("<xml attr=\"${null}\"/>", "<xml></xml>");
+		test("<xml attr=\"${''}\"/>", "<xml></xml>");
+		test("<xml attr=\"${' ' }\"/>", "<xml attr=\" \"></xml>");
+		test("<xml attr=\"${null}-\"/>", "<xml attr=\"null-\"></xml>");
+		test("<xml attr=\"${''}-\"/>", "<xml attr=\"-\"></xml>");
 	}
 
 	@Test
 	public void testIf() throws IOException {
-		test("<xml xmlns:c='http://www.xidea.org/ns/template'>" +
-				"<c:if test='${test}'>${value}</c:if>" +
-				"</xml>",
+		test("<xml xmlns:c='http://www.xidea.org/ns/template'>"
+				+ "<c:if test='${test}'>${value}</c:if>" + "</xml>",
 				"<xml>true</xml>");
 	}
 
 	@Test
 	public void testIfElse() throws IOException {
 		parser.setExpressionFactory(new ExpressionFactoryImpl());
-		test("<xml xmlns:c='http://www.xidea.org/ns/template'>" +
-				"<c:if test='${test}'>${!value}</c:if>" +
-				"<c:else test='${test}'>${value}</c:else>" +
-				"</xml>",
+		test("<xml xmlns:c='http://www.xidea.org/ns/template'>"
+				+ "<c:if test='${test}'>${!value}</c:if>"
+				+ "<c:else test='${test}'>${value}</c:else>" + "</xml>",
 				"<xml>false</xml>");
 	}
 
 	@Test
 	public void testFor() throws IOException {
 		parser.setExpressionFactory(new ExpressionFactoryImpl());
-		test("<xml xmlns:c='http://www.xidea.org/ns/template'>" +
-				"<c:for var='value' items='${[1,2,3,4]}'>${for.index}${value}" +
-				"<c:if test='${for.lastIndex == for.index}'>${for.lastIndex}</c:if></c:for>" +
-				"<c:else test='${test}'>${value}</c:else>" +
-				"</xml>",
+		test(
+				"<xml xmlns:c='http://www.xidea.org/ns/template'>"
+						+ "<c:for var='value' items='${[1,2,3,4]}'>${for.index}${value}"
+						+ "<c:if test='${for.lastIndex == for.index}'>${for.lastIndex}</c:if></c:for>"
+						+ "<c:else test='${test}'>${value}</c:else>" + "</xml>",
 				"<xml>011223343</xml>");
-		test("<xml xmlns:c='http://www.xidea.org/ns/template'>" +
-				"<c:for var='value' items='${[]}'>${value}</c:for>" +
-				"<c:else test='${test}'>${value}</c:else>" +
-				"</xml>",
+		test("<xml xmlns:c='http://www.xidea.org/ns/template'>"
+				+ "<c:for var='value' items='${[]}'>${value}</c:for>"
+				+ "<c:else test='${test}'>${value}</c:else>" + "</xml>",
 				"<xml>true</xml>");
 	}
 
 	@Test
 	public void testForElse() throws IOException {
 		parser.setExpressionFactory(new ExpressionFactoryImpl());
-		test("<xml xmlns:c='http://www.xidea.org/ns/template'>" +
-				"<c:for var='value' items='${[1,2,3,4]}'>${value}</c:for>" +
-				"<c:else test='${test}'>${value}</c:else>" +
-				"</xml>",
+		test("<xml xmlns:c='http://www.xidea.org/ns/template'>"
+				+ "<c:for var='value' items='${[1,2,3,4]}'>${value}</c:for>"
+				+ "<c:else test='${test}'>${value}</c:else>" + "</xml>",
 				"<xml>1234</xml>");
-		test("<xml xmlns:c='http://www.xidea.org/ns/template'>" +
-				"<c:for var='value' items='${[]}'>${value}</c:for>" +
-				"<c:else test='${test}'>${value}</c:else>" +
-				"</xml>",
+		test("<xml xmlns:c='http://www.xidea.org/ns/template'>"
+				+ "<c:for var='value' items='${[]}'>${value}</c:for>"
+				+ "<c:else test='${test}'>${value}</c:else>" + "</xml>",
 				"<xml>true</xml>");
 	}
 

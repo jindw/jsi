@@ -357,14 +357,23 @@ public class Template {
 			ArrayList<ArrayList<Object>> itemsStack) {
 		final Expression el = createExpression((Expression)data[1]);
 		if(data.length>2 && data[2] !=null){
-			final String prefix = " " + data[1] + "=\"";
+			final String prefix = " " + data[2] + "=\"";
 			pushToTop(itemsStack, new TemplateItem() {
 				public void render(Map<Object, Object> context, Writer out)
 						throws IOException {
-					Object value = el.evaluate(context);
-					if (value != null) {
+					Object result = el.evaluate(context);
+					if (result != null ){
+						String value ;
+						if(result instanceof String){
+							value = (String)result;
+							if (((String)result).length() == 0) {
+								return;
+							}
+						}else{
+							value = String.valueOf(result);
+						}
 						out.write(prefix);
-						printXMLAttribute(String.valueOf(value), context, out, false);
+						printXMLAttribute(value, context, out, false);
 						out.write('"');
 					}
 				}
