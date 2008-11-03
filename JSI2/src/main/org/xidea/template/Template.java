@@ -23,7 +23,8 @@ public class Template {
 	public static final int EL_TYPE_XML_TEXT = 6;
 	public static final int ATTRIBUTE_TYPE = 7;
 
-	public static final String FOR_KEY = "4";
+	public static final String FOR_KEY = "for";
+	public static final String IF_KEY = "if";
 
 	// private static ExpressionFactory propertyExpressionFactory = new
 	// PropertyExpressionFactory();
@@ -250,7 +251,7 @@ public class Template {
 					renderList(context, children, out);
 				}
 				// context[2] = test;//if passed(一定要放下来，确保覆盖)
-				context.put(IF_TYPE, test);
+				context.put(IF_KEY, test);
 			}
 
 		});
@@ -267,10 +268,10 @@ public class Template {
 		final ArrayList<Object> children = new ArrayList<Object>();
 		pushToTop(itemsStack, new TemplateItem() {
 			public void render(Map<Object, Object> context, Writer out) {
-				if (!toBoolean(context.get(IF_TYPE))) {
+				if (!toBoolean(context.get(IF_KEY))) {
 					if (el == null || toBoolean(el.evaluate(context))) {// if
 						renderList(context, children, out);
-						context.put(IF_TYPE, true);
+						context.put(IF_KEY, true);
 						;// if passed(不用要放下去，另一分支已正常)
 					}
 				}
@@ -315,7 +316,7 @@ public class Template {
 				}
 				//context.put("for", preiousStatus);
 				context.put(FOR_KEY, preiousStatus);// for key
-				context.put(IF_TYPE, len > 0);// if key
+				context.put(IF_KEY, len > 0);// if key
 			}
 		});
 		itemsStack.add(children);

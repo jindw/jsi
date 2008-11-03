@@ -209,7 +209,7 @@ function buildIf(data,itemsStack){
         if(test){
             renderList(context,children,result);
         }
-        context[2] = test;//if passed(一定要放下来，确保覆盖)
+        context['if'] = test;//if passed(一定要放下来，确保覆盖)
     })
     itemsStack.unshift(children);
 }
@@ -224,10 +224,10 @@ function buildElse(data,itemsStack){
     var data = data[1] == null ? null:createExpression(data[1]);
     var children = [];
     itemsStack[0].push(function(context,result){
-        if(!context[2]){
+        if(!context['if']){
             if(!data || data(context)){//if key
                 renderList(context,children,result);
-                context[2] = true;//if passed(不用要放下去，另一分支已正常)
+                context['if'] = true;//if passed(不用要放下去，另一分支已正常)
             }
         }
     })
@@ -255,10 +255,10 @@ function buildFor(data,itemsStack){
             }
             data = forStatus;
         }
-        var preiousStatus = context[4];
+        var preiousStatus = context['for'];
         var i = 0;
         var len = data.length;
-        var forStatus = context[4] = {lastIndex:len-1,depth:preiousStatus?preiousStatus.depth+1:0};
+        var forStatus = context['for'] = {lastIndex:len-1,depth:preiousStatus?preiousStatus.depth+1:0};
         //prepareFor(this);
         if(statusName){
         	context[statusName] = forStatus;
@@ -271,8 +271,8 @@ function buildFor(data,itemsStack){
         if(statusName){
             context[statusName] = preiousStatus;
         }
-        context[4] = preiousStatus;//for key
-        context[2] = len;//if key
+        context['for'] = preiousStatus;//for key
+        context['if'] = len;//if key
     });
     itemsStack.unshift(children);
 }
