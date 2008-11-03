@@ -51,6 +51,21 @@ public class XMLParserTest {
 	}
 
 	@Test
+	public void testFor() throws IOException {
+		parser.setExpressionFactory(new ExpressionFactoryImpl());
+		test("<xml xmlns:c='http://www.xidea.org/ns/template'>" +
+				"<c:for var='value' items='${[1,2,3,4]}'>${for.index}${value}</c:for>" +
+				"<c:else test='${test}'>${value}</c:else>" +
+				"</xml>",
+				"<xml>01122334</xml>");
+		test("<xml xmlns:c='http://www.xidea.org/ns/template'>" +
+				"<c:for var='value' items='${[]}'>${value}</c:for>" +
+				"<c:else test='${test}'>${for.lastIndex}${value}</c:else>" +
+				"</xml>",
+				"<xml>0true</xml>");
+	}
+
+	@Test
 	public void testForElse() throws IOException {
 		parser.setExpressionFactory(new ExpressionFactoryImpl());
 		test("<xml xmlns:c='http://www.xidea.org/ns/template'>" +
