@@ -14,6 +14,7 @@ import org.xidea.el.test.json.JSONWriter;
 
 import org.junit.Test;
 
+@SuppressWarnings("unused")
 public class JSONTest {
 
 	static String getText(String file) {

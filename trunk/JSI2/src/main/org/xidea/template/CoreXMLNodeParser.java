@@ -238,7 +238,7 @@ public class CoreXMLNodeParser implements XMLNodeParser {
 
 	boolean parseOutTag(Node node, ParseContext context) {
 		String value = getAttribute(node, "value");
-		List<Object> result = this.parser.parseText(value, false, 0);
+		List<Object> result = this.parser.parseText(value, false, false,0);
 		context.append(result);
 		return true;
 	}

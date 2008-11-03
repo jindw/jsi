@@ -7,8 +7,6 @@ import java.util.regex.Pattern;
 
 import org.xidea.el.Expression;
 
-
-
 public class TextParser implements Parser {
 	private static final Pattern FN_PATTERN = Pattern.compile("^[\\w]+\\s*$");
 
@@ -21,7 +19,7 @@ public class TextParser implements Parser {
 	}
 
 	public List<Object> parse(Object text) {
-		return parseText((String) text, false, (char) 0);
+		return parseText((String) text, false, false, (char) 0);
 	}
 
 	public String encodeText(String text, int quteChar) {
@@ -43,7 +41,7 @@ public class TextParser implements Parser {
 				if (quteChar == c) {
 					out.write("&#39;");
 					break;
-				}else if (quteChar == c) {
+				} else if (quteChar == c) {
 					out.write("&#34;");
 					break;
 				}
@@ -62,13 +60,13 @@ public class TextParser implements Parser {
 	 * @return <Array> result
 	 */
 	public List<Object> parseText(String text, boolean encodeXML,
-			int quteChar) {
+			boolean encodeAttr, int quteChar) {
 		int i = 0;
 		int start = 0;
 		int length = text.length();
 		ArrayList<Object> result = new ArrayList<Object>();
 		do {
-			final int p$ = text.indexOf('$',start);
+			final int p$ = text.indexOf('$', start);
 			if (isEscaped$(text, p$)) {
 				continue;
 			} else {
@@ -88,12 +86,20 @@ public class TextParser implements Parser {
 						if (p1 > start) {
 							Object el = parseEL(text.substring(p1 + 1, p2));
 							try {
-								if(start<p$){
-								    result.add(text.substring(start, p$));
+								if (start < p$) {
+									result.add(text.substring(start, p$));
 								}
-								result.add(new Object[] {
-										encodeXML ? Template.EL_TYPE_XML_TEXT
-												: Template.EL_TYPE, el });
+								if (encodeAttr) {
+									result.add(new Object[] {
+											Template.ATTRIBUTE_TYPE, el });
+								} else {
+									result
+											.add(new Object[] {
+													encodeXML ? Template.EL_TYPE_XML_TEXT
+															: Template.EL_TYPE,
+													el });
+
+								}
 								start = p2 + 1;
 							} catch (Exception e) {
 							}
@@ -106,12 +112,16 @@ public class TextParser implements Parser {
 		if (start < length) {
 			result.add(text.substring(start));
 		}
-		if (encodeXML) {
+		if (encodeXML || encodeAttr) {
 			i = result.size();
 			while (i-- > 0) {
 				Object item = result.get(i);
-				if(item instanceof String){
-					result.set(i,encodeText((String)item, quteChar));
+				if (item instanceof String) {
+					if(((String)item).length()==0){
+						result.remove(i);
+					}else{
+						result.set(i, encodeText((String) item, quteChar));
+					}
 				}
 			}
 		}
