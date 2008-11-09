@@ -8,6 +8,14 @@ import static org.xidea.template.Template.VAR_TYPE;
 import java.net.URL;
 import java.util.List;
 
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.dom.DOMResult;
+import javax.xml.transform.dom.DOMSource;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
@@ -16,6 +24,7 @@ import org.xidea.el.Expression;
 
 public class CoreXMLNodeParser implements XMLNodeParser {
 
+	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private XMLParser parser;
 
 	public CoreXMLNodeParser(XMLParser parser) {
@@ -80,13 +89,15 @@ public class CoreXMLNodeParser implements XMLNodeParser {
 		String var = getAttribute(node, "var");
 		String path = getAttribute(node, "path");
 		String xpath = getAttribute(node, "xpath");
+		String xslt = getAttribute(node, "xslt");
 		String name = getAttribute(node, "name");
 		Node doc = node.getOwnerDocument();
 		URL parentURL = context.getCurrentURL();
 		try {
 			if (name != null) {
-				DocumentFragment cachedNode = parser.toDocumentFragment(node, node.getChildNodes());
-				context.put("#"+name,cachedNode );
+				DocumentFragment cachedNode = parser.toDocumentFragment(node,
+						node.getChildNodes());
+				context.put("#" + name, cachedNode);
 			}
 			if (var != null) {
 				Node next = node.getFirstChild();
@@ -102,15 +113,15 @@ public class CoreXMLNodeParser implements XMLNodeParser {
 				if (path.startsWith("#")) {
 					doc = (Node) context.get(path);
 					String uri;
-					if(doc instanceof Document){
-						uri = ((Document)doc).getDocumentURI();
-					}else{
+					if (doc instanceof Document) {
+						uri = ((Document) doc).getDocumentURI();
+					} else {
 						uri = doc.getOwnerDocument().getDocumentURI();
 					}
-					if(uri != null){
-						try{
-						    context.setCurrentURL(new URL(uri));
-						}catch (Exception e) {
+					if (uri != null) {
+						try {
+							context.setCurrentURL(new URL(uri));
+						} catch (Exception e) {
 						}
 					}
 				} else {
@@ -122,10 +133,40 @@ public class CoreXMLNodeParser implements XMLNodeParser {
 			if (xpath != null) {
 				doc = this.parser.selectNodes(xpath, doc);
 			}
+			if (xslt != null) {
+				Source xsltSource;
+				if (xslt.startsWith("#")) {
+					Node node1 = ((Node) context.get(xslt));
+					Transformer transformer = javax.xml.transform.TransformerFactory
+							.newInstance().newTransformer();
+					DOMResult result = new DOMResult();
+					transformer.transform( new DOMSource(node1), result);
+					xsltSource = new javax.xml.transform.dom.DOMSource(result.getNode());
+				} else {
+					xsltSource = new javax.xml.transform.stream.StreamSource(
+							new URL(parentURL, xslt).openStream());
+				}
+
+				// create an instance of TransformerFactory
+				Transformer transformer = javax.xml.transform.TransformerFactory
+						.newInstance().newTransformer(xsltSource);
+				Source xmlSource;
+				if (doc.getNodeType() == Node.DOCUMENT_FRAGMENT_NODE) {
+					Element root = doc.getOwnerDocument().createElement("root");
+					root.appendChild(doc);
+					xmlSource = new DOMSource(root);
+				} else {
+					xmlSource = new DOMSource(doc);
+				}
+				DOMResult result = new DOMResult();
+
+				transformer.transform(xmlSource, result);
+				doc = result.getNode();
+			}
 			this.parser.parseNode(doc, context);
 			return true;
 		} catch (Exception e) {
-			//e.printStackTrace();
+			log.error(e);
 			return true;
 		} finally {
 			context.setCurrentURL(parentURL);
@@ -238,7 +279,7 @@ public class CoreXMLNodeParser implements XMLNodeParser {
 
 	boolean parseOutTag(Node node, ParseContext context) {
 		String value = getAttribute(node, "value");
-		List<Object> result = this.parser.parseText(value, false, false,0);
+		List<Object> result = this.parser.parseText(value, false, false, 0);
 		context.append(result);
 		return true;
 	}

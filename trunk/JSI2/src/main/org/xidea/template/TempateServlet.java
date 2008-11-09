@@ -19,7 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
 
-public abstract class TempateServlet extends GenericServlet {
+public class TempateServlet extends GenericServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Log log = LogFactory
 			.getLog(TempateServlet.class);
