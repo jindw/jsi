@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.HashMap;
 
 import org.junit.Before;
@@ -19,9 +20,15 @@ public class XMLParserTest {
 	@Before
 	public void setUp() throws Exception {
 		parser = new XMLParser();
+		parser.setExpressionFactory(new ExpressionFactoryImpl());
 	}
 
 	public void test(String template, String value) {
+		String result = renderTemplate(template);
+		assertEquals(value, result);
+	}
+
+	private String renderTemplate(String template) {
 		Template t = new Template(template, parser);
 		StringWriter out = new StringWriter();
 		HashMap<Object, Object> model = new HashMap<Object, Object>();
@@ -32,7 +39,8 @@ public class XMLParserTest {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		assertEquals(value, out.toString());
+		String result = out.toString();
+		return result;
 	}
 
 	@Test
@@ -56,7 +64,6 @@ public class XMLParserTest {
 
 	@Test
 	public void testIfElse() throws IOException {
-		parser.setExpressionFactory(new ExpressionFactoryImpl());
 		test("<xml xmlns:c='http://www.xidea.org/ns/template'>"
 				+ "<c:if test='${test}'>${!value}</c:if>"
 				+ "<c:else test='${test}'>${value}</c:else>" + "</xml>",
@@ -65,7 +72,6 @@ public class XMLParserTest {
 
 	@Test
 	public void testFor() throws IOException {
-		parser.setExpressionFactory(new ExpressionFactoryImpl());
 		test(
 				"<xml xmlns:c='http://www.xidea.org/ns/template'>"
 						+ "<c:for var='value' items='${[1,2,3,4]}'>${for.index}${value}"
@@ -80,7 +86,6 @@ public class XMLParserTest {
 
 	@Test
 	public void testForElse() throws IOException {
-		parser.setExpressionFactory(new ExpressionFactoryImpl());
 		test("<xml xmlns:c='http://www.xidea.org/ns/template'>"
 				+ "<c:for var='value' items='${[1,2,3,4]}'>${value}</c:for>"
 				+ "<c:else test='${test}'>${value}</c:else>" + "</xml>",
@@ -91,4 +96,47 @@ public class XMLParserTest {
 				"<xml>true</xml>");
 	}
 
+	@Test
+	public void testInclude() throws IOException {
+		URL res = this.getClass().getResource("include-test.xslt");
+		String xslt = res.toString();
+		test("<c:include xmlns:c='http://www.xidea.org/ns/template' path='"
+				+ xslt + "'>" +
+				"</c:include>",
+		renderTemplate(xslt));
+	}
+
+	@Test
+	public void testXsl() throws IOException {
+		String xml = this.getClass().getResource("include-test.xml").toString();
+		String xslt = this.getClass().getResource("include-test.xslt").toString();
+
+		test(
+				"<c:include xmlns:c='http://www.xidea.org/ns/template'"
+						+ " name='thisValue' path='"+xml+"' xpath='//meta' xslt='#thisValue'>"
+						+"<xsl:stylesheet version='1.0'"
+						+"	xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
+						+"	<xsl:template match='/'>"
+						+"		<div>"
+						+"			<xsl:apply-templates select='//meta' />"
+						+"		</div>"
+						+"	</xsl:template>"
+						+"	<xsl:template match='meta'>"
+						+"		<xsl:value-of select='@name' />"
+						+"	</xsl:template>"
+						+"</xsl:stylesheet>"
+						+ "</c:include>",
+				"<div>n1n2</div>");
+		
+		
+		test("<c:include xmlns:c='http://www.xidea.org/ns/template' path='"
+				+ xslt + "'>" + "</c:include>", renderTemplate(xslt));
+		test(
+				"<c:include xmlns:c='http://www.xidea.org/ns/template'"
+						+ " name='thisValue' path='#thisValue' xpath='//meta' xslt='"
+						+ xslt
+						+ "'>"
+						+ "<div><meta name='n1' value='v1'/><meta name='n2' value='v2'/></div></c:include>",
+				"<div>n1n2</div>");
+	}
 }
