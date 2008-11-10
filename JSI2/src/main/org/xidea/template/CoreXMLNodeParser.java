@@ -8,7 +8,6 @@ import static org.xidea.template.Template.VAR_TYPE;
 import java.net.URL;
 import java.util.List;
 
-import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.dom.DOMResult;
@@ -56,7 +55,7 @@ public class CoreXMLNodeParser implements XMLNodeParser {
 					return parseOutTag(node, context);
 				} else if ("include".equals(name)) {
 					return parseIncludeTag(node, context);
-				} else if ("for".equals(name)) {
+				} else if ("for".equals(name)||"forEach".equals(name)||"for-each".equals(name)) {
 					return parseForTag(node, context);
 				} else if ("var".equals(name)) {
 					return parseVarTag(node, context);
