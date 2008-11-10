@@ -180,15 +180,13 @@ public class HTMLNodeParser implements XMLNodeParser {
 			// this.parser.parseNode(attributes.item(i), context);
 		}
 		if (exts != null) {
-			for (Object item : exts) {
-				context.append(item);
-			}
+			context.append(exts);
 		}
 		if (HTML_LEAF.matcher(tagName).find()) {
 			context.append("/>");
 			return true;
 		}
-		context.append('>');
+		context.append(">");
 		Node next = node.getFirstChild();
 		if (next != null) {
 			do {
