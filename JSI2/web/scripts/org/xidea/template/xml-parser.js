@@ -18,30 +18,30 @@ function isTemplateNS(value,shortAvaliable){
 }
 XMLParser.prototype = new TextParser()
 XMLParser.prototype.parse = function(url){
-    var pos = url.indexOf('#')+1;
-    var data = this.load( pos?url.substr(0,pos-1):url,pos && url.substr(pos));
+    if(/^[\s\ufeff]*</.test(url)){
+        var data =toDoc(url)
+        //alert([data,doc.documentElement.tagName])
+    }else{
+        var pos = url.indexOf('#')+1;
+        var data = this.load( pos?url.substr(0,pos-1):url,pos && url.substr(pos));
+    }
     this.parseNode(data);
     return this.reuslt;
 }
 XMLParser.prototype.load = function(url,xpath){
 	try{
-		if(/^[\s\ufeff]*</.test(url)){
-	        var doc =toDoc(url)
-			//alert([data,doc.documentElement.tagName])
+	    var xhr = new XMLHttpRequest();
+	    xhr.open("GET",url,false)
+	    xhr.send('');
+	    if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
+	        var doc = xhr.responseXML;
 	    }else{
-		    var xhr = new XMLHttpRequest();
-		    xhr.open("GET",url,false)
-		    xhr.send('');
-		    if(/\/xml/.test(xhr.getResponseHeader("Content-Type"))){//text/xml,application/xml...
-		        var doc = xhr.responseXML;
-		    }else{
-		        var doc = toDoc(xhr.responseText)
-		    }
-		    if(xpath){
-		        doc = selectNodes(doc,xpath);
-		    }
-		    this.url = url;
-		}
+	        var doc = toDoc(xhr.responseText)
+	    }
+	    if(xpath){
+	        doc = selectNodes(doc,xpath);
+	    }
+	    this.url = url;
 		return doc;
 	}catch(e){
 		$log.error("文档解析失败",e)
