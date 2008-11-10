@@ -13,17 +13,22 @@ public class ParseContext extends HashMap<Object, Object>{
 	private URL currentURL;
 	private ArrayList<Object> result = new ArrayList<Object>();
 
-	public void append(char text) {
-		this.append(String.valueOf(text));
+	public void append(String object) {
+		result.add(object);
 	}
-
-	public void append(Object object) {
+	public void append(Object[] object) {
 		result.add(object);
 	}
 
 	public void append(List<Object> items) {
 		for (Object text : items) {
-			this.append(text);
+			if(text instanceof String){
+				this.append((String)text);
+			}else{
+
+				this.append((Object[])text);
+			}
+			
 		}
 	}
 
@@ -36,7 +41,23 @@ public class ParseContext extends HashMap<Object, Object>{
 	}
 
 	public List<Object> getResult() {
-		return result;
+		ArrayList<Object> result2 = new ArrayList<Object>(result.size());
+		StringBuilder buf = new StringBuilder();
+		for (Object item : result) {
+			if(item instanceof String){
+				buf.append(item);
+			}else{
+				if(buf.length()>0){
+					result2.add(buf.toString());
+					buf.setLength(0);
+				}
+				result2.add((Object[])item);
+			}
+		}
+		if(buf.length()>0){
+			result2.add(buf.toString());
+		}
+		return result2;
 	}
 
 	public void removeLastEnd() {

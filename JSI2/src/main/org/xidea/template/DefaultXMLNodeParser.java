@@ -110,9 +110,9 @@ public class DefaultXMLNodeParser implements XMLNodeParser {
 	}
 
 	private boolean parseEntityReference(Node node, ParseContext context) {
-		context.append('&');
+		context.append("&");
 		context.append(node.getNodeName());
-		context.append(';');
+		context.append(";");
 		return true;
 	}
 
@@ -171,7 +171,7 @@ public class DefaultXMLNodeParser implements XMLNodeParser {
 			}
 		}
 		context.append(buf);
-		context.append('"');
+		context.append("\"");
 		return true;
 	}
 
@@ -185,7 +185,7 @@ public class DefaultXMLNodeParser implements XMLNodeParser {
 		}
 		Node next = node.getFirstChild();
 		if (next != null) {
-			context.append('>');
+			context.append(">");
 			do {
 				this.parser.parseNode(next, context);
 			} while ((next = next.getNextSibling()) != null);
