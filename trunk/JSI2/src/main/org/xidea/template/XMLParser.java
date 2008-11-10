@@ -173,8 +173,13 @@ public class XMLParser extends TextParser {
 			doc = node.getOwnerDocument();
 		}
 		DocumentFragment frm = doc.createDocumentFragment();
-		for (int i = 0; i < nodes.getLength(); i++) {
-			frm.appendChild(nodes.item(i));
+		//sun bug:http://hi.baidu.com/jindw/blog/item/3275db138bc41024dc540138.html
+		Node[] nodes2 = new Node[nodes.getLength()];
+		for (int i = 0; i < nodes2.length; i++) {
+			nodes2[i] = nodes.item(i);
+		}
+		for(Node item : nodes2){
+			frm.appendChild(item);
 		}
 		return frm;
 	}

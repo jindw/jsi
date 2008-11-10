@@ -95,8 +95,12 @@ public class CoreXMLNodeParser implements XMLNodeParser {
 		URL parentURL = context.getCurrentURL();
 		try {
 			if (name != null) {
+				System.out.println(node.getChildNodes().item(0));
 				DocumentFragment cachedNode = parser.toDocumentFragment(node,
 						node.getChildNodes());
+				System.out.println(node.getFirstChild());
+				System.out.println(node.getChildNodes());
+				System.out.println(node.getChildNodes().getLength()); 
 				context.put("#" + name, cachedNode);
 			}
 			if (var != null) {
@@ -140,6 +144,12 @@ public class CoreXMLNodeParser implements XMLNodeParser {
 					Transformer transformer = javax.xml.transform.TransformerFactory
 							.newInstance().newTransformer();
 					DOMResult result = new DOMResult();
+					if(node1.getNodeType() == Node.DOCUMENT_FRAGMENT_NODE){
+						node1 = node1.getFirstChild();
+						while(node1.getNodeType() != Node.ELEMENT_NODE){
+							node1=node1.getNextSibling();
+						}
+					}
 					transformer.transform( new DOMSource(node1), result);
 					xsltSource = new javax.xml.transform.dom.DOMSource(result.getNode());
 				} else {
