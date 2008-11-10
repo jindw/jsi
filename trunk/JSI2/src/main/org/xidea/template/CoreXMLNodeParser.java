@@ -94,12 +94,8 @@ public class CoreXMLNodeParser implements XMLNodeParser {
 		URL parentURL = context.getCurrentURL();
 		try {
 			if (name != null) {
-				System.out.println(node.getChildNodes().item(0));
 				DocumentFragment cachedNode = parser.toDocumentFragment(node,
 						node.getChildNodes());
-				System.out.println(node.getFirstChild());
-				System.out.println(node.getChildNodes());
-				System.out.println(node.getChildNodes().getLength()); 
 				context.put("#" + name, cachedNode);
 			}
 			if (var != null) {
