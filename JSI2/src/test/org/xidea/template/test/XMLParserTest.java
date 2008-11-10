@@ -113,8 +113,9 @@ public class XMLParserTest {
 
 		test(
 				"<c:include xmlns:c='http://www.xidea.org/ns/template'"
+				+"<c:include"
 						+ " name='thisValue' path='"+xml+"' xpath='//meta' xslt='#thisValue'>"
-						+"<xsl:stylesheet version='1.0'"
+						+" <xsl:stylesheet version='1.0'"
 						+"	xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
 						+"	<xsl:template match='/'>"
 						+"		<div>"
