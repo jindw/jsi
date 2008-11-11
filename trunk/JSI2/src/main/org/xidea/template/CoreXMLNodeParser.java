@@ -155,6 +155,10 @@ public class CoreXMLNodeParser implements XMLNodeParser {
 				// create an instance of TransformerFactory
 				Transformer transformer = javax.xml.transform.TransformerFactory
 						.newInstance().newTransformer(xsltSource);
+				//javax.xml.transform.TransformerFactory
+				//.newInstance().set
+				//transformer.setNamespaceContext(parser.createNamespaceContext(doc.getOwnerDocument()));
+				
 				Source xmlSource;
 				if (doc.getNodeType() == Node.DOCUMENT_FRAGMENT_NODE) {
 					Element root = doc.getOwnerDocument().createElement("root");

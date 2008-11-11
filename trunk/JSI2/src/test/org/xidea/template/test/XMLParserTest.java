@@ -111,23 +111,7 @@ public class XMLParserTest {
 		String xml = this.getClass().getResource("include-test.xml").toString();
 		String xslt = this.getClass().getResource("include-test.xslt").toString();
 
-		test(
-				"<c:include xmlns:c='http://www.xidea.org/ns/template'"
-				+"<c:include"
-						+ " name='thisValue' path='"+xml+"' xpath='//meta' xslt='#thisValue'>"
-						+" <xsl:stylesheet version='1.0'"
-						+"	xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
-						+"	<xsl:template match='/'>"
-						+"		<div>"
-						+"			<xsl:apply-templates select='//meta' />"
-						+"		</div>"
-						+"	</xsl:template>"
-						+"	<xsl:template match='meta'>"
-						+"		<xsl:value-of select='@name' />"
-						+"	</xsl:template>"
-						+"</xsl:stylesheet>"
-						+ "</c:include>",
-				"<div>n1n2</div>");
+
 		
 		
 		test("<c:include xmlns:c='http://www.xidea.org/ns/template' path='"
@@ -139,5 +123,44 @@ public class XMLParserTest {
 						+ "'>"
 						+ "<div><meta name='n1' value='v1'/><meta name='n2' value='v2'/></div></c:include>",
 				"<div>n1n2</div>");
+		test("<c:include xmlns:c='http://www.xidea.org/ns/template'"
+				+ " name='thisValue' path='"+xml+"' xpath='//meta' xslt='#thisValue'>"
+				+" <xsl:stylesheet version='1.0'"
+				+"	xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
+				+"	<xsl:template match='/'>"
+				+"		<div>"
+				+"			<xsl:apply-templates select='//meta' />"
+				+"		</div>"
+				+"	</xsl:template>"
+				+"	<xsl:template match='meta'>"
+				+"		<xsl:value-of select='@name' />"
+				+"	</xsl:template>"
+				+"</xsl:stylesheet>"
+				+ "</c:include>",
+		"<div>n1n2</div>");
+		test(
+				"<c:include name='dataValue' path='#dataValue' xmlns:c='http://www.xidea.org/ns/template'>"
+				+"<c:include name='xmlValue' path='#xmlValue'>"
+				+"<div><meta name='n1' value='v1'/>"
+				+"<meta name='n2' value='v2'/>"
+				+"</div></c:include>"
+				+"<c:include"
+						+ " name='thisValue' path='#xmlValue' xpath='//meta' xslt='#thisValue'>"
+						+" <xsl:stylesheet version='1.0'"
+						+"	xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
+						+"	<xsl:template match='/'>"
+						+"		<div>"
+						+"			<xsl:apply-templates select='//meta' />"
+						+"		</div>"
+						+"	</xsl:template>"
+						+"	<xsl:template match='meta'>"
+						+"		<xsl:value-of select='@name' />"
+						+"	</xsl:template>"
+						+"</xsl:stylesheet>"
+						+ "</c:include></c:include>",
+				"<div><meta name=\"n1\" value=\"v1\"/>"
+				+"<meta name=\"n2\" value=\"v2\"/></div><div>n1n2</div>");
+		
+		
 	}
 }
