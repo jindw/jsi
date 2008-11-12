@@ -9,9 +9,9 @@ import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.template.ExpressionFactoryImpl;
+import org.xidea.el.ExpressionFactoryImpl;
 import org.xidea.template.Template;
-import org.xidea.template.XMLParser;
+import org.xidea.template.parser.XMLParser;
 
 public class XMLParserTest {
 
