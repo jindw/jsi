@@ -33,7 +33,7 @@
 			</fileset>
 		</jar>
 		<jar destfile="build/dest/JSEL-Source.jar" >
-			<zipfileset dir="build/dest" file="JSEL.jar"/>
+			<zipfileset src="build/dest/JSEL.jar"/>
 			<fileset dir="src/main">
 				<include name="org/xidea/el/**/*.java" />
 				<exclude name="**/test/**/*.*" />

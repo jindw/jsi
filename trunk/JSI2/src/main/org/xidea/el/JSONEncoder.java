@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 改造自stringtree，将类改成线程安全的方式。
- * 并提供简单的静态编码方法{@see JSONEncoder#encode(Object)}
+ * 改造自stringtree，将类改成线程安全的方式。 并提供简单的静态编码方法{@see JSONEncoder#encode(Object)}
+ * 
  * @author stringtree.org
  * @author jindw
  */
@@ -89,31 +89,40 @@ public class JSONEncoder {
 		return cached;
 	}
 
-	private void print(String obj, Writer out) throws IOException {
+	private void print(String text, Writer out) throws IOException {
 		out.write('"');
-		CharacterIterator it = new StringCharacterIterator(obj.toString());
-		for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
-			if (c == '"')
-				out.write("\\\"");
-			else if (c == '\\')
-				out.write("\\\\");
-			else if (c == '/')
-				out.write("\\/");
-			else if (c == '\b')
-				out.write("\\b");
-			else if (c == '\f')
-				out.write("\\f");
-			else if (c == '\n')
-				out.write("\\n");
-			else if (c == '\r')
-				out.write("\\r");
-			else if (c == '\t')
-				out.write("\\t");
-			else if (Character.isISOControl(c)) {
-				out.write("\\u");
-				out.write(Integer.toHexString(0x10000+c),1,5);
-			} else {
+		for (int i = 0; i < text.length(); i++) {
+			char c = text.charAt(i);
+			switch (c) {
+			case '"':
+				// case '\'':
+				// case '/':
+			case '\\':
+				out.write('\\');
 				out.write(c);
+				break;
+			case '\b':
+				out.write("\\b");
+				break;
+			case '\f':
+				out.write("\\f");
+				break;
+			case '\n':
+				out.write("\\n");
+				break;
+			case '\r':
+				out.write("\\r");
+				break;
+			case '\t':
+				out.write("\\t");
+				break;
+			default:
+				if (Character.isISOControl(c)) {
+					out.write("\\u");
+					out.write(Integer.toHexString(0x10000 + c), 1, 5);
+				} else {
+					out.write(c);
+				}
 			}
 		}
 		out.write('"');
@@ -132,7 +141,7 @@ public class JSONEncoder {
 
 	private void printObject(Object object, List<Object> cached, Writer out)
 			throws IOException {
-		out.write("{");
+		out.write('{');
 		BeanInfo info;
 		boolean addedSomething = false;
 		try {
@@ -147,7 +156,7 @@ public class JSONEncoder {
 					if (!accessor.isAccessible()) {
 						accessor.setAccessible(true);
 					}
-					Object value = accessor.invoke(object, (Object[]) null);
+					Object value = accessor.invoke(object);
 					if (addedSomething) {
 						out.write(',');
 					}
@@ -160,8 +169,9 @@ public class JSONEncoder {
 			Field[] ff = object.getClass().getFields();
 			for (int i = 0; i < ff.length; ++i) {
 				Field field = ff[i];
-				if (addedSomething)
+				if (addedSomething) {
 					out.write(',');
+				}
 				print(field.getName(), out);
 				out.write(':');
 				print(field.get(object), cached, out);
@@ -175,45 +185,47 @@ public class JSONEncoder {
 		} catch (IntrospectionException ie) {
 			ie.printStackTrace();
 		}
-		out.write("}");
+		out.write('}');
 	}
 
 	private void print(Map<?, ?> map, List<Object> cached, Writer out)
 			throws IOException {
-		out.write("{");
+		out.write('{');
 		Iterator<?> it = map.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<?, ?> e = (Map.Entry<?, ?>) it.next();
 			print(String.valueOf(e.getKey()), out);
-			out.write(":");
+			out.write(':');
 			print(e.getValue(), cached, out);
-			if (it.hasNext())
+			if (it.hasNext()) {
 				out.write(',');
+			}
 		}
-		out.write("}");
+		out.write('}');
 	}
 
-	private void print(Iterator<?> it, List<Object> cached, Writer out)
-			throws IOException {
-		out.write("[");
-		while (it.hasNext()) {
-			print(it.next(), cached, out);
-			if (it.hasNext())
-				out.write(",");
-		}
-		out.write("]");
-	}
 
 	private void print(Object[] object, List<Object> cached, Writer out)
 			throws IOException {
-		out.write("[");
+		out.write('[');
 		for (int i = 0; i < object.length; ++i) {
 			if (i > 0) {
 				out.write(',');
 			}
 			print(object[i], cached, out);
 		}
-		out.write("]");
+		out.write(']');
 	}
 
+	private void print(Iterator<?> it, List<Object> cached, Writer out)
+			throws IOException {
+		out.write('[');
+		while (it.hasNext()) {
+			print(it.next(), cached, out);
+			if (it.hasNext()) {
+				out.write(',');
+			}
+		}
+		out.write(']');
+	}
 }
