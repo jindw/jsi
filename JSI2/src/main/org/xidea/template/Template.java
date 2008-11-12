@@ -362,7 +362,7 @@ public class Template {
 
 	private void buildVar(Object[] data, ArrayList<ArrayList<Object>> itemsStack) {
 		final String name = (String) data[1];
-		if (data[2] != null) {
+		if (data.length>1 && data[2] != null) {
 			final Expression el = createExpression((Expression) data[2]);
 			pushToTop(itemsStack, new TemplateItem() {
 				public void render(Map<Object, Object> context, Writer out) {
@@ -418,4 +418,5 @@ public class Template {
 		}
 
 	}
+
 }

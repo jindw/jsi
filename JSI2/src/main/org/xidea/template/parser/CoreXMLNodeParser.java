@@ -5,6 +5,8 @@ import static org.xidea.template.Template.FOR_TYPE;
 import static org.xidea.template.Template.IF_TYPE;
 import static org.xidea.template.Template.VAR_TYPE;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.List;
 
@@ -20,6 +22,7 @@ import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xidea.el.Expression;
+import org.xidea.el.JSONEncoder;
 
 public class CoreXMLNodeParser implements XMLNodeParser {
 
@@ -55,25 +58,35 @@ public class CoreXMLNodeParser implements XMLNodeParser {
 					return parseOutTag(node, context);
 				} else if ("include".equals(name)) {
 					return parseIncludeTag(node, context);
-				} else if ("for".equals(name)||"forEach".equals(name)||"for-each".equals(name)) {
+				} else if ("for".equals(name) || "forEach".equals(name)
+						|| "for-each".equals(name)) {
 					return parseForTag(node, context);
 				} else if ("var".equals(name)) {
 					return parseVarTag(node, context);
+				} else if ("json".equals(name)) {
+					return parseJSONTag(node, context);
 				}
 			}
 		}
 		return false;
 	}
 
-	public String getAttribute(Node node, String key) {
+	public String getAttribute(Node node, String... keys) {
 		Element el = (Element) node;
-		return el.hasAttribute(key) ? el.getAttribute(key) : null;
+		for (String key : keys) {
+			if (el.hasAttribute(key)) {
+				return el.getAttribute(key);
+			}
+		}
+		return null;
 	}
 
 	private Expression toEL(String value) {
 		value = value.trim();
 		if (value.startsWith("${") && value.endsWith("}")) {
 			value = value.substring(2, value.length() - 1);
+		} else {
+			value = JSONEncoder.encode(value);
 		}
 		return parser.parseEL(value);
 	}
@@ -139,14 +152,15 @@ public class CoreXMLNodeParser implements XMLNodeParser {
 					Transformer transformer = javax.xml.transform.TransformerFactory
 							.newInstance().newTransformer();
 					DOMResult result = new DOMResult();
-					if(node1.getNodeType() == Node.DOCUMENT_FRAGMENT_NODE){
+					if (node1.getNodeType() == Node.DOCUMENT_FRAGMENT_NODE) {
 						node1 = node1.getFirstChild();
-						while(node1.getNodeType() != Node.ELEMENT_NODE){
-							node1=node1.getNextSibling();
+						while (node1.getNodeType() != Node.ELEMENT_NODE) {
+							node1 = node1.getNextSibling();
 						}
 					}
-					transformer.transform( new DOMSource(node1), result);
-					xsltSource = new javax.xml.transform.dom.DOMSource(result.getNode());
+					transformer.transform(new DOMSource(node1), result);
+					xsltSource = new javax.xml.transform.dom.DOMSource(result
+							.getNode());
 				} else {
 					xsltSource = new javax.xml.transform.stream.StreamSource(
 							new URL(parentURL, xslt).openStream());
@@ -155,10 +169,10 @@ public class CoreXMLNodeParser implements XMLNodeParser {
 				// create an instance of TransformerFactory
 				Transformer transformer = javax.xml.transform.TransformerFactory
 						.newInstance().newTransformer(xsltSource);
-				//javax.xml.transform.TransformerFactory
-				//.newInstance().set
-				//transformer.setNamespaceContext(parser.createNamespaceContext(doc.getOwnerDocument()));
-				
+				// javax.xml.transform.TransformerFactory
+				// .newInstance().set
+				// transformer.setNamespaceContext(parser.createNamespaceContext(doc.getOwnerDocument()));
+
 				Source xmlSource;
 				if (doc.getNodeType() == Node.DOCUMENT_FRAGMENT_NODE) {
 					Element root = doc.getOwnerDocument().createElement("root");
@@ -283,6 +297,45 @@ public class CoreXMLNodeParser implements XMLNodeParser {
 		} else {
 			context.append(new Object[] { VAR_TYPE, name, toEL(value) });
 		}
+		return true;
+	}
+
+	boolean parseJSONTag(Node node, ParseContext context) {
+		String var = getAttribute(node, "var");
+		String file = getAttribute(node, "file");
+		String encoding = getAttribute(node, "encoding", "charset");
+		String content = getAttribute(node, "content");
+		if (file != null) {
+			try {
+				InputStream in = new URL(context.getCurrentURL(), file)
+						.openStream();
+				InputStreamReader reader = new InputStreamReader(in,
+						encoding == null ? "utf-8" : encoding);
+				StringBuilder sbuf = new StringBuilder();
+				char[] cbuf = new char[1024];
+				int c;
+				while ((c = reader.read(cbuf)) >= 0) {
+					sbuf.append(cbuf, 0, c);
+				}
+				content = sbuf.toString();
+			} catch (Exception e) {
+				if (log.isWarnEnabled()) {
+					log.warn("json文件读取失败", e);
+				}
+			}
+		}
+		if (content == null) {
+			// Node next = node.getFirstChild();
+			// context.append(new Object[] { VAR_TYPE, var, null });
+			// if (next != null) {
+			// do {
+			// this.parser.parseNode(next, context);
+			// } while ((next = next.getNextSibling()) != null);
+			// }
+			// context.append(END);
+			content = node.getTextContent();
+		}
+		context.append(new Object[] { VAR_TYPE, var, parser.parseEL(content) });
 		return true;
 	}
 
