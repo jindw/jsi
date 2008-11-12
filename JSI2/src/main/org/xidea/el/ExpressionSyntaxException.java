@@ -1,4 +1,4 @@
-package org.xidea.template;
+package org.xidea.el;
 
 public class ExpressionSyntaxException extends RuntimeException {
 

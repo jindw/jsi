@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.xidea.template;
+package org.xidea.template.parser;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

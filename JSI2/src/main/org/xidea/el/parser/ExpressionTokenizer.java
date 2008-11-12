@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.xidea.template.ExpressionSyntaxException;
+import org.xidea.el.ExpressionSyntaxException;
 
 public class ExpressionTokenizer extends ExpressionTokenizerBase {
 

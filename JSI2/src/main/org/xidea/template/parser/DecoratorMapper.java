@@ -1,4 +1,4 @@
-package org.xidea.template;
+package org.xidea.template.parser;
 
 import java.io.InputStream;
 import java.util.ArrayList;

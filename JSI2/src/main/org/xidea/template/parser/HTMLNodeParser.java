@@ -1,4 +1,4 @@
-package org.xidea.template;
+package org.xidea.template.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +11,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.xidea.el.Expression;
+import org.xidea.el.JSONEncoder;
+import org.xidea.template.Template;
 
 public class HTMLNodeParser implements XMLNodeParser {
 	public static final Pattern HTML_LEAF = Pattern.compile(
@@ -58,9 +60,9 @@ public class HTMLNodeParser implements XMLNodeParser {
 					return parseCloneBooleanInput(el, context);
 				} else if (EL_SELECT.equals(localName)) {
 					context.put(SELECT_KEY, el);
-					//this.parser.parseNode(el, context);
-					//context.remove(SELECT_KEY);
-					//return true;
+					// this.parser.parseNode(el, context);
+					// context.remove(SELECT_KEY);
+					// return true;
 					return false;
 				} else if (EL_OPTION.equals(localName)) {
 					return parseCloneBooleanInput(el, context);
@@ -87,17 +89,14 @@ public class HTMLNodeParser implements XMLNodeParser {
 						value = value.substring(2, value.length() - 1);
 						valueEL = this.parser.parseEL(value);
 					} else if (value != null) {
-						valueEL = new ConstantExpression(value);
+						valueEL = this.parser.parseEL(JSONEncoder.encode(value));
 					} else {
 						valueEL = this.parser.parseEL(name);
 					}
 					List<Object> attributes = new ArrayList<Object>();
 					final Expression collectionEL = this.parser.parseEL(name);
-					attributes
-							.add(new Object[] {
-									Template.IF_TYPE,
-									new ContainsStringExpression(collectionEL,
-											valueEL) });
+					attributes.add(new Object[] { Template.IF_STRING_IN_TYPE,
+							collectionEL, valueEL });
 					attributes.add(" " + ATTRIBUTE_SELECTED + "=\""
 							+ BOOLEAN_ATTBUTE_MAP.get(ATTRIBUTE_SELECTED)
 							+ "\"");
@@ -118,14 +117,14 @@ public class HTMLNodeParser implements XMLNodeParser {
 					value = value.substring(2, value.length() - 1);
 					valueEL = this.parser.parseEL(value);
 				} else {
-					valueEL = new ConstantExpression(value);
+					valueEL = this.parser.parseEL(JSONEncoder.encode(value));
 				}
 				List<Object> attributes = new ArrayList<Object>();
 
 				final Expression collectionEL = this.parser.parseEL(name);
 
-				attributes.add(new Object[] { Template.IF_TYPE,
-						new ContainsStringExpression(collectionEL, valueEL) });
+				attributes.add(new Object[] { Template.IF_STRING_IN_TYPE,
+						collectionEL, valueEL });
 				attributes.add(" " + ATTRIBUTE_CHECKED + "=\""
 						+ BOOLEAN_ATTBUTE_MAP.get(ATTRIBUTE_CHECKED) + "\"");
 				attributes.add(END);

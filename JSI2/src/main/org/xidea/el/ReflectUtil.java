@@ -1,4 +1,4 @@
-package org.xidea.template;
+package org.xidea.el;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
@@ -13,12 +13,16 @@ import java.util.Map.Entry;
 public class ReflectUtil {
 	private static Map<Class<?>, Map<String, PropertyDescriptor>> classPropertyMap = new HashMap<Class<?>, Map<String, PropertyDescriptor>>();
 
-	static Map<Object, Object> map(Object source) {
+	public static Map<Object, Object> map(Object source) {
 		final HashSet<Entry<Object, Object>> base = new HashSet<Entry<Object, Object>>();
-		Map<String, PropertyDescriptor> propertyMap = getPropertyMap(source
-				.getClass());
-		for (String key : propertyMap.keySet()) {
-			base.add(new PropertyEntry(key, source));
+		if (source instanceof Map) {
+			return new HashMap<Object, Object>((Map<?,?>)base);
+		} else {
+			Map<String, PropertyDescriptor> propertyMap = getPropertyMap(source
+					.getClass());
+			for (String key : propertyMap.keySet()) {
+				base.add(new PropertyEntry(key, source));
+			}
 		}
 		return new AbstractMap<Object, Object>() {
 			@Override

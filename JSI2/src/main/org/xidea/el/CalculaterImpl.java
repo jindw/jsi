@@ -8,7 +8,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.el.parser.ExpressionToken;
 import org.xidea.el.parser.OperatorToken;
-import org.xidea.template.ReflectUtil;
 
 public class CalculaterImpl extends NumberArithmetic implements Calculater {
 	protected static final Object SKIP_QUESTION = new Object();
