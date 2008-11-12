@@ -13,10 +13,12 @@ public class ExpressionImpl implements Expression {
 	private static final Calculater DEFAULT_CALCULATER = new CalculaterImpl();
 	private final Calculater calculater;
 	private ExpressionToken[] expression;
+	private String source;
 	public ExpressionImpl(String el){
 		this(el,DEFAULT_CALCULATER);
 	}
 	public ExpressionImpl(String el,Calculater calculater){
+		this.source = el;
 		ExpressionTokenizer expressionTokens = new ExpressionTokenizer(el);
 		this.calculater = calculater;
 		this.expression = expressionTokens.toArray();
@@ -63,4 +65,9 @@ public class ExpressionImpl implements Expression {
 			}
 		}
 	}
+	@Override
+	public String toString() {
+		return source;
+	}
+	
 }

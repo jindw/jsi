@@ -1,4 +1,4 @@
-package org.xidea.template;
+package org.xidea.template.parser;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -11,6 +11,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
+import org.xidea.template.Template;
 
 public class DefaultXMLNodeParser implements XMLNodeParser {
 

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.template.DecoratorMapper;
+import org.xidea.template.parser.DecoratorMapper;
 
 public class DecoratorMapperTest {
 	DecoratorMapper mapper;

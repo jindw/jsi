@@ -1,4 +1,4 @@
-package org.xidea.template;
+package org.xidea.template.parser;
 
 import static org.xidea.template.Template.ELSE_TYPE;
 import static org.xidea.template.Template.FOR_TYPE;

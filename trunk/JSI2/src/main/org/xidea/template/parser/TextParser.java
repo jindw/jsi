@@ -1,4 +1,4 @@
-package org.xidea.template;
+package org.xidea.template.parser;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import org.xidea.el.Expression;
+import org.xidea.el.ExpressionFactory;
+import org.xidea.el.ExpressionFactoryImpl;
+import org.xidea.template.Template;
 
 public class TextParser implements Parser {
 	private static final Pattern FN_PATTERN = Pattern.compile("^[\\w]+\\s*$");
