@@ -139,21 +139,23 @@ public class XMLParserTest {
 				+ "</c:include>",
 		"<div>n1n2</div>");
 		test(
-				"<c:include name='dataValue' path='#dataValue' xmlns:c='http://www.xidea.org/ns/template'>"
+				"<c:include name='dataValue' path='#dataValue'" +
+				" xmlns='http://www.w3c.org/xhtml' xmlns:c='http://www.xidea.org/ns/template'>"
 				+"<c:include name='xmlValue' path='#xmlValue'>"
 				+"<div><meta name='n1' value='v1'/>"
 				+"<meta name='n2' value='v2'/>"
 				+"</div></c:include>"
 				+"<c:include"
-						+ " name='thisValue' path='#xmlValue' xpath='//meta' xslt='#thisValue'>"
+						+ " name='thisValue' path='#xmlValue' xpath='//xhtml:meta' xslt='#thisValue'>"
 						+" <xsl:stylesheet version='1.0'"
+						+"  xmlns:xhtml='http://www.w3c.org/xhtml' "
 						+"	xmlns:xsl='http://www.w3.org/1999/XSL/Transform'>"
 						+"	<xsl:template match='/'>"
 						+"		<div>"
-						+"			<xsl:apply-templates select='//meta' />"
+						+"			<xsl:apply-templates select='//xhtml:meta' />"
 						+"		</div>"
 						+"	</xsl:template>"
-						+"	<xsl:template match='meta'>"
+						+"	<xsl:template match='xhtml:meta'>"
 						+"		<xsl:value-of select='@name' />"
 						+"	</xsl:template>"
 						+"</xsl:stylesheet>"
