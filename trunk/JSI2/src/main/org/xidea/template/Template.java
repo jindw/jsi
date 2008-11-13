@@ -39,10 +39,6 @@ public class Template {
 		this(parser.parse(source));
 	}
 
-	public void render(Object context, Writer out) throws IOException {
-		renderList(ReflectUtil.map(context), items, out);
-	}
-
 	public void render(Map<Object, Object> context, Writer out)
 			throws IOException {
 		renderList(context, items, out);
