@@ -79,3 +79,8 @@ parseInt("234")
   * 与JSON官方网站发布的JSON解析程序相比，JSEL的效率更胜一筹，效率大概是他们的1.5至两倍。
 
   * 还有一个更加简单高效率的JSON解析器：StringTree，与其相比，JSEL单次解析的耗时大概是stringtree的两到三倍。
+
+
+== 下载 ==
+ * JSEL：[http://code.google.com/p/jsi/downloads/list?q=label:JSEL]
+ * JSEL 源代码: [http://jsi.googlecode.com/svn/trunk/JSI2/src/main/org/xidea/el/]
