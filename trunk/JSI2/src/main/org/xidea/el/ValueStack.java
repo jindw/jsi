@@ -1,6 +1,6 @@
 package org.xidea.el;
 
-public class ValueStack {
+class ValueStack {
 	private static int pos = -1;
 	private Object[] data = new Object[2];  
 	public Object top(){
