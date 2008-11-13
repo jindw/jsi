@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.xidea.el.Expression;
-import org.xidea.el.ReflectUtil;
 import org.xidea.template.parser.Parser;
 
 public class Template {
@@ -64,7 +63,7 @@ public class Template {
 	 * 
 	 * @internal
 	 */
-	private ArrayList<Object> compile(List<Object> datas) {
+	protected ArrayList<Object> compile(List<Object> datas) {
 		ArrayList<ArrayList<Object>> itemsStack = new ArrayList<ArrayList<Object>>();
 		itemsStack.add(new ArrayList<Object>());
 		for (int i = 0; i < datas.size(); i++) {
@@ -85,9 +84,8 @@ public class Template {
 	 * 
 	 * @internal
 	 */
-	private void compileItem(Object[] data,
+	protected void compileItem(Object[] data,
 			ArrayList<ArrayList<Object>> itemsStack) {
-
 		if (data.length == 0) {
 			itemsStack.remove(itemsStack.size() - 1);
 			return;
@@ -141,12 +139,13 @@ public class Template {
 
 	}
 
-	private static interface TemplateItem {
+	protected static interface TemplateItem {
 		public void render(Map<Object, Object> context, Writer out)
 				throws IOException;
 	}
 
-	private Expression createExpression(final Expression el) {
+	protected Expression createExpression(Object elo) {
+		final Expression el = (Expression)elo;
 		return new Expression() {
 			@SuppressWarnings("unchecked")
 			public Object evaluate(Map context) {
@@ -207,7 +206,7 @@ public class Template {
 		}
 	}
 
-	private void pushToTop(ArrayList<ArrayList<Object>> itemsStack, Object item) {
+	protected void pushToTop(ArrayList<ArrayList<Object>> itemsStack, Object item) {
 		itemsStack.get(itemsStack.size() - 1).add(item);
 	}
 
@@ -215,9 +214,9 @@ public class Template {
 		return test != null && !Boolean.FALSE.equals(test) && !"".equals(test);
 	}
 
-	private void buildExpression(Object[] data,
+	protected void buildExpression(Object[] data,
 			ArrayList<ArrayList<Object>> itemsStack, final boolean encodeXML) {
-		final Expression el = createExpression((Expression) data[1]);
+		final Expression el = createExpression( data[1]);
 		pushToTop(itemsStack, new TemplateItem() {
 			public void render(Map<Object, Object> context, Writer out)
 					throws IOException {
@@ -231,8 +230,8 @@ public class Template {
 		});
 	}
 
-	private void buildIf(Object[] data, ArrayList<ArrayList<Object>> itemsStack) {
-		final Expression el = createExpression((Expression) data[1]);
+	protected void buildIf(Object[] data, ArrayList<ArrayList<Object>> itemsStack) {
+		final Expression el = createExpression( data[1]);
 		final ArrayList<Object> children = new ArrayList<Object>();
 		pushToTop(itemsStack, new TemplateItem() {
 			public void render(Map<Object, Object> context, Writer out) {
@@ -248,10 +247,10 @@ public class Template {
 		itemsStack.add(children);
 	}
 
-	private void buildIfStringIn(Object[] data,
+	protected void buildIfStringIn(Object[] data,
 			ArrayList<ArrayList<Object>> itemsStack) {
-		final Expression elKey = createExpression((Expression) data[1]);
-		final Expression elValue = createExpression((Expression) data[2]);
+		final Expression elKey = createExpression( data[1]);
+		final Expression elValue = createExpression( data[2]);
 		final ArrayList<Object> children = new ArrayList<Object>();
 		pushToTop(itemsStack, new TemplateItem() {
 			public void render(Map<Object, Object> context, Writer out) {
@@ -285,11 +284,11 @@ public class Template {
 		itemsStack.add(children);
 	}
 
-	private void buildElse(Object[] data,
+	protected void buildElse(Object[] data,
 			ArrayList<ArrayList<Object>> itemsStack) {
 		itemsStack.remove(itemsStack.size() - 1);//
-		final Expression el = data[1] == null ? null
-				: createExpression((Expression) data[1]);
+		final Expression el = data.length>1 && data[1] == null ? null 
+				: createExpression( data[1]);
 		final ArrayList<Object> children = new ArrayList<Object>();
 		pushToTop(itemsStack, new TemplateItem() {
 			public void render(Map<Object, Object> context, Writer out) {
@@ -305,10 +304,10 @@ public class Template {
 		itemsStack.add(children);
 	}
 
-	private void buildFor(Object[] data, ArrayList<ArrayList<Object>> itemsStack) {
+	protected void buildFor(Object[] data, ArrayList<ArrayList<Object>> itemsStack) {
 		final String varName = (String) data[1];
-		final Expression itemExpression = createExpression((Expression) data[2]);
-		final String statusName = (String) data[3];
+		final Expression itemExpression = createExpression( data[2]);
+		final String statusName = data.length>3?(String) data[3]:null;
 		final ArrayList<Object> children = new ArrayList<Object>();
 		pushToTop(itemsStack, new TemplateItem() {
 			@SuppressWarnings("unchecked")
@@ -347,8 +346,8 @@ public class Template {
 		itemsStack.add(children);
 	}
 
-	private void buildRun(Object[] data, ArrayList<ArrayList<Object>> itemsStack) {
-		final Expression exp = (Expression) data[1];
+	protected void buildRun(Object[] data, ArrayList<ArrayList<Object>> itemsStack) {
+		final Expression exp = createExpression(data[1]);
 		pushToTop(itemsStack, new TemplateItem() {
 			public void render(Map<Object, Object> context, Writer out) {
 				exp.evaluate(context);
@@ -356,10 +355,10 @@ public class Template {
 		});
 	}
 
-	private void buildVar(Object[] data, ArrayList<ArrayList<Object>> itemsStack) {
+	protected void buildVar(Object[] data, ArrayList<ArrayList<Object>> itemsStack) {
 		final String name = (String) data[1];
 		if (data.length>1 && data[2] != null) {
-			final Expression el = createExpression((Expression) data[2]);
+			final Expression el = createExpression( data[2]);
 			pushToTop(itemsStack, new TemplateItem() {
 				public void render(Map<Object, Object> context, Writer out) {
 					context.put(name, el.evaluate(context));
@@ -378,9 +377,9 @@ public class Template {
 		}
 	}
 
-	private void buildAttribute(Object[] data,
+	protected void buildAttribute(Object[] data,
 			ArrayList<ArrayList<Object>> itemsStack) {
-		final Expression el = createExpression((Expression) data[1]);
+		final Expression el = createExpression( data[1]);
 		if (data.length > 2 && data[2] != null) {
 			final String prefix = " " + data[2] + "=\"";
 			pushToTop(itemsStack, new TemplateItem() {
