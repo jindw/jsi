@@ -11,7 +11,6 @@
  * 对象类型：java.util.Map、JavaBean 编码为JSON 对象字面量。
 
 
-
 === 如何使用 ===
 JSONEncoder 没有任何依赖，只时一个简单的JSONEncoder.java文件。
 它提供一个简单的静态方法，完成对象的JSON化。如果你需要将JSON输出至字符输出流。
@@ -29,3 +28,7 @@ JSONEncoder encoder= new JSONEncoder(true);
 //第一个参数指需要编码的对象，第二个参数指定输出流。
 encode.encode(object,out);
 }}}
+
+
+== 源代码下载 ==
+[http://jsi.googlecode.com/svn/trunk/JSI2/src/main/org/xidea/el/JSONEncoder.java]
