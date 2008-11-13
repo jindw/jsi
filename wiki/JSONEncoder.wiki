@@ -31,5 +31,5 @@ encode.encode(object,out);
 
 
 == 下载 ==
- * JSEL：[http://code.google.com/p/jsi/wiki/JSEL]
+ * JSEL：[http://code.google.com/p/jsi/downloads/list?q=label:JSEL]
  * JSONEncoder 源代码: [http://jsi.googlecode.com/svn/trunk/JSI2/src/main/org/xidea/el/JSONEncoder.java]
