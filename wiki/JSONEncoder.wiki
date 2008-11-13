@@ -1,3 +1,4 @@
+#labels JSEL
 === JSONEncoder 是什么 ===
 [http://code.google.com/p/jsi/wiki/JSEL JSEL] 下的一个JSON编码工具类，改造自stringtree的JSONWriter；将其改造为一个简单的线程安全的工具类。
 
