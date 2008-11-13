@@ -12,7 +12,7 @@ import org.xidea.el.parser.OperatorToken;
 public class CalculaterImpl extends NumberArithmetic implements Calculater {
 	protected static final Object SKIP_QUESTION = new Object();
 	private static final Object[] EMPTY_ARGS = new Object[0];
-	private static final Log log = LogFactory.getLog(InvokerImp.class);
+	private static final Log log = LogFactory.getLog(InvocableImp.class);
 
 	/**
 	 * 
@@ -256,6 +256,6 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 	}
 
 	private Invocable createInvocable(final Object thisObject, final String name) {
-		return new InvokerImp(thisObject, name);
+		return new InvocableImp(thisObject, name);
 	}
 }

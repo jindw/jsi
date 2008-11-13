@@ -2,11 +2,11 @@ package org.xidea.el;
 
 import java.lang.reflect.Method;
 
-public class InvokerImp implements Invocable {
+class InvocableImp implements Invocable {
 	private Object object;
 	private String name;
 
-	public InvokerImp(Object object, String name) {
+	public InvocableImp(Object object, String name) {
 		this.object = object;
 		this.name = name;
 	}
