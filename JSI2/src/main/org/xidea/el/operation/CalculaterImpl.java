@@ -229,9 +229,9 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 			return ReflectUtil.getValue(arg1, arg2);
 		case ExpressionToken.OP_GET_STATIC_METHOD:
 			String methodName = (String)arg1;
-			return createInvocable(null, methodName);
+			return createStaticInvocable(context, methodName);
 		case ExpressionToken.OP_GET_METHOD:
-			return createInvocable(arg1, String.valueOf(arg2));
+			return createInstanceInvocable(arg1, String.valueOf(arg2));
 		case ExpressionToken.OP_INVOKE_METHOD:
 			try {
 				Object[] arguments = EMPTY_ARGS;
@@ -256,15 +256,20 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 
 	}
 
-	private Invocable createInvocable(final Object thisObject, final String name) {
+	@SuppressWarnings("unchecked")
+	protected Invocable createStaticInvocable(Map context,final String name) {
+		return new InvocableImp(context, name);
+	}
+
+	protected Invocable createInstanceInvocable(final Object thisObject, final String name) {
 		return new InvocableImp(thisObject, name);
 	}
 
-	public void addFunction(String name, Method method) {
+	public void addInvocable(String name, Method method) {
 		
 	}
 
-	public void addFunction(Class clazz, String name, Method method) {
+	public void addInvocable(Class<?> clazz, String name, Method method) {
 		
 	}
 }
