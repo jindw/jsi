@@ -6,7 +6,7 @@ public class VarToken implements ExpressionToken{
 		this.value = value;
 	}
 	public int getType() {
-		return VALUE_CONSTANTS;
+		return VALUE_VAR;
 	}
 	public String getValue(){
 		return value;

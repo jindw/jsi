@@ -1,8 +1,5 @@
 package org.xidea.el.parser;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 public class ValueToken implements ExpressionToken {
 	private Object value;
 	private int type;
@@ -17,14 +14,7 @@ public class ValueToken implements ExpressionToken {
 	}
 
 	public Object getValue() {
-		switch (this.type) {
-		case ExpressionToken.VALUE_NEW_LIST:
-			return new ArrayList<Object>();
-		case ExpressionToken.VALUE_NEW_MAP:
-			return new HashMap<Object, Object>();
-		default:
-			return value;
-		}
+		return value;
 	}
 
 	public String toString() {
