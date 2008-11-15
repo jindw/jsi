@@ -1,4 +1,4 @@
-package org.xidea.el;
+package org.xidea.el.operation;
 
 import java.util.Date;
 import java.util.List;
@@ -162,7 +162,7 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Object compute(OperatorToken op, final Object arg1, final Object arg2) {
+	public Object compute(Map context,OperatorToken op, final Object arg1, final Object arg2) {
 		final int type = op.getType();
 		switch (type) {
 		case ExpressionToken.OP_NOT:
@@ -228,7 +228,8 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 		case ExpressionToken.OP_GET_PROP:
 			return ReflectUtil.getValue(arg1, arg2);
 		case ExpressionToken.OP_GET_STATIC_METHOD:
-			return createInvocable(null, String.valueOf(arg1));
+			String methodName = (String)arg1;
+			return createInvocable(null, methodName);
 		case ExpressionToken.OP_GET_METHOD:
 			return createInvocable(arg1, String.valueOf(arg2));
 		case ExpressionToken.OP_INVOKE_METHOD:

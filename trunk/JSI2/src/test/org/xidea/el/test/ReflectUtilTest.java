@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.Test;
-import org.xidea.el.ReflectUtil;
+import org.xidea.el.operation.ReflectUtil;
 
 public class ReflectUtilTest {
 	public static class Bean{

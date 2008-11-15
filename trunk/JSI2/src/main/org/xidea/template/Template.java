@@ -10,16 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.xidea.el.Expression;
-import org.xidea.template.parser.Parser;
 
-public class Template {
+public class Template{
 	public static final int EL_TYPE = 0;
 	public static final int VAR_TYPE = 1;
 	public static final int IF_TYPE = 2;
 	public static final int ELSE_TYPE = 3;
 	public static final int FOR_TYPE = 4;
-
-	public static final int RUN_TYPE = 5;
 
 	public static final int EL_TYPE_XML_TEXT = 6;
 	public static final int ATTRIBUTE_TYPE = 7;
@@ -32,10 +29,6 @@ public class Template {
 
 	public Template(List<Object> list) {
 		this.items = this.compile(list);
-	}
-
-	public Template(Object source, Parser parser) {
-		this(parser.parse(source));
 	}
 
 	public void render(Map<Object, Object> context, Writer out)
@@ -108,9 +101,6 @@ public class Template {
 			break;
 		case FOR_TYPE:// ":for":
 			buildFor(data, itemsStack);
-			break;
-		case RUN_TYPE:// ":fn":
-			buildRun(data, itemsStack);
 			break;
 		case ATTRIBUTE_TYPE:// ":attribute":
 			buildAttribute(data, itemsStack);
@@ -344,15 +334,6 @@ public class Template {
 			}
 		});
 		itemsStack.add(children);
-	}
-
-	protected void buildRun(Object[] data, ArrayList<ArrayList<Object>> itemsStack) {
-		final Expression exp = createExpression(data[1]);
-		pushToTop(itemsStack, new TemplateItem() {
-			public void render(Map<Object, Object> context, Writer out) {
-				exp.evaluate(context);
-			}
-		});
 	}
 
 	protected void buildVar(Object[] data, ArrayList<ArrayList<Object>> itemsStack) {

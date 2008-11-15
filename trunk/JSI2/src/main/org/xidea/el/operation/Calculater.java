@@ -1,4 +1,6 @@
-package org.xidea.el;
+package org.xidea.el.operation;
+
+import java.util.Map;
 
 import org.xidea.el.parser.OperatorToken;
 
@@ -11,5 +13,6 @@ public interface Calculater {
 	 * @return skip next value
 	 * @see CalculaterImpl
 	 */
-	public Object compute(OperatorToken op,Object arg1,Object arg2) ;
+	@SuppressWarnings("unchecked")
+	public Object compute(Map context,OperatorToken op,Object arg1,Object arg2) ;
 }
