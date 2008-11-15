@@ -2,6 +2,8 @@ package org.xidea.el;
 
 import java.util.Map;
 
+import org.xidea.el.operation.Calculater;
+import org.xidea.el.operation.CalculaterImpl;
 import org.xidea.el.parser.ValueToken;
 import org.xidea.el.parser.ExpressionToken;
 import org.xidea.el.parser.ExpressionTokenizer;
@@ -45,7 +47,7 @@ public class ExpressionImpl implements Expression {
 				}else if(length == 1){
 					arg1 = stack.pop();
 				}
-				Object result = calculater.compute((OperatorToken) item,arg1,arg2);
+				Object result = calculater.compute(context,(OperatorToken) item,arg1,arg2);
 				if(result instanceof LazyToken){
 					evaluate(stack, ((LazyToken)result).getChildren(), context);
 				}else{

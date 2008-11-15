@@ -29,7 +29,7 @@ public class XMLParserTest {
 	}
 
 	private String renderTemplate(String template) {
-		Template t = new Template(template, parser);
+		Template t = new Template(parser.parse(template));
 		StringWriter out = new StringWriter();
 		HashMap<Object, Object> model = new HashMap<Object, Object>();
 		model.put("test", true);

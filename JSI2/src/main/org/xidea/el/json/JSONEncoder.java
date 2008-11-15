@@ -1,4 +1,4 @@
-package org.xidea.el;
+package org.xidea.el.json;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -10,10 +10,9 @@ import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,18 +43,16 @@ public class JSONEncoder {
 	}
 
 	public void encode(Object value, Writer out) throws IOException {
-		List<Object> result = print(value, null, out);
+		Collection<Object> result = print(value, null, out);
 		if (result != null) {
 			result.clear();
 		}
 	}
 
-	private List<Object> print(Object object, List<Object> cached, Writer out)
-			throws IOException {
+	protected Collection<Object> print(Object object,
+			Collection<Object> cached, Writer out) throws IOException {
 		if (object == null) {
 			out.write("null");
-		} else if (object instanceof Class) {
-			out.write(String.valueOf(object));
 		} else if (object instanceof Boolean) {
 			out.write(String.valueOf(object));
 		} else if (object instanceof Number) {
@@ -66,8 +63,8 @@ public class JSONEncoder {
 			print(String.valueOf(object), out);
 		} else {
 			if (cached == null) {
-				cached = new ArrayList<Object>();
-			} else if (cyclic(cached, object)) {
+				cached = new HashSet<Object>();
+			} else if (cached.contains(object)) {
 				print("null", out);
 				return cached;
 			}
@@ -81,13 +78,13 @@ public class JSONEncoder {
 			} else if (object instanceof Collection) {
 				print(((Collection<?>) object).iterator(), cached, out);
 			} else {
-				printObject(object, cached, out);
+				printBean(object, cached, out);
 			}
 		}
 		return cached;
 	}
 
-	private void print(String text, Writer out) throws IOException {
+	protected void print(String text, Writer out) throws IOException {
 		out.write('"');
 		for (int i = 0; i < text.length(); i++) {
 			char c = text.charAt(i);
@@ -99,23 +96,25 @@ public class JSONEncoder {
 				out.write('\\');
 				out.write(c);
 				break;
-			case '\b':
+			case '\b'://\u0008
 				out.write("\\b");
 				break;
-			case '\f':
-				out.write("\\f");
-				break;
-			case '\n':
+			case '\n'://\u000a
+				//case '\v'://\u000b
 				out.write("\\n");
 				break;
-			case '\r':
+			//case '\f'://\u000c
+			//	out.write("\\f");
+			//	break;
+			case '\r'://\u000d
 				out.write("\\r");
 				break;
-			case '\t':
+			case '\t'://\u0009
 				out.write("\\t");
 				break;
 			default:
 				if (Character.isISOControl(c)) {
+					// if ((c >= 0x0000 && c <= 0x001F)|| (c >= 0x007F && c <= 0x009F)) {
 					out.write("\\u");
 					out.write(Integer.toHexString(0x10000 + c), 1, 5);
 				} else {
@@ -126,19 +125,8 @@ public class JSONEncoder {
 		out.write('"');
 	}
 
-	private boolean cyclic(List<?> cached, Object object) {
-		Iterator<?> it = cached.iterator();
-		while (it.hasNext()) {
-			Object existed = it.next();
-			if (object == existed) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void printObject(Object object, List<Object> cached, Writer out)
-			throws IOException {
+	protected void printBean(Object object, Collection<Object> cached,
+			Writer out) throws IOException {
 		out.write('{');
 		BeanInfo info;
 		boolean addedSomething = false;
@@ -186,7 +174,7 @@ public class JSONEncoder {
 		out.write('}');
 	}
 
-	private void print(Map<?, ?> map, List<Object> cached, Writer out)
+	protected void print(Map<?, ?> map, Collection<Object> cached, Writer out)
 			throws IOException {
 		out.write('{');
 		Iterator<?> it = map.entrySet().iterator();
@@ -202,8 +190,7 @@ public class JSONEncoder {
 		out.write('}');
 	}
 
-
-	private void print(Object[] object, List<Object> cached, Writer out)
+	protected void print(Object[] object, Collection<Object> cached, Writer out)
 			throws IOException {
 		out.write('[');
 		for (int i = 0; i < object.length; ++i) {
@@ -215,7 +202,7 @@ public class JSONEncoder {
 		out.write(']');
 	}
 
-	private void print(Iterator<?> it, List<Object> cached, Writer out)
+	protected void print(Iterator<?> it, Collection<Object> cached, Writer out)
 			throws IOException {
 		out.write('[');
 		while (it.hasNext()) {

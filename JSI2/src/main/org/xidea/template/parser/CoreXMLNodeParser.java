@@ -22,7 +22,7 @@ import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xidea.el.Expression;
-import org.xidea.el.JSONEncoder;
+import org.xidea.el.json.JSONEncoder;
 
 public class CoreXMLNodeParser implements XMLNodeParser {
 
