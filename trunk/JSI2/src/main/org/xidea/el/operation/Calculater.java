@@ -25,6 +25,6 @@ public interface Calculater {
 	@SuppressWarnings("unchecked")
 	public Object compute(Map context,OperatorToken op,Object arg1,Object arg2) ;
 
-	public void addFunction(String name,Method method);
-	public void addFunction(Class clazz,String name,Method method);
+	public void addInvocable(String name,Method method);
+	public void addInvocable(Class<?> clazz,String name,Method method);
 }
