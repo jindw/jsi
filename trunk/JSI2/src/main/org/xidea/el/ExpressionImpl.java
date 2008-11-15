@@ -1,5 +1,8 @@
 package org.xidea.el;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.xidea.el.operation.Calculater;
@@ -16,10 +19,12 @@ public class ExpressionImpl implements Expression {
 	private final Calculater calculater;
 	private ExpressionToken[] expression;
 	private String source;
-	public ExpressionImpl(String el){
-		this(el,DEFAULT_CALCULATER);
+
+	public ExpressionImpl(String el) {
+		this(el, DEFAULT_CALCULATER);
 	}
-	public ExpressionImpl(String el,Calculater calculater){
+
+	public ExpressionImpl(String el, Calculater calculater) {
 		this.source = el;
 		ExpressionTokenizer expressionTokens = new ExpressionTokenizer(el);
 		this.calculater = calculater;
@@ -32,41 +37,64 @@ public class ExpressionImpl implements Expression {
 		evaluate(stack, expression, context);
 		return stack.pop();
 	}
-	private void evaluate(ValueStack stack,ExpressionToken[] tokens,Map<Object, Object> context) {
+
+	@SuppressWarnings("unchecked")
+	private void evaluate(ValueStack stack, ExpressionToken[] tokens,
+			Map<Object, Object> context) {
 		ExpressionToken item = null;
 		int i = tokens.length;
-		while (i-->0) {
+		while (i-- > 0) {
 			item = (ExpressionToken) tokens[i];
 			if (item instanceof OperatorToken) {
 				Object arg2 = null;
 				Object arg1 = null;
-				int length = ((OperatorToken)item).getLength();
-				if(length>1){
+				int length = ((OperatorToken) item).getLength();
+				if (length > 1) {
 					arg2 = stack.pop();
 					arg1 = stack.pop();
-				}else if(length == 1){
+				} else if (length == 1) {
 					arg1 = stack.pop();
 				}
-				Object result = calculater.compute(context,(OperatorToken) item,arg1,arg2);
-				if(result instanceof LazyToken){
-					evaluate(stack, ((LazyToken)result).getChildren(), context);
-				}else{
-					stack.push(result);
+				switch (item.getType()) {
+				case ExpressionToken.OP_PARAM_JOIN:
+					((List) arg1).add(arg2);
+					stack.push(arg1);
+				case ExpressionToken.OP_MAP_PUSH:
+					((Map) arg1).put(((OperatorToken) item).getParam(), arg2);
+					stack.push(arg1);
+				default:
+					Object result = calculater.compute(context,
+							(OperatorToken) item, arg1, arg2);
+					if (result instanceof LazyToken) {
+						evaluate(stack, ((LazyToken) result).getChildren(),
+								context);
+					} else {
+						stack.push(result);
+					}
 				}
-			} else{
-				if(item instanceof VarToken){
-					String value = ((VarToken)item).getValue();
-					stack.push("this".equals(value)?context:context.get(value));
-				}else if(item instanceof ValueToken){
-					stack.push(((ValueToken)item).getValue());
-				}else if(item instanceof LazyToken){
-					stack.push(item);
-				}else{
-					throw new RuntimeException("无效Token"+item);
-				}
+			} else {
+				stack.push(getTokenValue(context, item));
 			}
 		}
 	}
+
+	protected Object getTokenValue(Map<Object, Object> context,
+			ExpressionToken item) {
+		switch (item.getType()) {
+		case ExpressionToken.VALUE_NEW_LIST:
+			return new ArrayList<Object>();
+		case ExpressionToken.VALUE_NEW_MAP:
+			return new HashMap<Object, Object>();
+		case ExpressionToken.VALUE_VAR:
+			String value = ((VarToken) item).getValue();
+			return ("this".equals(value) ? context : context.get(value));
+		case ExpressionToken.VALUE_LAZY:
+			return (item);
+		default:
+			return (((ValueToken) item).getValue());
+		}
+	}
+
 	@Override
 	public String toString() {
 		return source;
@@ -75,24 +103,28 @@ public class ExpressionImpl implements Expression {
 
 class ValueStack {
 	private static int pos = -1;
-	private Object[] data = new Object[2];  
-	public Object top(){
+	private Object[] data = new Object[2];
+
+	public Object top() {
 		return data[pos];
 	}
-	public Object pop(){
+
+	public Object pop() {
 		return data[pos--];
 	}
-	public Object push(Object value){
+
+	public Object push(Object value) {
 		pos++;
-		if(pos >= data.length){
-			Object[] data2 = new Object[data.length *2];
+		if (pos >= data.length) {
+			Object[] data2 = new Object[data.length * 2];
 			System.arraycopy(data, 0, data2, 0, data.length);
 			data = data2;
 		}
 		return data[pos] = value;
 	}
-	public boolean isEmpty(){
-		return pos<0;
+
+	public boolean isEmpty() {
+		return pos < 0;
 	}
 
 }
