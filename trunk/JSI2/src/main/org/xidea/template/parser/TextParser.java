@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.ExpressionFactoryImpl;
 import org.xidea.template.Template;
@@ -13,14 +12,11 @@ import org.xidea.template.Template;
 public class TextParser implements Parser {
 	private static final Pattern FN_PATTERN = Pattern.compile("^[\\w]+\\s*$");
 
-	private static ExpressionFactory defaultExpressionFactory = new ExpressionFactoryImpl();
-
-	private ExpressionFactory expressionFactory = defaultExpressionFactory;
+	private ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
 
 	public void setExpressionFactory(ExpressionFactory expressionFactory) {
 		this.expressionFactory = expressionFactory;
 	}
-
 	public List<Object> parse(Object text) {
 		return parseText((String) text, false, false, (char) 0);
 	}
@@ -87,7 +83,7 @@ public class TextParser implements Parser {
 					int p2 = findELEnd(text, p1, length);
 					if (p2 > 0) {
 						if (p1 > start) {
-							Object el = parseEL(text.substring(p1 + 1, p2));
+							Object el = optimizeEL(text.substring(p1 + 1, p2));
 							try {
 								if (start < p$) {
 									result.add(text.substring(start, p$));
@@ -120,9 +116,9 @@ public class TextParser implements Parser {
 			while (i-- > 0) {
 				Object item = result.get(i);
 				if (item instanceof String) {
-					if(((String)item).length()==0){
+					if (((String) item).length() == 0) {
 						result.remove(i);
-					}else{
+					} else {
 						result.set(i, encodeText((String) item, quteChar));
 					}
 				}
@@ -131,8 +127,8 @@ public class TextParser implements Parser {
 		return result;
 	}
 
-	protected Expression parseEL(String expression) {
-		return expressionFactory.createExpression(expression.trim());
+	public Object optimizeEL(String expression) {
+		return expressionFactory.optimizeEL(expression);
 	}
 
 	private boolean isEscaped$(String text, int p) {
