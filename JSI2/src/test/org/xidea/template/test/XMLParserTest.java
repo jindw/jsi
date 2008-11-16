@@ -161,7 +161,7 @@ public class XMLParserTest {
 						+"</xsl:stylesheet>"
 						+ "</c:include></c:include>",
 				"<div><meta name=\"n1\" value=\"v1\"/>"
-				+"<meta name=\"n2\" value=\"v2\"/></div><div>n1n2</div>");
+				+"<meta name=\"n2\" value=\"v2\"/></div><div xmlns=\"http://www.w3c.org/xhtml\" xmlns:xhtml=\"http://www.w3c.org/xhtml\">n1n2</div>");
 		
 		
 	}

@@ -2,5 +2,6 @@ package org.xidea.el;
 
 
 public interface ExpressionFactory {
-	public Expression createExpression(String el);
+	public Expression createEL(String el);
+	public String optimizeEL(String expression);
 }

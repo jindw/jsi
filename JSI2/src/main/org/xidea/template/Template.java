@@ -9,9 +9,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.el.Expression;
+import org.xidea.el.ExpressionFactory;
+import org.xidea.el.ExpressionFactoryImpl;
+import org.xidea.template.parser.CoreXMLNodeParser;
 
-public class Template{
+public class Template {
+	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
+
 	public static final int EL_TYPE = 0;
 	public static final int VAR_TYPE = 1;
 	public static final int IF_TYPE = 2;
@@ -24,6 +31,13 @@ public class Template{
 
 	public static final String FOR_KEY = "for";
 	public static final String IF_KEY = "if";
+
+	private ExpressionFactory expressionFactory = ExpressionFactoryImpl
+			.getInstance();
+
+	public void setExpressionFactory(ExpressionFactory expressionFactory) {
+		this.expressionFactory = expressionFactory;
+	}
 
 	protected List<Object> items;
 
@@ -45,8 +59,10 @@ public class Template{
 				} else {
 					out.write((String) item);
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
+			} catch (Exception e) {//每一个指令都拒绝异常
+				if (log.isDebugEnabled()) {
+					log.debug(e);
+				}
 			}
 		}
 	}
@@ -135,17 +151,7 @@ public class Template{
 	}
 
 	protected Expression createExpression(Object elo) {
-		final Expression el = (Expression)elo;
-		return new Expression() {
-			@SuppressWarnings("unchecked")
-			public Object evaluate(Map context) {
-				try {
-					return el.evaluate(context);
-				} catch (Exception e) {
-					return null;
-				}
-			}
-		};
+		return expressionFactory.createEL((String) elo);
 	}
 
 	protected void printXMLAttribute(String text, Map<Object, Object> context,
@@ -196,7 +202,8 @@ public class Template{
 		}
 	}
 
-	protected void pushToTop(ArrayList<ArrayList<Object>> itemsStack, Object item) {
+	protected void pushToTop(ArrayList<ArrayList<Object>> itemsStack,
+			Object item) {
 		itemsStack.get(itemsStack.size() - 1).add(item);
 	}
 
@@ -206,7 +213,7 @@ public class Template{
 
 	protected void buildExpression(Object[] data,
 			ArrayList<ArrayList<Object>> itemsStack, final boolean encodeXML) {
-		final Expression el = createExpression( data[1]);
+		final Expression el = createExpression(data[1]);
 		pushToTop(itemsStack, new TemplateItem() {
 			public void render(Map<Object, Object> context, Writer out)
 					throws IOException {
@@ -220,15 +227,25 @@ public class Template{
 		});
 	}
 
-	protected void buildIf(Object[] data, ArrayList<ArrayList<Object>> itemsStack) {
-		final Expression el = createExpression( data[1]);
+	protected void buildIf(Object[] data,
+			ArrayList<ArrayList<Object>> itemsStack) {
+		final Expression el = createExpression(data[1]);
 		final ArrayList<Object> children = new ArrayList<Object>();
 		pushToTop(itemsStack, new TemplateItem() {
 			public void render(Map<Object, Object> context, Writer out) {
-				boolean test = toBoolean(el.evaluate(context));
-				if (test) {
-					renderList(context, children, out);
+				boolean test;
+				try {
+					test = toBoolean(el.evaluate(context));
+					if (test) {
+						renderList(context, children, out);
+					}
+				} catch (Exception e) {
+					if (log.isDebugEnabled()) {
+						log.debug(e);
+					}
+					test = true;
 				}
+
 				// context[2] = test;//if passed(一定要放下来，确保覆盖)
 				context.put(IF_KEY, test);
 			}
@@ -239,32 +256,43 @@ public class Template{
 
 	protected void buildIfStringIn(Object[] data,
 			ArrayList<ArrayList<Object>> itemsStack) {
-		final Expression elKey = createExpression( data[1]);
-		final Expression elValue = createExpression( data[2]);
+		final Expression elKey = createExpression(data[1]);
+		final Expression elValue = createExpression(data[2]);
 		final ArrayList<Object> children = new ArrayList<Object>();
 		pushToTop(itemsStack, new TemplateItem() {
 			public void render(Map<Object, Object> context, Writer out) {
-				Object key = elKey.evaluate(context);
-				Object value = elValue.evaluate(context);
+
 				boolean test = false;
-				key = String.valueOf(key);
-				if (value instanceof Object[]) {
-					for (Object item : (Object[]) value) {
-						if (item != null && key.equals(String.valueOf(item))) {
-							test = true;
-							break;
+				try {
+					Object key = elKey.evaluate(context);
+					Object value = elValue.evaluate(context);
+
+					key = String.valueOf(key);
+					if (value instanceof Object[]) {
+						for (Object item : (Object[]) value) {
+							if (item != null
+									&& key.equals(String.valueOf(item))) {
+								test = true;
+								break;
+							}
+						}
+					} else if (value instanceof Collection) {
+						for (Object item : (Collection<?>) value) {
+							if (item != null
+									&& key.equals(String.valueOf(item))) {
+								test = true;
+								break;
+							}
 						}
 					}
-				} else if (value instanceof Collection) {
-					for (Object item : (Collection<?>) value) {
-						if (item != null && key.equals(String.valueOf(item))) {
-							test = true;
-							break;
-						}
+					if (test) {
+						renderList(context, children, out);
 					}
-				}
-				if (test) {
-					renderList(context, children, out);
+				} catch (Exception e) {
+					if (log.isDebugEnabled()) {
+						log.debug(e);
+					}
+					test = true;
 				}
 				// context[2] = test;//if passed(一定要放下来，确保覆盖)
 				context.put(IF_KEY, test);
@@ -277,27 +305,36 @@ public class Template{
 	protected void buildElse(Object[] data,
 			ArrayList<ArrayList<Object>> itemsStack) {
 		itemsStack.remove(itemsStack.size() - 1);//
-		final Expression el = data.length>1 && data[1] == null ? null 
-				: createExpression( data[1]);
+		final Expression el = data.length > 1 && data[1] == null ? null
+				: createExpression(data[1]);
 		final ArrayList<Object> children = new ArrayList<Object>();
 		pushToTop(itemsStack, new TemplateItem() {
 			public void render(Map<Object, Object> context, Writer out) {
 				if (!toBoolean(context.get(IF_KEY))) {
-					if (el == null || toBoolean(el.evaluate(context))) {// if
-						renderList(context, children, out);
+					try {
+						if (el == null || toBoolean(el.evaluate(context))) {// if
+							renderList(context, children, out);
+							context.put(IF_KEY, true);
+							;// if passed(不用要放下去，另一分支已正常)
+						}
+					} catch (Exception e) {
+						if (log.isDebugEnabled()) {
+							log.debug(e);
+						}
 						context.put(IF_KEY, true);
-						;// if passed(不用要放下去，另一分支已正常)
 					}
+
 				}
 			}
 		});
 		itemsStack.add(children);
 	}
 
-	protected void buildFor(Object[] data, ArrayList<ArrayList<Object>> itemsStack) {
+	protected void buildFor(Object[] data,
+			ArrayList<ArrayList<Object>> itemsStack) {
 		final String varName = (String) data[1];
-		final Expression itemExpression = createExpression( data[2]);
-		final String statusName = data.length>3?(String) data[3]:null;
+		final Expression itemExpression = createExpression(data[2]);
+		final String statusName = data.length > 3 ? (String) data[3] : null;
 		final ArrayList<Object> children = new ArrayList<Object>();
 		pushToTop(itemsStack, new TemplateItem() {
 			@SuppressWarnings("unchecked")
@@ -308,38 +345,41 @@ public class Template{
 				if (list instanceof Object[]) {
 					items = Arrays.asList(list);
 				} else {
-
 					items = (List<Object>) list;
 				}
-				ForStatus preiousStatus = (ForStatus) context.get(FOR_KEY);
 				int len = items.size();
-				ForStatus forStatus = new ForStatus(len);
-				context.put(FOR_KEY, forStatus);
-				// context.put("for", forStatus);
-				// prepareFor(this);
-				if (statusName != null) {
-					context.put(statusName, forStatus);
+				ForStatus preiousStatus = (ForStatus) context.get(FOR_KEY);
+				try {
+					ForStatus forStatus = new ForStatus(len);
+					context.put(FOR_KEY, forStatus);
+					// context.put("for", forStatus);
+					// prepareFor(this);
+					if (statusName != null) {
+						context.put(statusName, forStatus);
+					}
+					for (Object item : items) {
+						forStatus.index++;
+						context.put(varName, item);
+						renderList(context, children, out);
+					}
+					if (statusName != null) {
+						context.put(statusName, preiousStatus);
+					}
+				} finally {
+					// context.put("for", preiousStatus);
+					context.put(FOR_KEY, preiousStatus);// for key
+					context.put(IF_KEY, len > 0);// if key
 				}
-				for (Object item : items) {
-					forStatus.index++;
-					context.put(varName, item);
-					renderList(context, children, out);
-				}
-				if (statusName != null) {
-					context.put(statusName, preiousStatus);
-				}
-				// context.put("for", preiousStatus);
-				context.put(FOR_KEY, preiousStatus);// for key
-				context.put(IF_KEY, len > 0);// if key
 			}
 		});
 		itemsStack.add(children);
 	}
 
-	protected void buildVar(Object[] data, ArrayList<ArrayList<Object>> itemsStack) {
+	protected void buildVar(Object[] data,
+			ArrayList<ArrayList<Object>> itemsStack) {
 		final String name = (String) data[1];
-		if (data.length>1 && data[2] != null) {
-			final Expression el = createExpression( data[2]);
+		if (data.length > 1 && data[2] != null) {
+			final Expression el = createExpression(data[2]);
 			pushToTop(itemsStack, new TemplateItem() {
 				public void render(Map<Object, Object> context, Writer out) {
 					context.put(name, el.evaluate(context));
@@ -360,7 +400,7 @@ public class Template{
 
 	protected void buildAttribute(Object[] data,
 			ArrayList<ArrayList<Object>> itemsStack) {
-		final Expression el = createExpression( data[1]);
+		final Expression el = createExpression(data[1]);
 		if (data.length > 2 && data[2] != null) {
 			final String prefix = " " + data[2] + "=\"";
 			pushToTop(itemsStack, new TemplateItem() {

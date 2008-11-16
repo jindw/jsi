@@ -59,9 +59,11 @@ public class ExpressionImpl implements Expression {
 				case ExpressionToken.OP_PARAM_JOIN:
 					((List) arg1).add(arg2);
 					stack.push(arg1);
+					break;
 				case ExpressionToken.OP_MAP_PUSH:
 					((Map) arg1).put(((OperatorToken) item).getParam(), arg2);
 					stack.push(arg1);
+					break;
 				default:
 					Object result = calculater.compute(context,
 							(OperatorToken) item, arg1, arg2);

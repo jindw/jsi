@@ -21,7 +21,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.xidea.el.Expression;
 import org.xidea.el.json.JSONEncoder;
 
 public class CoreXMLNodeParser implements NodeParser {
@@ -81,17 +80,17 @@ public class CoreXMLNodeParser implements NodeParser {
 		return null;
 	}
 
-	private Expression toEL(String value) {
+	private Object toEL(String value) {
 		value = value.trim();
 		if (value.startsWith("${") && value.endsWith("}")) {
 			value = value.substring(2, value.length() - 1);
 		} else {
 			value = JSONEncoder.encode(value);
 		}
-		return parser.parseEL(value);
+		return parser.optimizeEL(value);
 	}
 
-	private Expression getAttributeEL(Node node, String key) {
+	private Object getAttributeEL(Node node, String key) {
 		String value = getAttribute(node, key);
 		return toEL(value);
 
@@ -198,7 +197,7 @@ public class CoreXMLNodeParser implements NodeParser {
 
 	boolean parseIfTag(Node node, ParseContext context) {
 		Node next = node.getFirstChild();
-		Expression test = getAttributeEL(node, "test");
+		Object test = getAttributeEL(node, "test");
 		context.append(new Object[] { IF_TYPE, test });
 		if (next != null) {
 			do {
@@ -212,7 +211,7 @@ public class CoreXMLNodeParser implements NodeParser {
 	boolean parseElseIfTag(Node node, ParseContext context) {
 		context.removeLastEnd();
 		Node next = node.getFirstChild();
-		Expression test = getAttributeEL(node, "test");
+		Object test = getAttributeEL(node, "test");
 		context.append(new Object[] { ELSE_TYPE, test });
 		if (next != null) {
 			do {
@@ -269,7 +268,7 @@ public class CoreXMLNodeParser implements NodeParser {
 
 	boolean parseForTag(Node node, ParseContext context) {
 		Node next = node.getFirstChild();
-		Expression items = getAttributeEL(node, "items");
+		Object items = getAttributeEL(node, "items");
 		String var = getAttribute(node, "var");
 		String status = getAttribute(node, "status");
 		context.append(new Object[] { FOR_TYPE, var, items, status });
@@ -335,7 +334,7 @@ public class CoreXMLNodeParser implements NodeParser {
 			// context.append(END);
 			content = node.getTextContent();
 		}
-		context.append(new Object[] { VAR_TYPE, var, parser.parseEL(content) });
+		context.append(new Object[] { VAR_TYPE, var, parser.optimizeEL(content) });
 		return true;
 	}
 

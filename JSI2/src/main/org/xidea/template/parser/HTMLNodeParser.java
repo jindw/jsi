@@ -84,17 +84,17 @@ public class HTMLNodeParser implements NodeParser {
 						&& selectNode.hasAttribute(VALUE)) {
 					String name = selectNode.getAttribute(NAME);
 					String value = selectNode.getAttribute(VALUE);
-					final Expression valueEL;
+					final Object valueEL;
 					if (value.startsWith("${") && value.endsWith("}")) {
 						value = value.substring(2, value.length() - 1);
-						valueEL = this.parser.parseEL(value);
+						valueEL = this.parser.optimizeEL(value);
 					} else if (value != null) {
-						valueEL = this.parser.parseEL(JSONEncoder.encode(value));
+						valueEL = this.parser.optimizeEL(JSONEncoder.encode(value));
 					} else {
-						valueEL = this.parser.parseEL(name);
+						valueEL = this.parser.optimizeEL(name);
 					}
 					List<Object> attributes = new ArrayList<Object>();
-					final Expression collectionEL = this.parser.parseEL(name);
+					final Object collectionEL = this.parser.optimizeEL(name);
 					attributes.add(new Object[] { Template.IF_STRING_IN_TYPE,
 							collectionEL, valueEL });
 					attributes.add(" " + ATTRIBUTE_SELECTED + "=\""
@@ -112,16 +112,16 @@ public class HTMLNodeParser implements NodeParser {
 					&& element.hasAttribute(VALUE)) {
 				String name = element.getAttribute(NAME);
 				String value = element.getAttribute(VALUE);
-				final Expression valueEL;
+				final Object valueEL;
 				if (value.startsWith("${") && value.endsWith("}")) {
 					value = value.substring(2, value.length() - 1);
-					valueEL = this.parser.parseEL(value);
+					valueEL = this.parser.optimizeEL(value);
 				} else {
-					valueEL = this.parser.parseEL(JSONEncoder.encode(value));
+					valueEL = this.parser.optimizeEL(JSONEncoder.encode(value));
 				}
 				List<Object> attributes = new ArrayList<Object>();
 
-				final Expression collectionEL = this.parser.parseEL(name);
+				final Object collectionEL = this.parser.optimizeEL(name);
 
 				attributes.add(new Object[] { Template.IF_STRING_IN_TYPE,
 						collectionEL, valueEL });
@@ -154,7 +154,7 @@ public class HTMLNodeParser implements NodeParser {
 				trueValue = " " + name + "=\"" + trueValue + "\"";
 				if (value.startsWith("${") && value.endsWith("}")) {
 					value = value.substring(2, value.length() - 1);
-					final Expression el = this.parser.parseEL(value);
+					final Object el = this.parser.optimizeEL(value);
 					context.append(new Object[] { Template.IF_TYPE, el });
 					context.append(trueValue);
 					context.append(END);
