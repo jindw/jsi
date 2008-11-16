@@ -32,7 +32,7 @@ public class XMLParser extends TextParser {
 			.compile("^[\\s\\ufeff]*<");
 
 	private DocumentBuilder documentBuilder;
-	private XMLNodeParser[] parserList = { new DefaultXMLNodeParser(this),
+	private NodeParser[] parserList = { new DefaultXMLNodeParser(this),
 			new HTMLNodeParser(this),
 			new CoreXMLNodeParser(this) };
 
@@ -52,9 +52,9 @@ public class XMLParser extends TextParser {
 		}
 	}
 
-	public void addNodePasser(XMLNodeParser parser){
+	public void addNodePasser(NodeParser parser){
 		int length = this.parserList.length;
-		XMLNodeParser[] newParserList = new XMLNodeParser[length+1];
+		NodeParser[] newParserList = new NodeParser[length+1];
 		System.arraycopy(this.parserList, 0, newParserList, 0, length);
 		newParserList[length] = parser;
 		this.parserList = newParserList;

@@ -14,7 +14,7 @@ import org.xidea.el.Expression;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.template.Template;
 
-public class HTMLNodeParser implements XMLNodeParser {
+public class HTMLNodeParser implements NodeParser {
 	public static final Pattern HTML_LEAF = Pattern.compile(
 			"^(?:meta|link|img|br|hr|input)$", Pattern.CASE_INSENSITIVE);
 
