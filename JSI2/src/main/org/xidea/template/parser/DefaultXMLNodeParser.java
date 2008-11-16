@@ -129,7 +129,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 		String value = attr.getValue();
 		if ("xmlns:c".equals(name)
 				&& ("#".equals(value) || "#core".equals(value))
-				|| TEMPLATE_NAMESPACE.matcher(value).find()) {
+				|| value.equals(TEMPLATE_NAMESPACE)) {
 			return true;
 		}
 		List<Object> buf = this.parser.parseText(value, true,true, '"');
