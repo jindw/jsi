@@ -20,6 +20,7 @@ import javax.xml.xpath.XPathExpressionException;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
+import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -181,11 +182,18 @@ public class XMLParser extends TextParser {
 
 	public void parseNode(Object node, ParseContext context) {
 		if (node instanceof Node) {
+			final int depth = context.getDepth();
+			if(node instanceof Element){
+				context.setDepth(depth+1);
+			}
 			int i = parserList.length;
 			while (i-- > 0) {
 				if (parserList[i].parseNode((Node) node, context)) {
-					return;
+					break;
 				}
+			}
+			if(node instanceof Element){
+				context.setDepth(depth);
 			}
 		} else if (node instanceof NodeList) {
 			NodeList list = (NodeList) node;
