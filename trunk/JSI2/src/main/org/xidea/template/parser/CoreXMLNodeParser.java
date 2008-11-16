@@ -40,8 +40,7 @@ public class CoreXMLNodeParser implements NodeParser {
 			if (namespaceURI != null
 					&& ("c".equals(prefix)
 							&& ("#".equals(namespaceURI) || "#core"
-									.equals(namespaceURI)) || TEMPLATE_NAMESPACE
-							.matcher(namespaceURI).find())) {
+									.equals(namespaceURI)) || namespaceURI.equals(TEMPLATE_NAMESPACE))) {
 				String name = el.getLocalName();
 				if ("choose".equals(name)) {
 					return parseChooseTag(node, context);
