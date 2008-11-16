@@ -42,6 +42,8 @@ public class CoreXMLNodeParser implements NodeParser {
 							&& ("#".equals(namespaceURI) || "#core"
 									.equals(namespaceURI)) || namespaceURI.equals(TEMPLATE_NAMESPACE))) {
 				String name = el.getLocalName();
+				int depth = context.getDepth();
+				context.setDepth(depth-1);
 				if ("choose".equals(name)) {
 					return parseChooseTag(node, context);
 				} else if ("elseif".equals(name)) {
@@ -64,6 +66,7 @@ public class CoreXMLNodeParser implements NodeParser {
 				} else if ("json".equals(name)) {
 					return parseJSONTag(node, context);
 				}
+				context.setDepth(depth);
 			}
 		}
 		return false;
@@ -340,7 +343,7 @@ public class CoreXMLNodeParser implements NodeParser {
 	boolean parseOutTag(Node node, ParseContext context) {
 		String value = getAttribute(node, "value");
 		List<Object> result = this.parser.parseText(value, false, false, 0);
-		context.append(result);
+		context.appendList(result);
 		return true;
 	}
 

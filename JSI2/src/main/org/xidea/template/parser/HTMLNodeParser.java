@@ -16,6 +16,8 @@ import org.xidea.template.Template;
 public class HTMLNodeParser implements NodeParser {
 	public static final Pattern HTML_LEAF = Pattern.compile(
 			"^(?:meta|link|img|br|hr|input)$", Pattern.CASE_INSENSITIVE);
+	public static final Pattern PRE_LEAF = Pattern.compile(
+			"^(?:script|style|pre|textarea)$", Pattern.CASE_INSENSITIVE);
 
 	private static final String XHTMLNS = "http://www.w3.org/1999/xhtml";
 	private static final String EL_INPUT = "input";
@@ -88,7 +90,8 @@ public class HTMLNodeParser implements NodeParser {
 						value = value.substring(2, value.length() - 1);
 						valueEL = this.parser.optimizeEL(value);
 					} else if (value != null) {
-						valueEL = this.parser.optimizeEL(JSONEncoder.encode(value));
+						valueEL = this.parser.optimizeEL(JSONEncoder
+								.encode(value));
 					} else {
 						valueEL = this.parser.optimizeEL(name);
 					}
@@ -169,6 +172,7 @@ public class HTMLNodeParser implements NodeParser {
 
 	private boolean parseElement(Node node, ParseContext context,
 			List<Object> exts) {
+		context.appendFormatIndent();
 		Element el = (Element) node;
 		NamedNodeMap attributes = node.getAttributes();
 		String tagName = el.getTagName();
@@ -178,20 +182,37 @@ public class HTMLNodeParser implements NodeParser {
 			// this.parser.parseNode(attributes.item(i), context);
 		}
 		if (exts != null) {
-			context.append(exts);
+			context.appendList(exts);
 		}
 		if (HTML_LEAF.matcher(tagName).find()) {
 			context.append("/>");
-			return true;
+			context.appendFormatEnd();
+		} else {
+			context.append(">");
+			Node next = node.getFirstChild();
+			if (next != null) {
+				boolean reserveSpace = PRE_LEAF.matcher(tagName).find();
+				boolean oldReserveSpace = context.isReserveSpace();
+				context.setReserveSpace(oldReserveSpace || reserveSpace);
+
+				boolean format =next.getNodeType() != Node.TEXT_NODE || next.getNextSibling()!=null;
+				if (format) {
+					context.appendFormatEnd();
+				}
+				try {
+					do {
+						this.parser.parseNode(next, context);
+					} while ((next = next.getNextSibling()) != null);
+				} finally {
+					context.setReserveSpace(oldReserveSpace);
+				}
+				if (format) {
+					context.appendFormatIndent();
+				}
+			}
+			context.append("</" + tagName + '>');
+			context.appendFormatEnd();
 		}
-		context.append(">");
-		Node next = node.getFirstChild();
-		if (next != null) {
-			do {
-				this.parser.parseNode(next, context);
-			} while ((next = next.getNextSibling()) != null);
-		}
-		context.append("</" + tagName + '>');
 		return true;
 	}
 }

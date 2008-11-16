@@ -60,14 +60,23 @@ public class DefaultXMLNodeParser implements NodeParser {
 	private boolean parseProcessingInstruction(Node node, ParseContext context) {
 		context.append("<?" + node.getNodeName() + " "
 				+ ((ProcessingInstruction) node).getData() + "?>");
+		context.appendFormatEnd();
 		return true;
 	}
 
 	private boolean parseCDATA(Node node, ParseContext context) {
+		boolean format = (node.getPreviousSibling() != null || node
+				.getNextSibling() != null);
+		if (format) {
+			context.appendFormatIndent();
+		}
 		context.append("<![CDATA[");
-		context.append(this.parser.parseText(((CDATASection) node).getData(),
-				false, false,0));
+		context.appendList(this.parser.parseText(((CDATASection) node)
+				.getData(), false, false, 0));
 		context.append("]]>");
+		if (format) {
+			context.appendFormatEnd();
+		}
 		return true;
 	}
 
@@ -92,6 +101,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 			context.append(node.getInternalSubset());
 			context.append("]>");
 		}
+		context.appendFormatEnd();
 		return true;
 	}
 
@@ -119,7 +129,20 @@ public class DefaultXMLNodeParser implements NodeParser {
 
 	private boolean parseTextNode(Node node, ParseContext context) {
 		String text = ((Text) node).getData();
-		context.append(this.parser.parseText(text, true,false, 0));
+		if (!context.isReserveSpace()) {
+			text = text.trim();
+		}
+		if (text.length() > 0) {
+			boolean format = (node.getPreviousSibling() != null || node
+					.getNextSibling() != null);
+			if (format) {
+				context.appendFormatIndent();
+			}
+			context.appendList(this.parser.parseText(text, true, false, 0));
+			if (format) {
+				context.appendFormatEnd();
+			}
+		}
 		return true;
 	}
 
@@ -132,7 +155,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 				|| value.equals(TEMPLATE_NAMESPACE)) {
 			return true;
 		}
-		List<Object> buf = this.parser.parseText(value, true,true, '"');
+		List<Object> buf = this.parser.parseText(value, true, true, '"');
 		boolean isStatic = false;
 		boolean isDynamic = false;
 		// hack parseText is void
@@ -158,8 +181,8 @@ public class DefaultXMLNodeParser implements NodeParser {
 				throw new RuntimeException("只能有单个EL表达式");
 			} else {// 只考虑单一EL表达式的情况
 				Object[] el = (Object[]) buf.get(0);
-				context.append(new Object[] { Template.ATTRIBUTE_TYPE, 
-						el[1], name});
+				context.append(new Object[] { Template.ATTRIBUTE_TYPE, el[1],
+						name });
 				return true;
 			}
 		}
@@ -171,12 +194,13 @@ public class DefaultXMLNodeParser implements NodeParser {
 				buf.set(0, "http://www.w3.org/1999/xhtml");
 			}
 		}
-		context.append(buf);
+		context.appendList(buf);
 		context.append("\"");
 		return true;
 	}
 
 	private boolean parseElement(Node node, ParseContext context) {
+		context.appendFormatIndent();
 		Element el = (Element) node;
 		NamedNodeMap attributes = node.getAttributes();
 		String tagName = el.getTagName();
@@ -187,14 +211,25 @@ public class DefaultXMLNodeParser implements NodeParser {
 		Node next = node.getFirstChild();
 		if (next != null) {
 			context.append(">");
+			boolean format = next.getNodeType() != Node.TEXT_NODE
+					|| next.getNextSibling() != null;
+			if (format) {
+				context.appendFormatEnd();
+			}
 			do {
 				this.parser.parseNode(next, context);
 			} while ((next = next.getNextSibling()) != null);
+			if (format) {
+				context.appendFormatIndent();
+			}
 			context.append("</" + tagName + '>');
+			context.appendFormatEnd();
 		} else {
 			context.append("/>");
+			context.appendFormatEnd();
 			return true;
 		}
+
 		return true;
 	}
 }
