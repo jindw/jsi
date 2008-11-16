@@ -29,7 +29,7 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 	// 将中序表达式转换为右序表达式
 	private List<ExpressionToken> right(Iterator<ExpressionToken> tokens) {
 		LinkedList<List<ExpressionToken>> rightStack = new LinkedList<List<ExpressionToken>>();
-		rightStack.push(new ArrayList<ExpressionToken>()); // 存储右序表达式
+		rightStack.addFirst(new ArrayList<ExpressionToken>()); // 存储右序表达式
 
 		LinkedList<OperatorToken> buffer = new LinkedList<OperatorToken>();
 
@@ -38,12 +38,12 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 			if (item instanceof OperatorToken) {
 				OperatorToken op = (OperatorToken) item;
 				if (buffer.isEmpty()) {
-					buffer.push(op);
+					buffer.addFirst(op);
 				} else if (item.getType() == ExpressionToken.BRACKET_BEGIN) {// ("(")
-					buffer.push(op);
+					buffer.addFirst(op);
 				} else if (item.getType() == ExpressionToken.BRACKET_END) {// .equals(")"))
 					while (true) {
-						ExpressionToken operator = buffer.pop();
+						ExpressionToken operator = buffer.removeFirst();
 						if (operator.getType() == ExpressionToken.BRACKET_BEGIN) {
 							break;
 						}
@@ -51,19 +51,19 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 					}
 				} else {
 					while (!buffer.isEmpty() && rightEnd(op, buffer.getFirst())) {
-						ExpressionToken operator = buffer.pop();
+						ExpressionToken operator = buffer.removeFirst();
 						// if (operator.getType() !=
 						// ExpressionToken.BRACKET_BEGIN){
 						addOperator(rightStack, operator);
 					}
-					buffer.push(op);
+					buffer.addFirst(op);
 				}
 			} else {// lazy begin value exp
 				addToken(rightStack, item);
 			}
 		}
 		while (!buffer.isEmpty()) {
-			ExpressionToken operator = buffer.pop();
+			ExpressionToken operator = buffer.removeFirst();
 			addOperator(rightStack, operator);
 		}
 		return rightStack.getFirst();
@@ -76,7 +76,7 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 		case ExpressionToken.OP_AND:
 		case ExpressionToken.OP_QUESTION:
 		case ExpressionToken.OP_QUESTION_SELECT:
-			List<ExpressionToken> children = rightStack.pop();
+			List<ExpressionToken> children = rightStack.removeFirst();
 			List<ExpressionToken> list = rightStack.getFirst();
 			LazyToken token = (LazyToken) list.get(list.size() - 1);
 			token.setChildren(toArray(children));
@@ -88,7 +88,7 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 			ExpressionToken token) {
 		List<ExpressionToken> list = rightStack.getFirst();
 		if (token instanceof LazyToken) {
-			rightStack.push(new ArrayList<ExpressionToken>());
+			rightStack.addFirst(new ArrayList<ExpressionToken>());
 		}
 		list.add(token);
 	}
