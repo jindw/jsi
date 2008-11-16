@@ -10,7 +10,6 @@ import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.xidea.el.Expression;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.template.Template;
 

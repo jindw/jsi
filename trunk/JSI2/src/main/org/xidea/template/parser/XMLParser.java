@@ -23,7 +23,6 @@ import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xidea.el.ExpressionFactoryImpl;
 import org.xidea.template.dtd.DefaultEntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
