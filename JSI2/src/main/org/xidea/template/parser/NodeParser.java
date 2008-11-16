@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 
 import org.w3c.dom.Node;
 
-public interface XMLNodeParser {
+public interface NodeParser {
 	public static final Object[] END = new Object[0];
 
 	public static final Pattern TEMPLATE_NAMESPACE = Pattern.compile("^http://www.xidea.org/ns/template.*",

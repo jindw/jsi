@@ -24,7 +24,7 @@ import org.w3c.dom.Node;
 import org.xidea.el.Expression;
 import org.xidea.el.json.JSONEncoder;
 
-public class CoreXMLNodeParser implements XMLNodeParser {
+public class CoreXMLNodeParser implements NodeParser {
 
 	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 	private XMLParser parser;

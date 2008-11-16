@@ -1,4 +1,4 @@
-package org.xidea.template;
+package org.xidea.template.test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Externalizable;

@@ -1,4 +1,4 @@
-package org.xidea.template;
+package org.xidea.template.test;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
+import org.xidea.template.Template;
 import org.xidea.template.parser.DecoratorMapper;
 import org.xidea.template.parser.ParseContext;
 import org.xidea.template.parser.XMLParser;

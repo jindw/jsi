@@ -13,7 +13,7 @@ import org.w3c.dom.ProcessingInstruction;
 import org.w3c.dom.Text;
 import org.xidea.template.Template;
 
-public class DefaultXMLNodeParser implements XMLNodeParser {
+public class DefaultXMLNodeParser implements NodeParser {
 
 	public static final Pattern SCRIPT_TAG = Pattern.compile("^script$",
 			Pattern.CASE_INSENSITIVE);
