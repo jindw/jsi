@@ -12,8 +12,6 @@ import org.xidea.el.ExpressionSyntaxException;
 
 public class ExpressionTokenizer extends ExpressionTokenizerBase {
 
-	private ExpressionToken[] reversedArray;
-
 	public ExpressionTokenizer(String value) {
 		super(value);
 		parse();
@@ -21,9 +19,7 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 	}
 
 	private boolean rightEnd(OperatorToken item, OperatorToken privious) {
-		int type = item.getType();
-		int priviousType = privious.getType();
-		return PRIORITY_MAP.get(type) <= PRIORITY_MAP.get(priviousType);
+		return item.getPriority() <= privious.getPriority();
 	}
 
 	// 将中序表达式转换为右序表达式
@@ -47,29 +43,29 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 						if (operator.getType() == ExpressionToken.BRACKET_BEGIN) {
 							break;
 						}
-						addOperator(rightStack, operator);
+						addRightOperator(rightStack, operator);
 					}
 				} else {
 					while (!buffer.isEmpty() && rightEnd(op, buffer.getFirst())) {
 						ExpressionToken operator = buffer.removeFirst();
 						// if (operator.getType() !=
 						// ExpressionToken.BRACKET_BEGIN){
-						addOperator(rightStack, operator);
+						addRightOperator(rightStack, operator);
 					}
 					buffer.addFirst(op);
 				}
 			} else {// lazy begin value exp
-				addToken(rightStack, item);
+				addRightToken(rightStack, item);
 			}
 		}
 		while (!buffer.isEmpty()) {
 			ExpressionToken operator = buffer.removeFirst();
-			addOperator(rightStack, operator);
+			addRightOperator(rightStack, operator);
 		}
 		return rightStack.getFirst();
 	}
 
-	private void addOperator(LinkedList<List<ExpressionToken>> rightStack,
+	private void addRightOperator(LinkedList<List<ExpressionToken>> rightStack,
 			ExpressionToken operator) {
 		switch (operator.getType()) {
 		case ExpressionToken.OP_OR:
@@ -79,12 +75,12 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 			List<ExpressionToken> children = rightStack.removeFirst();
 			List<ExpressionToken> list = rightStack.getFirst();
 			LazyToken token = (LazyToken) list.get(list.size() - 1);
-			token.setChildren(toArray(children));
+			token.setChildren(reverseArray(children));
 		}
-		addToken(rightStack, operator);
+		addRightToken(rightStack, operator);
 	}
 
-	public void addToken(LinkedList<List<ExpressionToken>> rightStack,
+	public void addRightToken(LinkedList<List<ExpressionToken>> rightStack,
 			ExpressionToken token) {
 		List<ExpressionToken> list = rightStack.getFirst();
 		if (token instanceof LazyToken) {
@@ -93,7 +89,7 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 		list.add(token);
 	}
 
-	private ExpressionToken[] toArray(List<ExpressionToken> list) {
+	private ExpressionToken[] reverseArray(List<ExpressionToken> list) {
 		ExpressionToken[] expression = new ExpressionToken[list.size()];
 		int i = expression.length - 1;
 		for (ExpressionToken expressionToken : list) {
@@ -103,10 +99,7 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 	}
 
 	public ExpressionToken[] toArray() {
-		if (this.reversedArray == null) {
-			this.reversedArray = toArray(expression);
-		}
-		return this.reversedArray;
+		return reverseArray(expression);
 	}
 }
 
@@ -114,22 +107,13 @@ class ExpressionTokenizerBase {
 	private static final int STATUS_BEGIN = -100;
 	private static final int STATUS_EXPRESSION = -101;
 	private static final int STATUS_OPERATOR = -102;
-	
-	protected static Map<Integer, Integer> PRIORITY_MAP = new HashMap<Integer, Integer>();
-	private static Map<String, Integer> OP_TYPE_MAP = new HashMap<String, Integer>();
-	private static Map<Integer, String> TYPE_OP_MAP = new HashMap<Integer, String>();
+
 	private static final String[] OPS;// = ">= <= == != && || + - * / % ? : .
 
 	private static void addOperator(int type, int priopity, String key,
 			List<String> ops) {
-		PRIORITY_MAP.put(type, priopity);
 		if (key != null) {
-			TYPE_OP_MAP.put(type, key);
-			if (OP_TYPE_MAP.containsKey(key)) {
-				OP_TYPE_MAP.put(key, -1);
-			} else {
-				OP_TYPE_MAP.put(key, type);
-			}
+
 			if (key.length() == 1) {
 				if (",:[{}]".indexOf(key.charAt(0)) == -1) {
 					ops.add(key);
@@ -139,10 +123,6 @@ class ExpressionTokenizerBase {
 				ops.add(0, key);
 			}
 		}
-	}
-
-	static String getOperator(int type) {
-		return TYPE_OP_MAP.get(type);
 	}
 
 	static {
@@ -191,16 +171,25 @@ class ExpressionTokenizerBase {
 
 		OPS = ops.toArray(new String[ops.size()]);
 	}
-	private static Map<Integer, OperatorToken> operatorMap = new HashMap<Integer, OperatorToken>();
-	private static final Map<String, ExpressionToken> CONSTAINS_MAP = new HashMap<String, ExpressionToken>();
-	static {
-		CONSTAINS_MAP.put("true", createToken(ExpressionToken.VALUE_CONSTANTS,
-				Boolean.TRUE));
-		CONSTAINS_MAP.put("false", createToken(ExpressionToken.VALUE_CONSTANTS,
-				Boolean.FALSE));
-		CONSTAINS_MAP.put("null", createToken(ExpressionToken.VALUE_CONSTANTS,
-				null));
+	private final static ExpressionToken TOKEN_TRUE = createToken(
+			ExpressionToken.VALUE_CONSTANTS, Boolean.TRUE);
+	private final static ExpressionToken TOKEN_FALSE = createToken(
+			ExpressionToken.VALUE_CONSTANTS, Boolean.FALSE);
+	private final static ExpressionToken TOKEN_NULL = createToken(
+			ExpressionToken.VALUE_CONSTANTS, null);
+
+	public static ExpressionToken getConstainsToken(String key) {
+		if ("true".equals(key)) {
+			return TOKEN_TRUE;
+		} else if ("false".equals(key)) {
+			return TOKEN_FALSE;
+		} else if ("null".equals(key)) {
+			return TOKEN_NULL;
+		}
+		return null;
 	}
+
+	private static Map<Integer, OperatorToken> operatorMap = new HashMap<Integer, OperatorToken>();
 
 	protected static ExpressionToken createToken(int type, Object value) {
 		switch (type) {
@@ -239,7 +228,6 @@ class ExpressionTokenizerBase {
 	protected ArrayList<ExpressionToken> tokens = new ArrayList<ExpressionToken>();
 	protected List<ExpressionToken> expression;
 
-
 	protected ExpressionTokenizerBase(String value) {
 		this.value = value.trim();
 		this.end = this.value.length();
@@ -257,7 +245,7 @@ class ExpressionTokenizerBase {
 				addKeyOrObject(number, false);
 			} else if (Character.isJavaIdentifierStart(c)) {
 				String id = findId();
-				ExpressionToken constains = CONSTAINS_MAP.get(id);
+				ExpressionToken constains = getConstainsToken(id);
 				if (constains == null) {
 					skipSpace();
 					if (previousType == ExpressionToken.OP_GET_PROP) {
@@ -282,7 +270,6 @@ class ExpressionTokenizerBase {
 		}
 	}
 
-
 	/**
 	 * 碰見:和,的時候，就需要檢查是否事map的間隔符號了
 	 * 
@@ -295,12 +282,14 @@ class ExpressionTokenizerBase {
 			ExpressionToken token = tokens.get(i);
 			int type = token.getType();
 			if (depth == 0) {
-				if (type == ExpressionToken.OP_MAP_PUSH || type == ExpressionToken.VALUE_NEW_MAP) {// ( <#newMap>
-															// <#push>
+				if (type == ExpressionToken.OP_MAP_PUSH
+						|| type == ExpressionToken.VALUE_NEW_MAP) {// (
+																	// <#newMap>
+					// <#push>
 					return true;
 				} else if (type == ExpressionToken.OP_PARAM_JOIN) {// (
-																	// <#newList>
-																	// <#param_join>
+					// <#newList>
+					// <#param_join>
 					return false;
 				}
 			}
@@ -342,6 +331,7 @@ class ExpressionTokenizerBase {
 		}
 		return null;
 	}
+
 	private void parseOperator(String op) {
 		if (op.length() == 1) {
 			switch (op.charAt(0)) {
@@ -434,7 +424,7 @@ class ExpressionTokenizerBase {
 					break;
 				}
 			default:
-				addToken(createToken(OP_TYPE_MAP.get(op), null));
+				addToken(createToken(OperatorToken.findType(op), null));
 			}
 		} else if (op.equals("||")) { // ||
 			addToken(createToken(ExpressionToken.OP_OR, null));
@@ -445,7 +435,7 @@ class ExpressionTokenizerBase {
 			addToken(new LazyToken());
 			// addToken(OperatorToken.getToken(ExpressionToken.SKIP_AND));
 		} else {
-			addToken(createToken(OP_TYPE_MAP.get(op), null));
+			addToken(createToken(OperatorToken.findType(op), null));
 		}
 
 	}
@@ -468,6 +458,7 @@ class ExpressionTokenizerBase {
 		previousType = token.getType();
 		tokens.add(token);
 	}
+
 	private void addKeyOrObject(Object object, boolean isVar) {
 		if (skipSpace(':') && isMapMethod()) {// object key
 			addToken(createToken(ExpressionToken.OP_MAP_PUSH, object));

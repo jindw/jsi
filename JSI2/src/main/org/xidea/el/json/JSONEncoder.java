@@ -80,6 +80,7 @@ public class JSONEncoder {
 			} else {
 				printBean(object, cached, out);
 			}
+			cached.remove(object);
 		}
 		return cached;
 	}

@@ -7,6 +7,8 @@ import java.io.StringWriter;
 import java.util.Collections;
 
 import org.xidea.el.ExpressionImpl;
+import org.xidea.el.json.JSONEncoder;
+import org.xidea.el.json.JSONTokenizer;
 import org.xidea.el.test.json.JSONReader;//StringTree實現還是不錯的
 import org.xidea.el.test.json.JSONWriter;
 
@@ -55,6 +57,8 @@ public class JSONTest {
 
 	@Test
 	public void testTime() throws Exception {
+		Object object = new JSONTokenizer("{\"a\":[],\"d\":[1,23,\"123\",[1,\"dddd\"],[]]}").parse();
+		System.out.println(JSONEncoder.encode(object));		
 		String[] tests = new String[]{"test-number.json","test-array.json","test.json"};
 		for(int i=0;i<tests.length;i++){
 			String file = tests[i];
@@ -68,10 +72,12 @@ public class JSONTest {
 			String json = getText(file);
 			for (int j = 0; j < 10; j++) {
 				long t1 = System.currentTimeMillis();
-				JSONReader reader = new JSONReader();
+
+				JSONTokenizer reader = new JSONTokenizer(json);
+				//JSONReader reader = new JSONReader();
 				//JSONTokener reader = new JSONTokener(json);
 				long t2 = System.currentTimeMillis();
-				jso = reader.read(json);
+				jso = reader.parse();
 				//jso = reader.nextValue();
 
 				long t3 = System.currentTimeMillis();
