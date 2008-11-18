@@ -2,19 +2,61 @@ package org.xidea.el.parser;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.xidea.el.ExpressionSyntaxException;
+import org.xidea.el.json.JSONTokenizer;
 
-public class ExpressionTokenizer extends ExpressionTokenizerBase {
+public class ExpressionTokenizer extends JSONTokenizer {
+	private static final int STATUS_BEGIN = -100;
+	private static final int STATUS_EXPRESSION = -101;
+	private static final int STATUS_OPERATOR = -102;
 
+	private final static ExpressionToken TOKEN_TRUE = createToken(
+			ExpressionToken.VALUE_CONSTANTS, Boolean.TRUE);
+	private final static ExpressionToken TOKEN_FALSE = createToken(
+			ExpressionToken.VALUE_CONSTANTS, Boolean.FALSE);
+	private final static ExpressionToken TOKEN_NULL = createToken(
+			ExpressionToken.VALUE_CONSTANTS, null);
+
+	protected static ExpressionToken getConstainsToken(String key) {
+		if ("true".equals(key)) {
+			return TOKEN_TRUE;
+		} else if ("false".equals(key)) {
+			return TOKEN_FALSE;
+		} else if ("null".equals(key)) {
+			return TOKEN_NULL;
+		}
+		return null;
+	}
+
+	protected static ExpressionToken createToken(int type, Object value) {
+		switch (type) {
+		case ExpressionToken.VALUE_VAR:
+			return new VarToken((String) value);
+		case ExpressionToken.VALUE_CONSTANTS:
+		case ExpressionToken.VALUE_NEW_MAP:
+		case ExpressionToken.VALUE_NEW_LIST:
+			return new ValueToken(type, value);
+		case ExpressionToken.VALUE_LAZY:
+			return new LazyToken();
+		case ExpressionToken.OP_MAP_PUSH:
+			return new OperatorToken(type, value);
+		default:
+			return new OperatorToken(type, null);
+		}
+	}
+
+	private int status = STATUS_BEGIN;
+	private int previousType = STATUS_BEGIN;
+
+	protected ArrayList<ExpressionToken> tokens = new ArrayList<ExpressionToken>();
+	protected List<ExpressionToken> expression;
 	public ExpressionTokenizer(String value) {
 		super(value);
-		parse();
+		parseEL();
 		this.expression = right(this.tokens.iterator());
 	}
 
@@ -80,7 +122,7 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 		addRightToken(rightStack, operator);
 	}
 
-	public void addRightToken(LinkedList<List<ExpressionToken>> rightStack,
+	private void addRightToken(LinkedList<List<ExpressionToken>> rightStack,
 			ExpressionToken token) {
 		List<ExpressionToken> list = rightStack.getFirst();
 		if (token instanceof LazyToken) {
@@ -98,143 +140,12 @@ public class ExpressionTokenizer extends ExpressionTokenizerBase {
 		return expression;
 	}
 
-	public ExpressionToken[] toArray() {
-		return reverseArray(expression);
-	}
-}
-
-class ExpressionTokenizerBase {
-	private static final int STATUS_BEGIN = -100;
-	private static final int STATUS_EXPRESSION = -101;
-	private static final int STATUS_OPERATOR = -102;
-
-	private static final String[] OPS;// = ">= <= == != && || + - * / % ? : .
-
-	private static void addOperator(int type, int priopity, String key,
-			List<String> ops) {
-		if (key != null) {
-
-			if (key.length() == 1) {
-				if (",:[{}]".indexOf(key.charAt(0)) == -1) {
-					ops.add(key);
-				}
-			} else if (key.length() == 2) {
-				// 当前只有二个字符的操作符，以后需要扩展
-				ops.add(0, key);
-			}
-		}
+	public ExpressionToken[] toReversedArray() {
+		return reverseArray(expression);//reversed
 	}
 
-	static {
-		ArrayList<String> ops = new ArrayList<String>();
-		ops.add("[");// !!
-		ops.add("{");
-		ops.add("]");
-		ops.add("}");
-
-		addOperator(ExpressionToken.BRACKET_BEGIN, Integer.MIN_VALUE, "(", ops);
-		addOperator(ExpressionToken.BRACKET_END, Integer.MIN_VALUE, ")", ops);
-
-		addOperator(ExpressionToken.OP_GET_PROP, 12, ".", ops);
-		addOperator(ExpressionToken.OP_GET_METHOD, 12, null, ops);
-		addOperator(ExpressionToken.OP_GET_STATIC_METHOD, 12, null, ops);
-		addOperator(ExpressionToken.OP_INVOKE_METHOD, 12, null, ops);
-		addOperator(ExpressionToken.VALUE_NEW_LIST, 12, "[", ops);
-		addOperator(ExpressionToken.VALUE_NEW_MAP, 12, "{", ops);
-
-		addOperator(ExpressionToken.OP_NOT, 8, "!", ops);
-		addOperator(ExpressionToken.OP_POS, 8, "+", ops);
-		addOperator(ExpressionToken.OP_NEG, 8, "-", ops);
-
-		addOperator(ExpressionToken.OP_MUL, 4, "*", ops);
-		addOperator(ExpressionToken.OP_DIV, 4, "/", ops);
-		addOperator(ExpressionToken.OP_MOD, 4, "%", ops);
-
-		addOperator(ExpressionToken.OP_ADD, 1, "+", ops);
-		addOperator(ExpressionToken.OP_SUB, 1, "-", ops);
-
-		addOperator(ExpressionToken.OP_LT, 0, "<", ops);
-		addOperator(ExpressionToken.OP_GT, 0, ">", ops);
-		addOperator(ExpressionToken.OP_LTEQ, 0, "<=", ops);
-		addOperator(ExpressionToken.OP_GTEQ, 0, ">=", ops);
-		addOperator(ExpressionToken.OP_EQ, 0, "==", ops);
-		addOperator(ExpressionToken.OP_NOTEQ, 0, "!=", ops);
-
-		addOperator(ExpressionToken.OP_AND, -1, "&&", ops);
-		addOperator(ExpressionToken.OP_OR, -2, "||", ops);
-
-		addOperator(ExpressionToken.OP_QUESTION, -4, "?", ops);
-		addOperator(ExpressionToken.OP_QUESTION_SELECT, -4, ":", ops);// !!
-
-		addOperator(ExpressionToken.OP_MAP_PUSH, -7, ":", ops);// !!
-		addOperator(ExpressionToken.OP_PARAM_JOIN, -8, ",", ops);
-
-		OPS = ops.toArray(new String[ops.size()]);
-	}
-	private final static ExpressionToken TOKEN_TRUE = createToken(
-			ExpressionToken.VALUE_CONSTANTS, Boolean.TRUE);
-	private final static ExpressionToken TOKEN_FALSE = createToken(
-			ExpressionToken.VALUE_CONSTANTS, Boolean.FALSE);
-	private final static ExpressionToken TOKEN_NULL = createToken(
-			ExpressionToken.VALUE_CONSTANTS, null);
-
-	public static ExpressionToken getConstainsToken(String key) {
-		if ("true".equals(key)) {
-			return TOKEN_TRUE;
-		} else if ("false".equals(key)) {
-			return TOKEN_FALSE;
-		} else if ("null".equals(key)) {
-			return TOKEN_NULL;
-		}
-		return null;
-	}
-
-	private static Map<Integer, OperatorToken> operatorMap = new HashMap<Integer, OperatorToken>();
-
-	protected static ExpressionToken createToken(int type, Object value) {
-		switch (type) {
-		case ExpressionToken.VALUE_VAR:
-			return new VarToken((String) value);
-		case ExpressionToken.VALUE_CONSTANTS:
-		case ExpressionToken.VALUE_NEW_MAP:
-		case ExpressionToken.VALUE_NEW_LIST:
-			return new ValueToken(type, value);
-		case ExpressionToken.VALUE_LAZY:
-			return new LazyToken();
-		case ExpressionToken.OP_MAP_PUSH:
-			return new OperatorToken(type, value);
-		default:
-			// public static OperatorToken getToken(final int type) {
-			OperatorToken token = operatorMap.get(type);
-			if (token == null) {
-				synchronized (operatorMap) {
-					token = operatorMap.get(type);
-					if (token == null) {
-						token = new OperatorToken(type, null);
-						operatorMap.put(type, token);
-					}
-				}
-			}
-			return token;
-		}
-	}
-
-	private String value;
-	private int start;
-	private final int end;
-	private int status = STATUS_BEGIN;
-	private int previousType = STATUS_BEGIN;
-
-	protected ArrayList<ExpressionToken> tokens = new ArrayList<ExpressionToken>();
-	protected List<ExpressionToken> expression;
-
-	protected ExpressionTokenizerBase(String value) {
-		this.value = value.trim();
-		this.end = this.value.length();
-	}
-
-	protected void parse() {
-		skipSpace();
+	protected void parseEL() {
+		skipSpace(0);
 		while (start < end) {
 			char c = value.charAt(start);
 			if (c == '"' || c == '\'') {
@@ -247,7 +158,7 @@ class ExpressionTokenizerBase {
 				String id = findId();
 				ExpressionToken constains = getConstainsToken(id);
 				if (constains == null) {
-					skipSpace();
+					skipSpace(0);
 					if (previousType == ExpressionToken.OP_GET_PROP) {
 						addToken(createToken(ExpressionToken.VALUE_CONSTANTS,
 								id));
@@ -266,10 +177,43 @@ class ExpressionTokenizerBase {
 							+ start);
 				}
 			}
-			skipSpace();
+			skipSpace(0);
 		}
 	}
+	private String findOperator() {// optimize json ,:[{}]
+		switch (value.charAt(start)) {
+		case '!'://!,!=
+		case '>'://>,>=
+		case '<'://<,<=
+			if(value.charAt(start+1)=='='){
+				return value.substring(start,start+=2);
+			}
+		case ','://optimize for json
+		case ':'://3op,map key
+		case '['://list
+		case ']':
+		case '{'://map
+		case '}':
+		case '('://quote
+		case ')':
+		case '.'://prop
+		case '?'://3op
+		case '+'://5op
+		case '-':
+		case '*':
+		case '/':
+		case '%':
+			return value.substring(start,start+=1);
 
+		case '='://==
+		case '&'://&&
+		case '|'://||
+			assert (value.charAt(start) == value.charAt(start+1));
+			return value.substring(start,start+=2);
+		}
+		return null;
+	}
+	
 	/**
 	 * 碰見:和,的時候，就需要檢查是否事map的間隔符號了
 	 * 
@@ -302,35 +246,7 @@ class ExpressionTokenizerBase {
 		return false;
 	}
 
-	private String findOperator() {// optimize json ,:[{}]
-		switch (value.charAt(start)) {
-		case ',':
-			start++;
-			return ",";
-		case ':':
-			start++;
-			return ":";
-		case '[':
-			start++;
-			return "[";
-		case '{':
-			start++;
-			return "{";
-		case ']':
-			start++;
-			return "]";
-		case '}':
-			start++;
-			return "}";
-		}
-		for (String op : OPS) {
-			if (value.startsWith(op, start)) {
-				start += op.length();
-				return op;
-			}
-		}
-		return null;
-	}
+
 
 	private void parseOperator(String op) {
 		if (op.length() == 1) {
@@ -519,167 +435,5 @@ class ExpressionTokenizerBase {
 	private void addMap() {
 		addToken(createToken(ExpressionToken.BRACKET_BEGIN, null));
 		addToken(createToken(ExpressionToken.VALUE_NEW_MAP, null));
-	}
-
-	private Number findNumber() {
-		int i = start;
-		char c = value.charAt(i++);
-		if (c == '0' && i < end) {
-			c = value.charAt(i++);
-			if (c == 'x') {
-				while (i < end) {
-					c = value.charAt(i++);
-					if (!(c >= '0' && c <= '9' || c >= 'a' && c <= 'f' || c >= 'A'
-							&& c <= 'F')) {
-						i--;
-						break;
-					}
-				}
-				return parseNumber(value.substring(start, start = i));
-			} else if (c >= '0' && c <= '9') {
-				while (i < end) {
-					c = value.charAt(i++);
-					if (c < '0' || c > '7') {
-						i--;
-						break;
-					}
-				}
-				return parseNumber(value.substring(start, start = i));
-
-			} else {
-				i--;// next process
-			}
-		}
-		while (i < end) {
-			c = value.charAt(i++);
-			if (c < '0' || c > '9') {
-				i--;
-				break;
-			}
-		}
-		if (c == '.') {
-			i++;
-			while (i < end) {
-				c = value.charAt(i++);
-				if (c < '0' || c > '9') {
-					i--;
-					break;
-				}
-			}
-		}
-		return parseNumber(value.substring(start, start = i));
-	}
-
-	private Number parseNumber(String text) {
-		if (text.startsWith("0x")) {
-			return Integer.parseInt(text.substring(2), 16);
-		} else if (text.indexOf('.') >= 0) {
-			return Double.parseDouble(text);
-		} else if (text.charAt(0) == '0' && text.length() > 1) {
-			return Integer.parseInt(text.substring(1), 8);
-		} else {
-			return Integer.parseInt(text);
-		}
-	}
-
-	private String findId() {
-		int p = start;
-		if (Character.isJavaIdentifierPart(value.charAt(p++))) {
-			while (p < end) {
-				if (!Character.isJavaIdentifierPart(value.charAt(p))) {
-					break;
-				}
-				p++;
-			}
-			return (value.substring(start, start = p));
-		}
-		throw new ExpressionSyntaxException();
-
-	}
-
-	/**
-	 * {@link Decompiler#printSourceString
-	 */
-
-	private String findString() {
-		char quoteChar = value.charAt(start++);
-		StringBuilder buf = new StringBuilder();
-		while (start < end) {
-			char c = value.charAt(start++);
-			switch (c) {
-			case '\\':
-				char c2 = value.charAt(start++);
-				switch (c2) {
-				case 'b':
-					buf.append('\b');
-					break;
-				case 'f':
-					buf.append('\f');
-					break;
-				case 'n':
-					buf.append('\n');
-					break;
-				case 'r':
-					buf.append('\r');
-					break;
-				case 't':
-					buf.append('\t');
-					break;
-				case 'v':
-					buf.append(0xb);
-					break; // Java lacks \v.
-				case ' ':
-					buf.append(' ');
-					break;
-				case '\\':
-					buf.append('\\');
-					break;
-				case '\'':
-					buf.append('\'');
-					break;
-				case '\"':
-					buf.append('"');
-					break;
-				case 'u':
-					buf.append((char) Integer.parseInt(value.substring(
-							start + 1, start + 5), 16));
-					start += 4;
-					break;
-				case 'x':
-					buf.append((char) Integer.parseInt(value.substring(
-							start + 1, start + 3), 16));
-					start += 2;
-					break;
-				}
-				break;
-			case '"':
-			case '\'':
-				if (c == quoteChar) {
-					return (buf.toString());
-				}
-			default:
-				buf.append(c);
-
-			}
-		}
-		return null;
-	}
-
-	private boolean skipSpace(int... nextChars) {
-		while (start < end) {
-			if (!Character.isWhitespace(value.charAt(start))) {
-				break;
-			}
-			start++;
-		}
-		if (nextChars.length > 0 && start < end) {
-			int next = value.charAt(start);
-			for (int i : nextChars) {
-				if (i == next) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 }

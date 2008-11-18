@@ -28,7 +28,7 @@ public class ExpressionImpl implements Expression {
 		this.source = el;
 		ExpressionTokenizer expressionTokens = new ExpressionTokenizer(el);
 		this.calculater = calculater;
-		this.expression = expressionTokens.toArray();
+		this.expression = expressionTokens.toReversedArray();
 	}
 
 	@SuppressWarnings("unchecked")

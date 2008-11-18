@@ -2,6 +2,7 @@ package org.xidea.el.operation;
 
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,8 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 	protected static final Object SKIP_QUESTION = new Object();
 	private static final Object[] EMPTY_ARGS = new Object[0];
 	private static final Log log = LogFactory.getLog(CalculaterImpl.class);
+	private Map<String, Invocable> globalInvocableMap = new HashMap<String, Invocable>();
+	private Map<String, Map<String, Invocable>> memberInvocableMap = new HashMap<String, Map<String, Invocable>>();
 
 	/**
 	 * 
@@ -162,7 +165,8 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Object compute(Map context,OperatorToken op, final Object arg1, final Object arg2) {
+	public Object compute(Map context, OperatorToken op, final Object arg1,
+			final Object arg2) {
 		final int type = op.getType();
 		switch (type) {
 		case ExpressionToken.OP_NOT:
@@ -228,8 +232,8 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 		case ExpressionToken.OP_GET_PROP:
 			return ReflectUtil.getValue(arg1, arg2);
 		case ExpressionToken.OP_GET_STATIC_METHOD:
-			String methodName = (String)arg1;
-			return createStaticInvocable(context, methodName);
+			String methodName = (String) arg1;
+			return getGlobalInvocable(context, methodName);
 		case ExpressionToken.OP_GET_METHOD:
 			return createInstanceInvocable(arg1, String.valueOf(arg2));
 		case ExpressionToken.OP_INVOKE_METHOD:
@@ -241,7 +245,7 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 				return ((Invocable) arg1).invoke(arguments);
 			} catch (Exception e) {
 				if (log.isDebugEnabled()) {
-					log.debug("方法调用失败:"+arg1, e);
+					log.debug("方法调用失败:" + arg1, e);
 				}
 				return null;
 			}
@@ -257,19 +261,65 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Invocable createStaticInvocable(Map context,final String name) {
-		return new InvocableImp(context, name);
+	protected Invocable getGlobalInvocable(Map context, final String name) {
+		Invocable invocable = this.globalInvocableMap.get(name);
+		if (invocable != null) {
+			return invocable;
+		}
+		Object inv = context.get(name);
+		if (inv instanceof Invocable) {
+			return invocable;
+		} else if ((inv instanceof Method)) {
+			Method method = (Method) inv;
+			return InvocableFactory.createProxy(method);
+		}
+		return null;
 	}
 
-	protected Invocable createInstanceInvocable(final Object thisObject, final String name) {
-		return new InvocableImp(thisObject, name);
+	protected Invocable createInstanceInvocable(final Object thisObject,
+			final String name) {
+		Map<String, Invocable> invocableMap = this.memberInvocableMap.get(name);
+		Invocable invocable = null;
+		if (invocableMap != null) {
+			invocable = findInvocable(invocableMap, thisObject.getClass());
+		}
+		if (invocable != null) {
+			return InvocableFactory.createProxy(thisObject, invocable);
+		}
+		return null;
 	}
 
-	public void addInvocable(String name, Method method) {
-		
+	private Invocable findInvocable(Map<String, Invocable> invocableMap,
+			Class<?> clazz) {
+		Invocable invocable = invocableMap.get(clazz.getName());
+		if (invocable != null) {
+			return invocable;
+		} else {
+			Class<?>[] interfaces = clazz.getInterfaces();
+			for (Class<?> clazz2 : interfaces) {
+				invocable = findInvocable(invocableMap, clazz2);
+				if (invocable != null) {
+					return invocable;
+				}
+			}
+		}
+		Class<?> clazz2 = clazz.getSuperclass();
+		if (clazz2 != clazz) {
+			return findInvocable(invocableMap, clazz2);
+		}
+		return null;
 	}
 
-	public void addInvocable(Class<?> clazz, String name, Method method) {
-		
+	public void addInvocable(String name, Invocable invocable) {
+		this.globalInvocableMap.put(name, invocable);
+	}
+
+	public void addInvocable(Class<?> clazz, String name, Invocable invocable) {
+		Map<String, Invocable> invocableMap = this.memberInvocableMap.get(name);
+		if (invocableMap == null) {
+			invocableMap = new HashMap<String, Invocable>();
+			this.memberInvocableMap.put(name, invocableMap);
+		}
+		invocableMap.put(clazz.getName(), invocable);
 	}
 }

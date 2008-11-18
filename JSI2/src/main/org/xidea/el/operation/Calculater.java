@@ -1,6 +1,5 @@
 package org.xidea.el.operation;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.xidea.el.parser.OperatorToken;
@@ -25,6 +24,6 @@ public interface Calculater {
 	@SuppressWarnings("unchecked")
 	public Object compute(Map context,OperatorToken op,Object arg1,Object arg2) ;
 
-	public void addInvocable(String name,Method method);
-	public void addInvocable(Class<?> clazz,String name,Method method);
+	public void addInvocable(String name,Invocable method);
+	public void addInvocable(Class<?> clazz,String name,Invocable method);
 }
