@@ -1,13 +1,18 @@
-package org.xidea.el;
+package org.xidea.el.test;
 
 import static org.junit.Assert.*;
 
+import java.math.BigDecimal;
+import java.util.Arrays;
+
 import org.junit.Test;
+import org.xidea.el.ExpressionFactoryImpl;
 
 public class ExpressionFactoryImplTest {
 	ExpressionFactoryImpl expressionFactory = new ExpressionFactoryImpl();
 	@Test
 	public void testOptimizeELString() {
+		System.out.println((ExpressionFactoryImplTest.class.getInterfaces()));
 		expressionFactory.optimizeEL("''");
 		expressionFactory.optimizeEL("'['");
 		try{
