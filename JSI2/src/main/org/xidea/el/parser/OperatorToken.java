@@ -25,7 +25,7 @@ public class OperatorToken implements ExpressionToken {
 			",",// map list,
 			OP_GET_PROP,
 			".",// prop
-			OP_GET_METHOD, "#.", OP_GET_STATIC_METHOD, "#", OP_INVOKE_METHOD,
+			OP_GET_METHOD, "#.", OP_GET_GLOBAL_METHOD, "#", OP_INVOKE_METHOD,
 			"#()" // method call
 
 	};
@@ -50,7 +50,7 @@ public class OperatorToken implements ExpressionToken {
 		case OP_NOT:
 		case OP_POS:
 		case OP_NEG:
-		case OP_GET_STATIC_METHOD:
+		case OP_GET_GLOBAL_METHOD:
 			this.length = 1;
 		}
 	}
@@ -74,7 +74,7 @@ public class OperatorToken implements ExpressionToken {
 			return Integer.MIN_VALUE;
 		case OP_GET_PROP:
 		case OP_GET_METHOD:
-		case OP_GET_STATIC_METHOD:
+		case OP_GET_GLOBAL_METHOD:
 		case OP_INVOKE_METHOD:
 		case VALUE_NEW_LIST:
 		case VALUE_NEW_MAP:
