@@ -153,10 +153,14 @@ public class NumberArithmetic {
 		} else if (isType(Float.class, n1, n2)) {
 			return n1.floatValue() / n2.floatValue();
 		} else {
-			long left = n1.longValue() % n2.longValue();
+			long right = n2.longValue();
+			if(right == 0){
+				return Double.NaN;
+			}
+			long left = n1.longValue() % right;
 			if (left == 0) {
 				if (isType(Long.class, n1, n2)) {
-					return n1.longValue() / n2.longValue();
+					return n1.longValue() / right;
 				} else if (isType(Integer.class, n1, n2) || isType(Short.class, n1, n2)
 						|| isType(Byte.class, n1, n2)) {
 					return n1.intValue() / n2.intValue();

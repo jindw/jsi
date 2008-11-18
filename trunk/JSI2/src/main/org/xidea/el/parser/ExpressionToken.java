@@ -43,7 +43,7 @@ public abstract interface ExpressionToken {
 	public static final int OP_NEG = 28;//('-'<<8) + 'n';//負數
 
 	public static final int OP_GET_METHOD = 29;//('.'<<16) + ('('<<8) + ')';
-	public static final int OP_GET_STATIC_METHOD = 30;//('('<<8) + ')';
+	public static final int OP_GET_GLOBAL_METHOD = 30;//('('<<8) + ')';
 	public static final int OP_INVOKE_METHOD = 31;
 
 

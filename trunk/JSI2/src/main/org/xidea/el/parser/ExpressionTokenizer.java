@@ -397,32 +397,32 @@ public class ExpressionTokenizer extends JSONTokenizer {
 				if (type == ExpressionToken.BRACKET_BEGIN) {
 					depth--;
 					if (depth == 0) {
-						return insertAndReturnIsStatic(index - 1);
+						if (index-1 > 0
+								&& tokens.get(index-1).getType() == ExpressionToken.OP_GET_PROP) {
+							tokens.set(index-1, createToken(ExpressionToken.OP_GET_METHOD, null));
+							return false;
+						} else {
+							tokens.add(index, createToken(ExpressionToken.OP_GET_GLOBAL_METHOD,
+									null));
+							return true;
+						}
 					}
 				} else if (type == ExpressionToken.BRACKET_END) {
 					depth++;
 				}
 				index--;
 			}
-		} else if (token instanceof VarToken) {
-			return insertAndReturnIsStatic(index - 1);
-		} else if (token instanceof ValueToken) {
-			return insertAndReturnIsStatic(index - 1);
+		} else if (token instanceof VarToken) {//gloabl call
+			tokens.set(index,createToken(ExpressionToken.VALUE_CONSTANTS, ((VarToken)token).getValue()));
+			tokens.add(index, createToken(ExpressionToken.OP_GET_GLOBAL_METHOD, null));
+			return true;
+		} else if (token instanceof ValueToken) {//member call
+			tokens.set(index-1, createToken(ExpressionToken.OP_GET_METHOD, null));
+			return false;
 		}
 		throw new ExpressionSyntaxException("无效方法调用语法");
 	}
 
-	private boolean insertAndReturnIsStatic(int index) {
-		if (index > 0
-				&& tokens.get(index).getType() == ExpressionToken.OP_GET_PROP) {
-			tokens.set(index, createToken(ExpressionToken.OP_GET_METHOD, null));
-			return false;
-		} else {
-			tokens.add(index, createToken(ExpressionToken.OP_GET_STATIC_METHOD,
-					null));
-			return true;
-		}
-	}
 
 	private void addList() {
 		addToken(createToken(ExpressionToken.BRACKET_BEGIN, null));
