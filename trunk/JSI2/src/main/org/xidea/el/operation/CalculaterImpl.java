@@ -129,9 +129,9 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 
 		case ExpressionToken.OP_GET_PROP:
 			return ReflectUtil.getValue(arg1, arg2);
-		case ExpressionToken.OP_GET_GLOBAL_METHOD:
-			String methodName = (String) arg1;
-			return getGlobalInvocable(context, methodName);
+//		case ExpressionToken.OP_GET_GLOBAL_METHOD:
+//			String methodName = (String) arg1;
+//			return getGlobalInvocable(context, methodName);
 		case ExpressionToken.OP_GET_METHOD:
 			return createInstanceInvocable(arg1, String.valueOf(arg2));
 		case ExpressionToken.OP_INVOKE_METHOD:
@@ -159,7 +159,7 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Invocable getGlobalInvocable(Map context, final String name) {
+	public Invocable getGlobalInvocable(Map context, final String name) {
 		Invocable invocable = this.globalInvocableMap.get(name);
 		if (invocable != null) {
 			return invocable;
