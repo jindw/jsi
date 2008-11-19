@@ -63,7 +63,7 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Object compute(Map context, OperatorToken op, final Object arg1,
+	public Object compute( OperatorToken op, final Object arg1,
 			final Object arg2) {
 		final int type = op.getType();
 		switch (type) {
@@ -140,7 +140,13 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 				if (arg2 instanceof List) {
 					arguments = ((List) arg2).toArray();
 				}
-				return ((Invocable) arg1).invoke(arguments);
+				Invocable invocable = null;
+				if (arg1 instanceof Invocable) {
+					invocable = (Invocable) arg1;
+				} else if ((arg1 instanceof Method)) {
+					invocable = InvocableFactory.createProxy((Method) arg1);
+				}
+				return invocable.invoke(arguments);
 			} catch (Exception e) {
 				if (log.isDebugEnabled()) {
 					log.debug("方法调用失败:" + arg1, e);
@@ -159,17 +165,10 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Invocable getGlobalInvocable(Map context, final String name) {
+	public Invocable getGlobalInvocable(final String name) {
 		Invocable invocable = this.globalInvocableMap.get(name);
 		if (invocable != null) {
 			return invocable;
-		}
-		Object inv = context.get(name);
-		if (inv instanceof Invocable) {
-			return invocable;
-		} else if ((inv instanceof Method)) {
-			Method method = (Method) inv;
-			return InvocableFactory.createProxy(method);
 		}
 		return null;
 	}
