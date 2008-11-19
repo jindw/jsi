@@ -18,6 +18,9 @@ public abstract class InvocableFactory implements Invocable {
 	public static Invocable createProxy(final Object object,
 			final Invocable baseInvocable) {
 		return new Invocable() {
+			/**
+			 * 表达式不推荐调用没有参数的方法（这一般是写方法），所以，也不做0参数优化
+			 */
 			public Object invoke(Object... args) throws Exception {
 				Object[] args2 = new Object[args.length + 1];
 				System.arraycopy(args, 0, args2, 1, args.length);

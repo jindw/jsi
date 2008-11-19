@@ -34,7 +34,7 @@ public class ExpressionImpl implements Expression {
 
 	@SuppressWarnings("unchecked")
 	public Object evaluate(Map context) {
-		if(context == null){
+		if (context == null) {
 			context = Collections.EMPTY_MAP;
 		}
 		ValueStack stack = new ValueStack();
@@ -69,8 +69,8 @@ public class ExpressionImpl implements Expression {
 					stack.push(arg1);
 					break;
 				default:
-					Object result = calculater.compute(context,
-							(OperatorToken) item, arg1, arg2);
+					Object result = calculater.compute((OperatorToken) item,
+							arg1, arg2);
 					if (result instanceof LazyToken) {
 						evaluate(stack, ((LazyToken) result).getChildren(),
 								context);
@@ -93,12 +93,12 @@ public class ExpressionImpl implements Expression {
 			return new HashMap<Object, Object>();
 		case ExpressionToken.VALUE_VAR:
 			String value = ((VarToken) item).getValue();
-			if("this".equals(value)){
+			if ("this".equals(value)) {
 				return context;
-			}else{
+			} else {
 				Object result = context.get(value);
-				if(result == null && !context.containsKey(value)){
-					result = calculater.getGlobalInvocable(context,value);
+				if (result == null && !context.containsKey(value)) {
+					result = calculater.getGlobalInvocable(value);
 				}
 				return result;
 			}
