@@ -1,6 +1,7 @@
 package org.xidea.el;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,9 @@ public class ExpressionImpl implements Expression {
 
 	@SuppressWarnings("unchecked")
 	public Object evaluate(Map context) {
+		if(context == null){
+			context = Collections.EMPTY_MAP;
+		}
 		ValueStack stack = new ValueStack();
 		evaluate(stack, expression, context);
 		return stack.pop();
