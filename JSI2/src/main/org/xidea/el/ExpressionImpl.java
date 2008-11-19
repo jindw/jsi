@@ -89,7 +89,15 @@ public class ExpressionImpl implements Expression {
 			return new HashMap<Object, Object>();
 		case ExpressionToken.VALUE_VAR:
 			String value = ((VarToken) item).getValue();
-			return ("this".equals(value) ? context : context.get(value));
+			if("this".equals(value)){
+				return context;
+			}else{
+				Object result = context.get(value);
+				if(result == null && !context.containsKey(value)){
+					result = calculater.getGlobalInvocable(context,value);
+				}
+				return result;
+			}
 		case ExpressionToken.VALUE_LAZY:
 			return (item);
 		default:

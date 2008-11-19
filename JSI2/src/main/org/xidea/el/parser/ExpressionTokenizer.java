@@ -399,11 +399,12 @@ public class ExpressionTokenizer extends JSONTokenizer {
 					if (depth == 0) {
 						if (index-1 > 0
 								&& tokens.get(index-1).getType() == ExpressionToken.OP_GET_PROP) {
+							//TODO:....
 							tokens.set(index-1, createToken(ExpressionToken.OP_GET_METHOD, null));
 							return false;
 						} else {
-							tokens.add(index, createToken(ExpressionToken.OP_GET_GLOBAL_METHOD,
-									null));
+//							tokens.add(index, createToken(ExpressionToken.OP_GET_GLOBAL_METHOD,
+//									null));
 							return true;
 						}
 					}
@@ -413,8 +414,8 @@ public class ExpressionTokenizer extends JSONTokenizer {
 				index--;
 			}
 		} else if (token instanceof VarToken) {//gloabl call
-			tokens.set(index,createToken(ExpressionToken.VALUE_CONSTANTS, ((VarToken)token).getValue()));
-			tokens.add(index, createToken(ExpressionToken.OP_GET_GLOBAL_METHOD, null));
+//			tokens.set(index,createToken(ExpressionToken.VALUE_CONSTANTS, ((VarToken)token).getValue()));
+//			tokens.add(index, createToken(ExpressionToken.OP_GET_GLOBAL_METHOD, null));
 			return true;
 		} else if (token instanceof ValueToken) {//member call
 			tokens.set(index-1, createToken(ExpressionToken.OP_GET_METHOD, null));

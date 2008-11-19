@@ -24,6 +24,8 @@ public interface Calculater {
 	@SuppressWarnings("unchecked")
 	public Object compute(Map context,OperatorToken op,Object arg1,Object arg2) ;
 
+	@SuppressWarnings("unchecked")
+	public Invocable getGlobalInvocable(Map context, final String name);
 	public void addInvocable(String name,Invocable method);
 	public void addInvocable(Class<?> clazz,String name,Invocable method);
 }
