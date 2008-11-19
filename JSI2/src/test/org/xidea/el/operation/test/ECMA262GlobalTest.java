@@ -25,5 +25,13 @@ public class ECMA262GlobalTest {
 		Expression el = factory.createEL("isNaN(0/0)");
 		assertEquals(true, el.evaluate(null));
 	}
+	@Test
+	public void testFP() throws Exception{
+		//Expression el = factory.createEL("'金大为'.substring(1,2)");
+		Expression el = factory.createEL("(true?isNaN:isFinite)(0/0)");
+		assertEquals(true, el.evaluate(null));
+		el = factory.createEL("(false?isNaN:isFinite)(0/0)");
+		assertEquals(false, el.evaluate(null));
+	}
 	
 }

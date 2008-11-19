@@ -390,9 +390,9 @@ public class ExpressionTokenizer extends JSONTokenizer {
 		int index = tokens.size() - 1;
 		ExpressionToken token = tokens.get(index);
 		if (token.getType() == ExpressionToken.BRACKET_END) {
-			int depth = 1;
+			int depth = 0;
 			index--;
-			while (index > 0) {
+			while (index >= 0) {
 				int type = token.getType();
 				if (type == ExpressionToken.BRACKET_BEGIN) {
 					depth--;
@@ -412,6 +412,7 @@ public class ExpressionTokenizer extends JSONTokenizer {
 					depth++;
 				}
 				index--;
+				token = tokens.get(index);
 			}
 		} else if (token instanceof VarToken) {//gloabl call
 //			tokens.set(index,createToken(ExpressionToken.VALUE_CONSTANTS, ((VarToken)token).getValue()));
