@@ -45,12 +45,13 @@ public class Template {
 		this.items = this.compile(list);
 	}
 
-	public void render(Map<Object, Object> context, Writer out)
+	public void render(Map<? extends Object, ? extends Object > context, Writer out)
 			throws IOException {
 		renderList(context, items, out);
 	}
 
-	protected void renderList(Map<Object, Object> context,
+	@SuppressWarnings("unchecked")
+	protected void renderList(Map context,
 			List<Object> children, Writer out) {
 		for (Object item : children) {
 			try {
@@ -146,7 +147,8 @@ public class Template {
 	}
 
 	protected static interface TemplateItem {
-		public void render(Map<Object, Object> context, Writer out)
+		@SuppressWarnings("unchecked")
+		public void render(Map context, Writer out)
 				throws IOException;
 	}
 
@@ -154,7 +156,8 @@ public class Template {
 		return expressionFactory.createEL((String) elo);
 	}
 
-	protected void printXMLAttribute(String text, Map<Object, Object> context,
+	@SuppressWarnings("unchecked")
+	protected void printXMLAttribute(String text, Map context,
 			Writer out, boolean escapeSingleChar) throws IOException {
 		for (int i = 0; i < text.length(); i++) {
 			int c = text.charAt(i);
@@ -182,7 +185,7 @@ public class Template {
 		}
 	}
 
-	protected void printXMLText(String text, Map<Object, Object> context,
+	protected void printXMLText(String text,
 			Writer out) throws IOException {
 		for (int i = 0; i < text.length(); i++) {
 			int c = text.charAt(i);
@@ -215,11 +218,12 @@ public class Template {
 			ArrayList<ArrayList<Object>> itemsStack, final boolean encodeXML) {
 		final Expression el = createExpression(data[1]);
 		pushToTop(itemsStack, new TemplateItem() {
-			public void render(Map<Object, Object> context, Writer out)
+			@SuppressWarnings("unchecked")
+			public void render(Map context, Writer out)
 					throws IOException {
 				Object value = el.evaluate(context);
 				if (encodeXML && value != null) {
-					printXMLText(String.valueOf(value), context, out);
+					printXMLText(String.valueOf(value), out);
 				} else {
 					out.write(String.valueOf(value));
 				}
@@ -232,7 +236,8 @@ public class Template {
 		final Expression el = createExpression(data[1]);
 		final ArrayList<Object> children = new ArrayList<Object>();
 		pushToTop(itemsStack, new TemplateItem() {
-			public void render(Map<Object, Object> context, Writer out) {
+			@SuppressWarnings("unchecked")
+			public void render(Map context, Writer out) {
 				boolean test;
 				try {
 					test = toBoolean(el.evaluate(context));
@@ -260,7 +265,8 @@ public class Template {
 		final Expression elValue = createExpression(data[2]);
 		final ArrayList<Object> children = new ArrayList<Object>();
 		pushToTop(itemsStack, new TemplateItem() {
-			public void render(Map<Object, Object> context, Writer out) {
+			@SuppressWarnings("unchecked")
+			public void render(Map context, Writer out) {
 
 				boolean test = false;
 				try {
@@ -309,7 +315,8 @@ public class Template {
 				: createExpression(data[1]);
 		final ArrayList<Object> children = new ArrayList<Object>();
 		pushToTop(itemsStack, new TemplateItem() {
-			public void render(Map<Object, Object> context, Writer out) {
+			@SuppressWarnings("unchecked")
+			public void render(Map context, Writer out) {
 				if (!toBoolean(context.get(IF_KEY))) {
 					try {
 						if (el == null || toBoolean(el.evaluate(context))) {// if
@@ -338,7 +345,7 @@ public class Template {
 		final ArrayList<Object> children = new ArrayList<Object>();
 		pushToTop(itemsStack, new TemplateItem() {
 			@SuppressWarnings("unchecked")
-			public void render(Map<Object, Object> context, Writer out) {
+			public void render(Map context, Writer out) {
 				Object list = itemExpression.evaluate(context);
 				List<Object> items;
 				// alert(data.constructor)
@@ -381,14 +388,16 @@ public class Template {
 		if (data.length > 1 && data[2] != null) {
 			final Expression el = createExpression(data[2]);
 			pushToTop(itemsStack, new TemplateItem() {
-				public void render(Map<Object, Object> context, Writer out) {
+				@SuppressWarnings("unchecked")
+				public void render(Map context, Writer out) {
 					context.put(name, el.evaluate(context));
 				}
 			});
 		} else {
 			final ArrayList<Object> children = new ArrayList<Object>();
 			pushToTop(itemsStack, new TemplateItem() {
-				public void render(Map<Object, Object> context, Writer out) {
+				@SuppressWarnings("unchecked")
+				public void render(Map context, Writer out) {
 					StringWriter buf = new StringWriter();
 					renderList(context, children, buf);
 					context.put(name, buf.toString());
@@ -404,7 +413,8 @@ public class Template {
 		if (data.length > 2 && data[2] != null) {
 			final String prefix = " " + data[2] + "=\"";
 			pushToTop(itemsStack, new TemplateItem() {
-				public void render(Map<Object, Object> context, Writer out)
+				@SuppressWarnings("unchecked")
+				public void render(Map context, Writer out)
 						throws IOException {
 					Object result = el.evaluate(context);
 					if (result != null) {
@@ -425,7 +435,8 @@ public class Template {
 			});
 		} else {
 			pushToTop(itemsStack, new TemplateItem() {
-				public void render(Map<Object, Object> context, Writer out)
+				@SuppressWarnings("unchecked")
+				public void render(Map context, Writer out)
 						throws IOException {
 					Object value = el.evaluate(context);
 					printXMLAttribute(String.valueOf(value), context, out, true);
