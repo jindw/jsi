@@ -10,6 +10,6 @@ public abstract interface Parser {
      * @abstract
      * @return <Array> result
      */
-    public abstract List<Object> parse(Object node);
+    public abstract List<Object> parse(Object node,ParseContext context);
 
 }

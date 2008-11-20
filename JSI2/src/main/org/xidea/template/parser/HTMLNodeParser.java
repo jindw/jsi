@@ -172,7 +172,7 @@ public class HTMLNodeParser implements NodeParser {
 
 	private boolean parseElement(Node node, ParseContext context,
 			List<Object> exts) {
-		context.appendFormatIndent();
+		context.appendIndent();
 		Element el = (Element) node;
 		NamedNodeMap attributes = node.getAttributes();
 		String tagName = el.getTagName();
@@ -186,7 +186,7 @@ public class HTMLNodeParser implements NodeParser {
 		}
 		if (HTML_LEAF.matcher(tagName).find()) {
 			context.append("/>");
-			context.appendFormatEnd();
+//			context.appendFormatEnd();
 		} else {
 			context.append(">");
 			Node next = node.getFirstChild();
@@ -196,9 +196,9 @@ public class HTMLNodeParser implements NodeParser {
 				context.setReserveSpace(oldReserveSpace || reserveSpace);
 
 				boolean format =next.getNodeType() != Node.TEXT_NODE || next.getNextSibling()!=null;
-				if (format) {
-					context.appendFormatEnd();
-				}
+//				if (format) {
+//					context.appendFormatEnd();
+//				}
 				try {
 					do {
 						this.parser.parseNode(next, context);
@@ -207,11 +207,11 @@ public class HTMLNodeParser implements NodeParser {
 					context.setReserveSpace(oldReserveSpace);
 				}
 				if (format) {
-					context.appendFormatIndent();
+					context.appendIndent();
 				}
 			}
 			context.append("</" + tagName + '>');
-			context.appendFormatEnd();
+//			context.appendFormatEnd();
 		}
 		return true;
 	}

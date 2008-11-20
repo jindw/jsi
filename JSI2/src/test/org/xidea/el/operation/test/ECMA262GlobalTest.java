@@ -12,6 +12,9 @@ public class ECMA262GlobalTest {
 
 	@Test
 	public void testEncode() throws Exception{
+		System.out.println(new Double(Double.NEGATIVE_INFINITY));
+		//Float;
+		
 		//Expression el = factory.createEL("'金大为'.substring(1,2)");
 		Expression el = factory.createEL("encodeURIComponent('金大为')");
 		String encoded = (String)el.evaluate(null);

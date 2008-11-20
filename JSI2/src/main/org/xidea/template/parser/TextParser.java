@@ -17,7 +17,7 @@ public class TextParser implements Parser {
 	public void setExpressionFactory(ExpressionFactory expressionFactory) {
 		this.expressionFactory = expressionFactory;
 	}
-	public List<Object> parse(Object text) {
+	public List<Object> parse(Object text,ParseContext context) {
 		return parseText((String) text, false, false, (char) 0);
 	}
 

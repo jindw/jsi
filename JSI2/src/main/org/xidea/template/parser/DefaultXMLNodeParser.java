@@ -60,7 +60,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 	private boolean parseProcessingInstruction(Node node, ParseContext context) {
 		context.append("<?" + node.getNodeName() + " "
 				+ ((ProcessingInstruction) node).getData() + "?>");
-		context.appendFormatEnd();
+		//context.appendFormatEnd();
 		return true;
 	}
 
@@ -68,15 +68,15 @@ public class DefaultXMLNodeParser implements NodeParser {
 		boolean format = (node.getPreviousSibling() != null || node
 				.getNextSibling() != null);
 		if (format) {
-			context.appendFormatIndent();
+			context.appendIndent();
 		}
 		context.append("<![CDATA[");
 		context.appendList(this.parser.parseText(((CDATASection) node)
 				.getData(), false, false, 0));
 		context.append("]]>");
-		if (format) {
-			context.appendFormatEnd();
-		}
+//		if (format) {
+//			context.appendFormatEnd();
+//		}
 		return true;
 	}
 
@@ -101,7 +101,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 			context.append(node.getInternalSubset());
 			context.append("]>");
 		}
-		context.appendFormatEnd();
+//		context.appendFormatEnd();
 		return true;
 	}
 
@@ -136,12 +136,12 @@ public class DefaultXMLNodeParser implements NodeParser {
 			boolean format = (node.getPreviousSibling() != null || node
 					.getNextSibling() != null);
 			if (format) {
-				context.appendFormatIndent();
+				context.appendIndent();
 			}
 			context.appendList(this.parser.parseText(text, true, false, 0));
-			if (format) {
-				context.appendFormatEnd();
-			}
+//			if (format) {
+//				context.appendFormatEnd();
+//			}
 		}
 		return true;
 	}
@@ -200,7 +200,7 @@ public class DefaultXMLNodeParser implements NodeParser {
 	}
 
 	private boolean parseElement(Node node, ParseContext context) {
-		context.appendFormatIndent();
+		context.appendIndent();
 		Element el = (Element) node;
 		NamedNodeMap attributes = node.getAttributes();
 		String tagName = el.getTagName();
@@ -213,20 +213,20 @@ public class DefaultXMLNodeParser implements NodeParser {
 			context.append(">");
 			boolean format = next.getNodeType() != Node.TEXT_NODE
 					|| next.getNextSibling() != null;
-			if (format) {
-				context.appendFormatEnd();
-			}
+//			if (format) {
+//				context.appendFormatEnd();
+//			}
 			do {
 				this.parser.parseNode(next, context);
 			} while ((next = next.getNextSibling()) != null);
 			if (format) {
-				context.appendFormatIndent();
+				context.appendIndent();
 			}
 			context.append("</" + tagName + '>');
-			context.appendFormatEnd();
+//			context.appendFormatEnd();
 		} else {
 			context.append("/>");
-			context.appendFormatEnd();
+//			context.appendFormatEnd();
 			return true;
 		}
 
