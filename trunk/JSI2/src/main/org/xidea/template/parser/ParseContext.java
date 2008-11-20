@@ -2,6 +2,7 @@ package org.xidea.template.parser;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -127,10 +128,12 @@ public class ParseContext extends HashMap<Object, Object> {
 		int stackTop = 0;
 		for (Object item : result2) {
 			if (item instanceof String) {
+				System.out.println(item);
 				current.add(item);
 			} else {
 				Object[] cmd = (Object[]) item;
 
+				//System.out.println(Arrays.asList(cmd));
 				if (cmd.length == 0) {
 					ArrayList<Object> children = stack.remove(stackTop--);
 					current = stack.get(stackTop);
@@ -138,12 +141,23 @@ public class ParseContext extends HashMap<Object, Object> {
 					((ArrayList) current.get(current.size() - 1)).set(1,
 							children);
 				} else {
+					int type = (Integer) cmd[0];
+					if(type == Template.ELSE_TYPE){
+						ArrayList<Object> children = stack.remove(stackTop--);
+						current = stack.get(stackTop);
+						((ArrayList) current.get(current.size() - 1)).set(1,
+								children);
+					}
+					
 					ArrayList<Object> cmd2 = new ArrayList<Object>(
 							cmd.length + 1);
 					cmd2.add(cmd[0]);
 					current.add(cmd2);
-					switch ((Integer) cmd[0]) {
+					switch (type) {
 					case Template.VAR_TYPE:
+						if (cmd[3] != null) {
+							break;
+						}
 					case Template.IF_TYPE:
 					case Template.ELSE_TYPE:
 					case Template.FOR_TYPE:

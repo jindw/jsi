@@ -219,7 +219,7 @@ public class Template {
 
 
 	protected boolean toBoolean(Object test) {
-		if(test != null){
+		if(test == null){
 			return false;
 		}else if (test instanceof Boolean){
 			return (Boolean)test;

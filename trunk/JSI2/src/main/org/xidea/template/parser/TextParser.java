@@ -12,12 +12,14 @@ import org.xidea.template.Template;
 public class TextParser implements Parser {
 	private static final Pattern FN_PATTERN = Pattern.compile("^[\\w]+\\s*$");
 
-	private ExpressionFactory expressionFactory = ExpressionFactoryImpl.getInstance();
+	private ExpressionFactory expressionFactory = ExpressionFactoryImpl
+			.getInstance();
 
 	public void setExpressionFactory(ExpressionFactory expressionFactory) {
 		this.expressionFactory = expressionFactory;
 	}
-	public List<Object> parse(Object text,ParseContext context) {
+
+	public List<Object> parse(Object text, ParseContext context) {
 		return parseText((String) text, false, false, (char) 0);
 	}
 
@@ -89,14 +91,16 @@ public class TextParser implements Parser {
 									result.add(text.substring(start, p$));
 								}
 								if (encodeAttr) {
-									result.add(new Object[] {
-											Template.ATTRIBUTE_TYPE, el });
-								} else {
 									result
 											.add(new Object[] {
-													encodeXML ? Template.EL_TYPE_XML_TEXT
-															: Template.EL_TYPE,
-													el });
+													Template.ATTRIBUTE_TYPE,
+													el, null });
+								} else if (encodeXML) {
+									result.add(new Object[] {
+											Template.EL_TYPE_XML_TEXT, el });
+								} else {
+									result.add(new Object[] { Template.EL_TYPE,
+											el });
 
 								}
 								start = p2 + 1;
