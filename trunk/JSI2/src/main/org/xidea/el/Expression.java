@@ -8,8 +8,7 @@ public interface Expression {
 	 * @param context 变量表
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	public Object evaluate(Map context);
+	public Object evaluate(Map<? extends Object, ? extends Object> context);
 	/**
 	 * 返回表达式的源代码
 	 * @return

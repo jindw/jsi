@@ -33,7 +33,7 @@ public class ExpressionImpl implements Expression {
 	}
 
 	@SuppressWarnings("unchecked")
-	public Object evaluate(Map context) {
+	public Object evaluate(Map<? extends Object, ? extends Object> context) {
 		if (context == null) {
 			context = Collections.EMPTY_MAP;
 		}
@@ -44,7 +44,7 @@ public class ExpressionImpl implements Expression {
 
 	@SuppressWarnings("unchecked")
 	private void evaluate(ValueStack stack, ExpressionToken[] tokens,
-			Map<Object, Object> context) {
+			Map context) {
 		ExpressionToken item = null;
 		int i = tokens.length;
 		while (i-- > 0) {
