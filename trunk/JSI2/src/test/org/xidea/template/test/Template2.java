@@ -1,4 +1,4 @@
-package org.xidea.template;
+package org.xidea.template.test;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -13,9 +13,11 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.ExpressionFactoryImpl;
+import org.xidea.template.Template;
+import org.xidea.template.parser.CoreXMLNodeParser;
 
-public class Template {
-	private static Log log = LogFactory.getLog(Template.class);
+public class Template2 extends Template {
+	private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 
 	public static final int EL_TYPE = 0;// [0,'el']
 	public static final int VAR_TYPE = 1;// [1,[...],'var','value']//value
@@ -39,9 +41,7 @@ public class Template {
 
 	protected Object[] items;//transient？
 
-	public Template() {
-	}
-	public Template(List<Object> list) {
+	public Template2(List<Object> list) {
 		this.items = this.compile(list);
 	}
 
@@ -53,7 +53,6 @@ public class Template {
 	@SuppressWarnings("unchecked")
 	protected void renderList(final Map context, final Object[] children, final Writer out) {
 		int index = children.length;
-		//for (final Object item : children) {
 		while (index-->0) {
 			final Object item = children[index];
 			try {
@@ -96,14 +95,11 @@ public class Template {
 		}
 	}
 
-	private Object[] reverse(Object[] result){
-		int begin = 0;
-		int end = result.length-1;
-		while (begin<end) {
-			Object item = result[begin];
-			result[begin] = result[end];
-			result[end--] = item;
-			begin++;
+	private Object[] reverse(List<Object> datas){
+		Object[] result = new Object[datas.size()];
+		int i = result.length-1;
+		for (Object item:datas) {
+			result[i--] = item;
 		}
 		return result;
 	}
@@ -114,7 +110,7 @@ public class Template {
 	 */
 	@SuppressWarnings("unchecked")
 	protected Object[] compile(List<Object> datas) {
-		final Object[] result = reverse(datas.toArray());//;
+		final Object[] result = reverse(datas);//.toArray();
 		for (int i = 0; i < result.length; i++) {
 			final Object item = result[i];
 			if (item instanceof List) {

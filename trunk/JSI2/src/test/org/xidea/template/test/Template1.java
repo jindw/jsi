@@ -15,9 +15,10 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.el.Expression;
 import org.xidea.el.ExpressionFactory;
 import org.xidea.el.ExpressionFactoryImpl;
+import org.xidea.template.Template;
 import org.xidea.template.parser.CoreXMLNodeParser;
 
-public class Template1 {
+public class Template1 extends Template {
         private static Log log = LogFactory.getLog(CoreXMLNodeParser.class);
 
         public static final int EL_TYPE = 0;
@@ -43,7 +44,7 @@ public class Template1 {
         protected List<Object> items;
 
         public Template1(List<Object> list) {
-                this.items = this.compile(list);
+                this.items = this.compile2(list);
         }
 
         public void render(Map<? extends Object, ? extends Object > context, Writer out)
@@ -74,7 +75,7 @@ public class Template1 {
          *
          * @internal
          */
-        protected ArrayList<Object> compile(List<Object> datas) {
+        protected ArrayList<Object> compile2(List<Object> datas) {
                 ArrayList<ArrayList<Object>> itemsStack = new ArrayList<ArrayList<Object>>();
                 itemsStack.add(new ArrayList<Object>());
                 for (int i = 0; i < datas.size(); i++) {
