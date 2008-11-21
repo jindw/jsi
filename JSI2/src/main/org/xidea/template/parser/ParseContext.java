@@ -105,23 +105,8 @@ public class ParseContext extends HashMap<Object, Object> {
 
 
 	@SuppressWarnings("unchecked")
-	public List<Object> getResult() {
-		ArrayList<Object> result2 = new ArrayList<Object>(result.size());
-		StringBuilder buf = new StringBuilder();
-		for (Object item : result) {
-			if (item instanceof String) {
-				buf.append(item);
-			} else {
-				if (buf.length() > 0) {
-					result2.add(buf.toString());
-					buf.setLength(0);
-				}
-				result2.add((Object[]) item);
-			}
-		}
-		if (buf.length() > 0) {
-			result2.add(buf.toString());
-		}
+	public List<Object> getResultTree() {
+		ArrayList<Object> result2 = getResult();
 		ArrayList<ArrayList<Object>> stack = new ArrayList<ArrayList<Object>>();
 		ArrayList<Object> current = new ArrayList<Object>();
 		stack.add(current);
@@ -174,6 +159,26 @@ public class ParseContext extends HashMap<Object, Object> {
 			}
 		}
 		return stack.get(0);
+	}
+
+	public ArrayList<Object> getResult() {
+		ArrayList<Object> result2 = new ArrayList<Object>(result.size());
+		StringBuilder buf = new StringBuilder();
+		for (Object item : result) {
+			if (item instanceof String) {
+				buf.append(item);
+			} else {
+				if (buf.length() > 0) {
+					result2.add(buf.toString());
+					buf.setLength(0);
+				}
+				result2.add((Object[]) item);
+			}
+		}
+		if (buf.length() > 0) {
+			result2.add(buf.toString());
+		}
+		return result2;
 	}
 
 }
