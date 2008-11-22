@@ -5,8 +5,6 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,10 +26,10 @@ public class TemplateTimeTest {
 	@Test
 	public void test2() throws Exception {
 		System.out.println(String[].class);
-		System.out.println(Object[].class);
+		System.out.println(Object[][].class);
 		System.out.println(String[].class.getSuperclass());
-		System.out.println(Object[].class.getSuperclass());
-		System.out.println(new String[0] instanceof Object[]);
+		System.out.println(Object[][].class.getSuperclass());
+		System.out.println(new String[0][0] instanceof Object[][]);
 
 	}
 

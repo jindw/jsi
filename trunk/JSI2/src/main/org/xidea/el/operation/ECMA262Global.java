@@ -34,7 +34,7 @@ public class ECMA262Global implements Invocable {
 		this.type = type;
 	}
 
-	public static Object getArg(Object[] args, int index, Object defaultValue) {
+	private static Object getArg(Object[] args, int index, Object defaultValue) {
 		if (index >= 0 && index < args.length) {
 			return args[index];
 		} else {
@@ -69,7 +69,15 @@ public class ECMA262Global implements Invocable {
 			return Double.valueOf(String.valueOf(getArg(args, 0, null)));
 		case ID_ENCODEURI:
 		case ID_DECODEURI:
-			throw new UnsupportedOperationException();
+			
+		}
+		throw new UnsupportedOperationException(toString());
+	}
+	public String toString(){
+		for (int i = 0; i < IDMAP.length; i += 2) {
+			if((Integer) IDMAP[i] == type){
+				return (String) IDMAP[i + 1];
+			}
 		}
 		return null;
 	}

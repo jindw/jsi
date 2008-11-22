@@ -85,7 +85,7 @@ public class HTMLNodeParser implements NodeParser {
 						&& selectNode.hasAttribute(VALUE)) {
 					String name = selectNode.getAttribute(NAME);
 					String value = selectNode.getAttribute(VALUE);
-					final Object valueEL;
+					final String valueEL;
 					if (value.startsWith("${") && value.endsWith("}")) {
 						value = value.substring(2, value.length() - 1);
 						valueEL = this.parser.optimizeEL(value);
@@ -96,9 +96,11 @@ public class HTMLNodeParser implements NodeParser {
 						valueEL = this.parser.optimizeEL(name);
 					}
 					List<Object> attributes = new ArrayList<Object>();
-					final Object collectionEL = this.parser.optimizeEL(name);
-					attributes.add(new Object[] { Template.IF_STRING_IN_TYPE,
-							collectionEL, valueEL });
+					final String collectionEL = this.parser.optimizeEL(name);
+//					attributes.add(new Object[] { Template.IF_STRING_IN_TYPE,
+//							collectionEL, valueEL });
+					attributes.add(new Object[] { Template.IF_TYPE,
+							createCSEL(collectionEL,valueEL) });
 					attributes.add(" " + ATTRIBUTE_SELECTED + "=\""
 							+ BOOLEAN_ATTBUTE_MAP.get(ATTRIBUTE_SELECTED)
 							+ "\"");
@@ -114,7 +116,7 @@ public class HTMLNodeParser implements NodeParser {
 					&& element.hasAttribute(VALUE)) {
 				String name = element.getAttribute(NAME);
 				String value = element.getAttribute(VALUE);
-				final Object valueEL;
+				final String valueEL;
 				if (value.startsWith("${") && value.endsWith("}")) {
 					value = value.substring(2, value.length() - 1);
 					valueEL = this.parser.optimizeEL(value);
@@ -123,10 +125,11 @@ public class HTMLNodeParser implements NodeParser {
 				}
 				List<Object> attributes = new ArrayList<Object>();
 
-				final Object collectionEL = this.parser.optimizeEL(name);
+				final String collectionEL = this.parser.optimizeEL(name);
 
-				attributes.add(new Object[] { Template.IF_STRING_IN_TYPE,
-						collectionEL, valueEL });
+//				attributes.add(new Object[] { Template.IF_STRING_IN_TYPE, collectionEL, valueEL });
+				attributes.add(new Object[] { Template.IF_TYPE,
+						createCSEL(collectionEL,valueEL) });
 				attributes.add(" " + ATTRIBUTE_CHECKED + "=\""
 						+ BOOLEAN_ATTBUTE_MAP.get(ATTRIBUTE_CHECKED) + "\"");
 				attributes.add(END);
@@ -142,6 +145,16 @@ public class HTMLNodeParser implements NodeParser {
 			}
 		}
 		return parseElement(element, context, null);
+	}
+
+	/**
+	 * ContainsStringEL
+	 * @param valueEL
+	 * @param collectionEL
+	 * @return
+	 */
+	protected String createCSEL(final String collectionEL,final String valueEL) {
+		return "__contains_string__("+collectionEL+","+ valueEL+")";
 	}
 
 	private void appendBooleanAttribute(Attr node, ParseContext context) {

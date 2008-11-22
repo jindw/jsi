@@ -10,13 +10,15 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.el.parser.ExpressionToken;
 import org.xidea.el.parser.OperatorToken;
 
-public class CalculaterImpl extends NumberArithmetic implements Calculater {
+public class CalculaterImpl  implements Calculater {
 	protected static final Object SKIP_QUESTION = new Object();
 	private static final Object[] EMPTY_ARGS = new Object[0];
 	private static final Log log = LogFactory.getLog(CalculaterImpl.class);
+	private NumberArithmetic mumberArithmetic = new NumberArithmetic();
 	private Map<String, Invocable> globalInvocableMap = new HashMap<String, Invocable>();
 	private Map<String, Map<String, Invocable>> memberInvocableMap = new HashMap<String, Map<String, Invocable>>();
 	{
+		TemplateGlobal.appendTo(globalInvocableMap);
 		ECMA262Global.appendTo(globalInvocableMap);
 	}
 	protected boolean compare(int type, Object arg1, Object arg2) {
@@ -72,7 +74,7 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 		case ExpressionToken.OP_POS:
 			return ECMA262Util.ToNumber(arg1);
 		case ExpressionToken.OP_NEG:
-			return this.subtract(0, ECMA262Util.ToNumber(arg1));
+			return mumberArithmetic.subtract(0, ECMA262Util.ToNumber(arg1));
 			/* +-*%/ */
 		case ExpressionToken.OP_ADD:
 			Object p1 = ECMA262Util.ToPrimitive(arg1, String.class);
@@ -80,16 +82,16 @@ public class CalculaterImpl extends NumberArithmetic implements Calculater {
 			if (p1 instanceof String || p2 instanceof String) {
 				return String.valueOf(p1) + p2;
 			} else {
-				return this.add(ECMA262Util.ToNumber(p1), ECMA262Util.ToNumber(p2));
+				return mumberArithmetic.add(ECMA262Util.ToNumber(p1), ECMA262Util.ToNumber(p2));
 			}
 		case ExpressionToken.OP_SUB:
-			return this.subtract(ECMA262Util.ToNumber(arg1), ECMA262Util.ToNumber(arg2));
+			return mumberArithmetic.subtract(ECMA262Util.ToNumber(arg1), ECMA262Util.ToNumber(arg2));
 		case ExpressionToken.OP_MUL:
-			return this.multiply(ECMA262Util.ToNumber(arg1), ECMA262Util.ToNumber(arg2));
+			return mumberArithmetic.multiply(ECMA262Util.ToNumber(arg1), ECMA262Util.ToNumber(arg2));
 		case ExpressionToken.OP_DIV:
-			return this.divide(ECMA262Util.ToNumber(arg1), ECMA262Util.ToNumber(arg2));
+			return mumberArithmetic.divide(ECMA262Util.ToNumber(arg1), ECMA262Util.ToNumber(arg2),true);
 		case ExpressionToken.OP_MOD:
-			return this.modulus(ECMA262Util.ToNumber(arg1), ECMA262Util.ToNumber(arg2));
+			return mumberArithmetic.modulus(ECMA262Util.ToNumber(arg1), ECMA262Util.ToNumber(arg2));
 
 			/* boolean */
 		case ExpressionToken.OP_GT:
