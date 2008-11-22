@@ -8,25 +8,26 @@ package org.xidea.el.operation;
  */
 
 public class NumberArithmetic {
-	public NumberArithmetic() {
-	}
-
-	public boolean isType(Class<?> clazz, Number n1, Number n2) {
-		return clazz.isInstance(n1) || clazz.isInstance(n2);
-	}
-
 	public final static boolean isNaN(Number n1) {
-		return (n1 instanceof Double) && n1.doubleValue() == Double.NaN;
+		if(n1 instanceof Double || n1 instanceof Float){
+			float f = n1.floatValue();
+			return f!=f;
+		}
+		return false;
 	}
 
 	public final static boolean isNI(Number n1) {
-		return (n1 instanceof Double)
-				&& n1.doubleValue() == Double.NEGATIVE_INFINITY;
+		return (n1 instanceof Double || n1 instanceof Float)
+				&& n1.floatValue() == Float.NEGATIVE_INFINITY;
 	}
 
 	public final static boolean isPI(Number n1) {
-		return (n1 instanceof Double)
-				&& n1.doubleValue() == Double.POSITIVE_INFINITY;
+		return (n1 instanceof Double || n1 instanceof Float)
+				&& n1.floatValue() == Float.POSITIVE_INFINITY;
+	}
+
+	protected static boolean isType(Class<?> clazz, Number n1, Number n2) {
+		return clazz.isInstance(n1) || clazz.isInstance(n2);
 	}
 
 	/**
@@ -63,7 +64,12 @@ public class NumberArithmetic {
 			}
 		} else if (isType(Integer.class, n1, n2) || isType(Short.class, n1, n2)
 				|| isType(Byte.class, n1, n2)) {
-			return n1.intValue() - n2.intValue();
+			int offset =  n1.intValue() - n2.intValue();
+			if (offset == 0) {
+				return 0;
+			} else {
+				return offset > 0 ? 1 : 0;
+			}
 		}
 		double offset = n1.doubleValue() - n2.doubleValue();
 		if (offset == 0) {
@@ -148,21 +154,27 @@ public class NumberArithmetic {
 	 *            右参数
 	 * @return 结果
 	 */
-	public Number divide(Number n1, Number n2) {
+	public Number divide(Number n1, Number n2, boolean exact) {
 		if (isType(Double.class, n1, n2)) {
 		} else if (isType(Float.class, n1, n2)) {
 			return n1.floatValue() / n2.floatValue();
 		} else {
-			long right = n2.longValue();
-			if(right == 0){
-				return Double.NaN;
-			}
-			long left = n1.longValue() % right;
-			if (left == 0) {
-				if (isType(Long.class, n1, n2)) {
+			if (isType(Long.class, n1, n2)) {
+				long right = n2.longValue();
+				if (right == 0) {
+					return Float.NaN;
+				}
+				if (!exact || n1.longValue() % right == 0) {
 					return n1.longValue() / right;
-				} else if (isType(Integer.class, n1, n2) || isType(Short.class, n1, n2)
-						|| isType(Byte.class, n1, n2)) {
+				}
+			} else if (isType(Integer.class, n1, n2)
+					|| isType(Short.class, n1, n2)
+					|| isType(Byte.class, n1, n2)) {
+				int right = n2.intValue();
+				if (right == 0) {
+					return Float.NaN;
+				}
+				if (!exact || n1.intValue() % right == 0) {
 					return n1.intValue() / n2.intValue();
 				}
 			}

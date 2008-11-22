@@ -131,7 +131,7 @@ public class TextParser implements Parser {
 		return result;
 	}
 
-	public Object optimizeEL(String expression) {
+	public String optimizeEL(String expression) {
 		return expressionFactory.optimizeEL(expression);
 	}
 

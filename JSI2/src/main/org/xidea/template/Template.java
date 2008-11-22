@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +24,7 @@ public class Template {
 
 	public static final int EL_TYPE_XML_TEXT = 6;// [6,'el']
 	public static final int ATTRIBUTE_TYPE = 7;// [6,'value','name']//name opt?
-	public static final int IF_STRING_IN_TYPE = 8;// [8,[...],'value','values']
+//	public static final int IF_STRING_IN_TYPE = 8;//!!!是否应该通过EL函数＋if解决这个问题？// [8,[...],'value','values']
 
 	public static final String FOR_KEY = "for";
 	public static final String IF_KEY = "if";
@@ -83,9 +82,9 @@ public class Template {
 					case ATTRIBUTE_TYPE:// ":attribute":
 						renderAttribute(context, data, out);
 						break;
-					case IF_STRING_IN_TYPE://
-						renderIfStringIn(context, data, out);
-						break;
+//					case IF_STRING_IN_TYPE://
+//						renderIfStringIn(context, data, out);
+//						break;
 					}
 				}
 			} catch (Exception e) {// 每一个指令都拒绝异常
@@ -130,7 +129,7 @@ public class Template {
 				case IF_TYPE:
 				case ELSE_TYPE:
 				case FOR_TYPE:
-				case IF_STRING_IN_TYPE:
+//				case IF_STRING_IN_TYPE:
 					cmd[1] = compile((List) cmd[1]);
 					break;
 				}
@@ -150,8 +149,8 @@ public class Template {
 						cmd[2] = createExpression(cmd[2]);
 					}
 					break;
-				case IF_STRING_IN_TYPE:
-					cmd[2] = createExpression(cmd[2]);
+//				case IF_STRING_IN_TYPE:
+//					cmd[2] = createExpression(cmd[2]);
 				case FOR_TYPE:
 					cmd[3] = createExpression(cmd[3]);
 					break;
@@ -273,44 +272,6 @@ public class Template {
 		}
 		// context[2] = test;//if passed(一定要放下来，确保覆盖)
 		context.put(IF_KEY, test);
-	}
-
-	@SuppressWarnings("unchecked")
-	protected void renderIfStringIn(Map context, Object[] data, Writer out) {
-		Boolean test = Boolean.FALSE;
-		try {
-			Object key = ((Expression) data[2]).evaluate(context);
-			Object value = ((Expression) data[3]).evaluate(context);
-
-			key = String.valueOf(key);
-			if (value instanceof Object[]) {
-				for (Object item : (Object[]) value) {
-					if (item != null && key.equals(String.valueOf(item))) {
-						test = Boolean.TRUE;
-						break;
-					}
-				}
-			} else if (value instanceof Collection) {
-				for (Object item : (Collection<?>) value) {
-					if (item != null && key.equals(String.valueOf(item))) {
-						test = true;
-						break;
-					}
-				}
-			}
-			if (test) {
-				renderList(context, (Object[]) data[1], out);
-			}
-		} catch (Exception e) {
-			if (log.isDebugEnabled()) {
-				log.debug(e);
-			}
-			test = Boolean.TRUE;
-		}
-
-		// context[2] = test;//if passed(一定要放下来，确保覆盖)
-		context.put(IF_KEY, test);
-
 	}
 
 	@SuppressWarnings("unchecked")

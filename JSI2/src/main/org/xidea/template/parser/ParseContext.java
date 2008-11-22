@@ -2,7 +2,6 @@ package org.xidea.template.parser;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -146,7 +145,7 @@ public class ParseContext extends HashMap<Object, Object> {
 					case Template.IF_TYPE:
 					case Template.ELSE_TYPE:
 					case Template.FOR_TYPE:
-					case Template.IF_STRING_IN_TYPE:
+//					case Template.IF_STRING_IN_TYPE:
 						cmd2.add(null);
 						stackTop++;
 						stack.add(current = new ArrayList<Object>());
