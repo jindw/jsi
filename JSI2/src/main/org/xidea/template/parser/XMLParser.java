@@ -2,6 +2,7 @@ package org.xidea.template.parser;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.HashMap;
@@ -107,10 +108,11 @@ public class XMLParser extends TextParser {
 	public Node loadXML(URL url, ParseContext context) throws SAXException,
 			IOException, XPathExpressionException {
 		context.setCurrentURL(url);
-		Document doc = documentBuilder.parse(url.openStream());
+		Document doc = documentBuilder.parse(getInputStream(url));
 		// selectNodes(xpath, doc);
 		return doc;
 	}
+
 
 	public NamespaceContext createNamespaceContext(Document doc){
 		NamedNodeMap attributes = doc.getDocumentElement().getAttributes();
