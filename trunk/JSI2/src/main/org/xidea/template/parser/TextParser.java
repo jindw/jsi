@@ -1,6 +1,9 @@
 package org.xidea.template.parser;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -23,7 +26,10 @@ public class TextParser implements Parser {
 		return parseText((String) text, false, false, (char) 0);
 	}
 
-	public String encodeText(String text, int quteChar) {
+	protected InputStream getInputStream(URL url) throws IOException {
+		return url.openStream();
+	}
+	protected String encodeText(String text, int quteChar) {
 		StringWriter out = new StringWriter();
 		for (int i = 0; i < text.length(); i++) {
 			int c = text.charAt(i);
