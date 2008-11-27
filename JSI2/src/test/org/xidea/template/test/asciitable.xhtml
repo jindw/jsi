@@ -1,3 +1,4 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns:c="#core">
 	<h1>${name}</h1>
 	<table border="${border}">
@@ -13,7 +14,7 @@
 				<c:for var="cell" items="${data}">
 					<td>
 					<!-- <c:out value="${'&amp;#x'+row+cell}"/>; -->
-						<pre><c:out value="&amp;#x"/>${row}${cell};</pre>
+						<pre><c:out value="&amp;#x"/>${row}${cell};&nbsp;-</pre>
 					</td>
 				</c:for>
 			</tr>

@@ -12,7 +12,7 @@ public class DefaultEntityResolver implements EntityResolver2 {
 	static {
 		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Transitional//EN",
 				"xhtml1-transitional.dtd");
-		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Transitional//EN",
+		DEFAULT_DTD_MAP.put("-//W3C//DTD XHTML 1.0 Strict//EN",
 				"xhtml1-strict.dtd");
 		DEFAULT_DTD_MAP.put("-//W3C//ENTITIES Latin 1 for XHTML//EN",
 				"xhtml-lat1.ent");
