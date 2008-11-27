@@ -9,12 +9,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIDependence;
 import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.ScriptLoader;
 
 public class DefaultJSIPackage implements JSIPackage {
+	private static final Log log = LogFactory.getLog(DefaultJSIPackage.class);
 	private JSIRoot root;
 	private String name;
 	private String implementation;
@@ -77,7 +80,7 @@ public class DefaultJSIPackage implements JSIPackage {
 		for (Iterator<String> it2 = objects.iterator(); it2.hasNext();) {
 			String item = it2.next();
 			if (objectScriptMap.containsKey(item)) {
-				System.out.println("重复的脚本元素定义:" + item);
+				log.error("重复的脚本元素定义:" + item);
 			}
 			objectScriptMap.put(item, scriptName);
 			item = item.replace("\\..*$", "");

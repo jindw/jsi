@@ -10,9 +10,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIPackage;
 
 public abstract class PackageParser {
+	private static final Log log = LogFactory.getLog(PackageParser.class);
 	public static final String SET_IMPLEMENTATION = "setImplementation";
 	public static final String ADD_SCRIPT = "addScript";
 	public static final String ADD_DEPENDENCE = "addDependence";
@@ -58,8 +61,8 @@ public abstract class PackageParser {
 			beforeLoadDependences = filterStrings(beforeLoadDependences);
 			afterLoadDependences = filterStrings(afterLoadDependences);
 		} catch (RuntimeException e) {
-			System.out.println(beforeLoadDependences);
-			System.out.println(afterLoadDependences);
+			log.error(beforeLoadDependences);
+			log.error(afterLoadDependences);
 			e.printStackTrace();
 			throw e;
 		}
