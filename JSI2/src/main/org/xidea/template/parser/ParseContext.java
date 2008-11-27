@@ -112,7 +112,7 @@ public class ParseContext extends HashMap<Object, Object> {
 		int stackTop = 0;
 		for (Object item : result2) {
 			if (item instanceof String) {
-				System.out.println(item);
+				//System.out.println(item);
 				current.add(item);
 			} else {
 				Object[] cmd = (Object[]) item;
