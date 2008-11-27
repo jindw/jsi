@@ -51,7 +51,7 @@ public class TemplateTimeTest {
 		long t1 = 0;
 		long t2 = 0;
 		long t3 = 0;
-		for (int i = 0; i < 5000; i++) {
+		for (int i = 0; i < 50; i++) {
 			// result2 = testXMLTemplate(xt, context);
 			long m1 = System.currentTimeMillis();
 			result1 = testXMLTemplate(xt2, context);
