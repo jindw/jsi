@@ -13,9 +13,13 @@
 		<jar destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
+				<exclude name="**/test/**.*" />
+				<exclude name="**/sandbox/**.*" />
 			</fileset>
 			<fileset dir="src/main">
 				<include name="**/*.java" />
+				<exclude name="**/test/**.*" />
+				<exclude name="**/sandbox/**.*" />
 			</fileset>
 			<fileset dir="build/dest/">
 				<include name="exported.xml" />
