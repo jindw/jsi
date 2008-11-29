@@ -19,7 +19,7 @@ this.addScript('globals-info.js','RootInfo'
                             ,['SourceEntry','ObjectInfo','computeURL'])
 
 this.addScript('jsidoc.js',['JSIDoc']
-                            ,['org.xidea.template:Template']
+                            ,['org.xidea.lite:Template']
                             ,['MenuUI','SourceEntry','PackageInfo','findPackages',
                                 "org.xidea.jsidoc.util:JSON",
                                 "org.xidea.jsidoc.util:loadTextByURL",
@@ -51,4 +51,4 @@ this.addScript('tags.js',['valuesTag','accessTag','flagTag','valueTag']);
 
 this.addScript('type-info.js',['TypeInfo','ParamInfo'])
 
-//this.addDependence('jsidoc.js','org.xidea.template:XMLParser');
+//this.addDependence('jsidoc.js','org.xidea.lite:XMLParser');
