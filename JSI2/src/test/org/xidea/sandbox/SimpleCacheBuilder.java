@@ -1,4 +1,4 @@
-package org.xidea.jsi.doc;
+package org.xidea.sandbox;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
