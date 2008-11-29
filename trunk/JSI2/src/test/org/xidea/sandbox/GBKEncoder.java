@@ -1,4 +1,4 @@
-package org.xidea.test;
+package org.xidea.sandbox;
 
 public class GBKEncoder {
 	public static void main(String[] args) {
