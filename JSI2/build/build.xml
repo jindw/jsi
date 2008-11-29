@@ -26,45 +26,6 @@
 		</jar>
 		<copyfile dest="build/dest/JSI-${version}.jar" src="build/dest/JSI.jar" />
 	</target>
-	<target name="jar-template">
-		<jar destfile="build/dest/JSEL.jar" compress="true">
-			<fileset dir="web/WEB-INF/classes">
-				<include name="org/xidea/el/**/*.class" />
-				<exclude name="**/test/**/*.*" />
-			</fileset>
-		</jar>
-		<copyfile dest="build/dest/JSEL-${version}.jar" src="build/dest/JSEL.jar" />
-
-		<jar destfile="build/dest/JSEL-Source.jar">
-			<zipfileset src="build/dest/JSEL.jar" />
-			<fileset dir="src/main">
-				<include name="org/xidea/el/**/*.java" />
-				<exclude name="**/test/**/*.*" />
-			</fileset>
-		</jar>
-		<copyfile dest="build/dest/JSEL-Source${version}.jar" src="build/dest/JSEL-Source.jar" />
-		<jar destfile="build/dest/Template.jar" compress="true">
-			<fileset dir="web/WEB-INF/classes">
-				<include name="org/xidea/el/**/*.class" />
-				<include name="org/xidea/template/**/*.class" />
-				<include name="org/xidea/template/dtd/**/*.ent" />
-				<include name="org/xidea/template/dtd/**/*.dtd" />
-				<exclude name="**/test/**/*.*" />
-			</fileset>
-		</jar>
-		<copyfile dest="build/dest/Template-${version}.jar" src="build/dest/Template.jar"/>
-
-		<jar destfile="build/dest/Template-Source.jar">
-			<zipfileset src="build/dest/Template.jar">
-			</zipfileset>
-			<fileset dir="src/main">
-				<include name="org/xidea/el/**/*.java" />
-				<include name="org/xidea/template/**/*.java" />
-				<exclude name="**/test/**/*.*" />
-			</fileset>
-		</jar>
-		<copyfile dest="build/dest/Template-Source-${version}.jar" src="build/dest/Template-Source.jar"/>
-	</target>
 	<target name="packageOptimize">
 		<java classname="org.jside.jsi.tools.generator.JSIPackageGenerator">
 			<classpath>
