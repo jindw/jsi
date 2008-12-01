@@ -1,0 +1,118 @@
+@IMPORT url("default.css");
+
+html,body{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#CCF;
+}
+#toolbar{
+    z-index:2;
+    position:absolute;
+    bottom:0px;
+	background-color:#CCF;
+	text-align: right;
+    width:100%;
+    height:25px;
+}
+.menu-box{
+    display:inline;
+    border: 1px solid #000000;
+    margin: 2px;
+    padding: 2px;
+    height:18px;
+    float:right;
+    overflow:visible;
+    position:relative;
+    top:0px;
+    left:0px;
+}
+
+.menu-box *{
+    font-size:14px;
+    line-height:16px;
+    color:#333333;
+    text-align:left;
+    text-decoration:none;
+}
+#toolbar li,#toolbar ul{
+    list-style-type: none;
+    margin:2px;
+    padding:1px;
+}
+#toolbar ul{
+    padding:0px;
+    margin:0px;
+    text-indent:0px;
+    position:absolute;
+    border: 1px solid #000;
+    border-bottom: 0px;
+    background:#DDF;
+    display:none;
+    width:120px;
+    bottom:15px;
+    right:0px;
+}
+#toolbar li.open{
+    z-index:2;
+}
+#toolbar li.open ul{
+    display:inline;
+}
+/* fix ie bug  (not work)*/
+#toolbar li.open ul a{
+    position:relation;
+    height:18px;
+    left:0px;
+}
+
+#toolbar li.menu-item{
+    padding:6px;
+    margin:0px;
+    padding-left:0px;
+    text-indent:10px;
+    border-bottom: 1px solid #000;
+}
+
+#content{
+    position:absolute;
+    overflow-x:hidden;
+    overflow:auto;
+    top:0px;
+    border:5px solid #CCF;
+    height:98%;
+    background:#FFF;
+    /*height:expression((this.parentNode.clientHeight-40)+'px');*/
+    /*width:expression((this.parentNode.clientWidth-10)+'px');*/
+}
+
+
+h2,h3,h4,h5{
+    width:100%;
+    text-indent: 4px;
+    margin: 0px;
+    background-color: #EEF;
+}
+#content li{
+    position:static;
+    margin: 0px;
+    padding-left: 5px;
+    list-style-type: none;
+    overflow:hidden;
+}
+#content .root-pane li{
+    padding-left: 25px;
+}
+#content li li{
+    padding-top: 4px;
+    padding-left: 30px;
+}
+#content ul{
+    zoom:1;
+    width:100%;
+    overflow:hidden;
+    background-color:#FFF;
+    margin: 0px;
+    margin-top: 6px;
+    padding: 0px;
+}

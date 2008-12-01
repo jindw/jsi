@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<?xml version="1.0" encoding="utf-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta name="keywords"
+  content="JSI,JSIntegration,JavaScript Integration,Package,Load on demand,page decorator" />
+<title>JSI Home</title>
+<link rel="stylesheet" type="text/css" href="styles/index.css" />
+</head>
+<body>
+<div
+ style="position:absolute;top:0px;right:0px;padding:8px;opacity:0.4;filter:Alpha(Opacity=40);width:20%;color:red;background: yellow;">
+ 网站部署中<br /> 当前版本JSI2.5Preview，<br />历史版本[<a href="../jsi_v2.0">2.0</a>]</div>
+<div class="block-row" id="header">
+	<div id="logo">
+	    <img src="images/logo.gif"/>
+	    <p>The highest excellence is like that of water. The excellence of water appears in its benefiting all things, and in its occupying, without striving, the low place which all men dislike. Hence it is near to the Tao.</p>
+	    <div>
+	        <a href="http://www.microsoft.com/windows/downloads/ie/getitnow.mspx"
+		     title><img src='images/browser/ie-ico.gif' border="0"/>
+		     <span class="tooltip">Internat Explorer 6.0+ </span></a>
+		    <a href="http://www.mozilla.org/"
+		     title=""><img src='images/browser/firefox-ico.gif' border="0"/>
+		     <span class="tooltip">Firefox 1.0 + </span></a>
+		    <a href="http://www.mozilla.org/releases/"
+		     title=""><img src='images/browser/mozilla-ico.gif' border="0"/>
+		     <span class="tooltip">Mozilla 1.0 + </span></a>
+		    <a href="http://browser.netscape.com/"
+		     title=""><img src='images/browser/netscape-ico.gif' border="0"/>
+		     <span class="tooltip">Netscape 6.2.2 + </span></a>
+		    <a href="http://www.opera.com/"
+		     title=""><img src='images/browser/opera-ico.gif' border="0"/>
+		     <span class="tooltip">Opera 9.0 + </span></a>
+	    </div>
+	</div>
+	
+	<h3>JSI Introduction:</h3>
+
+	<p>JSI project in two parts: core framework and a series of sub-project based on the core framework. </p>
+
+	<p>Core framework designed to provide an open, non-invasive javascript library management solutions and a comprehensive front-end development, debugging, document parsing, template compiling,  packaging and exporting environmental support.</p>
+
+	<p>It could serve as a developing time javascript management tools to allow developers to enjoy the various convenient during the development time; 
+	can also run as a runtime javascript framework;so that the author of the javascript library can prepare the dependence of the relevant javascript library, so that end-users from the cumbersome rely on the management of freed, improve the usability of the javascript library.
+	</p>
+	
+	<p>JSI has a sound mechanism for effective isolation module, facilitate the reuse, thirdparty javascript management, to avoid the naming of their pollution problems. 
+	At the same time strongly simple pursuit of freedom, not the introduction of special syntax, the javascript library in framework without relying on the framework.</p>
+
+	<p>JSI as an open javascript library management framework, any official built-in libraries will not provided, as far as possible achieve the neutrality of the javascript library.
+	but I also will chair the JSIDE (JSI SIDE) the development of this project, it will be the basis of JSI , To do some practice, and share some of the optional library. 
+	At the same time other users according to their preferences can also integrate other javascript library, when we will provide some integration of some well-known javascript library as examples (such as: jQuery, Prototype, Scriptaculous, YAHOO UI).</p>
+	
+	<p>The sub-projects of JSI, can provide a useful function of the specific. such as the page decorative framework.</p>
+</div>
+<div class="block-row">
+	<div class='block-item'>
+		<h3>Core Function:</h3>
+		<ul>
+		    <li><a
+		      href='http://code.google.com/p/jsi/wiki/LoadOnDemand'>
+		      load on demand
+		      <span class="tooltip"> 除常见的阻塞式装载方式，JSI还提供了无阻塞的按需装载方式（延迟同步装载，异步装载，JSI2.0+） </span>
+		      </a>
+		    </li>
+		    <li><a
+		     href='http://www.javaeye.com/article/71282'>
+		     dependence management
+		     <span class="tooltip">
+		      脚本依赖的暴露、扩散是复杂度陡增的最大祸根。<br />
+		      JSI提供了完善的依赖管理方案，将依赖终结在类库开发者手中。提高类库的易用性</span></a></li>
+		    <li><a href='http://www.javaeye.com/article/71280'>
+		     module isolation
+		      <span class="tooltip">
+		      传统方式使用类库，将其直接导入进来，在全局上下文执行，这带来一个名称冲突的隐患；<br />
+		      JSI中，每个脚本都有单独的执行上下文，不必担心不同脚本的命名冲突。<br />
+		      甚至，在JSI的保护下，你可以是无忌惮的自由的使用内部元素。
+		      </span></a> </li>
+		</ul>
+	</div>
+	<div class='block-item'>
+		<h3>Sub Project</h3>
+		<ul>
+		    <li><a
+		      href="../jsidoc/">Self Parsed Document<span class="tooltip">
+		        通过对项目脚本的实时解析，生成API文档；<br />
+				简单方便，保持文档与代码的同步。</span> </a> </li>
+		    <li><a
+		      href="../jsi_v2.0/decorator/">
+		      <strong>Page Decorate Framework</strong>
+		      <span class="tooltip">
+		        JSI组件模型是一种用来装饰简单html元素的框架，使用简单的xml标记，标识其装饰行为，比如将一个普通的input装饰成一个日期输入控件，将一个html
+				ul标记装饰成菜单或树，将一个textarea装饰成一个代码语法高亮显示区域，或一个wysiwyg html编辑器。
+				<br />
+		        <br />
+				JSI启动后将自动检查decorator标记，构建层次结构，自动做相关类的寻找、导入和装饰操作；实现零脚本代码的web富客户端编程。
+				</span>
+		      </a>
+		      </li>
+		    <li><a href="template/" class="online-ppt">
+		        JSISide Template Engine
+		        <span class="tooltip">
+				一个简单的模板引擎。<br />
+		        JSDoc 及一些示例装饰器都基于此。</span></a></li>
+		</ul>
+	</div>
+</div>
+<div class="block-row">
+    <div class='block-item'>
+        <h3>Related Resources:</h3>
+        <ul>
+            <li><a href="preview/" class="online-ppt">Preview</a></li>
+            <li><a href="http://jsi.googlecode.com/svn/trunk/JSI2/web/doc/">Some documents</a></li>
+            <li><a href="http://code.google.com/p/jsi/source/browse">Code here</a></li>
+            <li><a
+                href="http://sourceforge.net/project/showfiles.php?group_id=175776">Download
+            </a></li>
+        </ul>
+    </div>
+    <div class='block-item'>
+        <h3>Communication:</h3>
+        <ul>
+            <li><a href="http://forum.xidea.org">Mail Group Google Group <span class="tooltip">
+                Google Group</span> </a></li>
+            <li><a href="http://jsi.googlecode.com/">Google Code</a></li>
+            <li><a href="http://code.google.com/p/jsi/issues/list">Issues submitted</a></li>
+            <li><a href="http://hi.baidu.com/jindw">The author's blog </a></li>
+        </ul>
+    </div>
+</div>
+<div class="block-row">
+
+	<div class='block-item'>
+		<h3>Support JSI:</h3>
+		<ul>
+            <li><a href="#null">Join JSI Side。
+                <span class="tooltip">
+                JSI Side是我们准备开始的一个JSI外围项目。
+                他的目标之一是共享一些基于JSI的可选类库。<br />
+                其次，他还是一个交流的空间，项目成员不必全是直接的代码贡献者；<br />
+                我们欢迎成员在私有项目中实践中发现JSI目前的不足，提出改进建议。<br /><br />
+                在您熟悉JSI内核工作原理和核心思想之后，如果我们观点比较一致，我们也欢迎您加入JSI 内核的开发。
+                </span></a></li>
+		    <li><a href="#null">Help promote
+		        <span class="tooltip">好酒也怕巷子深。<br />
+                为了JSI开源项目的发展，可以在自己的blog，网站上提供JSI项目的链接，项目logo；<br />
+                如果你有时间，也可以编写一些JSI相关的实用教材。</span></a></li>
+		    <li><a href="http://www.javaeye.com/article/77597">develope third-party set decoration 
+		        <span class="tooltip">一个优秀的组件集合，对于JSI的发展将非常有利；<br />
+		        您可以和我们一道，丰富JSI自带的装饰器集合；<br />
+		        也可以开发自己的第三方装饰器；<br />
+		        详情可见我们的邀请信。</span></a></li>
+		    <li><a href="#null">Bug reports or recommendations for improvement
+		        <span class="tooltip">
+		        有何bug报告或改进建议，可以直接向我们的bug系统提交，也可以邮件与我们联系。</span></a></li>
+		</ul>
+	</div>
+	<div class='block-item'>
+		<h3>Thanks：</h3>
+		<ul>
+		    <li><a href="http://www.redsaga.com/">redsaga open-source organizations
+		    <span class="tooltip">感谢满江红开源组织为JSI项目提供网站空间。</span></a> 
+		    </li>
+            <li><a href="http://www.googlecode.com/">Google Code
+            <span class="tooltip">感谢GoogleCode提供的svn，wiki及邮件组服务。</span></a> 
+            </li>
+            <li><a href="http://www.sourceforge.net/">SourceForge
+            <span class="tooltip">感谢SourceForge为JSI项目提供CVS及文件下载服务。</span></a> 
+            </li>
+		    <li><a href="http://www.javascud.org/">javascud</a> 
+		    </li>
+		</ul>
+	</div>
+</div>
+
+<div class="block-row">
+<form action="http://groups.google.com/group/jsier/boxsubscribe">
+<div><b> Subscribe jsier（ <a
+  href="http://groups.google.com/group/jsier"> visit </a> ） </b></div>
+<div>Email： <input type=text name=email /> <input type=hidden
+  name="hl" value="zh-CN" /> <input type=submit name="sub" value="Subscribe" /></div>
+</form>
+<p>About us:Email: jindw◎xidea.org , jinyun.jin◎gmail.com&nbsp;
+&nbsp;QQ Group: 23180506</p>
+</div>
+</body>
+</html>

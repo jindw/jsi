@@ -1,0 +1,20 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script src="../scripts/boot.js"></script>
+</head>
+<body>
+<script>
+this.scriptBase = $JSI.scriptBase + "org/xidea/jsidoc/";
+var t1 = new Date();
+$import("org.xidea.jsidoc:JSIDoc");
+var t2 = new Date();
+$log.info("即时装载时间:",(t2 - t1))
+
+
+//这里只是打印一下延迟装载时间
+$import("org.xidea.jsidoc:JSIDoc",true);
+</script>
+
+</body>
+</html>

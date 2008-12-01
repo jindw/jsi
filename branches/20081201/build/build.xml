@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="GBK"?>
+<project name="JSI" default="build" basedir="../">
+	<tstamp>
+		<format property="version" pattern="yyyyMMdd" />
+	</tstamp>
+	<target name="init">
+		<delete dir="build/temp">
+		</delete>
+		<mkdir dir="build/temp/scripts" />
+		<mkdir dir="build/dest" />
+	</target>
+	<target name="jar">
+		<jar destfile="build/dest/JSI.jar">
+			<fileset dir="web/WEB-INF/classes">
+				<include name="**/*.*" />
+			</fileset>
+			<fileset dir="src/main">
+				<include name="**/*.java" />
+			</fileset>
+			<fileset dir="build/dest/">
+				<include name="exported.xml" />
+			</fileset>
+			<zipfileset dir="src/main" prefix="META-INF">
+				<include name="*.tld" />
+			</zipfileset>
+		</jar>
+		<copyfile dest="build/dest/JSI-${version}.jar" src="build/dest/JSI.jar" />
+	</target>
+	<target name="jar-template">
+		<jar destfile="build/dest/JSEL.jar" compress="true">
+			<fileset dir="web/WEB-INF/classes">
+				<include name="org/xidea/el/**/*.class" />
+				<exclude name="**/test/**/*.*" />
+			</fileset>
+		</jar>
+		<copyfile dest="build/dest/JSEL-${version}.jar" src="build/dest/JSEL.jar" />
+
+		<jar destfile="build/dest/JSEL-Source.jar">
+			<zipfileset src="build/dest/JSEL.jar" />
+			<fileset dir="src/main">
+				<include name="org/xidea/el/**/*.java" />
+				<exclude name="**/test/**/*.*" />
+			</fileset>
+		</jar>
+		<copyfile dest="build/dest/JSEL-Source${version}.jar" src="build/dest/JSEL-Source.jar" />
+		<jar destfile="build/dest/Template.jar" compress="true">
+			<fileset dir="web/WEB-INF/classes">
+				<include name="org/xidea/el/**/*.class" />
+				<include name="org/xidea/template/**/*.class" />
+				<include name="org/xidea/template/dtd/**/*.ent" />
+				<include name="org/xidea/template/dtd/**/*.dtd" />
+				<exclude name="**/test/**/*.*" />
+			</fileset>
+		</jar>
+		<copyfile dest="build/dest/Template-${version}.jar" src="build/dest/Template.jar"/>
+
+		<jar destfile="build/dest/Template-Source.jar">
+			<zipfileset src="build/dest/Template.jar">
+			</zipfileset>
+			<fileset dir="src/main">
+				<include name="org/xidea/el/**/*.java" />
+				<include name="org/xidea/template/**/*.java" />
+				<exclude name="**/test/**/*.*" />
+			</fileset>
+		</jar>
+		<copyfile dest="build/dest/Template-Source-${version}.jar" src="build/dest/Template-Source.jar"/>
+	</target>
+	<target name="packageOptimize">
+		<java classname="org.jside.jsi.tools.generator.JSIPackageGenerator">
+			<classpath>
+				<path location="../JSA-CORE/classes">
+				</path>
+				<path location="../JST/classes">
+				</path>
+				<fileset dir="../JST/lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+			<arg value="-scriptsBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-output" />
+			<arg value="${basedir}/build/dest/package-gen.js" />
+			<arg value="org.xidea.jsidoc.export" />
+			<arg value="org.xidea.jsidoc" />
+			<arg value="org.xidea.jsidoc.util" />
+		</java>
+	</target>
+	<target name="compress">
+		<java classname="org.jside.jsi.tools.export.ExportorAction">
+			<classpath>
+				<path location="../JST/classes">
+				</path>
+				<path location="../JSI2/web/WEB-INF/classes">
+				</path>
+				<fileset dir="../JST/lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-outputBoot" />
+			<arg value="${basedir}/build/dest/boot.js" />
+			<!--
+			<arg value="-bootCached" />
+			<arg value="example.*" />
+			-->
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/exported.js" />
+			<arg value="-outputXML" />
+			<arg value="${basedir}/build/dest/exported.xml" />
+			<arg value="-outputJAR" />
+			<arg value="${basedir}/build/dest/exported.jar" />
+			<arg value="-ascii" />
+			<arg value="false" />
+			<arg value="example.*" />
+			<arg value="example.dependence.*" />
+			<arg value="org.xidea.jsidoc.export.*" />
+			<!--
+			<arg value="example.*" />
+			<arg value="org.xidea.jsidoc.*" />
+			-->
+		</java>
+	</target>
+	<target name="compress-all-xml">
+		<java classname="org.jside.jsi.tools.export.ExportorAction">
+			<classpath>
+				<path location="../JSI2/web/WEB-INF/classes">
+				</path>
+				<path location="../JST/classes">
+				</path>
+				<fileset dir="../JST/lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-outputXML" />
+			<arg value="${basedir}/build/dest/exported-all.xml" />
+			<arg value="-ascii" />
+			<arg value="false" />
+			<arg value="example.*" />
+			<arg value="example.dependence.*" />
+			<arg value="example.alias.*" />
+			<arg value="example.internal.*" />
+			<arg value="org.xidea.jsidoc.*" />
+			<arg value="org.xidea.jsidoc.export.*" />
+			<arg value="org.xidea.jsidoc.util.*" />
+		</java>
+	</target>
+
+	<target name="buildExample" depends="jar">
+		<war destfile="build/dest/JSI-example-${version}.war" webxml="web/WEB-INF/web.xml" description="http://localhost/JSI-example-${version}/scripts/jsidoc">
+			<zipfileset dir="build/dest" file="JSI.jar" prefix="WEB-INF/lib/" />
+			<zipfileset dir="web">
+				<include name="scripts/example/**/*.*" />
+				<include name="WEB-INF/lib/**/*.*" />
+			</zipfileset>
+		</war>
+	</target>
+	<target name="ftp">
+		<ftp password="jindw@163.com" server="upload.sourceforge.net" userid="anonymous" action="put" remotedir="/incoming">
+			<fileset file="build/dest/">
+				<include name="*${version}.war" />
+				<include name="JSI.jar" />
+			</fileset>
+		</ftp>
+	</target>
+	<target name="buildJSIDoc" depends="init">
+		<delete file="build/dest/JSI-JSIDoc-${version}.zip">
+		</delete>
+		<java classpath="web/WEB-INF/classes/" classname="org.xidea.jsi.doc.SimpleCacheBuilder">
+			<arg value="${basedir}/web/scripts" />
+			<arg value="${basedir}/build/temp/" />
+		</java>
+		<zip destfile="build/dest/JSI-JSIDoc-${version}.zip" compress="true">
+			<zipfileset dir="web/scripts">
+				<include name="**/*.*" />
+				<exclude name="**/*.db" />
+				<exclude name="*/**/*.js" />
+				<exclude name="*/**/*.xhtml" />
+				<exclude name="*/**/*test*.html" />
+				<exclude name="*/**/root-frame.html" />
+			</zipfileset>
+			<zipfileset dir="web/scripts/org/xidea/jsidoc/">
+				<include name="root-frame.html" />
+			</zipfileset>
+			<zipfileset dir="build/temp/">
+				<include name="jsidoc-source.js" />
+			</zipfileset>
+		</zip>
+	</target>
+	<target name="build" depends="compress,jar">
+		<delete file="build/dest/JSI-${version}.tar">
+		</delete>
+		<tar destfile="build/dest/JSI-${version}.tar" compression="gzip">
+			<tarfileset dir="web">
+				<include name="**/*.*" />
+				<include name="scripts/**/*.*" />
+				<exclude name="WEB-INF/classes/**/*.*" />
+				<exclude name="**/*.db" />
+			</tarfileset>
+		</tar>
+		<zip destfile="build/dest/JSI-${version}.zip" compress="true">
+			<zipfileset dir="web">
+				<include name="**/*.*" />
+				<include name="scripts/**/*.*" />
+				<exclude name="WEB-INF/classes/**/*.*" />
+				<exclude name="**/*.db" />
+			</zipfileset>
+		</zip>
+	</target>
+
+</project>
