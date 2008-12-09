@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 import java.util.jar.JarFile;
@@ -18,6 +17,7 @@ import java.util.zip.ZipEntry;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.impl.DataJSIRoot;
+import org.xidea.jsi.impl.DefaultJSIExportorFactory;
 import org.xidea.jsi.impl.DefaultJSILoadContext;
 import org.xidea.jsi.impl.JSIUtils;
 
@@ -99,14 +99,7 @@ public class JSIService {
 			final DataJSIRoot root = new DataJSIRoot(content);
 			String type = root.loadText(null, "#type");
 			JSIExportor exportor;
-			if ("report".equals(type)) {
-				exportor = JSIUtils.getExportor(JSIExportor.TYPE_REPORT);
-			} else if ("confuse".equals(type)) {
-				// String prefix = root.loadText(null, "#prefix");
-				exportor = JSIUtils.getExportor(JSIExportor.TYPE_CONFUSE);// confuseUnimported
-			} else {
-				exportor = JSIUtils.getExportor(JSIExportor.TYPE_SIMPLE);
-			}
+			exportor = JSIUtils.getExportor(type);
 			if (exportor == null) {
 				return null;
 			}
@@ -119,19 +112,9 @@ public class JSIService {
 					root.$import(item, context);
 				}
 			}
-			return exportor.export(context, new HashMap<String, String>() {
-				/**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				@Override
-				public String get(Object key) {
-					return root.loadText(null, String.valueOf(key));
-				}
-			});
+			return exportor.export(context);
 		} else {
-			return JSIUtils.getExportor(JSIExportor.TYPE_CONFUSE) == null ? null : "";
+			return JSIUtils.getExportor(DefaultJSIExportorFactory.TYPE_CONFUSE) == null ? null : "";
 		}
 
 	}
