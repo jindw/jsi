@@ -13,8 +13,23 @@ import org.xidea.jsi.ScriptLoader;
  * @author jindw
  */
 public class DefaultJSIExportorFactory {
-
-	private String type = JSIExportor.TYPE_SIMPLE;
+	/**
+	 * 混淆隔离支持的导出合并实现
+	 */
+	public static final String TYPE_CONFUSE = "confuse";
+	/**
+	 * 创建问题报告实现
+	 */
+	public static final String TYPE_REPORT = "report";
+	/**
+	 * 简单的直接导出合并实现，一般用于运行时合并
+	 */
+	public static final String TYPE_SIMPLE = "simple";
+	/**
+	 * 创建XML数据打包实现 创建问题报告实现
+	 */
+	public static final String TYPE_XML = "xml";
+	private String type = TYPE_SIMPLE;
 
 	public DefaultJSIExportorFactory(String type) {
 		this.type = type;
@@ -25,13 +40,13 @@ public class DefaultJSIExportorFactory {
 	 * 
 	 */
 	public JSIExportor createExplorter() {
-		if (JSIExportor.TYPE_SIMPLE.equals(type)) {
+		if (TYPE_SIMPLE.equals(type)) {
 			return createSimpleExplorter();
-		}else if (JSIExportor.TYPE_CONFUSE.equals(type)) {
+		} else if (TYPE_CONFUSE.equals(type)) {
 			return createConfuseExplorter();
-		}else if (JSIExportor.TYPE_XML.equals(type)) {
+		} else if (TYPE_XML.equals(type)) {
 			return createXMLExplorter();
-		}else if (JSIExportor.TYPE_REPORT.equals(type)) {
+		} else if (TYPE_REPORT.equals(type)) {
 			return createReportExplorter();
 		}
 		return null;
@@ -70,7 +85,7 @@ public class DefaultJSIExportorFactory {
 
 class SimpleExporter implements JSIExportor {
 
-	public String export(JSILoadContext context, Map<String, String> config) {
+	public String export(JSILoadContext context) {
 		StringBuilder result = new StringBuilder();
 		List<ScriptLoader> scriptList = context.getScriptList();
 		for (ScriptLoader entry : scriptList) {
@@ -84,7 +99,7 @@ class SimpleExporter implements JSIExportor {
 
 class XMLExporter implements JSIExportor {
 
-	public String export(JSILoadContext context, Map<String, String> config) {
+	public String export(JSILoadContext context) {
 		StringBuilder content = new StringBuilder(
 				"<properties>\n<entry key='#export'>");
 		boolean first = true;
