@@ -1,4 +1,6 @@
-#labels Featured
+=== 网页已移动至：http://code.google.com/p/jsi/wiki/Lite ===
+
+<font color="#FFF">
 === Lite 是什么 ====
 
 缩写自List Template，是一个由一个简单的控制指令集和一个表达式解析引擎组成的简单模板引擎。
@@ -36,3 +38,4 @@ XML良好的结构，对于模板的语意表达和代码组织非常有利。
  * 代码的格式化和自动的空白压缩。
  * 简单的可选属性表示方法。
  * 文档片段级别的包含。
+</font>
