@@ -1,4 +1,6 @@
-#labels Featured,JSEL,EL
+=== 网页已移动至：http://code.google.com/p/lite/wiki/JSEL ===
+
+<font color="#FFF">
 ===JSEL简介===
 
 JSEL是一个基于逆波兰式结构，采用JS运算规则的简单的表达式解释引擎。
@@ -84,3 +86,4 @@ parseInt("234")
 == 下载 ==
  * JSEL：[http://code.google.com/p/jsi/downloads/list?q=label:JSEL]
  * JSEL 源代码: [http://jsi.googlecode.com/svn/trunk/JSI2/src/main/org/xidea/el/]
+</font>
