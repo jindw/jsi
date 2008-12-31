@@ -97,8 +97,13 @@ Parser.prototype = {
         var parserList = this.parserList;
         var i = parserList.length;
         while(i--){
-            if(parserList[i](node,this)){
-                break;
+            var result = parserList[i](node,this);
+            if(result){
+                if(result == true){//break
+                    break;
+                }else{
+                    node = result;//
+                }
             }
         }
     }
