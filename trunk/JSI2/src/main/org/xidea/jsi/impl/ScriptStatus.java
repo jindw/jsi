@@ -27,5 +27,17 @@ class ScriptStatus {
 			return flagMap.put(object, Boolean.TRUE) != null;
 		}
 	}
-
+	/**
+	 * @param object
+	 * @return
+	 */
+	public boolean isLoaded(String object) {
+		if (flagMap == null) {
+			return true;
+		}else if (object == null) {
+			return false;
+		} else {
+			return flagMap.containsKey(object);
+		}
+	}
 }
