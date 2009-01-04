@@ -38,7 +38,7 @@ public class DefaultJSILoadContext implements JSILoadContext {
 				}
 			} else {
 				int pos = object.indexOf(".");
-				//命名空间也算
+				// 命名空间也算
 				exportMap.put(pos < 0 ? object : object.substring(0, pos), pkg
 						.getName());
 			}
@@ -49,9 +49,6 @@ public class DefaultJSILoadContext implements JSILoadContext {
 		if (status == null) {
 			scriptStatusMap.put(id, status = new ScriptStatus());
 		}
-		if (status.load(object)) {
-			return;
-		}
 		pkg.initialize();
 		List<JSIDependence> list = ((DefaultJSIPackage) pkg).getDependenceMap()
 				.get(path);
@@ -61,40 +58,48 @@ public class DefaultJSILoadContext implements JSILoadContext {
 			}
 		} else {
 			for (JSIDependence dependence : list) {
-				String dependenceObjectName = dependence.getThisObjectName();
+				String dependenceThisObjectName = dependence
+						.getThisObjectName();
 				if (!dependence.isAfterLoad()
-						&& (dependenceObjectName == null || object == null || object
-								.equals(dependenceObjectName))) {
+						&& (dependenceThisObjectName == null || object == null || object
+								.equals(dependenceThisObjectName))) {
 					((DefaultJSIDependence) dependence).load(this);
+					if (status.isLoaded(object)) {
+						return;
+					}
 				}
+			}
+			if (status.load(object)) {
+				return;
 			}
 			if (!loadList.contains(id)) {
 				loadList.add(id);
 			}
 			for (JSIDependence dependence : list) {
-				String dependenceObjectName = dependence.getThisObjectName();
+				String dependenceThisObjectName = dependence
+						.getThisObjectName();
 				if (dependence.isAfterLoad()
-						&& (dependenceObjectName == null || object == null || object
-								.equals(dependence.getTargetObjectName()))) {
+						&& (dependenceThisObjectName == null || object == null || object
+								.equals(dependenceThisObjectName))) {
 					((DefaultJSIDependence) dependence).load(this);
 				}
 			}
 		}
 	}
 
-//	public boolean isLevelSupported(int joinLevel) {
-//		switch (joinLevel) {
-//		case JOIN_DIRECT:
-//		case JOIN_AS_XML:
-//			return true;
-//		case JOIN_AS_JSIDOC:
-//		case JOIN_WITHOUT_ALL_CONFLICTION:
-//		case JOIN_WITHOUT_INNER_CONFLICTION:
-//			return false;
-//		}
-//		return false;
-//	}
-//
+	// public boolean isLevelSupported(int joinLevel) {
+	// switch (joinLevel) {
+	// case JOIN_DIRECT:
+	// case JOIN_AS_XML:
+	// return true;
+	// case JOIN_AS_JSIDOC:
+	// case JOIN_WITHOUT_ALL_CONFLICTION:
+	// case JOIN_WITHOUT_INNER_CONFLICTION:
+	// return false;
+	// }
+	// return false;
+	// }
+	//
 
 	/*
 	 * (non-Javadoc)
