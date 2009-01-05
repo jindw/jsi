@@ -103,4 +103,7 @@ public class DefaultJSIDependence implements JSIDependence {
 	public JSIPackage getTargetPackage() {
 		return targetPackage;
 	}
+	public String toString(){
+		return "[:"+this.thisObjectName+"->"+this.targetFileName+":"+this.targetObjectName+"]#"+(this.afterLoad?"afterLoad":"beforeLoad");
+	}
 }

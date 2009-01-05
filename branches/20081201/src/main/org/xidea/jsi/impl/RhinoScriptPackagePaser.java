@@ -34,6 +34,7 @@ public class RhinoScriptPackagePaser extends PackageParser {
 			@SuppressWarnings("unused")
 			Object result = Context.call(new ContextAction() {
 				public Object run(final Context cx) {
+					System.out.println(source);
 					Scriptable scope = ScriptRuntime.getGlobal(cx);
 					scope.put("$this", scope, Context.toObject(RhinoScriptPackagePaser.this, scope));
 					cx.evaluateString(scope, BIND_SCRIPT, "<package-wrapper.js>", 1, null);

@@ -49,9 +49,6 @@ public class DefaultJSILoadContext implements JSILoadContext {
 		if (status == null) {
 			scriptStatusMap.put(id, status = new ScriptStatus());
 		}
-		if (status.load(object)) {
-			return;
-		}
 		pkg.initialize();
 		List<JSIDependence> list = ((DefaultJSIPackage) pkg).getDependenceMap()
 				.get(path);
@@ -68,6 +65,10 @@ public class DefaultJSILoadContext implements JSILoadContext {
 					((DefaultJSIDependence) dependence).load(this);
 				}
 			}
+
+			if (status.load(object)) {//TODO !!!
+				return;
+			}
 			if (!loadList.contains(id)) {
 				loadList.add(id);
 			}
@@ -75,7 +76,7 @@ public class DefaultJSILoadContext implements JSILoadContext {
 				String dependenceObjectName = dependence.getThisObjectName();
 				if (dependence.isAfterLoad()
 						&& (dependenceObjectName == null || object == null || object
-								.equals(dependence.getTargetObjectName()))) {
+								.equals(dependenceObjectName))) {
 					((DefaultJSIDependence) dependence).load(this);
 				}
 			}

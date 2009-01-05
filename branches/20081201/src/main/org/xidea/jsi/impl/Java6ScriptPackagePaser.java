@@ -38,6 +38,8 @@ public class Java6ScriptPackagePaser extends PackageParser {
 		javax.script.SimpleBindings binds = new javax.script.SimpleBindings();
 		try {
 			binds.put("$this", this);
+			System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+			System.out.println(engine);
 			engine.eval(BIND_SCRIPT, binds);
 			engine.eval(source, binds);
 		} catch (Exception e) {
