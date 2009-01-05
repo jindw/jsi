@@ -3,7 +3,13 @@ package org.xidea.jsi;
 import java.util.List;
 import java.util.Map;
 
+import org.xidea.jsi.impl.DefaultJSILoadContext;
 
+
+/**
+ * @see DefaultJSILoadContext
+ * @author jindw
+ */
 public interface JSILoadContext {
 
 	/**

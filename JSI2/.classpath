@@ -9,5 +9,6 @@
 	<classpathentry kind="var" path="TOMCAT_HOME/lib/jsp-api.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/js.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/commons-logging-1.0.4.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/Template.jar"/>
 	<classpathentry kind="output" path="web/WEB-INF/classes"/>
 </classpath>

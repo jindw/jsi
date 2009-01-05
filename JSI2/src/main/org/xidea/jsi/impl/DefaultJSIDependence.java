@@ -40,6 +40,7 @@ public class DefaultJSIDependence implements JSIDependence {
 
 	/**
 	 * 在包初始化时。用来创建具体实例（×匹配）
+	 * 
 	 * @param thisObjectName
 	 * @return
 	 */
@@ -51,23 +52,27 @@ public class DefaultJSIDependence implements JSIDependence {
 		return instance;
 	}
 
-
-
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIDependence#isAfterLoad()
 	 */
 	public boolean isAfterLoad() {
 		return afterLoad;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIDependence#getTargetFileName()
 	 */
 	public String getTargetFileName() {
 		return targetFileName;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.xidea.jsi.impl.JSIDependence#getTargetObjectName()
 	 */
 	public String getTargetObjectName() {
@@ -102,5 +107,11 @@ public class DefaultJSIDependence implements JSIDependence {
 
 	public JSIPackage getTargetPackage() {
 		return targetPackage;
+	}
+
+	public String toString() {
+		return "[:" + this.thisObjectName + "->" + this.targetFileName + ":"
+				+ this.targetObjectName + "]#"
+				+ (this.afterLoad ? "afterLoad" : "beforeLoad");
 	}
 }
