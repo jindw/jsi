@@ -1,3 +1,4 @@
+#labels Deprecated
 === 网页已移动至：http://code.google.com/p/jsi/wiki/Lite ===
 
 <font color="#FFF">
