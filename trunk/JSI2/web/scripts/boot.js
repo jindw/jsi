@@ -237,7 +237,7 @@ var $import = function(freeEval,cachedScripts){
                     $log.apply($log,msg);
                 }
                 if(":debug"){
-                    if((typeof window.console == 'object') && (typeof console.log == 'function')){
+                    if((typeof window && window.console == 'object') && (typeof console.log == 'function')){
                         var msg = [bindLevel,bindName];
                         msg.push.apply(msg,arguments);
                         console.log(msg.join(';'))
