@@ -118,5 +118,8 @@ public class DefaultScriptLoader implements ScriptLoader {
 		}
 		return source;
 	}
+	public String toString(){
+		return this.path;
+	}
 
 }

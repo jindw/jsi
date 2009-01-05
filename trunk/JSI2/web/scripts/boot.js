@@ -26,64 +26,68 @@ if(":debug"){
      * 调试友好支持
      */
     (function(){
-        //compute scriptBase
-        var rootMatcher = /(^\w+:((\/\/\/\w\:)|(\/\/[^\/]*))?)/;
-        //var rootMatcher = /^\w+:(?:(?:\/\/\/\w\:)|(?:\/\/[^\/]*))?/;
-        var homeFormater = /(^\w+:\/\/[^\/#\?]*$)/;
-        //var homeFormater = /^\w+:\/\/[^\/#\?]*$/;
-        var urlTrimer = /[#\?].*$/;
-        var dirTrimer = /[^\/\\]*([#\?].*)?$/;
-        var forwardTrimer = /[^\/]+\/\.\.\//;
-        var base = document.location.href.
-                replace(homeFormater,"$1/").
-                replace(dirTrimer,"");
-        var baseTags = document.getElementsByTagName("base");
-        var scripts = document.getElementsByTagName("script");
-        /*
-         * 计算绝对地址
-         * @public
-         * @param <string>url 原url
-         * @return <string> 绝对URL
-         * @static
-         */
-        function computeURL(url){
-            var purl = url.replace(urlTrimer,'').replace(/\\/g,'/');
-            var surl = url.substr(purl.length);
-            //prompt(rootMatcher.test(purl),[purl , surl])
-            if(rootMatcher.test(purl)){
+        if(this.document){
+            //compute scriptBase
+            var rootMatcher = /(^\w+:((\/\/\/\w\:)|(\/\/[^\/]*))?)/;
+            //var rootMatcher = /^\w+:(?:(?:\/\/\/\w\:)|(?:\/\/[^\/]*))?/;
+            var homeFormater = /(^\w+:\/\/[^\/#\?]*$)/;
+            //var homeFormater = /^\w+:\/\/[^\/#\?]*$/;
+            var urlTrimer = /[#\?].*$/;
+            var dirTrimer = /[^\/\\]*([#\?].*)?$/;
+            var forwardTrimer = /[^\/]+\/\.\.\//;
+            var base = document.location.href.
+                    replace(homeFormater,"$1/").
+                    replace(dirTrimer,"");
+            var baseTags = document.getElementsByTagName("base");
+            var scripts = document.getElementsByTagName("script");
+            /*
+             * 计算绝对地址
+             * @public
+             * @param <string>url 原url
+             * @return <string> 绝对URL
+             * @static
+             */
+            function computeURL(url){
+                var purl = url.replace(urlTrimer,'').replace(/\\/g,'/');
+                var surl = url.substr(purl.length);
+                //prompt(rootMatcher.test(purl),[purl , surl])
+                if(rootMatcher.test(purl)){
+                    return purl + surl;
+                }else if(purl.charAt(0) == '/'){
+                    return rootMatcher.exec(base)[0]+purl + surl;
+                }
+                purl = base + purl;
+                while(purl.length >(purl = purl.replace(forwardTrimer,'')).length){
+                    //alert(purl)
+                }
                 return purl + surl;
-            }else if(purl.charAt(0) == '/'){
-                return rootMatcher.exec(base)[0]+purl + surl;
             }
-            purl = base + purl;
-            while(purl.length >(purl = purl.replace(forwardTrimer,'')).length){
-                //alert(purl)
-            }
-            return purl + surl;
-        }
-        //处理HTML BASE 标记
-        if(baseTags){
-            for(var i=baseTags.length-1;i>=0;i--){
-                var href = baseTags[i].href;
-                if(href){
-                    base = computeURL(href.replace(homeFormater,"$1/").replace(dirTrimer,""));
-                    break;
+            //处理HTML BASE 标记
+            if(baseTags){
+                for(var i=baseTags.length-1;i>=0;i--){
+                    var href = baseTags[i].href;
+                    if(href){
+                        base = computeURL(href.replace(homeFormater,"$1/").replace(dirTrimer,""));
+                        break;
+                    }
                 }
             }
-        }
-
-        //IE7 XHR 强制ActiveX支持
-        if(this.ActiveXObject && this.XMLHttpRequest && location.protocol=="file:"){
-            this.XMLHttpRequest = null;
-        }
-        var script = scripts[scripts.length-1];
-	    if(script){
-	        //mozilla bug
-	        while(script.nextSibling && script.nextSibling.nodeName.toUpperCase() == 'SCRIPT'){
-	            script = script.nextSibling;
-	        }
-	        var scriptBase = (script.getAttribute('src')||"/scripts/boot.js").replace(/[^\/\\]+$/,'');
-	        $JSI.scriptBase = computeURL(scriptBase);
+    
+            //IE7 XHR 强制ActiveX支持
+            if(this.ActiveXObject && this.XMLHttpRequest && location.protocol=="file:"){
+                this.XMLHttpRequest = null;
+            }
+            var script = scripts[scripts.length-1];
+    	    if(script){
+    	        //mozilla bug
+    	        while(script.nextSibling && script.nextSibling.nodeName.toUpperCase() == 'SCRIPT'){
+    	            script = script.nextSibling;
+    	        }
+    	        var scriptBase = (script.getAttribute('src')||"/scripts/boot.js").replace(/[^\/\\]+$/,'');
+    	        $JSI.scriptBase = computeURL(scriptBase);
+            }
+        }else{
+            $JSI.scriptBase= "classpath:"
         }
     })();
 }else{
@@ -992,7 +996,7 @@ var $import = function(freeEval,cachedScripts){
                 }else{
                     //函数内只有一次赋值（申明后置，也就你JavaScript够狠！！ ）
                     var map = loader.dependenceMap = {};
-                    loader.initialize = scriptLoaderInitialize;
+                    loader.initialize = ScriptLoader_initialize;
                     map[key] = [dep]
                 }
             }else{//直接装载（只是装载到缓存对象，没有进入装载单元），无需记录
@@ -1063,7 +1067,7 @@ var $import = function(freeEval,cachedScripts){
      * 初始化制定对象，未指定代表全部对象，即当前转载单元的全部对象
      * @private
      */
-    function scriptLoaderInitialize(object){
+    function ScriptLoader_initialize(object){
         //也一定不存在。D存I存，D亡I亡
         var dependenceMap = this.dependenceMap;
         var vars = [];
