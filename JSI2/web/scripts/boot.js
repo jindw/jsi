@@ -87,7 +87,7 @@ if(":debug"){
     	        $JSI.scriptBase = computeURL(scriptBase);
             }
         }else{
-            $JSI.scriptBase= "classpath:"
+            $JSI.scriptBase= "classpath:///"
         }
     })();
 }else{
