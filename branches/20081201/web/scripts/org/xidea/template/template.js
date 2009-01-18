@@ -247,13 +247,17 @@ function buildFor(data,itemsStack){
         var data = itemExpression(context);
         //alert(data.constructor)
         if(!(data instanceof Array)){
-            //hack $for as buf
-            forStatus = [];
-            //hack len as key
-            for(var len in data){
-                forStatus.push(len);
+            if(typeof data == 'number'){
+                data = new Array(data);
+            }else{
+                //hack forStatus as buf
+                forStatus = [];
+                //hack len as key
+                for(var len in data){
+                   forStatus.push(len);
+                }
+                data = forStatus; 
             }
-            data = forStatus;
         }
         var preiousStatus = context['for'];
         var i = 0;
