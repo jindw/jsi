@@ -61,38 +61,46 @@ public class DefaultJSIPackage implements JSIPackage {
 	@SuppressWarnings("unchecked")
 	public void addScript(String scriptName, Object objectNames,
 			Object beforeLoadDependences, Object afterLoadDependences) {
-		checkState();
-		loaderMap.put(scriptName, new DefaultScriptLoader(this, scriptName));
-		List<String> objects = new ArrayList<String>();
-		if (objectNames instanceof String) {
-			objects.add((String) objectNames);
-		} else if (objectNames instanceof Collection) {
-			for (Iterator<Object> it2 = ((Collection<Object>) objectNames)
-					.iterator(); it2.hasNext();) {
-				objects.add((String) it2.next());
+		try {
+			checkState();
+			loaderMap
+					.put(scriptName, new DefaultScriptLoader(this, scriptName));
+			List<String> objects = new ArrayList<String>();
+			if (objectNames instanceof String) {
+				objects.add((String) objectNames);
+			} else if (objectNames instanceof Collection) {
+				for (Iterator<Object> it2 = ((Collection<Object>) objectNames)
+						.iterator(); it2.hasNext();) {
+					objects.add((String) it2.next());
+				}
 			}
-		}
-		List<String> savedObjects = scriptObjectMap.get(scriptName);
-		if (savedObjects == null) {
-			savedObjects = new ArrayList<String>();
-			scriptObjectMap.put(scriptName, savedObjects);
-		}
-		for (Iterator<String> it2 = objects.iterator(); it2.hasNext();) {
-			String item = it2.next();
-			if (objectScriptMap.containsKey(item)) {
-				log.error("重复的脚本元素定义:" + item);
+			List<String> savedObjects = scriptObjectMap.get(scriptName);
+			if (savedObjects == null) {
+				savedObjects = new ArrayList<String>();
+				scriptObjectMap.put(scriptName, savedObjects);
 			}
-			objectScriptMap.put(item, scriptName);
-			item = item.replace("\\..*$", "");
-			if (!savedObjects.contains(item)) {
-				savedObjects.add(item);
+			for (Iterator<String> it2 = objects.iterator(); it2.hasNext();) {
+				String item = it2.next();
+				if (objectScriptMap.containsKey(item)) {
+					log.error("重复的脚本元素定义:" + item);
+				}
+				objectScriptMap.put(item, scriptName);
+				item = item.replace("\\..*$", "");
+				if (!savedObjects.contains(item)) {
+					savedObjects.add(item);
+				}
 			}
-		}
-		if (beforeLoadDependences != null) {
-			this.addDependence(scriptName, beforeLoadDependences, false);
-		}
-		if (afterLoadDependences != null) {
-			this.addDependence(scriptName, afterLoadDependences, true);
+			if (beforeLoadDependences != null) {
+				this.addDependence(scriptName, beforeLoadDependences, false);
+			}
+			if (afterLoadDependences != null) {
+				this.addDependence(scriptName, afterLoadDependences, true);
+			}
+		} catch (RuntimeException e) {
+			log.error("添加脚本异常:" + this.name + "#addScript(" + scriptName + ","
+					+ objectNames + "," + beforeLoadDependences + ","
+					+ afterLoadDependences + ")", e);
+			throw e;
 		}
 	}
 
@@ -169,37 +177,82 @@ public class DefaultJSIPackage implements JSIPackage {
 				boolean samePackage = false;
 				boolean allSource = "*".equals(thisPath);
 				boolean allTarget = targetPath.endsWith("*");
-				if (allSource || allTarget) {
-					Collection<String> thisFileMap;
-					Collection<String> targetFileMap;
+				try {
+					if (allSource || allTarget) {
+						Collection<String> thisFileMap;
+						Collection<String> targetFileMap;
 
-					if (allSource) {
-						thisFileMap = this.scriptObjectMap.keySet();
-					} else {
-						String file = this.objectScriptMap.get(thisPath);// file
-																			// ->
-																			// thisFile
-						if (file != null) {
+						if (allSource) {
+							thisFileMap = this.scriptObjectMap.keySet();
+						} else {
+							String file = this.objectScriptMap.get(thisPath);// file
+							// ->
+							// thisFile
+							if (file != null) {
+								thisObjectName = thisPath;
+							} else {
+								file = thisPath;
+							}
+							thisFileMap = Arrays.asList(new String[] { file });
+						}
+						if (allTarget) {
+							if (targetPath.equals("*")) {// *x*
+								samePackage = true;
+							} else {
+								targetPackage = this.root
+										.findPackageByPath(targetPath);
+								targetPackage = root.requirePackage(
+										targetPackage.getName(), true);
+							}
+							targetFileMap = targetPackage.getScriptObjectMap()
+									.keySet();
+						} else {
+							String file = this.objectScriptMap.get(targetPath);// file
+							// targetFile
+							if (file != null) {
+								targetObjectName = targetPath;
+							} else if (this.scriptObjectMap
+									.containsKey(targetPath)) {
+								file = targetPath;
+							} else {
+								targetPackage = this.root
+										.findPackageByPath(targetPath);
+								targetPath = targetPath.substring(targetPackage
+										.getName().length() + 1);
+								targetPackage = root.requirePackage(
+										targetPackage.getName(), true);
+								file = targetPackage.getObjectScriptMap().get(
+										targetPath);
+								if (file != null) {
+									targetObjectName = targetPath;
+								} else {
+									file = targetPath;
+								}
+							}
+							targetFileMap = Arrays
+									.asList(new String[] { file });
+						}
+						for (String targetFile : targetFileMap) {
+							DefaultJSIDependence dep = new DefaultJSIDependence(
+									targetPackage, targetFile,
+									targetObjectName, afterLoad);
+							for (String thisFile : thisFileMap) {
+								if (!(samePackage && thisFile
+										.equals(targetFile))) {
+									saveDependence(dep, thisFile,
+											thisObjectName);
+								}
+							}
+						}
+					} else {// 单挑
+						String thisFile = this.objectScriptMap.get(thisPath);
+						if (thisFile != null) {
 							thisObjectName = thisPath;
 						} else {
-							file = thisPath;
+							thisFile = thisPath;
 						}
-						thisFileMap = Arrays.asList(new String[] { file });
-					}
-					if (allTarget) {
-						if (targetPath.equals("*")) {// *x*
-							samePackage = true;
-						} else {
-							targetPackage = this.root
-									.findPackageByPath(targetPath);
-							targetPackage = root.requirePackage(targetPackage
-									.getName(), true);
-						}
-						targetFileMap = targetPackage.getScriptObjectMap()
-								.keySet();
-					} else {
-						String file = this.objectScriptMap.get(targetPath);// file
-																			// targetFile
+
+						String file = this.objectScriptMap.get(targetPath);
 						if (file != null) {
 							targetObjectName = targetPath;
 						} else if (this.scriptObjectMap.containsKey(targetPath)) {
@@ -207,6 +260,12 @@ public class DefaultJSIPackage implements JSIPackage {
 						} else {
 							targetPackage = this.root
 									.findPackageByPath(targetPath);
+							if (targetPackage == null) {
+								log.error(targetPackage);
+								throw new RuntimeException(
+										"can not find Package for:"
+												+ targetPath);
+							}
 							targetPath = targetPath.substring(targetPackage
 									.getName().length() + 1);
 							targetPackage = root.requirePackage(targetPackage
@@ -219,50 +278,15 @@ public class DefaultJSIPackage implements JSIPackage {
 								file = targetPath;
 							}
 						}
-						targetFileMap = Arrays.asList(new String[] { file });
-					}
-					for (String targetFile : targetFileMap) {
 						DefaultJSIDependence dep = new DefaultJSIDependence(
-								targetPackage, targetFile, targetObjectName,
+								targetPackage, file, targetObjectName,
 								afterLoad);
-						for (String thisFile : thisFileMap) {
-							if (!(samePackage && thisFile.equals(targetFile))) {
-								saveDependence(dep, thisFile, thisObjectName);
-							}
-						}
+						saveDependence(dep, thisFile, thisObjectName);
 					}
-				} else {// 单挑
-					String thisFile = this.objectScriptMap.get(thisPath);
-					if (thisFile != null) {
-						thisObjectName = thisPath;
-					} else {
-						thisFile = thisPath;
-					}
-
-					String file = this.objectScriptMap.get(targetPath);
-					if (file != null) {
-						targetObjectName = targetPath;
-					} else if (this.scriptObjectMap.containsKey(targetPath)) {
-						file = targetPath;
-					} else {
-						targetPackage = this.root.findPackageByPath(targetPath);
-						targetPath = targetPath.substring(targetPackage
-								.getName().length() + 1);
-						targetPackage = root.requirePackage(targetPackage
-								.getName(), true);
-						file = targetPackage.getObjectScriptMap().get(
-								targetPath);
-						if (file != null) {
-							targetObjectName = targetPath;
-						} else {
-							file = targetPath;
-						}
-					}
-					DefaultJSIDependence dep = new DefaultJSIDependence(
-							targetPackage, file, targetObjectName, afterLoad);
-					saveDependence(dep, thisFile, thisObjectName);
+				} catch (RuntimeException e) {
+					log.error("包解析异常:" + this.name + "#addDependence(" + args
+							+ ")", e);
 				}
-
 			}
 		}
 	}
