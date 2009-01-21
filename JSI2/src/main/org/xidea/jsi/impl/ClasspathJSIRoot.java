@@ -18,7 +18,7 @@ public class ClasspathJSIRoot extends AbstractJSIRoot implements JSIRoot {
 		this(null,encoding);
 	}
 	public ClasspathJSIRoot(ClassLoader loader,String encoding) {
-		this.loader = loader;
+		this.loader = loader == null?this.getClass().getClassLoader():loader;
 		if(encoding!=null){
 			this.encoding = encoding;
 		}
@@ -28,11 +28,11 @@ public class ClasspathJSIRoot extends AbstractJSIRoot implements JSIRoot {
 		try {
 			String path ;
 			if(pkgName!=null&&pkgName.length()>0){
-				path = '/'+pkgName.replace('.', '/')+'/'+scriptName;
+				path = pkgName.replace('.', '/')+'/'+scriptName;
 			}else{
-				path = '/'+scriptName;
+				path = scriptName;
 			}
-			InputStream in = loader == null?String.class.getResourceAsStream(path):loader.getResourceAsStream(path); 
+			InputStream in = loader.getResourceAsStream(path); 
 			if(in == null){
 				return null;
 			}
