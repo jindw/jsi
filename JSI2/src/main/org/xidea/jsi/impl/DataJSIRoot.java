@@ -1,13 +1,17 @@
 package org.xidea.jsi.impl;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.xidea.jsi.JSIRoot;
 
 public class DataJSIRoot extends AbstractJSIRoot implements JSIRoot {
-	private Properties dataMap;
+	protected Properties dataMap;
 	public DataJSIRoot(String source) {
 		if (source != null) {
 			source = source.replaceAll("$\\s*<\\?[^>]\\?>", "");
@@ -27,6 +31,15 @@ public class DataJSIRoot extends AbstractJSIRoot implements JSIRoot {
 		Properties data = new Properties();
 		data.putAll(dataMap);
 		this.dataMap = data;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<String> listPath() {
+		return new ArrayList(dataMap.keySet());
+	}
+
+	public void setContent(String path, String context) {
+		dataMap.put(path, context);
 	}
 
 	public String loadText(String pkgName, String scriptName) {
