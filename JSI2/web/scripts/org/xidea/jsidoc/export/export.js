@@ -8,6 +8,7 @@
 
 function Exporter(){
     this.imports = [];
+    this.externPackage = [];
     this.result = [];
     this.cachedInfos = [];
     this.featrueMap = {};
@@ -21,6 +22,8 @@ Exporter.prototype = {
     		for(var fileName in packageObject.scriptObjectMap){
     			this.addImport(packagePath + fileName);
     		}
+    	}else if(/.:$/.test(path)){
+    		this.externPackage.push(path.substring(0,path.length-1));
     	}else{
             this.imports.push(path);
             addDependenceInfo(new DependenceInfo(path),this.result,this.cachedInfos)
@@ -98,10 +101,18 @@ Exporter.prototype = {
             var text = this.getSource(path,compileFilter);
             appendEntry(content,path,text);
         }
+        for(var i = 0;i<this.externPackage.length;i++){
+        	var packageName = this.externPackage[i];
+        	if(!packageMap[packageName]){
+                packageMap[packageName] = true;
+                packageList.push(packageName)
+            }
+        }
         //alert("xxx.yyy.zz".replace(/\./g,'/'));
         //alert("xxx.yyy.zz".replace(/\./g,'/'));
         
         //mozilla bug fix
+        //Why?
         ''.replace(/\./g,'/');
         packageList = findPackages(packageList,true);
         for(var i = 0;i<packageList.length;i++){
