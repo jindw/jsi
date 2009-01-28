@@ -899,7 +899,7 @@ var $import = function(freeEval,cachedScripts){
                         loadTextByURL(scriptBase+"?path="+name.replace(/\.|$/g,'/')+ '__package__.js');
                 }else{
                     var pscript = getCachedScript(name,'') ||
-                        loadTextByURL(scriptBase+name.replace(/\.|$/g,'/')+ '__package__.js');
+                        cachedScripts[name] === undefined && loadTextByURL(scriptBase+name.replace(/\.|$/g,'/')+ '__package__.js');
                 }
                 if(pscript){
                     return new Package(name,pscript);
