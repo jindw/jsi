@@ -16,6 +16,9 @@
 				<exclude name="**/test/**.*" />
 				<exclude name="**/sandbox/**.*" />
 			</fileset>
+			<zipfileset src="web/WEB-INF/lib/Template.jar" defaultexcludes="true">
+				<include name="org/xidea/lite/*.js"/>
+			</zipfileset>
 			<fileset dir="src/main">
 				<include name="**/*.java" />
 				<exclude name="**/test/**.*" />

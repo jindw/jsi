@@ -82,6 +82,9 @@ Exporter.prototype = {
         }
         return content.join('\n')
     },
+    getImports:function(){
+    	return this.imports
+    },
     getXMLContent : function(){
         var packageMap = {};
         var packageList = [];
@@ -89,7 +92,7 @@ Exporter.prototype = {
         var content = ['<?xml version="1.0" encoding="UTF-8"?>\n',
 			'<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">\n',
 			"<properties>\n"];
-        appendEntry(content,'#export',this.imports.join(','));
+        //appendEntry(content,'#export',this.imports.join(','));
         for(var i = 0;i<this.result.length;i++){
             var path = this.result[i];
             var packageName = path.replace(/\/[^\/\/]+$/,"").replace(/\//g,'.');
