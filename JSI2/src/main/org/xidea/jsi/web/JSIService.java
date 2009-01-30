@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
@@ -19,7 +21,8 @@ import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.impl.DataJSIRoot;
 import org.xidea.jsi.impl.DefaultJSIExportorFactory;
 import org.xidea.jsi.impl.DefaultJSILoadContext;
-import org.xidea.jsi.impl.JSIUtils;
+import org.xidea.jsi.impl.FileJSIRoot;
+import org.xidea.jsi.impl.JSIText;
 
 public class JSIService {
 	protected String scriptBase;
@@ -29,50 +32,32 @@ public class JSIService {
 	 * 只有默认的encoding没有设置的时候，才会设置
 	 */
 	protected String encoding = null;
-
-
-	public String getScriptBase() {
-		return scriptBase;
-	}
-
 	public void setScriptBase(String scriptBase) {
 		this.scriptBase = scriptBase;
 	}
-
-	public File getScriptBaseDirectory() {
-		return scriptBaseDirectory;
-	}
-
 	public void setScriptBaseDirectory(File scriptBaseFile) {
 		this.scriptBaseDirectory = scriptBaseFile;
 	}
-
-	public String getEncoding() {
-		return encoding;
-	}
-
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
 	}
-
-	public File getExternalLibraryDirectory() {
-		return externalLibraryDirectory;
-	}
-
 	public void setExternalLibraryDirectory(File externalLibraryFilr) {
 		this.externalLibraryDirectory = externalLibraryFilr;
 	}
 
-	public JSIService() {
-		super();
-	}
-
-	public boolean printResource(String path, OutputStream out)
+	public boolean print(String path, Map<String, String[]> param, OutputStream out)
 			throws IOException {
+		String encoding = this.encoding == null?"utf-8":this.encoding;
+		if(path == null || path.length() == 0){
+			out.write(buildDocumentHTML().getBytes(encoding));
+			return true;
+		}else if("export.action".equals(path)){
+			out.write(buildExportHTML(param).getBytes(encoding));
+		}
 		boolean isPreload = false;
-		if (path.endsWith(JSIUtils.PRELOAD_FILE_POSTFIX)) {
+		if (path.endsWith(JSIText.PRELOAD_FILE_POSTFIX)) {
 			isPreload = true;
-			path = path.replaceFirst(JSIUtils.PRELOAD_FILE_POSTFIX + "$", ".js");
+			path = path.substring(0,path.length()-JSIText.PRELOAD_FILE_POSTFIX .length())+".js";
 		}
 		InputStream in = this.getResourceStream(path);
 		if (in != null) {
@@ -83,44 +68,19 @@ public class JSIService {
 
 	}
 
+
 	protected void printResource(String path, boolean isPreload,
 			InputStream in, OutputStream out) throws IOException {
 		if (isPreload) {
-			out.write(JSIUtils.buildPreloadPerfix(path).getBytes());
+			out.write(JSIText.buildPreloadPerfix(path).getBytes());
 			output(in, out);
-			out.write(JSIUtils.buildPreloadPostfix("//").getBytes());
+			out.write(JSIText.buildPreloadPostfix("//").getBytes());
 		} else {
 			output(in, out);
 		}
 	}
-
-	public String export(String content) throws IOException {
-		if (content != null) {
-			final DataJSIRoot root = new DataJSIRoot(content);
-			String type = root.loadText(null, "#type");
-			JSIExportor exportor;
-			exportor = JSIUtils.getExportor(type);
-			if (exportor == null) {
-				return null;
-			}
-			String importString = root.loadText(null, "#export");
-			JSILoadContext context = new DefaultJSILoadContext();
-			if (importString != null) {
-				String[] imports = importString.split("\\s*,\\s*");
-				// 只有Data Root 才能支持这种方式
-				for (String item : imports) {
-					root.$import(item, context);
-				}
-			}
-			return exportor.export(context);
-		} else {
-			return JSIUtils.getExportor(DefaultJSIExportorFactory.TYPE_CONFUSE) == null ? null : "";
-		}
-
-	}
-
-	public String document() {
-		List<String> packageList = JSIUtils
+	protected String buildDocumentHTML() {
+		List<String> packageList = FileJSIRoot
 				.findPackageList(this.scriptBaseDirectory);
 		StringWriter out = new StringWriter();
 		if (packageList.isEmpty()) {
@@ -151,7 +111,35 @@ public class JSIService {
 		return out.toString();
 	}
 
-	public boolean isIndex(String path) {
+	protected String buildExportHTML(Map<String, String[]> param) throws IOException {
+		String[] contents = param.get("content");
+		if (contents != null) {
+			final DataJSIRoot root = new DataJSIRoot(contents[0]);
+			JSIExportor exportor = DefaultJSIExportorFactory.getInstance()
+					.createExplorter(param);
+			if (exportor == null) {
+				return null;
+			}
+			JSILoadContext context = new DefaultJSILoadContext();
+			String[] exports = param.get("exports");
+			if (exports != null) {
+				// 只有Data Root 才能支持这种方式
+				for (String item : exports) {
+					root.$import(item, context);
+				}
+			}
+			return exportor.export(context);
+		} else {
+			Map<String, String[]> testParams = new HashMap<String, String[]>();
+			testParams.put("level", new String[] { String
+					.valueOf(DefaultJSIExportorFactory.TYPE_EXPORT_CONFUSE) });
+			return DefaultJSIExportorFactory.getInstance().createExplorter(
+					testParams) == null ? null : "";
+		}
+
+	}
+
+	protected boolean isIndex(String path) {
 		return path.length() == 0 || path.equals("index.jsp")
 				|| path.equals("index.php");
 	}
@@ -235,7 +223,7 @@ public class JSIService {
 		return null;
 	}
 
-	public static void output(InputStream in, OutputStream out)
+	private static void output(InputStream in, OutputStream out)
 			throws IOException {
 		byte[] buf = new byte[1024];
 		int len = in.read(buf);

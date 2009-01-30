@@ -121,7 +121,6 @@ var ExportUI = {
             //导出时解决内部变量之间的冲突
         case 2:
             //导出时尽可能解决全部冲突
-            
             var type = level == -3?"report":"confuse";
             var xmlContent = exporter.getXMLContent();
             xmlContent = xmlContent.replace(/<properties[^>]*>/,

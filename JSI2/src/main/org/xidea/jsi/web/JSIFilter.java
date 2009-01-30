@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -17,7 +18,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xidea.jsi.impl.JSIUtils;
+import org.xidea.jsi.impl.JSIText;
 
 /**
  * 该类为方便调试开发，发布时可编译脚本，能后去掉此类。 Servlet 2.4 +
@@ -45,10 +46,10 @@ public class JSIFilter extends JSIService implements Filter {
 				path = req.getParameter("path");
 			}
 			boolean isPreload = false;
-			if (path.endsWith(JSIUtils.PRELOAD_FILE_POSTFIX)) {
+			if (path.endsWith(JSIText.PRELOAD_FILE_POSTFIX)) {
 				isPreload = true;
-				path = path.replaceFirst(JSIUtils.PRELOAD_FILE_POSTFIX + "$",
-						".js");
+				path = path.substring(0,path.length()-JSIText.PRELOAD_FILE_POSTFIX .length())+".js";
+
 			}
 			InputStream in = getResourceStream(path);
 			if (in != null) {
@@ -83,12 +84,12 @@ public class JSIFilter extends JSIService implements Filter {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean processAttachedAction(HttpServletRequest request,
+	private boolean processAttachedAction(HttpServletRequest request,
 			HttpServletResponse response, String path) throws IOException {
 		if (isIndex(path) && request.getParameter("path") == null) {
 			String externalScript = request.getParameter("externalScript");
 			if (externalScript == null) {
-				response.getWriter().print(document());
+				response.getWriter().print(buildDocumentHTML());
 			} else {
 				response
 						.sendRedirect("org/xidea/jsidoc/index.html?externalScript="
@@ -97,8 +98,11 @@ public class JSIFilter extends JSIService implements Filter {
 			}
 			return true;
 		} else if ("export.action".equals(path)) {
-			String content = request.getParameter("content");
-			String result = export(content);
+			//type =1,type=2,type=3
+			@SuppressWarnings("unchecked")
+			Map param = request.getParameterMap();
+			@SuppressWarnings("unchecked")
+			String result = buildExportHTML(param);
 			if(result == null){
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			}else{
