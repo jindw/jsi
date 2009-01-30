@@ -14,72 +14,83 @@ import org.xidea.jsi.ScriptLoader;
  */
 public class DefaultJSIExportorFactory {
 	/**
-	 * 混淆隔离支持的导出合并实现
-	 */
-	public static final String TYPE_CONFUSE = "confuse";
-	/**
 	 * 创建问题报告实现
 	 */
-	public static final String TYPE_REPORT = "report";
+	public static final int TYPE_REPORT = 0;
 	/**
 	 * 简单的直接导出合并实现，一般用于运行时合并
 	 */
-	public static final String TYPE_SIMPLE = "simple";
+	public static final int TYPE_SIMPLE = 1;
+	/**
+	 * 混淆隔离支持的导出合并实现
+	 */
+	public static final int TYPE_EXPORT_RESERVE = 2;
+	/**
+	 * 混淆隔离支持的导出合并实现
+	 */
+	public static final int TYPE_EXPORT_CONFUSE = 3;
 	/**
 	 * 创建XML数据打包实现 创建问题报告实现
 	 */
-	public static final String TYPE_XML = "xml";
-	private String type = TYPE_SIMPLE;
+	public static final int TYPE_XML = -1;
 
-	public DefaultJSIExportorFactory(String type) {
-		this.type = type;
+	private final static String JSI_EXPORTOR_FACTORY_CLASS = "org.jside.jsi.tools.export.JSAExportorFactory";
+	private static DefaultJSIExportorFactory exportorFactory = null;
+
+	public static DefaultJSIExportorFactory getInstance() {
+		try {
+			exportorFactory = (DefaultJSIExportorFactory) Class.forName(
+					JSI_EXPORTOR_FACTORY_CLASS).newInstance();
+
+		} catch (Exception e) {
+			exportorFactory = new DefaultJSIExportorFactory();
+		}
+		return exportorFactory;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
 	 */
-	public JSIExportor createExplorter() {
-		if (TYPE_SIMPLE.equals(type)) {
-			return createSimpleExplorter();
-		} else if (TYPE_CONFUSE.equals(type)) {
-			return createConfuseExplorter();
-		} else if (TYPE_XML.equals(type)) {
-			return createXMLExplorter();
-		} else if (TYPE_REPORT.equals(type)) {
-			return createReportExplorter();
+	public JSIExportor createExplorter(Map<String, String[]> param) {
+		String[] levels = param.get("level");
+		int level = 1;
+		if (levels != null) {
+			level = Integer.parseInt(levels[0]);
+		}
+		switch (level) {
+		case TYPE_EXPORT_CONFUSE:
+			return createConfuseExplorter(param);
+		case TYPE_EXPORT_RESERVE:
+			return createReserveExplorter(param);
+		case TYPE_SIMPLE:
+			return createSimpleExplorter(param);
+		case TYPE_XML:
+			return createXMLExplorter(param);
+		case TYPE_REPORT:
+			return createReportExplorter(param);
 		}
 		return null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xidea.jsi.impl.JSIExportorFactory#createXMLExplorter()
-	 */
-	public JSIExportor createXMLExplorter() {
-		return new XMLExporter();
+	protected JSIExportor createConfuseExplorter(Map<String, String[]> param) {
+		return null;// throw new UnsupportedOperationException("不支持导出方式");
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xidea.jsi.impl.JSIExportorFactory#createSimpleExplorter()
-	 */
-	public JSIExportor createSimpleExplorter() {
+	protected JSIExportor createReserveExplorter(Map<String, String[]> param) {
+		return null;// throw new UnsupportedOperationException("不支持导出方式");
+	}
+
+	protected JSIExportor createSimpleExplorter(Map<String, String[]> param) {
 		return new SimpleExporter();
 	}
 
-	/**
-	 * @see org.xidea.jsi.impl.JSIExportorFactory#createConfuseExplorter(java.lang.String,
-	 *      java.lang.String, boolean)
-	 */
-	public JSIExportor createConfuseExplorter() {
+	protected JSIExportor createReportExplorter(Map<String, String[]> param) {
 		return null;// throw new UnsupportedOperationException("不支持导出方式");
 	}
 
-	public JSIExportor createReportExplorter() {
-		return null;// throw new UnsupportedOperationException("不支持导出方式");
+	protected JSIExportor createXMLExplorter(Map<String, String[]> param) {
+		return new XMLExporter();
 	}
 }
 
