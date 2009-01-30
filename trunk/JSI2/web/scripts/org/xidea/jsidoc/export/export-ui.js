@@ -40,8 +40,9 @@ var ExportUI = {
         initializeForm();
         var request1 = new Request(compressServiceURL,"post",function(success){
             if(success){
-                updateDisabledForm('1');
+                updateDisabledForm('0');
                 updateDisabledForm('2');
+                updateDisabledForm('3');
             }
         });
         request1.send("");
@@ -76,12 +77,12 @@ var ExportUI = {
         var prefix = exportDocument.getElementById(PREFIX_CONTAINER_ID);
         var jsidoc = exportDocument.getElementById(JSIDOC_URL_CONTAINER_ID);
         var mixTemplate = exportDocument.getElementById(MIX_TEMPLATE_CONTAINER_ID);
-        prefix.style.display = (level == 1 || level ==2) ? 'inline':'none';
+        prefix.style.display = (level >1 ) ? 'inline':'none';
         jsidoc.style.display = (level == -2) ? 'inline':'none';
-        mixTemplate.style.display = (level == -3) ? 'none':'inline';
+        mixTemplate.style.display = (level >1) ? 'inline':'none';
         var lis = levelInput.form.getElementsByTagName("li");
         for(var i=0;i<lis.length;i++){
-            lis[i].style.display = (i-3 == level)?'block':'none';
+            lis[i].style.display = (i-2 == level)?'block':'none';
         }
         
     },
@@ -104,38 +105,40 @@ var ExportUI = {
             exporter.addImport(path);
         }
         
+        showResult("数据装在中.....");
         switch(level*1){
         case -2:
-            showResult(exporter.getDocumentContent(form.jsidocURL.value));
+            showResult(exporter.getDocumentContent(form.jsidocURL.value),true);
             break;
         case -1:
-            showResult(exporter.getXMLContent());
+            showResult(exporter.getXMLContent(),true);
             break;
-        case 0:
-            showResult(exporter.getTextContent());
+        case 1:
+            showResult(exporter.getTextContent(),true);
             break;
         
-        case -3:
+        case 0:
             //导出分析报告
-        case 1:
-            //导出时解决内部变量之间的冲突
         case 2:
+            //导出时解决内部变量之间的冲突
+        case 3:
             //导出时尽可能解决全部冲突
-            var type = level == -3?"report":"confuse";
+            var prefix = form.prefix.value;//PARAM_PREFIX
             var xmlContent = exporter.getXMLContent();
-            xmlContent = xmlContent.replace(/<properties[^>]*>/,
-            [
-              "$&<entry key='#type'>",type,"</entry>",
-              "<entry key='#internalPrefix'>",prefix,"</entry>",
-              "<entry key='#lineSeperator'>&#10;&#13;</entry>"
-            ].join(""))
+            var result = ["content=",encodeURIComponent(xmlContent)]
+            var imports = exporter.getImports();
+            var i = imports.length;
+            while(i--){
+            	result.push("&exports=",imports[i]);
+            }
+            result.push("&level=",level);
+            result.push("&internalPrefix=",encodeURIComponent(prefix));
+            result.push("&lineSeparator=",encodeURIComponent("\r\n"));
             //submit to JSA
-            showResult("数据装在中.....");
             var request = new Request(compressServiceURL,"post",function(){
                 showResult(this.getText(),true)
             });
-            var prefix = form.prefix.value;//PARAM_PREFIX
-            request.send("&content="+encodeURIComponent(xmlContent));
+            request.send(result.join(""));
             break;
         default:
             $log.error("不支持导出级别["+level+"],将导出xml格式打包文件");
@@ -145,12 +148,11 @@ var ExportUI = {
     }
 }
 var dialog;
-function showResult(content,reuse){
-    if(!reuse && dialog){
+function showResult(content){
+    if(dialog){
         try{
             dialog.close();
         }catch(e){}
-        dialog = null;
     }
     dialog = dialog || window.open('about:blank','source','modal=yes,left=200,top=100,width=600px,height=600px');
     var doc = dialog.document;
@@ -164,7 +166,7 @@ function initializeForm(){
     var levels = exportDocument.forms[0].level;
     for(var i=0; i<levels.length; i++) {
         var input = levels[i];
-        if(input.value ==1 ||input.value ==2){
+        if(input.value ==2 ||input.value ==3||input.value ==0){
             input.disabled = true;
         }else if(!input.disabled && input.checked ){
             input.click();
