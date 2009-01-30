@@ -87,8 +87,9 @@ var ExportUI = {
         
     },
     doExport : function(form){
+        showResult("数据装在中.....");
         var level = form.level;
-        var i=level.length;
+        var i=level.length||6;
         var mixTemplate = form.mixTemplate.checked;
         while(i--){
             var input = level[i];
@@ -105,7 +106,6 @@ var ExportUI = {
             exporter.addImport(path);
         }
         
-        showResult("数据装在中.....");
         switch(level*1){
         case -2:
             showResult(exporter.getDocumentContent(form.jsidocURL.value),true);
@@ -142,17 +142,21 @@ var ExportUI = {
             break;
         default:
             $log.error("不支持导出级别["+level+"],将导出xml格式打包文件");
-            showResult(exporter.getXMLContent());
+            showResult(exporter.getXMLContent(),true);
             break;
         }
     }
 }
 var dialog;
-function showResult(content){
+function showResult(content,reuse){
+	//
     if(dialog){
         try{
             dialog.close();
-        }catch(e){}
+        }catch(e){
+        }finally{
+        	dialog = null;
+        }
     }
     dialog = dialog || window.open('about:blank','source','modal=yes,left=200,top=100,width=600px,height=600px');
     var doc = dialog.document;
