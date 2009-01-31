@@ -58,16 +58,16 @@
 			<arg value="-bootCached" />
 			<arg value="example.*" />
 			-->
-			<arg value="-exported" />
+			<arg value="-exports" />
 			<arg value="example.*" />
-			<arg value="example.alias.*" />
+			<!--<arg value="example.alias.*" />-->
 			<arg value="example.dependence.*" />
 			<arg value="example.internal.*" />
 			<arg value="org.xidea.jsidoc.*" />
 			<arg value="org.xidea.jsidoc.export.*" />
 			<arg value="org.xidea.jsidoc.util.*" />
-			<arg value="org.xidea.jsidoc.test.*" />
-			<arg value="org.xidea.jsidoc.test.loader.*" />
+			<arg value="org.xidea.test.*" />
+			<arg value="org.xidea.test.loader.*" />
 			
 			<arg value="-outputBoot" />
 			<arg value="${basedir}/build/dest/boot.js" />
