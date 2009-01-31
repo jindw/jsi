@@ -1,7 +1,7 @@
 #labels Phase-Support,Phase-Implementation
 == JSA简介 ==
 
-首先，JSA!=JSI,JSA只是一个为JSI服务的脚本处理工具。不过目前更多的人只是用他来压缩脚本。
+JSA是一个为JSI服务的脚本处理工具（JSA!=JSI）。更多的人用他来压缩脚本。
 
 JSA的主要功能有：
   * 兼容JSI的脚本库导出
