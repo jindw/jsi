@@ -31,62 +31,52 @@
 				<include name="*.tld" />
 			</zipfileset>
 		</jar>
-		<copyfile dest="build/dest/JSI-${version}.jar" src="build/dest/JSI.jar" />
+		<copy tofile="build/dest/JSI-${version}.jar" file="build/dest/JSI.jar" />
 	</target>
 	<target name="packageOptimize">
-		<java classname="org.jside.jsi.tools.generator.JSIPackageGenerator">
-			<classpath>
-				<path location="../JSA-CORE/classes">
-				</path>
-				<path location="../JST/classes">
-				</path>
-				<fileset dir="../JST/lib">
-					<include name="**/*.jar" />
-				</fileset>
-			</classpath>
-			<arg value="-scriptsBase" />
+		<java classname="org.jside.jsi.tools.web.PackageAction" classpath="../JSA/build/dest/JSA-CMD.jar">
+			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-output" />
 			<arg value="${basedir}/build/dest/package-gen.js" />
+
+			<arg value="-packageName" />
 			<arg value="org.xidea.jsidoc.export" />
+
+			<arg value="-dependences" />
 			<arg value="org.xidea.jsidoc" />
 			<arg value="org.xidea.jsidoc.util" />
 		</java>
 	</target>
 	<target name="compress">
-		<java classname="org.jside.jsi.tools.export.ExportorAction">
-			<classpath>
-				<path location="../JST/classes">
-				</path>
-				<path location="../JSI2/web/WEB-INF/classes">
-				</path>
-				<fileset dir="../JST/lib">
-					<include name="**/*.jar" />
-				</fileset>
-			</classpath>
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="../JSA/build/dest/JSA-CMD.jar">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
-			<arg value="-outputBoot" />
-			<arg value="${basedir}/build/dest/boot.js" />
+			<arg value="-config.ascii" />
+			<arg value="false" />
 			<!--
 			<arg value="-bootCached" />
 			<arg value="example.*" />
 			-->
+			<arg value="-exported" />
+			<arg value="example.*" />
+			<arg value="example.alias.*" />
+			<arg value="example.dependence.*" />
+			<arg value="example.internal.*" />
+			<arg value="org.xidea.jsidoc.*" />
+			<arg value="org.xidea.jsidoc.export.*" />
+			<arg value="org.xidea.jsidoc.util.*" />
+			<arg value="org.xidea.jsidoc.test.*" />
+			<arg value="org.xidea.jsidoc.test.loader.*" />
+			
+			<arg value="-outputBoot" />
+			<arg value="${basedir}/build/dest/boot.js" />
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/exported.js" />
 			<arg value="-outputXML" />
 			<arg value="${basedir}/build/dest/exported.xml" />
 			<arg value="-outputJAR" />
 			<arg value="${basedir}/build/dest/exported.jar" />
-			<arg value="-ascii" />
-			<arg value="false" />
-			<arg value="example.*" />
-			<arg value="example.dependence.*" />
-			<arg value="org.xidea.jsidoc.export.*" />
-			<!--
-			<arg value="example.*" />
-			<arg value="org.xidea.jsidoc.*" />
-			-->
 		</java>
 	</target>
 	<target name="compress-all-xml">
@@ -158,7 +148,12 @@
 		</zip>
 	</target>
 	<target name="build" depends="compress,jar">
-		<delete file="build/dest/JSI-${version}.tar">
+		<delete>
+			<fileset dir="build/dest/">
+				<include name="JSI-*.jar" />
+				<include name="JSI-*.tar" />
+				<include name="JSI-*.zip" />
+			</fileset>
 		</delete>
 		<tar destfile="build/dest/JSI-${version}.tar" compression="gzip">
 			<tarfileset dir="web">
