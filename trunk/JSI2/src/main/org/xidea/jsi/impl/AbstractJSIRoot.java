@@ -21,6 +21,10 @@ public abstract class AbstractJSIRoot implements JSIRoot {
 	public JSILoadContext $import(String  path, JSILoadContext context) {
 		JSIPackage pkg = findPackageByPath( path);
 		String fileNames  =  path.substring(pkg.getName().length() + 1);
+		if(fileNames.length() == 0){
+			//package import
+			return context;
+		}
 		if ("*".equals( fileNames)) {
 			for (Iterator<String> it = pkg.getScriptObjectMap().keySet()
 					.iterator(); it.hasNext();) {
