@@ -145,6 +145,9 @@ public class JSIService {
 	}
 
 	public InputStream getResourceStream(String path) {
+		if(path.startsWith("/")){
+			path = path.substring(1);
+		}
 		File file = new File(this.scriptBaseDirectory, path);
 		if (file.exists()) {
 			try {
@@ -186,16 +189,13 @@ public class JSIService {
 				}
 			}
 		}
-		if(path.startsWith("/")){
-			path = path.substring(1);
-		}
 		return this.getClass().getClassLoader().getResourceAsStream(path);
 	}
 
 	protected InputStream findByJAR(File file, String path) {
 		try {
 			JarFile jarFile = new JarFile(file);
-			ZipEntry ze = jarFile.getEntry(path.substring(1));
+			ZipEntry ze = jarFile.getEntry(path);
 			if (ze != null) {
 				return jarFile.getInputStream(ze);
 			}
