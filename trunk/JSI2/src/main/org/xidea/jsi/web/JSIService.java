@@ -186,6 +186,9 @@ public class JSIService {
 				}
 			}
 		}
+		if(path.startsWith("/")){
+			path = path.substring(1);
+		}
 		return this.getClass().getClassLoader().getResourceAsStream(path);
 	}
 
