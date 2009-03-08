@@ -168,15 +168,16 @@ public class DefaultJSIPackage implements JSIPackage {
 			for (Iterator<List<Object>> iterator = unparsedDependenceList
 					.iterator(); iterator.hasNext();) {
 				List<Object> args = iterator.next();
-				String thisPath = (String) args.get(0);
+				final String thisPath = (String) args.get(0);
+				
 				String targetPath = (String) args.get(1);
 				JSIPackage targetPackage = this;
 				String thisObjectName = null;
 				String targetObjectName = null;
-				boolean afterLoad = (Boolean) args.get(2);
-				boolean samePackage = false;
-				boolean allSource = "*".equals(thisPath);
-				boolean allTarget = targetPath.endsWith("*");
+				
+				final boolean afterLoad = (Boolean) args.get(2);
+				final boolean allSource = "*".equals(thisPath);
+				final boolean allTarget = targetPath.endsWith("*");
 				try {
 					if (allSource || allTarget) {
 						Collection<String> thisFileMap;
@@ -196,9 +197,7 @@ public class DefaultJSIPackage implements JSIPackage {
 							thisFileMap = Arrays.asList(new String[] { file });
 						}
 						if (allTarget) {
-							if (targetPath.equals("*")) {// *x*
-								samePackage = true;
-							} else {
+							if (!targetPath.equals("*")) {// *x*
 								targetPackage = this.root
 										.findPackageByPath(targetPath);
 								targetPackage = root.requirePackage(
@@ -232,6 +231,7 @@ public class DefaultJSIPackage implements JSIPackage {
 							targetFileMap = Arrays
 									.asList(new String[] { file });
 						}
+						final boolean samePackage = targetPackage.equals(this);
 						for (String targetFile : targetFileMap) {
 							DefaultJSIDependence dep = new DefaultJSIDependence(
 									targetPackage, targetFile,
