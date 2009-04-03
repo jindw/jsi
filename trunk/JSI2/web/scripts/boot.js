@@ -1144,10 +1144,11 @@ var $import = function(freeEval,cachedScripts){
     }
     if("org.xidea.jsi.boot:col"){
         var lazyCacheFileMap = {};
+        var bodyNode = document.body||document.documentElement;
         function appendCacheScript(path,callback){
             //callback = wrapCallback(callback,pkg,file);
             var script = document.createElement("script");
-            (document.body||document.documentElement).appendChild(script);
+            bodyNode.appendChild(script);
             function onload(){//complete
                 if(callback && (this.readyState==null || /complete|loaded/.test(this.readyState))){
                     callback();
@@ -1166,7 +1167,6 @@ var $import = function(freeEval,cachedScripts){
        
         function doAsynLoad(path,target,col,requiredCache){
             (function asynLoad(){
-                //$log.error(document.documentElement.innerHTML)
                 if(requiredCache.length){
                     while(getCachedScript.apply(0,requiredCache[0])!=null){
                         if(requiredCache.length > 1){
@@ -1236,46 +1236,50 @@ var $import = function(freeEval,cachedScripts){
                 }
                 next();
             }else{
-                for(var filePath in cacheFileMap){//path --> filePath
-                    if(cacheFileMap[filePath][1] && !lazyCacheFileMap[filePath]){
-                        lazyCacheFileMap[filePath] = true;//已经再装载队列中了
-                        list.push(filePath);
-                    }
-                }
-                if(":debug"){
-                    if(location.protocol == 'file:'){
-                        //alert(scriptBase+list[0].replace(/.js$/gm,"__preload__.js"))
-                        try{
-                            loadTextByURL(scriptBase+list[0].replace(/.js$/gm,"__preload__.js"))
-                            document.write(list.join("\n").
-                                replace(/.js$/gm,"__preload__.js").
-                                replace(/.+/g,"<script src='"+scriptBase+"?path=$&' onerror='return alert'></script>"));
-                        }catch(e){
-                        }
-                    }else{
-                        document.write(list.join("\n").
-                                replace(/\.js$/gm,'__preload__.js').
-                                replace(/.+/g,"<script src='"+scriptBase+"?path=$&'></script>"));
-                    }
-                }else{
-                    document.write(list.join("\n").
-                                replace(/.js$/gm,"__preload__.js").
-                                replace(/.+/g,"<script src='"+scriptBase+"$&'></script>"))
-                }
-                lazyTaskList.push(function(){
-                        while(filePath = list.pop()){
-                            delete lazyCacheFileMap[filePath];//无需再记录了
-                        }
-                        if(":debug"){
-                            var t3 = new Date();
-                        }
-                        $import(path,target)
-                        if(":debug"){
-                            $log.trace("延迟装载("+path+")：前期依赖计算时间、缓存时间、装载时间 分别为："
-                                    ,t2-t1,t3-t2,new Date()-t3);
-                        }
-                    });
-                document.write(lazyScript);
+            	if(bodyNode.tagName < 'a'){
+	                for(var filePath in cacheFileMap){//path --> filePath
+	                    if(cacheFileMap[filePath][1] && !lazyCacheFileMap[filePath]){
+	                        lazyCacheFileMap[filePath] = true;//已经再装载队列中了
+	                        list.push(filePath);
+	                    }
+	                }
+	                if(":debug"){
+	                    if(location.protocol == 'file:'){
+	                        //alert(scriptBase+list[0].replace(/.js$/gm,"__preload__.js"))
+	                        try{
+	                            loadTextByURL(scriptBase+list[0].replace(/.js$/gm,"__preload__.js"))
+	                            document.write(list.join("\n").
+	                                replace(/.js$/gm,"__preload__.js").
+	                                replace(/.+/g,"<script src='"+scriptBase+"?path=$&' onerror='return alert'></script>"));
+	                        }catch(e){
+	                        }
+	                    }else{
+	                        document.write(list.join("\n").
+	                                replace(/\.js$/gm,'__preload__.js').
+	                                replace(/.+/g,"<script src='"+scriptBase+"?path=$&'></script>"));
+	                    }
+	                }else{
+	                    document.write(list.join("\n").
+	                                replace(/.js$/gm,"__preload__.js").
+	                                replace(/.+/g,"<script src='"+scriptBase+"$&'></script>"))
+	                }
+	                lazyTaskList.push(function(){
+	                        while(filePath = list.pop()){
+	                            delete lazyCacheFileMap[filePath];//无需再记录了
+	                        }
+	                        if(":debug"){
+	                            var t3 = new Date();
+	                        }
+	                        $import(path,target)
+	                        if(":debug"){
+	                            $log.trace("延迟装载("+path+")：前期依赖计算时间、缓存时间、装载时间 分别为："
+	                                    ,t2-t1,t3-t2,new Date()-t3);
+	                        }
+	                    });
+	                document.write(lazyScript);
+	            }else{
+	            	$import(path,target);
+	            }
             }
         }
     }
