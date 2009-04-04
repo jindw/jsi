@@ -10,7 +10,8 @@ function Template(path){
         this.data = path;
     }else{
         var t = $import('org.xidea.lite:Template',{} );
-        return new t(path);
+        //t = new t(path);
+        return t;
     }
 }
 Template.prototype.render = function(context){
@@ -354,7 +355,6 @@ var checkLocation = win.location;
 var checkInterval;
 
 var templateMap = {
-    /*
 	"constructor.xhtml" : new Template(scriptBase+"html/constructor.xhtml"),
 	"export.xhtml" : new Template(scriptBase+"html/export.xhtml"),
 	"function.xhtml" : new Template(scriptBase+"html/function.xhtml"),
@@ -362,7 +362,7 @@ var templateMap = {
 	"native.xhtml" : new Template(scriptBase+"html/native.xhtml"),
 	"object.xhtml" : new Template(scriptBase+"html/object.xhtml"),
 	"package.xhtml" : new Template(scriptBase+"html/package.xhtml"),
-	"source.xhtml" : new Template(scriptBase+"html/source.xhtml")*/
+	"source.xhtml" : new Template(scriptBase+"html/source.xhtml")
 };
 while(win!=win.top){
 	try{
