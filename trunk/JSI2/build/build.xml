@@ -66,7 +66,10 @@
 		<copy tofile="build/dest/JSI-${version}.jar" file="build/dest/JSI.jar" />
 	</target>
 	<target name="compress-jsidoc">
-		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="../JSA/build/dest/JSA-CMD.jar">
+		<java classname="org.jside.jsi.tools.export.ExportAction">
+			<classpath path="../JSA/classes">
+				<pathelement path="../JSA/build/dest/JSA-CMD.jar"/>
+			</classpath>
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-config.ascii" />

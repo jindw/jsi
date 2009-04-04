@@ -214,7 +214,7 @@ var encodeMap = {
     '&':'\\u0026',
     '>':'\\u003e'
 }
-var templateRegexp = /new\s+Template\s*\((?:[^)]|'[^']*?'|"[^"]*?")+\)/g;
+var templateRegexp = /new\s+Template\s*\((?:[\w\.\+\s]+|'.*?'|".*?")+\)/g;
 function encodeReplacer(c){
     return encodeMap[c];
 }
@@ -231,15 +231,18 @@ function defaultTemplateFilter(text,path){
         $import(path,{});
         var packageObject = $import(path.replace(/\/[^\/]+$/,':').replace(/\//g,'.'));
         var loader = packageObject.loaderMap[path.replace(/.*\//,'')];
-        text = text.replace(templateRegexp,function(template){
+        text = text.replace(templateRegexp,function(templateCode,path){
             try{
-                var object = loader.hook(template);
-                if(object && object.compileData){
-                    object = JSON.encode(object.compileData);
-                    return "new Template"+"("+object+")";
+                var path = loader.hook(path);
+                if(typeof path == 'string'){
+                    var object = loader.hook(templateCode);
+                    if(object && object.compileData){
+                        object = JSON.encode(object.compileData);
+                        return "new Template"+"("+object+")";
+                    }
                 }
-            }catch(e){$log.error("替换出错：",template)}
-            return template;
+            }catch(e){$log.error("替换出错：",templateCode)}
+            return templateCode;
         });
     }
     return text;
