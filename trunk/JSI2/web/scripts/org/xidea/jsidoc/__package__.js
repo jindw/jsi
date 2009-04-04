@@ -19,7 +19,7 @@ this.addScript('globals-info.js','RootInfo'
                             ,['SourceEntry','ObjectInfo','computeURL'])
 
 this.addScript('jsidoc.js',['JSIDoc']
-                            ,['org.xidea.lite:Template']
+                            ,0
                             ,['MenuUI','SourceEntry','PackageInfo','findPackages',
                                 "org.xidea.jsidoc.util:JSON",
                                 "org.xidea.jsidoc.util:loadTextByURL",

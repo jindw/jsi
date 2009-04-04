@@ -198,6 +198,7 @@ Exporter.prototype = {
         }
         if(compileFilter){
             rtv = compileFilter(rtv,path);
+            
         }
         return rtv;
     }

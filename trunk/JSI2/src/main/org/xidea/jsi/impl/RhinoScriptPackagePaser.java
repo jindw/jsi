@@ -1,5 +1,6 @@
 package org.xidea.jsi.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -50,6 +51,10 @@ public class RhinoScriptPackagePaser extends PackageParser {
 	@Override
 	public Collection<String> findGlobals(String scriptName,String pattern) {
 		String source = this.packageObject.loadText(scriptName);
+		if(source == null){
+			//当某个脚本没有一起大包时，这里抛出的异常可能会导致包解析失败
+			return new ArrayList<String>();
+		}
 		CompilerEnvirons env = new CompilerEnvirons();
 		env.setReservedKeywordAsIdentifier(true);
 		Parser parser = new Parser(

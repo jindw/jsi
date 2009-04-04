@@ -5,8 +5,18 @@
  * @author jindw
  * @version $Id: jsidoc.js,v 1.9 2008/02/28 14:39:09 jindw Exp $
  */
-
-
+function Template(path){
+    if(path instanceof Function){
+        this.data = path;
+    }else{
+        var t = $import('org.xidea.lite:Template',{} );
+        return new t(path);
+    }
+}
+Template.prototype.render = function(context){
+    return this.data(context)
+}
+//alert(Template)
 function onload(){
     //
     // "您需要把您的外部文件放在一个Web服务器上察看;",
@@ -328,6 +338,7 @@ var JSIDoc = {
         }
     }
 }
+
 var documentMap = {};
 var scriptBase = this.scriptBase
 var documentBase = (scriptBase + 'html/').substr($JSI.scriptBase.length);
@@ -341,7 +352,9 @@ var CONTENT_FRAME_ID = "content";
 var win = window;
 var checkLocation = win.location;
 var checkInterval;
+
 var templateMap = {
+    /*
 	"constructor.xhtml" : new Template(scriptBase+"html/constructor.xhtml"),
 	"export.xhtml" : new Template(scriptBase+"html/export.xhtml"),
 	"function.xhtml" : new Template(scriptBase+"html/function.xhtml"),
@@ -349,8 +362,7 @@ var templateMap = {
 	"native.xhtml" : new Template(scriptBase+"html/native.xhtml"),
 	"object.xhtml" : new Template(scriptBase+"html/object.xhtml"),
 	"package.xhtml" : new Template(scriptBase+"html/package.xhtml"),
-	"part.xhtml" : new Template(scriptBase+"html/part.xhtml"),
-	"source.xhtml" : new Template(scriptBase+"html/source.xhtml")
+	"source.xhtml" : new Template(scriptBase+"html/source.xhtml")*/
 };
 while(win!=win.top){
 	try{

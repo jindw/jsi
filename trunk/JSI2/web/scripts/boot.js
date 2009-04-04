@@ -1339,5 +1339,5 @@ var $import = function(freeEval,cachedScripts){
         }
         return pkg2obj;
     }
-}(function(){eval(arguments[0]);},{});
+}(function($){eval($);},{});
 
