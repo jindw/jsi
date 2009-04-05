@@ -18,9 +18,10 @@ this.addScript('globals-info.js','RootInfo'
                             ,['FileInfo','PackageInfo','createPrototypeStack']
                             ,['SourceEntry','ObjectInfo','computeURL'])
 
+this.addScript('template.js',['getTemplate'])
 this.addScript('jsidoc.js',['JSIDoc']
                             ,0
-                            ,['MenuUI','SourceEntry','PackageInfo','findPackages',
+                            ,['getTemplate','MenuUI','SourceEntry','PackageInfo','findPackages',
                                 "org.xidea.jsidoc.util:JSON",
                                 "org.xidea.jsidoc.util:loadTextByURL",
                                 'org.xidea.jsidoc.export:ExportUI'])
