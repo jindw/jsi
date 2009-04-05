@@ -3,6 +3,9 @@
 	<tstamp>
 		<format property="version" pattern="yyyyMMdd" />
 	</tstamp>
+
+	<available file="../JSA/build/dest/JSA-CMD.jar" property="JSAPath" value="../JSA/classes;../JSA/build/dest/JSA-CMD.jar;../JSA/classes" />
+
 	<target name="init">
 		<delete dir="build/temp">
 		</delete>
@@ -36,9 +39,8 @@
 	<target name="jar-compressed-jsidoc">
 		<mkdir dir="build/dest/export/"/>
 		<mkdir dir="build/dest/util/"/>
-		<echo file="build/dest/__package__.js">this.addScript("jsidoc.js",["JSIDoc",'DependenceInfo','Exporter','ExportUI','Request','JSON','xmlReplacer','loadTextByURL','findGlobals','findGlobalsAsList'])</echo>
 		<echo file="build/dest/export/__package__.js">this.setImplementation("org.xidea.jsidoc")</echo>
-		<echo file="build/dest/util/__package__.js">this.setImplementation("org.xidea.jsidoc")</echo>
+		<echo file="build/dest/__package__.js">this.addScript("jsidoc.js",["JSIDoc",'DependenceInfo','Exporter','ExportUI'],['org.xidea.jsidoc.util.*'])</echo>
 		<jar destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
@@ -61,6 +63,7 @@
 				<include name="__package__.js" />
 				<include name="export/__package__.js" />
 				<include name="util/__package__.js" />
+				<include name="util/util.js" />
 			</zipfileset>
 			<zipfileset dir="src/main" prefix="META-INF">
 				<include name="*.tld" />
@@ -69,31 +72,43 @@
 		<copy tofile="build/dest/JSI-${version}.jar" file="build/dest/JSI.jar" />
 	</target>
 	<target name="compress-jsidoc">
-		<java classname="org.jside.jsi.tools.export.ExportAction">
-			<classpath path="../JSA/classes">
-				<pathelement path="../JSA/build/dest/JSA-CMD.jar"/>
-			</classpath>
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-config.ascii" />
 			<arg value="false" />
-			<!--
-			<arg value="-bootCached" />
-			<arg value="example.*" />
-			-->
+			
 			<arg value="-exports" />
-			<arg value="org.xidea.jsidoc:JSIDoc" />
-			<arg value="org.xidea.jsidoc.export.*" />
 			<arg value="org.xidea.jsidoc.util.*" />
 
 			<arg value="-outputBoot" />
 			<arg value="${basedir}/build/dest/boot-compress.js" />
+			<arg value="-outputPackage" />
+			<arg value="${basedir}/build/dest/util/__package__.js" />
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/util/util.js" />
+		</java>
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-config.ascii" />
+			<arg value="false" />
+			
+			<arg value="-bootCached" />
+			<arg value="org.xidea.jsidoc.util.*" />
+			
+			<arg value="-exports" />
+			<arg value="org.xidea.jsidoc:JSIDoc" />
+			<arg value="org.xidea.jsidoc.export.*" />
+
+			<arg value="-outputPackage" />
+			<arg value="${basedir}/build/dest/jsidoc-package.js" />
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jsidoc.js" />
 		</java>
 	</target>
 	<target name="compress-all">
-		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="../JSA/build/dest/JSA-CMD.jar">
+		<java classname="org.jside.jsi.tools.export.ExportAction"  classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-config.ascii" />
