@@ -106,10 +106,20 @@ var JSIDoc = {
             var key = packageGroupMap[i]
             var packages = packageGroupMap[key];
             var packages = findPackages(packages,findDependence);
-            var packageInfos = this.packageInfoGroupMap[key] = [];
-            this.packageInfoGroupMap.push(key);
+            var packageInfos = this.packageInfoGroupMap[key];
+            if(!packageInfos){
+            	 this.packageInfoGroupMap[key] = packageInfos = [];
+            	 this.packageInfoGroupMap.push(key);
+            }
+            outer:
             for(var j = 0;j<packages.length;j++){
                 var packageInfo = PackageInfo.require(packages[j])
+                var k=packageInfos.length;
+                while(k--){
+                	if(packageInfos[k] == packageInfo){
+                		continue outer;
+                	}
+                }
                 packageInfos.push(packageInfo);
                 this.packageInfoMap[packageInfo.name] = packageInfo;
             }
