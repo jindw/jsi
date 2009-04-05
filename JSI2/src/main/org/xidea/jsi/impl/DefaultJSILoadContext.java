@@ -87,20 +87,6 @@ public class DefaultJSILoadContext implements JSILoadContext {
 		}
 	}
 
-	// public boolean isLevelSupported(int joinLevel) {
-	// switch (joinLevel) {
-	// case JOIN_DIRECT:
-	// case JOIN_AS_XML:
-	// return true;
-	// case JOIN_AS_JSIDOC:
-	// case JOIN_WITHOUT_ALL_CONFLICTION:
-	// case JOIN_WITHOUT_INNER_CONFLICTION:
-	// return false;
-	// }
-	// return false;
-	// }
-	//
-
 	/*
 	 * (non-Javadoc)
 	 * 
