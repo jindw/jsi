@@ -214,7 +214,38 @@ var encodeMap = {
     '&':'\\u0026',
     '>':'\\u003e'
 }
-var templateRegexp = /new\s+Template\s*\((?:[\w\.\+\s]+|'.*?'|".*?")+\)/g;
+var templateRegexp = /new\s+Template\s*\(((?:[\w\.\+\s]+|'.*?'|".*?")+)\)/g;
+function defaultTemplateFilter(text,path){
+    if(templateRegexp.test(text)){
+    
+        $import(path,{});
+        var packageObject = $import(path.replace(/\/[^\/]+$/,':').replace(/\//g,'.'));
+        var loader = packageObject.loaderMap[path.replace(/.*\//,'')];
+        
+        text = text.replace(templateRegexp,function(templateCode,path){
+            try{
+                if(path && (typeof loader.hook(path) == 'string')){
+                    var object = loader.hook(templateCode);
+                    if(object && (object = object.compileData)){
+                    	if(object instanceof Function){
+                    		object = object.toString();
+                    	}else{
+                    		object = JSON.encode(object);
+                    	}
+                    	
+                        return "new Template"+"("+object+")";
+                        
+                    }
+                }
+            }catch(e){$log.error("替换出错：",templateCode)}
+            
+            return templateCode;
+        });
+        
+    }
+    return text;
+}
+
 function encodeReplacer(c){
     return encodeMap[c];
 }
@@ -225,33 +256,6 @@ function appendEntry(content,path,text){
 	    :text.replace(/[<>&]/g,xmlReplacer));
     content.push("</entry>\n");
 }
-
-function defaultTemplateFilter(text,path){
-    if(templateRegexp.test(text)){
-        $import(path,{});
-        var packageObject = $import(path.replace(/\/[^\/]+$/,':').replace(/\//g,'.'));
-        var loader = packageObject.loaderMap[path.replace(/.*\//,'')];
-        text = text.replace(templateRegexp,function(templateCode,path){
-            try{
-                var path = loader.hook(path);
-                if(typeof path == 'string'){
-                    var object = loader.hook(templateCode);
-                    if(object && object.compileData){
-                        object = JSON.encode(object.compileData);
-                        return "new Template"+"("+object+")";
-                    }
-                }
-            }catch(e){$log.error("替换出错：",templateCode)}
-            return templateCode;
-        });
-    }
-    return text;
-}
-
-
-
-
-
 
 function addDependenceInfo(dependenceInfo,result,cachedInfos){
     var befores = dependenceInfo.getBeforeInfos();

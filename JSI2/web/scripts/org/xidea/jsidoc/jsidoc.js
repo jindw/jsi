@@ -10,7 +10,7 @@ function Template(path){
         this.data = path;
     }else{
         var t = $import('org.xidea.lite:Template',{} );
-        //t = new t(path);
+        t = new t(path);
         return t;
     }
 }

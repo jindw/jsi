@@ -35,15 +35,17 @@
 	</target>
 	<target name="jar-compressed-jsidoc">
 		<mkdir dir="build/dest/export/"/>
+		<mkdir dir="build/dest/util/"/>
+		<echo file="build/dest/__package__.js">this.addScript("jsidoc.js",["JSIDoc",'DependenceInfo','Exporter','ExportUI','Request','JSON','xmlReplacer','loadTextByURL','findGlobals','findGlobalsAsList'])</echo>
 		<echo file="build/dest/export/__package__.js">this.setImplementation("org.xidea.jsidoc")</echo>
-		<echo file="build/dest/__package__.js">this.addScript("jsidoc.js",['DependenceInfo','Exporter','ExportUI','Request','JSON','xmlReplacer','loadTextByURL','findGlobals','findGlobalsAsList'])</echo>
+		<echo file="build/dest/util/__package__.js">this.setImplementation("org.xidea.jsidoc")</echo>
 		<jar destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
 				<include name="org/xidea/test/**/*.*" />
 				<include name="**/jsidoc/styles/*.*" />
 				<exclude name="**/jsidoc/html/*.xhtml" />
-				<exclude name="**/jsidoc/*.*" />
+				<exclude name="**/jsidoc/*.js" />
 				<exclude name="**/jsidoc/export/*.*" />
 				<exclude name="**/jsidoc/util/*.*" />
 				<exclude name="**/test/**/*.*" />
@@ -58,6 +60,7 @@
 				<include name="jsidoc.js" />
 				<include name="__package__.js" />
 				<include name="export/__package__.js" />
+				<include name="util/__package__.js" />
 			</zipfileset>
 			<zipfileset dir="src/main" prefix="META-INF">
 				<include name="*.tld" />
