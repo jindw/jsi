@@ -5,19 +5,6 @@
  * @author jindw
  * @version $Id: jsidoc.js,v 1.9 2008/02/28 14:39:09 jindw Exp $
  */
-function Template(path){
-    if(path instanceof Function){
-        this.data = path;
-    }else{
-        var t = $import('org.xidea.lite:Template',{} );
-        t = new t(path);
-        return t;
-    }
-}
-Template.prototype.render = function(context){
-    return this.data(context)
-}
-//alert(Template)
 function onload(){
     //
     // "您需要把您的外部文件放在一个Web服务器上察看;",
@@ -364,16 +351,6 @@ var win = window;
 var checkLocation = win.location;
 var checkInterval;
 
-var templateMap = {
-	"constructor.xhtml" : new Template(scriptBase+"html/constructor.xhtml"),
-	"export.xhtml" : new Template(scriptBase+"html/export.xhtml"),
-	"function.xhtml" : new Template(scriptBase+"html/function.xhtml"),
-	"menu.xhtml" : new Template(scriptBase+"html/menu.xhtml"),
-	"native.xhtml" : new Template(scriptBase+"html/native.xhtml"),
-	"object.xhtml" : new Template(scriptBase+"html/object.xhtml"),
-	"package.xhtml" : new Template(scriptBase+"html/package.xhtml"),
-	"source.xhtml" : new Template(scriptBase+"html/source.xhtml")
-};
 while(win!=win.top){
 	try{
 		win.parent.document.forms.length;
@@ -395,9 +372,3 @@ function preload(pkg,file2dataMap,value){
 
 };
 $JSI.preload = preload;
-/**
- * @internal
- */
-function getTemplate(path){
-    return templateMap[path];
-}
