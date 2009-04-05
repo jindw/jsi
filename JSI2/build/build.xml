@@ -43,7 +43,7 @@
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
 				<include name="org/xidea/test/**/*.*" />
-				<include name="**/jsidoc/styles/*.*" />
+				<exclude name="**/jsidoc/styles/*.png" />
 				<exclude name="**/jsidoc/html/*.xhtml" />
 				<exclude name="**/jsidoc/*.js" />
 				<exclude name="**/jsidoc/export/*.*" />
