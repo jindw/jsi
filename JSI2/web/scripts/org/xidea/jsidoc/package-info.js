@@ -67,39 +67,41 @@ PackageInfo.prototype.getObjectInfo = function(name){
  * @protected
  */
 PackageInfo.prototype.getObjectInfoMap = function(){
-    if(this._objectInfoMap){
-        return this._objectInfoMap;
-    }else{
-        this._objectInfoMap = {};
+    if(!this._objectInfoMap){
+        var _objectInfoMap = {};
+        //$log.debug("getObjectInfoMap",this.fileInfos.length)
         for(var i = 0;i<this.fileInfos.length;i++){
             var objectInfoMap = this.fileInfos[i].getObjectInfoMap();
             for(var o in objectInfoMap){
-                this._objectInfoMap[o] = objectInfoMap[o];
+                _objectInfoMap[o] = objectInfoMap[o];
             }
         }
-        return this._objectInfoMap;
+        //$log.debug("getObjectInfoMap",_objectInfoMap)
+        
+        this._objectInfoMap = _objectInfoMap;
     }
+    return this._objectInfoMap;
 };
 /**
  * @public
  */
 PackageInfo.prototype.getObjectInfos = function(){
-    if(this._objectInfos){
-        return this._objectInfos;
-    }else{
-        this._objectInfos = [];
+    if(!this._objectInfos){
+        var _objectInfos = [];
         var objectInfoMap = this.getObjectInfoMap();
         for(var n in objectInfoMap){
-            this._objectInfos.push(n);
+            _objectInfos.push(n);
         }
-        this._objectInfos.sort();
-        for(var i=0;i<this._objectInfos.length;i++){
+        //$log.debug("getObjectInfos",_objectInfos.length)
+        _objectInfos.sort();
+        for(var i=0;i<_objectInfos.length;i++){
             //$log.info(list[i]);
-            this._objectInfos[i] = objectInfoMap[this._objectInfos[i]];
+            _objectInfos[i] = objectInfoMap[_objectInfos[i]];
             //$log.info(list[i]);
         }
-        return this._objectInfos;
+        this._objectInfos = _objectInfos
     }
+    return this._objectInfos;
 }
 
 

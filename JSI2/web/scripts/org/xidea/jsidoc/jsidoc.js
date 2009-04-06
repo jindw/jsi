@@ -190,7 +190,9 @@ var JSIDoc = {
     genPackage : function(packageName,document){
         var template = getTemplate("package.xhtml");
         var packageInfo = PackageInfo.require(packageName);
-        function run(){
+        //TODO: 有待改进
+        var tasks = packageInfo.getInitializers();
+        tasks.push(function(){
             var infos = packageInfo.getObjectInfos();
             var constructors = [];
             var functions = [];
@@ -221,13 +223,16 @@ var JSIDoc = {
             document.write(data);
             document.close();
             //out.close();
+        });
+        var pos = 0;
+        function run(){
+        	//$log.debug([pos,tasks.length])
+            if(pos<tasks.length){
+                tasks[pos++]();
+                run();
+            }
         }
-        //TODO: 有待改进
-        var tasks = packageInfo.getInitializers();
-        tasks.push(run);
-        for(var i=0;i<tasks.length;i++){
-            tasks[i]();
-        }
+        run();
         //runTasks(tasks);
         //return "<html><body><h1>装在中......</h1></body></html>"
     },

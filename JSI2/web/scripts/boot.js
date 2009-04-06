@@ -928,7 +928,6 @@ var $import = function(freeEval,cachedScripts){
     }
 
 
-
     /**
      * 脚本装载器<b> &#160;(JSI 内部对象，普通用户不可见)</b>.
      * 该对象的属性可以在JSI托管脚本内调用,但是,如果你使用了这些属性,你的脚本就无法脱离JSI环境(导出).
@@ -949,6 +948,7 @@ var $import = function(freeEval,cachedScripts){
          */
         this.name = fileName;
 
+        ScriptLoader[this.name] = (ScriptLoader[this.name]||0)+1;
         /**
          * 脚本目录，可在托管脚本顶层上下文（非函数内）访问，<code>this&#46;scriptBase</code>
          * @friend
@@ -966,11 +966,14 @@ var $import = function(freeEval,cachedScripts){
          */
         //this.dependenceMap = null;
         
+        ScriptLoader[this.name] += 0x10;
         var loader = prepareScriptLoad(packageObject,this)
         if(loader){
-            return  loader;
+            return loader;
         }
+        ScriptLoader[this.name] += 0x100;
         doScriptLoad(packageObject,this);
+        ScriptLoader[this.name] += 0x1000000;
     };
     /*
      * 前期准备，初始化装载单元的依赖表，包括依赖变量申明，装载前依赖的装载注入
@@ -1021,35 +1024,45 @@ var $import = function(freeEval,cachedScripts){
      * @private 
      */
     function doScriptLoad(packageObject,loader){
-        var name = loader.name;
+        var loaderName = loader.name;
         var packageName = packageObject.name;
-        var cachedScript = getCachedScript(packageName,name);
-        packageObject.loaderMap[name] = loader;
+        var cachedScript = getCachedScript(packageName,loaderName);
+        packageObject.loaderMap[loaderName] = loader;
         try{
+            ScriptLoader[loaderName] += 0x2000
+            
             if(cachedScript instanceof Function){
-                //$JSI.preload(pkgName,name,'')
-                cachedScripts[packageName][name]='';//clear cache
+                //$JSI.preload(pkgName,loaderName,'')
+                cachedScripts[packageName][loaderName]='';//clear cache
                 return cachedScript.call(loader);
             }else{
+            	if(loaderName == 'show-detail.js'){
+            	    $log.error(loaderName,loader)
+                }
                 if(":debug"){
                     //不要清除文本缓存
-                    return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(scriptBase+"?path="+packageObject.name.replace(/\.|$/g,'/')+name)));
+                    return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(scriptBase+"?path="+packageObject.name.replace(/\.|$/g,'/')+loaderName)));
                 }else{
                      //不要清除文本缓存
-                    return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(packageObject.scriptBase+name)));
+                    return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(packageObject.scriptBase+loaderName)));
+                }
+            	if(loaderName == 'show-detail.js'){
+            	    $log.error(loaderName,loader)
                 }
             }
+            ScriptLoader[loaderName] += 0x10000
+            
         }catch(e){
             if(":debug"){
                 if("org.xidea.jsi.boot:$log"){
-                    $log.error("Load Error:\n"+loader.scriptBase + name+"\n\nException:"+e);
+                    $log.error("Load Error:\n"+loader.scriptBase + loaderName+"\n\nException:"+e);
                 }
             }
             throw e;
         }finally{
             delete loader.varMap ;
             delete loader.varText ;
-            var names = packageObject.scriptObjectMap[name];
+            var names = packageObject.scriptObjectMap[loaderName];
             var index = names.length;
             var objectMap = packageObject.objectMap;
             //此处优化不知有无作用
@@ -1071,14 +1084,14 @@ var $import = function(freeEval,cachedScripts){
         //也一定不存在。D存I存，D亡I亡
         var dependenceMap = this.dependenceMap;
         var vars = [];
-        var name = this.name;
+        var loaderName = this.name;
         var dependenceList = dependenceMap[0];
         if(dependenceList){
             //一定要用delete，彻底清除
             delete dependenceMap[0];
             var i = dependenceList.length;
             while(i--){
-                //alert("ScriptLoader#initialize:"+name+"/"+dep.getNames())
+                //alert("ScriptLoader#initialize:"+loaderName+"/"+dep.getNames())
                 loadDependence(dependenceList[i],vars);
             }
         }
@@ -1114,12 +1127,21 @@ var $import = function(freeEval,cachedScripts){
         }
         if(vars.length){
             this.varMap = vars;
-            vars = vars.join(',')
-            this.hook(vars.replace(/([^,]+)/g,'$1 = this.varMap.$1'));
+            vars = vars.join(',');
+            try{
+            	this.hook(vars.replace(/([^,]+)/g,'$1 = this.varMap.$1'));
+            }catch(e){
+            	$log.debug("奇怪的状态",
+            	this.varMap,this,
+            	this.constructor,
+            	this.hook == null,
+            	"status"+ScriptLoader[loaderName].toString(16)
+            	)
+            	throw e;
+            }
             delete this.varMap;
         }
     }
-    
     function doObjectImport(packageObject,objectName,target){
         //do load
         loadScript(packageObject,packageObject.objectScriptMap[objectName],objectName,true);
@@ -1339,4 +1361,4 @@ var $import = function(freeEval,cachedScripts){
         }
         return pkg2obj;
     }
-}(function($){return eval($);},{});
+}(function(){return eval(arguments[0]);},{});
