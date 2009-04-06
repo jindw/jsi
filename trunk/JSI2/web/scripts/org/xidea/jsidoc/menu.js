@@ -21,6 +21,7 @@ var MenuUI = {
             var i = 0;
             tasks.push(function(){
                 var os = packageInfo.getObjectInfos();
+                //alert("obj.len:"+os.length)
                 for(var i=0;i<os.length;i++){
                     tasks.push(buildAppender(document,nextSibling,os[i]));
                 }
@@ -36,7 +37,7 @@ var MenuUI = {
                 if(i<tasks.length){
                     tasks[i++]();
                 }else{
-                    clearTimeout(task);
+                    clearInterval(task);
                 }
             }
             var task = setInterval(run,20);

@@ -59,32 +59,33 @@ FileInfo.prototype.getDocEntry = function(name){
 FileInfo.prototype.getObject = function(name){
     return this.getObjectMap()[name];
 };
+var importedMap = {};
 /**
  * @friend
  */
 FileInfo.prototype.getObjectMap = function(){
-    if(this._objectMap){
-        return this._objectMap;
-    }
-    try{
-        this._objectMap = {};
-        //this.packageObject.loadScript(this.name,false);
-        try{
-            var path = this.packageObject.name.replace(/\.|$/g,'/') +this.name;
-            //this.packageObject.loadScript(this.name,false);
-            //Avoid document.write
-            var backup = document.write;
-            document.write = voidWrite;
-            $import(path,null);
-            document.write = backup;
-        }catch(e){
-            $log.info("文档工具装载脚本失败：",path,e);
-        }
-        for(var i=0;i<this.objects.length;i++){
-            this._objectMap[this.objects[i]] = getObject(this.objects[i],this.packageObject.objectMap)
-        }
-    }catch(e){
-        $log.error(e);
+    if(!this._objectMap){
+	    try{
+	        var _objectMap = {};
+	        //this.packageObject.loadScript(this.name,false);
+	        try{
+	            var path = this.packageObject.name.replace(/\.|$/g,'/') +this.name;
+	            //this.packageObject.loadScript(this.name,false);
+	            //Avoid document.write
+	            var backup = document.write;
+	            document.write = voidWrite;
+	            importedMap[path] && $import(path,null);
+	            document.write = backup;
+	        }catch(e){
+	            $log.info("文档工具装载脚本失败：",path,e);
+	        }
+	        for(var i=0;i<this.objects.length;i++){
+	            _objectMap[this.objects[i]] = getObject(this.objects[i],this.packageObject.objectMap)
+	        }
+	        this._objectMap = this._objectMap || _objectMap
+	    }catch(e){
+	        $log.error(e);
+	    }
     }
     return this._objectMap;
 };
@@ -107,18 +108,19 @@ FileInfo.prototype.getObjectInfo = function(name){
  * @public
  */
 FileInfo.prototype.getObjectInfoMap = function(){
-    if(this._objectInfoMap){
-        return this._objectInfoMap;
+    if(!this._objectInfoMap){
+	    try{
+	    	//$log.debug("getObjectInfoMap",this.objects);
+	        var _objectInfoMap = {}
+	        for(var i = 0;i<this.objects.length;i++){
+	            _objectInfoMap[this.objects[i]] = ObjectInfo.create(this,this.objects[i]);
+	        }
+	        this._objectInfoMap = this._objectInfoMap || _objectInfoMap;
+	    }catch(e){
+	        $log.error(e);
+	    }
     }
-    try{
-        this._objectInfoMap = {}
-        for(var i = 0;i<this.objects.length;i++){
-            this._objectInfoMap[this.objects[i]] = ObjectInfo.create(this,this.objects[i]);
-        }
-        return this._objectInfoMap;
-    }catch(e){
-        $log.error(e);
-    }
+    return this._objectInfoMap;
 }
 
 
@@ -136,7 +138,7 @@ FileInfo.prototype.getAvailableObjectInfo = function(name){
  */
 FileInfo.prototype.getAvailableObjectFileInfoMap = function(name){
     if(!this._availableOFMap){
-        this._availableOFMap = {};
+        var _availableOFMap = {};
         var dependenceInfos = this._depInf.getBeforeInfos();
         dependenceInfos = dependenceInfos.concat(this._depInf.getAfterInfos());
         for(var i = 0;i<dependenceInfos.length;i++){
@@ -146,13 +148,14 @@ FileInfo.prototype.getAvailableObjectFileInfoMap = function(name){
             var depPkgInfo = PackageInfo.require(depPkgName);
             var depFileInfo = depPkgInfo.fileInfos[dependenceInfo.fileName];
             for(var j = 0; j<names.length;j++){
-                this._availableOFMap[names[j]] = depFileInfo;
+                _availableOFMap[names[j]] = depFileInfo;
             }
         }
         var names = this.objects;
         for(var i = 0;i<names.length;i++){
-            this._availableOFMap[names[i]] = this;
+            _availableOFMap[names[i]] = this;
         }
+        this._availableOFMap = this._availableOFMap || _availableOFMap;
         
     }
     return this._availableOFMap;
@@ -169,7 +172,7 @@ FileInfo.prototype.getAvailableObjectMap = function(name){
         for(var n in objectFileInfoMap){
             objectMap[n] = objectFileInfoMap[n].getObject(n);
         }
-        this._availableMap = objectMap;
+        this._availableMap = this._availableMap || objectMap;
     }
     return this._availableMap;
 }
