@@ -49,13 +49,6 @@ public class DefaultScriptLoader implements ScriptLoader {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.xidea.jsi.impl.ScriptEntry#getPackageName()
-	 */
-	public String getPackageName() {
-		return this._package.getName();
-	}
-
-	/* (non-Javadoc)
 	 * @see org.xidea.jsi.impl.ScriptEntry#getPath()
 	 */
 	public String getPath() {

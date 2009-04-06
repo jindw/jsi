@@ -15,14 +15,22 @@ import org.xidea.jsi.impl.DefaultScriptLoader;
  */
 public interface ScriptLoader { 
 
+	/**
+	 * @return real package
+	 */
 	public abstract JSIPackage getPackage();
 
+	/**
+	 * @return short name(without path)
+	 */
 	public abstract String getName();
-
-	public abstract String getPackageName();
 
 	public abstract String getPath();
 
+	/**
+	 * varName -> targetPackageName(real package)
+	 * @return
+	 */
 	public abstract Map<String, String> getDependenceVarMap();
 
 	public abstract Collection<String> getDependenceVars();

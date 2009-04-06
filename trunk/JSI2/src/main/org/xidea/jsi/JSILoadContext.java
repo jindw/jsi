@@ -24,7 +24,7 @@ public interface JSILoadContext {
 
 	/**
 	 * 获取导出对象列表
-	 * {objectName:objectPackage}
+	 * {objectName:objectPackageName（real）}
 	 * @return
 	 */
 	public abstract Map<String, String> getExportMap();
