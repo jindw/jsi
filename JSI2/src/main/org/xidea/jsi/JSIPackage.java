@@ -52,6 +52,10 @@ public interface JSIPackage {
 
 	public abstract Map<String, String> getObjectScriptMap();
 
+	/**
+	 * thisFile -> DependenceList
+	 * @return
+	 */
 	public abstract Map<String, List<JSIDependence>> getDependenceMap();
 	/**
 	 * 此处的loaderMap与JSI脚本中的loaderMap不同。loaderMap在包初始化时就一稳定

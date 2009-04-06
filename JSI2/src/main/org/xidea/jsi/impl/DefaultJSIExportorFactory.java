@@ -131,7 +131,7 @@ class XMLExporter implements JSIExportor {
 		HashMap<String, Object> packageFileMap = new HashMap<String, Object>();
 		for (ScriptLoader entry : scriptList) {
 			appendEntry(content, entry.getPath(), entry.getSource());
-			String packageName = entry.getPackageName();
+			String packageName = entry.getPackage().getName();
 			if (packageFileMap.get(packageName) == null) {
 				packageFileMap.put(packageName, "");
 				JSIPackage jsiPackage = entry.getPackage();
