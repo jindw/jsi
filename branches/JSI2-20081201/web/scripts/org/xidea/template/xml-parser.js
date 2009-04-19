@@ -389,7 +389,8 @@ function parseAttribute(node,context){
 }
 function parseTextNode(node,context){
     var data = node.data;
-    context.append.apply(context,parseText(data.replace(/^\s+|\s+$/g,' '),true))
+    data = data.replace(/^\s+|\s+$/g,'')||' ';
+    context.append.apply(context,parseText(data,true))
     return true;
 }
 

@@ -1143,7 +1143,7 @@ var $import = function(freeEval,cachedScripts){
         function appendCacheScript(path,callback){
             //callback = wrapCallback(callback,pkg,file);
             var script = document.createElement("script");
-            (document.body||document.documentElement).appendChild(script);
+            document.documentElement.appendChild(script);
             function onload(){//complete
                 if(callback && (this.readyState==null || /complete|loaded/.test(this.readyState))){
                     callback();

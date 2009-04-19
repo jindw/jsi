@@ -17,7 +17,7 @@ var ATTRIBUTE_TYPE = 7;//":attribute":
 
 
 var FOR_KEY = "this['for']";
-var TEMPLATE_NS_REG = /^http:\/\/www.xidea.org\/ns\/template.*/;
+var TEMPLATE_NS_REG = /^http:\/\/www.xidea.org\/ns\/(?:template|lite)\/core/;
 
 
 //add as default
