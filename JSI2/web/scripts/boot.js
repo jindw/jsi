@@ -16,17 +16,31 @@
  */
 
 
-/**
- * 方便调试的支持
+
+/*
+ * JSI2.5 起，为了避免scriptBase 探测。节省代码量，我们使用写死的方法。
+ * 如果您的网页上使用了如base之类的标签，那么，为了摸平浏览器的差异，你可能需要再这里明确指定scriptBase的准确路径。
  */
-if(":debug"){
-    var $JSI= {
-    };
+/**
+ * JSI对象
+ * @public
+ */
+var $JSI= {
     /**
-     * 调试友好支持
+     * 脚本根路径，调试模式下，系统根据启动脚本文件名自动探测，但是真实部署时，需要用户自己手动指定包路径。
+     * @public
+     * @id $JSI.scriptBase
+     * @typeof string
+     * @static
      */
-    (function(){
-        if(this.document){
+     //scriptBase : "http://localhost:8080/script2/"
+};
+if(this.document){
+    if(":debug"){
+	    /**
+		 * 方便调试的支持
+		 */
+	    +function(){
             //compute scriptBase
             var rootMatcher = /(^\w+:((\/\/\/\w\:)|(\/\/[^\/]*))?)/;
             //var rootMatcher = /^\w+:(?:(?:\/\/\/\w\:)|(?:\/\/[^\/]*))?/;
@@ -86,38 +100,33 @@ if(":debug"){
     	        var scriptBase = (script.getAttribute('src')||"/scripts/boot.js").replace(/[^\/\\]+$/,'');
     	        $JSI.scriptBase = computeURL(scriptBase);
             }
-        }else{
-            $JSI.scriptBase= "classpath:///"
-        }
-    })();
+
+        }();
+    }
 }else{
-    /*
-     * JSI2.5 起，为了避免scriptBase 探测。节省代码量，我们使用写死的方法。
-     * 如果您的网页上使用了如base之类的标签，那么，为了摸平浏览器的差异，你可能需要再这里明确指定scriptBase的准确路径。
-     */
-    /**
-     * JSI对象
-     * @public
-     */
-    var $JSI= {
-        /**
-         * 脚本根路径，调试模式下，系统根据启动脚本文件名自动探测，但是真实部署时，需要用户自己手动指定包路径。
-         * @public
-         * @id $JSI.scriptBase
-         * @typeof string
-         * @static
-         */
-         //scriptBase : "http://localhost:8080/script2/"
-    };
-    
-//    if(!scriptBase){
-//        scriptBase = document.getElementsByTagName('script');
-//        $JSI.scriptBase = scriptBase = scriptBase[scriptBase.length-1].src.replace(/[^\/]*$/,'');
-//    }
+	if("org.xidea.jsi.boot:server"){
+	    $JSI.scriptBase= "classpath:///";
+		function XMLHttpRequest(){
+		}
+		XMLHttpRequest.prototype = {
+			open : function(method, url, asyn) {
+				url = url.replace(/^\w+:(\/)+(?:\?.*=)/,'$1');
+				var ins = context.getClass().getResourceAsStream(url);
+				var ins = new java.io.InputStreamReader(ins,"utf-8");
+				var buf = new java.io.StringWriter();
+				var c;
+				while((c=ins.read())>=0){
+					buf.append(c);
+				}
+				this.responseText = ''+buf;
+			},
+			send : function(data) {
+				
+			},
+			status : 200
+		}
+	}
 }
-
-
-
 
 if("org.xidea.jsi.boot:$log"){
     /**
@@ -230,6 +239,7 @@ var $import = function(freeEval,cachedScripts){
          * @param bindLevel 绑定函数的输出级别，只有该级别大于等于输出级别时，才可输出日志
          */
         function buildLevelLog(bindLevel,bindName){
+        	var window = this;
             return function(){
                 if(bindLevel>=consoleLevel){
                     var msg = [bindLevel,bindName];
@@ -424,6 +434,32 @@ var $import = function(freeEval,cachedScripts){
                 }
             };
         }
+    }
+    /*
+     * 加载指定文本，找不到文件(404)返回null,调试时采用
+     * @friend
+     * @param url 文件url
+     * @return <string> 结果文本
+     */
+    function loadTextByURL(url){
+        if("org.xidea.jsi.boot:avoidBlock"){
+            var req = new XMLHttpRequest();
+            req.open("GET",url,false);
+            //for ie file 404 will throw exception 
+            //document.title = url;
+            req.send('');
+            if(req.status >= 200 && req.status < 300 || req.status == 304 || !req.status){
+                //return  req.responseText;
+                return req.responseText;
+            }else{
+                //debug("load faild:",url,"status:",req.status);
+            }
+        }else{
+            //debug(url);
+            //trace(url);
+            //return ''; //throw new Error("uncached url:"+url)
+        }
+
     }
     /**
      * 包信息数据结构类<b> &#160;(JSI 内部对象，普通用户不可见)</b>.
@@ -838,32 +874,6 @@ var $import = function(freeEval,cachedScripts){
         }
     }
     /*
-     * 加载指定文本，找不到文件(404)返回null,调试时采用
-     * @friend
-     * @param url 文件url
-     * @return <string> 结果文本
-     */
-    function loadTextByURL(url){
-        if("org.xidea.jsi.boot:avoidBlock"){
-            var req = new XMLHttpRequest();
-            req.open("GET",url,false);
-            //for ie file 404 will throw exception 
-            //document.title = url;
-            req.send('');
-            if(req.status >= 200 && req.status < 300 || req.status == 304 || !req.status){
-                //return  req.responseText;
-                return req.responseText;
-            }else{
-                //debug("load faild:",url,"status:",req.status);
-            }
-        }else{
-            //debug(url);
-            //trace(url);
-            //return ''; //throw new Error("uncached url:"+url)
-        }
-
-    };
-    /*
      * 获取指定实现包(不存在则加载之)
      * @intenal
      * @param <string>name 包名
@@ -1165,12 +1175,12 @@ var $import = function(freeEval,cachedScripts){
         }
     }
     if("org.xidea.jsi.boot:col"){
+    	var lazyScriptParentNode;//defined later
         var lazyCacheFileMap = {};
-        var bodyNode = document.body||document.documentElement;
         function appendCacheScript(path,callback){
             //callback = wrapCallback(callback,pkg,file);
             var script = document.createElement("script");
-            bodyNode.appendChild(script);
+            lazyScriptParentNode.appendChild(script);
             function onload(){//complete
                 if(callback && (this.readyState==null || /complete|loaded/.test(this.readyState))){
                     callback();
@@ -1205,6 +1215,7 @@ var $import = function(freeEval,cachedScripts){
             })()
         }
         function lazyImport(path,target,col){
+        	lazyScriptParentNode = lazyScriptParentNode || document.body||document.documentElement;
             var pkg = findPackageByPath(path);
             var fileName = path.substr(pkg.name.length+1)
             var list = [];
@@ -1258,7 +1269,7 @@ var $import = function(freeEval,cachedScripts){
                 }
                 next();
             }else{
-            	if(bodyNode.tagName < 'a'){
+            	if(lazyScriptParentNode.tagName < 'a'){
 	                for(var filePath in cacheFileMap){//path --> filePath
 	                    if(cacheFileMap[filePath][1] && !lazyCacheFileMap[filePath]){
 	                        lazyCacheFileMap[filePath] = true;//已经再装载队列中了
