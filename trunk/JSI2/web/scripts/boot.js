@@ -15,8 +15,6 @@
  * @version $Id: boot.js,v 1.3 2008/02/25 05:21:27 jindw Exp $
  */
 
-
-
 /*
  * JSI2.5 起，为了避免scriptBase 探测。节省代码量，我们使用写死的方法。
  * 如果您的网页上使用了如base之类的标签，那么，为了摸平浏览器的差异，你可能需要再这里明确指定scriptBase的准确路径。
@@ -111,9 +109,9 @@ if(this.document){
 		XMLHttpRequest.prototype = {
 			open : function(method, url, asyn) {
 				url = url.replace(/^\w+:(\/)+(?:\?.*=)/,'$1');
-				var ins = context.getClass().getResourceAsStream(url);
-				var ins = new java.io.InputStreamReader(ins,"utf-8");
 				var buf = new java.io.StringWriter();
+				var ins = buf.getClass().getResourceAsStream(url);
+				var ins = new java.io.InputStreamReader(ins,"utf-8");
 				var c;
 				while((c=ins.read())>=0){
 					buf.append(c);
