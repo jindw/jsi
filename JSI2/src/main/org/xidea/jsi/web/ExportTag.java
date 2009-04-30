@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.ScriptLoader;
 import org.xidea.jsi.impl.DefaultJSILoadContext;
@@ -17,6 +19,7 @@ public class ExportTag extends javax.servlet.jsp.tagext.BodyTagSupport {
 	 * 
 	 */
 	private static final long serialVersionUID = 13434L;
+	private static final Log log = LogFactory.getLog(ExportTag.class);
 	private static final String IMPORT_FN = "$import";
 	private static final String GLOBAL_JSI_ROOT_KEY = ExportTag.class.getName()
 			+ ":ROOT";
@@ -63,7 +66,7 @@ public class ExportTag extends javax.servlet.jsp.tagext.BodyTagSupport {
 			}
 
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.debug(e);;
 		}
 		return SKIP_BODY;
 	}

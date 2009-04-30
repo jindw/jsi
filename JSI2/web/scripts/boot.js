@@ -33,99 +33,6 @@ var $JSI= {
      */
      //scriptBase : "http://localhost:8080/script2/"
 };
-if(this.document){
-    if(":debug"){
-	    /**
-		 * 方便调试的支持
-		 */
-	    +function(){
-            //compute scriptBase
-            var rootMatcher = /(^\w+:((\/\/\/\w\:)|(\/\/[^\/]*))?)/;
-            //var rootMatcher = /^\w+:(?:(?:\/\/\/\w\:)|(?:\/\/[^\/]*))?/;
-            var homeFormater = /(^\w+:\/\/[^\/#\?]*$)/;
-            //var homeFormater = /^\w+:\/\/[^\/#\?]*$/;
-            var urlTrimer = /[#\?].*$/;
-            var dirTrimer = /[^\/\\]*([#\?].*)?$/;
-            var forwardTrimer = /[^\/]+\/\.\.\//;
-            var base = document.location.href.
-                    replace(homeFormater,"$1/").
-                    replace(dirTrimer,"");
-            var baseTags = document.getElementsByTagName("base");
-            var scripts = document.getElementsByTagName("script");
-            /*
-             * 计算绝对地址
-             * @public
-             * @param <string>url 原url
-             * @return <string> 绝对URL
-             * @static
-             */
-            function computeURL(url){
-                var purl = url.replace(urlTrimer,'').replace(/\\/g,'/');
-                var surl = url.substr(purl.length);
-                //prompt(rootMatcher.test(purl),[purl , surl])
-                if(rootMatcher.test(purl)){
-                    return purl + surl;
-                }else if(purl.charAt(0) == '/'){
-                    return rootMatcher.exec(base)[0]+purl + surl;
-                }
-                purl = base + purl;
-                while(purl.length >(purl = purl.replace(forwardTrimer,'')).length){
-                    //alert(purl)
-                }
-                return purl + surl;
-            }
-            //处理HTML BASE 标记
-            if(baseTags){
-                for(var i=baseTags.length-1;i>=0;i--){
-                    var href = baseTags[i].href;
-                    if(href){
-                        base = computeURL(href.replace(homeFormater,"$1/").replace(dirTrimer,""));
-                        break;
-                    }
-                }
-            }
-    
-            //IE7 XHR 强制ActiveX支持
-            if(this.ActiveXObject && this.XMLHttpRequest && location.protocol=="file:"){
-                this.XMLHttpRequest = null;
-            }
-            var script = scripts[scripts.length-1];
-    	    if(script){
-    	        //mozilla bug
-    	        while(script.nextSibling && script.nextSibling.nodeName.toUpperCase() == 'SCRIPT'){
-    	            script = script.nextSibling;
-    	        }
-    	        var scriptBase = (script.getAttribute('src')||"/scripts/boot.js").replace(/[^\/\\]+$/,'');
-    	        $JSI.scriptBase = computeURL(scriptBase);
-            }
-
-        }();
-    }
-}else{
-	if("org.xidea.jsi.boot:server"){
-	    $JSI.scriptBase= "classpath:///";
-		function XMLHttpRequest(){
-		}
-		XMLHttpRequest.prototype = {
-			open : function(method, url, asyn) {
-				url = url.replace(/^\w+:(\/)+(?:\?.*=)/,'$1');
-				var buf = new java.io.StringWriter();
-				var ins = buf.getClass().getResourceAsStream(url);
-				var ins = new java.io.InputStreamReader(ins,"utf-8");
-				var c;
-				while((c=ins.read())>=0){
-					buf.append(c);
-				}
-				this.responseText = ''+buf;
-			},
-			send : function(data) {
-				
-			},
-			status : 200
-		}
-	}
-}
-
 if("org.xidea.jsi.boot:$log"){
     /**
      * 全局日志
@@ -184,6 +91,124 @@ if("org.xidea.jsi.boot:$log"){
  *                    <p>一般可忽略返回值.因为默认情况下,导入为全局变量;无需再显示申明了.</p>
  */
 var $import = function(freeEval,cachedScripts){
+    /*
+     * 加载指定文本，找不到文件(404)返回null,调试时采用
+     * @friend
+     * @param url 文件url
+     * @return <string> 结果文本
+     */
+    function loadTextByURL(url){
+        if("org.xidea.jsi.boot:avoidBlock"){
+            var req = new XMLHttpRequest();
+            req.open("GET",url,false);
+            //for ie file 404 will throw exception 
+            //document.title = url;
+            req.send('');
+            if(req.status >= 200 && req.status < 300 || req.status == 304 || !req.status){
+                //return  req.responseText;
+                return req.responseText;
+            }else{
+                //debug("load faild:",url,"status:",req.status);
+            }
+        }else{
+            //debug(url);
+            //trace(url);
+            //return ''; //throw new Error("uncached url:"+url)
+        }
+    }
+    if(this.document){
+        if(":debug"){
+    	    /**
+    		 * 方便调试的支持
+    		 */
+            //compute scriptBase
+            var rootMatcher = /(^\w+:((\/\/\/\w\:)|(\/\/[^\/]*))?)/;
+            //var rootMatcher = /^\w+:(?:(?:\/\/\/\w\:)|(?:\/\/[^\/]*))?/;
+            var homeFormater = /(^\w+:\/\/[^\/#\?]*$)/;
+            //var homeFormater = /^\w+:\/\/[^\/#\?]*$/;
+            var urlTrimer = /[#\?].*$/;
+            var dirTrimer = /[^\/\\]*([#\?].*)?$/;
+            var forwardTrimer = /[^\/]+\/\.\.\//;
+            var base = document.location.href.
+                    replace(homeFormater,"$1/").
+                    replace(dirTrimer,"");
+            var baseTags = document.getElementsByTagName("base");
+            var scripts = document.getElementsByTagName("script");
+            /*
+             * 计算绝对地址
+             * @public
+             * @param <string>url 原url
+             * @return <string> 绝对URL
+             * @static
+             */
+            function computeURL(url){
+                var purl = url.replace(urlTrimer,'').replace(/\\/g,'/');
+                var surl = url.substr(purl.length);
+                //prompt(rootMatcher.test(purl),[purl , surl])
+                if(rootMatcher.test(purl)){
+                    return purl + surl;
+                }else if(purl.charAt(0) == '/'){
+                    return rootMatcher.exec(base)[0]+purl + surl;
+                }
+                purl = base + purl;
+                while(purl.length >(purl = purl.replace(forwardTrimer,'')).length){
+                    //alert(purl)
+                }
+                return purl + surl;
+            }
+            //处理HTML BASE 标记
+            if(baseTags){
+                for(var i=baseTags.length-1;i>=0;i--){
+                    var href = baseTags[i].href;
+                    if(href){
+                        base = computeURL(href.replace(homeFormater,"$1/").replace(dirTrimer,""));
+                        break;
+                    }
+                }
+            }
+    
+            //IE7 XHR 强制ActiveX支持
+            if(this.ActiveXObject && this.XMLHttpRequest && location.protocol=="file:"){
+                this.XMLHttpRequest = null;
+            }
+            var script = scripts[scripts.length-1];
+    	    if(script){
+    	        //mozilla bug
+    	        while(script.nextSibling && script.nextSibling.nodeName.toUpperCase() == 'SCRIPT'){
+    	            script = script.nextSibling;
+    	        }
+    	        scriptBase = (script.getAttribute('src')||"/scripts/boot.js").replace(/[^\/\\]+$/,'');
+    	        $JSI.scriptBase = computeURL(scriptBase);
+            }
+    
+        }
+    }else{
+    	if("org.xidea.jsi.boot:server"){
+    	    $JSI.scriptBase= "classpath:///";
+    		try{
+    		    //Java6
+    		    var cpl = new org.xidea.jsi.impl.ClasspathJSIRoot();
+    	    }catch(e){
+    		    //Rhino
+    		    var cpl = java.lang.Class.forName("org.xidea.jsi.impl.ClasspathJSIRoot").newInstance();
+    		}
+    	    function loadTextByURL(url){
+    	        /*
+    		     	url = url.replace(/^\w+:(\/)+(?:\?.*=)/,'$1');
+    				var buf = new java.io.StringWriter();
+    				var ins = buf.getClass().getResourceAsStream(url);
+    				var ins = new java.io.InputStreamReader(ins,"utf-8");
+    				var c;
+    				while((c=ins.read())>=0){
+    					buf.append(c);
+    				}
+    		     */
+    		     url = url.replace(/^\w+:(\/)+(?:\?.*=)?/,'');
+        		 return cpl.loadText(url)+'';
+    	    }
+    	}
+    }
+    
     if("org.xidea.jsi.boot:$log"){
         $log = function (){
             var i = 0;
@@ -432,32 +457,6 @@ var $import = function(freeEval,cachedScripts){
                 }
             };
         }
-    }
-    /*
-     * 加载指定文本，找不到文件(404)返回null,调试时采用
-     * @friend
-     * @param url 文件url
-     * @return <string> 结果文本
-     */
-    function loadTextByURL(url){
-        if("org.xidea.jsi.boot:avoidBlock"){
-            var req = new XMLHttpRequest();
-            req.open("GET",url,false);
-            //for ie file 404 will throw exception 
-            //document.title = url;
-            req.send('');
-            if(req.status >= 200 && req.status < 300 || req.status == 304 || !req.status){
-                //return  req.responseText;
-                return req.responseText;
-            }else{
-                //debug("load faild:",url,"status:",req.status);
-            }
-        }else{
-            //debug(url);
-            //trace(url);
-            //return ''; //throw new Error("uncached url:"+url)
-        }
-
     }
     /**
      * 包信息数据结构类<b> &#160;(JSI 内部对象，普通用户不可见)</b>.

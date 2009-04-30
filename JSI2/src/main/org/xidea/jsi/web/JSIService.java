@@ -16,6 +16,8 @@ import java.util.Properties;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.impl.DataJSIRoot;
@@ -25,6 +27,7 @@ import org.xidea.jsi.impl.FileJSIRoot;
 import org.xidea.jsi.impl.JSIText;
 
 public class JSIService {
+	private static final Log log = LogFactory.getLog(JSIService.class);
 	protected String scriptBase;
 	protected File scriptBaseDirectory;
 	protected File externalLibraryDirectory;
@@ -153,7 +156,7 @@ public class JSIService {
 			try {
 				return new FileInputStream(file);
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				log.debug(e);;
 			}
 		}
 		File[] list = this.scriptBaseDirectory.listFiles(new FilenameFilter() {

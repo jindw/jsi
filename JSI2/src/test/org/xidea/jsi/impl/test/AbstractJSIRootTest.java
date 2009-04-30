@@ -67,17 +67,20 @@ public class AbstractJSIRootTest {
 	@Test
 	public void test$importStringJSILoadContext() {
 		JSILoadContext context = new DefaultJSILoadContext();
+		Map<String, String> expect = new HashMap<String, String>(ALL_EXAMPLE_MAP);
 		root.$import("example.*", context);
-		assertEquals(ALL_EXAMPLE_MAP, context.getExportMap());
+		assertEquals(expect, context.getExportMap());
 		assertEquals(1, context.getScriptList().size());
 
 		root.$import("example.internal.*", context);
-		assertEquals(ALL_EXAMPLE_INTERNAL_MAP, context.getExportMap());
-		assertEquals(2, context.getScriptList().size());
+		expect.putAll(ALL_EXAMPLE_INTERNAL_MAP);
+		assertEquals(expect, context.getExportMap());
+		assertEquals(3, context.getScriptList().size());
 
+		expect.putAll(ALL_EXAMPLE_DEPENDENCE_MAP);
 		root.$import("example.dependence.*", context);
-		assertEquals(ALL_EXAMPLE_DEPENDENCE_MAP, context.getExportMap());
-		assertEquals(2, context.getScriptList().size());
+		assertEquals(expect, context.getExportMap());
+		assertEquals(5, context.getScriptList().size());
 
 	}
 
