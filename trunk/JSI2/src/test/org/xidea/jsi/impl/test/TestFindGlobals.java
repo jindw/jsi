@@ -17,7 +17,9 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.impl.DefaultJSIPackage;
+import org.xidea.jsi.impl.FileJSIRoot;
 import org.xidea.jsi.impl.Java6ScriptPackagePaser;
 
 public class TestFindGlobals {
@@ -27,7 +29,7 @@ public class TestFindGlobals {
 
 	static {
 		InputStream in = Java6ScriptPackagePaser.class.getResourceAsStream(
-				"/org/xidea/jsidoc/export/find-globals.js"
+				"/org/xidea/jsidoc/util/find-globals.js"
 				// "find-globals.js"
 				);
 		try {
@@ -73,18 +75,23 @@ public class TestFindGlobals {
 
 	@Test
 	public void testFindFromDir() {
-		processDir(new File("D:\\eclipse\\workspace\\JSI2\\web\\scripts"));
+		File dir = new File(this.getClass().getResource("/").getFile());
+		processDir(dir);
 		//processDir(new File("D:\\eclipse\\workspace\\JSISide\\web\\scripts"));
 		//processDir(new File("D:\\eclipse\\workspace\\JSI-thirdparty\\web\\scripts"));
 		System.out.println("javaTime:" + this.javaTime);
 		System.out.println("scriptTime:" + this.scriptTime);
 	}
 
-	private void processDir(File files) {
+	private void processDir(final File files) {
 		final Java6ScriptPackagePaser parser = new Java6ScriptPackagePaser(new DefaultJSIPackage(null, "test"){
 			@Override
 			public String loadText(String scriptName) {
-				return scriptName;
+				if(JSIPackage.PACKAGE_FILE_NAME.equals(scriptName)){
+					return "";
+				}else{
+					return scriptName;
+				}
 			}
 			
 		});

@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIRoot;
 
 public class ClasspathJSIRoot extends AbstractJSIRoot implements JSIRoot {
+	private static final Log log = LogFactory.getLog(ClasspathJSIRoot.class);
 	private String encoding = "utf-8";
 	private ClassLoader loader;
 
@@ -32,21 +36,25 @@ public class ClasspathJSIRoot extends AbstractJSIRoot implements JSIRoot {
 			}else{
 				path = scriptName;
 			}
-			InputStream in = loader.getResourceAsStream(path); 
-			if(in == null){
-				return null;
-			}
-			Reader reader = new InputStreamReader(in,this.encoding);
-			StringBuilder buf = new StringBuilder();
-			char[] cbuf = new char[1024];
-			for (int len = reader.read(cbuf); len > 0; len = reader.read(cbuf)) {
-				buf.append(cbuf, 0, len);
-			}
-			return buf.toString();
+			return loadText(path);
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.warn(e);;
 			return null;
 		}
+	}
+	public String loadText(String path) throws UnsupportedEncodingException,
+			IOException {
+		InputStream in = loader.getResourceAsStream(path); 
+		if(in == null){
+			return null;
+		}
+		Reader reader = new InputStreamReader(in,this.encoding);
+		StringBuilder buf = new StringBuilder();
+		char[] cbuf = new char[1024];
+		for (int len = reader.read(cbuf); len > 0; len = reader.read(cbuf)) {
+			buf.append(cbuf, 0, len);
+		}
+		return buf.toString();
 	}
 
 }

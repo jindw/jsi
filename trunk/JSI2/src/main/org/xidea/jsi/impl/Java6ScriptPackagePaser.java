@@ -7,6 +7,8 @@ import java.util.HashSet;
 
 import javax.script.ScriptEngine;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIPackage;
 
 import sun.org.mozilla.javascript.internal.CompilerEnvirons;
@@ -16,7 +18,8 @@ import sun.org.mozilla.javascript.internal.Parser;
 import sun.org.mozilla.javascript.internal.ScriptOrFnNode;
 
 public class Java6ScriptPackagePaser extends PackageParser {
-
+	private static final Log log = LogFactory.getLog(Java6ScriptPackagePaser.class);
+	
 	public static final ScriptEngine engine = new javax.script.ScriptEngineManager()
 			.getEngineByExtension("js");
 
@@ -42,8 +45,8 @@ public class Java6ScriptPackagePaser extends PackageParser {
 			engine.eval(BIND_SCRIPT, binds);
 			engine.eval(source, binds);
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new UnsupportedSyntaxException(e);
+			log.error(e);;
+			throw new UnsupportedSyntaxException(packageObject.getName(),e);
 		}
 	}
 	

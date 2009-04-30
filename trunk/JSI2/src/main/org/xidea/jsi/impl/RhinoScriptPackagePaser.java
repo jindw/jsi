@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mozilla.javascript.CompilerEnvirons;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
@@ -17,6 +19,8 @@ import org.mozilla.javascript.Scriptable;
 import org.xidea.jsi.JSIPackage;
 
 public class RhinoScriptPackagePaser extends PackageParser {
+	private static final Log log = LogFactory.getLog(RhinoScriptPackagePaser.class);
+
 	private JSIPackage packageObject;
 	public RhinoScriptPackagePaser(JSIPackage packageObject){
 		this.packageObject = packageObject;
@@ -43,8 +47,8 @@ public class RhinoScriptPackagePaser extends PackageParser {
 				}
 			});
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new UnsupportedSyntaxException(e);
+			log.warn(e);;
+			throw new UnsupportedSyntaxException(packageObject.getName(),e);
 		}
 	}
 

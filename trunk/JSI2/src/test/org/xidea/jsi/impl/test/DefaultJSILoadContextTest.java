@@ -2,6 +2,7 @@ package org.xidea.jsi.impl.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.xidea.jsi.impl.test.AbstractJSIRootTest.ALL_EXAMPLE_MAP;
 import static org.xidea.jsi.impl.test.AbstractJSIRootTest.ALL_EXAMPLE_DEPENDENCE_MAP;
 import static org.xidea.jsi.impl.test.AbstractJSIRootTest.ALL_EXAMPLE_INTERNAL_MAP;
 import static org.xidea.jsi.impl.test.AbstractJSIRootTest.createObjectPackageMap;
@@ -22,8 +23,14 @@ public class DefaultJSILoadContextTest {
 
 	@Test
 	public void testLoadScript() {
-		fail("麻烦：（");
+		JSILoadContext context = root.$import("example/hello-world.js");
+		assertEquals(ALL_EXAMPLE_MAP,context.getExportMap());
 
+		context = root.$import("example.internal.*");
+		assertEquals(ALL_EXAMPLE_INTERNAL_MAP,context.getExportMap());
+		
+		context = root.$import("example/dependence/show-detail.js");
+		assertEquals(ALL_EXAMPLE_DEPENDENCE_MAP,context.getExportMap());
 	}
 
 	@Test

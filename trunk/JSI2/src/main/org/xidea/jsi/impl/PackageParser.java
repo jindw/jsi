@@ -61,9 +61,9 @@ public abstract class PackageParser {
 			beforeLoadDependences = filterStrings(beforeLoadDependences);
 			afterLoadDependences = filterStrings(afterLoadDependences);
 		} catch (RuntimeException e) {
-			log.error(beforeLoadDependences);
-			log.error(afterLoadDependences);
-			e.printStackTrace();
+			//log.error(beforeLoadDependences);
+			//log.error(afterLoadDependences);
+			log.warn(e);;
 			throw e;
 		}
 		addScriptCall.add(Arrays.asList(scriptName, objectNames,

@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIRoot;
 
 public class DataJSIRoot extends AbstractJSIRoot implements JSIRoot {
+	private static final Log log = LogFactory.getLog(DataJSIRoot.class);
 	protected Properties dataMap;
 	public DataJSIRoot(String source) {
 		if (source != null) {
@@ -19,7 +22,7 @@ public class DataJSIRoot extends AbstractJSIRoot implements JSIRoot {
 						.getBytes("utf-8")));
 				this.dataMap = data;
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.warn(e);;
 				throw new RuntimeException(e);
 			}
 		}

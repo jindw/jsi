@@ -9,10 +9,13 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRoot;
 
 public class FileJSIRoot extends AbstractJSIRoot implements JSIRoot {
+	private static final Log log = LogFactory.getLog(FileJSIRoot.class);
 	private File scriptBase;
 	private String encoding = "utf-8";
 
@@ -39,7 +42,7 @@ public class FileJSIRoot extends AbstractJSIRoot implements JSIRoot {
 			}
 			return buf.toString();
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.warn(e);;
 			return null;
 		}
 	}
