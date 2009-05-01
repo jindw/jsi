@@ -185,13 +185,6 @@ var $import = function(freeEval,cachedScripts){
     }else{
     	if("org.xidea.jsi.boot:server"){
     	    $JSI.scriptBase= "classpath:///";
-    		try{
-    		    //Java6
-    		    var cpl = new org.xidea.jsi.impl.ClasspathJSIRoot();
-    	    }catch(e){
-    		    //Rhino
-    		    var cpl = java.lang.Class.forName("org.xidea.jsi.impl.ClasspathJSIRoot").newInstance();
-    		}
     	    function loadTextByURL(url){
     	        /*
     		     	url = url.replace(/^\w+:(\/)+(?:\?.*=)/,'$1');
@@ -204,7 +197,7 @@ var $import = function(freeEval,cachedScripts){
     				}
     		     */
     		     url = url.replace(/^\w+:(\/)+(?:\?.*=)?/,'');
-        		 return cpl.loadText(url)+'';
+        		 return Packages.org.xidea.jsi.impl.ClasspathRoot.loadText(url)+'';
     	    }
     	}
     }

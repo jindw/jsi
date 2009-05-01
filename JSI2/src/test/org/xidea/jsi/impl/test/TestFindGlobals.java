@@ -18,8 +18,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.impl.DefaultJSIPackage;
-import org.xidea.jsi.impl.FileJSIRoot;
+import org.xidea.jsi.impl.DefaultPackage;
+import org.xidea.jsi.impl.FileRoot;
 import org.xidea.jsi.impl.Java6ScriptPackagePaser;
 
 public class TestFindGlobals {
@@ -84,7 +84,7 @@ public class TestFindGlobals {
 	}
 
 	private void processDir(final File files) {
-		final Java6ScriptPackagePaser parser = new Java6ScriptPackagePaser(new DefaultJSIPackage(null, "test"){
+		final Java6ScriptPackagePaser parser = new Java6ScriptPackagePaser(new DefaultPackage(null, "test"){
 			@Override
 			public String loadText(String scriptName) {
 				if(JSIPackage.PACKAGE_FILE_NAME.equals(scriptName)){

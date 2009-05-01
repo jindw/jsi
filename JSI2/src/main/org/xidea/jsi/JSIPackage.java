@@ -3,7 +3,7 @@ package org.xidea.jsi;
 import java.util.List;
 import java.util.Map;
 
-import org.xidea.jsi.impl.DefaultJSIPackage;
+import org.xidea.jsi.impl.DefaultPackage;
 
 
 
@@ -13,7 +13,7 @@ import org.xidea.jsi.impl.DefaultJSIPackage;
  * 该对象需要在多个LoadContext中共享数据。
  * 实现中需要注意线程安全设计。
  * @scope Application
- * @see org.xidea.jsi.impl.DefaultJSIPackage
+ * @see org.xidea.jsi.impl.DefaultPackage
  * @author jindw
  */
 public interface JSIPackage {
@@ -32,7 +32,7 @@ public interface JSIPackage {
 	 * @param beforeLoadDependences String||Collection
 	 * @param afterLoadDependences String||Collection
 	 * 
-	 * @see DefaultJSIPackage#addScript(String, Object, Object, Object)
+	 * @see DefaultPackage#addScript(String, Object, Object, Object)
 	 */
 	public void addScript(String scriptName, Object objectNames,
 			Object beforeLoadDependences, Object afterLoadDependences);
@@ -41,7 +41,7 @@ public interface JSIPackage {
 	 * @param thisPath
 	 * @param targetPath String||Collection
 	 * @param afterLoad
-	 * @see DefaultJSIPackage#addDependence(String, Object, boolean)
+	 * @see DefaultPackage#addDependence(String, Object, boolean)
 	 */
 	public void addDependence(String thisPath, Object targetPath,
 			boolean afterLoad);

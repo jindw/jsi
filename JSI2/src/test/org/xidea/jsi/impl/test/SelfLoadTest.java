@@ -5,23 +5,23 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSILoadContext;
-import org.xidea.jsi.impl.ClasspathJSIRoot;
-import org.xidea.jsi.impl.DefaultJSILoadContext;
-import org.xidea.jsi.impl.FileJSIRoot;
+import org.xidea.jsi.impl.ClasspathRoot;
+import org.xidea.jsi.impl.DefaultLoadContext;
+import org.xidea.jsi.impl.FileRoot;
 
 
 public class SelfLoadTest {
 
-	private ClasspathJSIRoot root;
+	private ClasspathRoot root;
 
 	@Before
 	public void setUp() throws Exception {
-		root = new ClasspathJSIRoot();
+		root = new ClasspathRoot();
 	}
 
 	@Test
 	public void testLoadText() {
-		JSILoadContext context = new DefaultJSILoadContext();
+		JSILoadContext context = new DefaultLoadContext();
 		root.$import("example.*",context);
 		root.$import("example.alias.*",context);
 		root.$import("example.dependence.*",context);

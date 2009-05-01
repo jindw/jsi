@@ -10,11 +10,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.ScriptLoader;
-import org.xidea.jsi.impl.DataJSIRoot;
+import org.xidea.jsi.impl.DataRoot;
 
 public class CircularDependenceTest {
 
-	private DataJSIRoot root;
+	private DataRoot root;
 
 	@Before
 	public void setUp() throws Exception {
@@ -31,7 +31,7 @@ public class CircularDependenceTest {
 					.put(
 							"test/__package__.js",
 							"this.addScript('test1.js','test1','test2.js');this.addScript('test2.js','test2','test1.js')");
-			root = new DataJSIRoot(data);
+			root = new DataRoot(data);
 			root.$import("test/test1.js");
 		} catch (StackOverflowError e) {
 			return;
@@ -52,7 +52,7 @@ public class CircularDependenceTest {
 						+ "this.addScript('test2.js','test2',0,'test3.js');"
 						+ "this.addScript('test3.js','test3','test1.js');"
 						+ "this.addScript('test4.js','test4',0,'test1.js');");
-		root = new DataJSIRoot(data);
+		root = new DataRoot(data);
 		for (int i = 1; i < 4; i++) {
 			JSILoadContext context = root.$import("test/test" + i + ".js");
 			ArrayList<String> result = new ArrayList<String>();

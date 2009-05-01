@@ -18,7 +18,7 @@ public interface JSIRoot {
 
 	/**
 	 * 换回具体的实现包（只管获取，不做初始化）
-	 * @see org.xidea.jsi.impl.AbstractJSIRoot#requirePackage(String, boolean)
+	 * @see org.xidea.jsi.impl.AbstractRoot#requirePackage(String, boolean)
 	 * @param name
 	 * @param exact
 	 * @return
@@ -26,7 +26,7 @@ public interface JSIRoot {
 	public abstract JSIPackage requirePackage(String name, boolean exact);
 
 	/**
-	 * @see org.xidea.jsi.impl.AbstractJSIRoot#findPackageByPath(String)
+	 * @see org.xidea.jsi.impl.AbstractRoot#findPackageByPath(String)
 	 * @param path
 	 * @return
 	 */

@@ -11,12 +11,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.impl.AbstractJSIRoot;
-import org.xidea.jsi.impl.ClasspathJSIRoot;
-import org.xidea.jsi.impl.DefaultJSILoadContext;
+import org.xidea.jsi.impl.AbstractRoot;
+import org.xidea.jsi.impl.ClasspathRoot;
+import org.xidea.jsi.impl.DefaultLoadContext;
 
 public class AbstractJSIRootTest {
-	private AbstractJSIRoot root;
+	private AbstractRoot root;
 	public static Map<String, String> ALL_EXAMPLE_MAP = createObjectPackageMap(
 			"example", "sayHello", "message");
 	public static Map<String, String> ALL_EXAMPLE_INTERNAL_MAP = createObjectPackageMap(
@@ -40,7 +40,7 @@ public class AbstractJSIRootTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		root = new ClasspathJSIRoot("utf-8");
+		root = new ClasspathRoot("utf-8");
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class AbstractJSIRootTest {
 
 	@Test
 	public void test$importStringJSILoadContext() {
-		JSILoadContext context = new DefaultJSILoadContext();
+		JSILoadContext context = new DefaultLoadContext();
 		Map<String, String> expect = new HashMap<String, String>(ALL_EXAMPLE_MAP);
 		root.$import("example.*", context);
 		assertEquals(expect, context.getExportMap());

@@ -20,10 +20,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSILoadContext;
-import org.xidea.jsi.impl.DataJSIRoot;
-import org.xidea.jsi.impl.DefaultJSIExportorFactory;
-import org.xidea.jsi.impl.DefaultJSILoadContext;
-import org.xidea.jsi.impl.FileJSIRoot;
+import org.xidea.jsi.impl.DataRoot;
+import org.xidea.jsi.impl.DefaultExportorFactory;
+import org.xidea.jsi.impl.DefaultLoadContext;
+import org.xidea.jsi.impl.FileRoot;
 import org.xidea.jsi.impl.JSIText;
 
 public class JSIService {
@@ -83,7 +83,7 @@ public class JSIService {
 		}
 	}
 	protected String buildDocumentHTML() {
-		List<String> packageList = FileJSIRoot
+		List<String> packageList = FileRoot
 				.findPackageList(this.scriptBaseDirectory);
 		StringWriter out = new StringWriter();
 		if (packageList.isEmpty()) {
@@ -117,13 +117,13 @@ public class JSIService {
 	protected String buildExportHTML(Map<String, String[]> param) throws IOException {
 		String[] contents = param.get("content");
 		if (contents != null) {
-			final DataJSIRoot root = new DataJSIRoot(contents[0]);
-			JSIExportor exportor = DefaultJSIExportorFactory.getInstance()
+			final DataRoot root = new DataRoot(contents[0]);
+			JSIExportor exportor = DefaultExportorFactory.getInstance()
 					.createExplorter(param);
 			if (exportor == null) {
 				return null;
 			}
-			JSILoadContext context = new DefaultJSILoadContext();
+			JSILoadContext context = new DefaultLoadContext();
 			String[] exports = param.get("exports");
 			if (exports != null) {
 				// 只有Data Root 才能支持这种方式
@@ -135,8 +135,8 @@ public class JSIService {
 		} else {
 			Map<String, String[]> testParams = new HashMap<String, String[]>();
 			testParams.put("level", new String[] { String
-					.valueOf(DefaultJSIExportorFactory.TYPE_EXPORT_CONFUSE) });
-			return DefaultJSIExportorFactory.getInstance().createExplorter(
+					.valueOf(DefaultExportorFactory.TYPE_EXPORT_CONFUSE) });
+			return DefaultExportorFactory.getInstance().createExplorter(
 					testParams) == null ? null : "";
 		}
 

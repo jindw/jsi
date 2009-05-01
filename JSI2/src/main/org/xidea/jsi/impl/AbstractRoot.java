@@ -8,14 +8,14 @@ import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRoot;
 
-public abstract class AbstractJSIRoot implements JSIRoot {
+public abstract class AbstractRoot implements JSIRoot {
 
 	protected Map<String, JSIPackage> packageMap = new HashMap<String, JSIPackage>();
 
 	public abstract String loadText(String pkgName, String scriptName);
 
 	public JSILoadContext $import(String path) {
-		return $import(path, new DefaultJSILoadContext());
+		return $import(path, new DefaultLoadContext());
 	}
 
 	public JSILoadContext $import(String  path, JSILoadContext context) {
@@ -90,7 +90,7 @@ public abstract class AbstractJSIRoot implements JSIRoot {
 			}
 			String source = this.loadText(name, JSIPackage.PACKAGE_FILE_NAME);
 			if (source != null) {
-				JSIPackage pkg  = new DefaultJSIPackage(this, name);
+				JSIPackage pkg  = new DefaultPackage(this, name);
 				createPackageParser(pkg).setup(pkg);
 				packageMap.put(name, pkg);
 				return pkg;

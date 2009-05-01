@@ -11,18 +11,18 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.impl.ClasspathJSIRoot;
-import org.xidea.jsi.impl.DefaultJSIPackage;
+import org.xidea.jsi.impl.ClasspathRoot;
+import org.xidea.jsi.impl.DefaultPackage;
 import org.xidea.jsi.impl.Java6ScriptPackagePaser;
 import org.xidea.jsi.impl.PackageParser;
 
 public class PackageParserTest {
 
-	private ClasspathJSIRoot root;
+	private ClasspathRoot root;
 
 	@Before
 	public void setUp() throws Exception {
-		root = new ClasspathJSIRoot();
+		root = new ClasspathRoot();
 	}
 
 	@Test
@@ -42,7 +42,7 @@ public class PackageParserTest {
 		} else {
 			parser = new Java6ScriptPackagePaser(pkg);
 		}
-		DefaultJSIPackage pkg2 = new DefaultJSIPackage(root, "pkg.test");
+		DefaultPackage pkg2 = new DefaultPackage(root, "pkg.test");
 		parser.setup(pkg2);
 		assertEquals(varMap.keySet(), pkg2.getObjectScriptMap()
 				.keySet());
@@ -51,7 +51,7 @@ public class PackageParserTest {
 	@Test
 	public void testParseX() {
 		String pkgName = "pkg.test";
-		DefaultJSIPackage pkg = new DefaultJSIPackage(null, pkgName){
+		DefaultPackage pkg = new DefaultPackage(null, pkgName){
 			@Override
 			public String loadText(String fileName){
 				return "this.addScript('a.js',['Class1','Class2'],'xxx','Base');"

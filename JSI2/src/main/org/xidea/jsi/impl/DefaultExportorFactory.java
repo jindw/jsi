@@ -12,7 +12,7 @@ import org.xidea.jsi.ScriptLoader;
 /**
  * @author jindw
  */
-public class DefaultJSIExportorFactory {
+public class DefaultExportorFactory {
 	/**
 	 * 创建问题报告实现
 	 */
@@ -35,15 +35,15 @@ public class DefaultJSIExportorFactory {
 	public static final int TYPE_XML = -1;
 
 	private final static String JSI_EXPORTOR_FACTORY_CLASS = "org.jside.jsi.tools.export.JSAExportorFactory";
-	private static DefaultJSIExportorFactory exportorFactory = null;
+	private static DefaultExportorFactory exportorFactory = null;
 
-	public static DefaultJSIExportorFactory getInstance() {
+	public static DefaultExportorFactory getInstance() {
 		try {
-			exportorFactory = (DefaultJSIExportorFactory) Class.forName(
+			exportorFactory = (DefaultExportorFactory) Class.forName(
 					JSI_EXPORTOR_FACTORY_CLASS).newInstance();
 
 		} catch (Exception e) {
-			exportorFactory = new DefaultJSIExportorFactory();
+			exportorFactory = new DefaultExportorFactory();
 		}
 		return exportorFactory;
 	}

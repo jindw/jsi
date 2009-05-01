@@ -10,15 +10,15 @@ import static org.xidea.jsi.impl.test.AbstractJSIRootTest.createObjectPackageMap
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSILoadContext;
-import org.xidea.jsi.impl.ClasspathJSIRoot;
+import org.xidea.jsi.impl.ClasspathRoot;
 
 public class DefaultJSILoadContextTest {
 
-	private ClasspathJSIRoot root;
+	private ClasspathRoot root;
 
 	@Before
 	public void setUp() throws Exception {
-		root = new ClasspathJSIRoot("utf-8");
+		root = new ClasspathRoot("utf-8");
 	}
 
 	@Test
