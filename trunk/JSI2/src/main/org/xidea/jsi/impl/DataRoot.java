@@ -10,10 +10,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIRoot;
 
-public class DataJSIRoot extends AbstractJSIRoot implements JSIRoot {
-	private static final Log log = LogFactory.getLog(DataJSIRoot.class);
+public class DataRoot extends AbstractRoot implements JSIRoot {
+	private static final Log log = LogFactory.getLog(DataRoot.class);
 	protected Properties dataMap;
-	public DataJSIRoot(String source) {
+	public DataRoot(String source) {
 		if (source != null) {
 			source = source.replaceAll("$\\s*<\\?[^>]\\?>", "");
 			try {
@@ -28,7 +28,7 @@ public class DataJSIRoot extends AbstractJSIRoot implements JSIRoot {
 		}
 	}
 
-	public DataJSIRoot(Map<String, String> dataMap) {
+	public DataRoot(Map<String, String> dataMap) {
 		Properties data = new Properties();
 		data.putAll(dataMap);
 		this.dataMap = data;

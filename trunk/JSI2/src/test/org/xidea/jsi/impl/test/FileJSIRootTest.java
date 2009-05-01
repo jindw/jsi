@@ -4,15 +4,15 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.jsi.impl.FileJSIRoot;
+import org.xidea.jsi.impl.FileRoot;
 
 public class FileJSIRootTest {
-	private FileJSIRoot root;
+	private FileRoot root;
 
 	@Before
 	public void setUp() throws Exception {
 
-		root = new FileJSIRoot(this.getClass().getResource("/").getFile(),
+		root = new FileRoot(this.getClass().getResource("/").getFile(),
 				"utf-8");
 	}
 

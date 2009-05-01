@@ -16,8 +16,8 @@ import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.ScriptLoader;
 
-public class DefaultJSIPackage implements JSIPackage {
-	private static final Log log = LogFactory.getLog(DefaultJSIPackage.class);
+public class DefaultPackage implements JSIPackage {
+	private static final Log log = LogFactory.getLog(DefaultPackage.class);
 	private JSIRoot root;
 	private String name;
 	private String implementation;
@@ -27,7 +27,7 @@ public class DefaultJSIPackage implements JSIPackage {
 	private List<List<Object>> unparsedDependenceList = new ArrayList<List<Object>>();
 	private Map<String, List<JSIDependence>> dependenceMap = new HashMap<String, List<JSIDependence>>();
 
-	public DefaultJSIPackage(JSIRoot root, String name) {
+	public DefaultPackage(JSIRoot root, String name) {
 		this.root = root;
 		this.name = name;
 	}
@@ -233,7 +233,7 @@ public class DefaultJSIPackage implements JSIPackage {
 						}
 						final boolean samePackage = targetPackage.equals(this);
 						for (String targetFile : targetFileMap) {
-							DefaultJSIDependence dep = new DefaultJSIDependence(
+							DefaultDependence dep = new DefaultDependence(
 									targetPackage, targetFile,
 									targetObjectName, afterLoad);
 							for (String thisFile : thisFileMap) {
@@ -278,7 +278,7 @@ public class DefaultJSIPackage implements JSIPackage {
 								file = targetPath;
 							}
 						}
-						DefaultJSIDependence dep = new DefaultJSIDependence(
+						DefaultDependence dep = new DefaultDependence(
 								targetPackage, file, targetObjectName,
 								afterLoad);
 						saveDependence(dep, thisFile, thisObjectName);
@@ -291,7 +291,7 @@ public class DefaultJSIPackage implements JSIPackage {
 		}
 	}
 
-	private void saveDependence(DefaultJSIDependence dep, String thisFile,
+	private void saveDependence(DefaultDependence dep, String thisFile,
 			String thisObject) {
 		List<JSIDependence> depList = this.dependenceMap.get(thisFile);
 		if (depList == null) {

@@ -4,10 +4,10 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.jsi.impl.ClasspathJSIRoot;
+import org.xidea.jsi.impl.ClasspathRoot;
 
 public class ClasspathJSIRootTest {
-	private ClasspathJSIRoot root;
+	private ClasspathRoot root;
 
 	/**
 	 * 
@@ -15,7 +15,7 @@ public class ClasspathJSIRootTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		root = new ClasspathJSIRoot("utf-8");
+		root = new ClasspathRoot("utf-8");
 	}
 
 	@Test

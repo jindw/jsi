@@ -14,12 +14,12 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRoot;
 
-public class FileJSIRoot extends AbstractJSIRoot implements JSIRoot {
-	private static final Log log = LogFactory.getLog(FileJSIRoot.class);
+public class FileRoot extends AbstractRoot implements JSIRoot {
+	private static final Log log = LogFactory.getLog(FileRoot.class);
 	private File scriptBase;
 	private String encoding = "utf-8";
 
-	public FileJSIRoot(String scriptBase, String encoding) {
+	public FileRoot(String scriptBase, String encoding) {
 		this.scriptBase = new File(scriptBase);
 		this.encoding = encoding;
 	}

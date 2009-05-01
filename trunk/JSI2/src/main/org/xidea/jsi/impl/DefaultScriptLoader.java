@@ -60,12 +60,12 @@ public class DefaultScriptLoader implements ScriptLoader {
 	 */
 	public Map<String, String> getDependenceVarMap() {
 		if (this.dependenceVarMap == null) {
-			List<JSIDependence> list = ((DefaultJSIPackage)_package).getDependenceMap().get(name);
+			List<JSIDependence> list = ((DefaultPackage)_package).getDependenceMap().get(name);
 			HashMap<String, String> dependenceVarMap = new HashMap<String, String>();
 			if (list != null) {
 				for (JSIDependence dependence : list) {
 					List<String> buf = new ArrayList<String>();
-					((DefaultJSIDependence)dependence).initialize(buf);
+					((DefaultDependence)dependence).initialize(buf);
 					for (String name : buf) {
 						dependenceVarMap.put(name, dependence.getTargetPackage().getName());
 					}

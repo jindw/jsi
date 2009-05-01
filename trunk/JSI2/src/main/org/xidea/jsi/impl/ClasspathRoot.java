@@ -10,18 +10,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIRoot;
 
-public class ClasspathJSIRoot extends AbstractJSIRoot implements JSIRoot {
-	private static final Log log = LogFactory.getLog(ClasspathJSIRoot.class);
+public class ClasspathRoot extends AbstractRoot implements JSIRoot {
+	private static final Log log = LogFactory.getLog(ClasspathRoot.class);
 	private String encoding = "utf-8";
 	private ClassLoader loader;
 
-	public ClasspathJSIRoot() {
+	public ClasspathRoot() {
 		this(null);
 	}
-	public ClasspathJSIRoot(String encoding) {
+	public ClasspathRoot(String encoding) {
 		this(null,encoding);
 	}
-	public ClasspathJSIRoot(ClassLoader loader,String encoding) {
+	public ClasspathRoot(ClassLoader loader,String encoding) {
 		this.loader = loader == null?this.getClass().getClassLoader():loader;
 		if(encoding!=null){
 			this.encoding = encoding;
@@ -36,19 +36,22 @@ public class ClasspathJSIRoot extends AbstractJSIRoot implements JSIRoot {
 			}else{
 				path = scriptName;
 			}
-			return loadText(path);
+			return loadText(path,loader,encoding);
 		} catch (IOException e) {
 			log.warn(e);;
 			return null;
 		}
 	}
-	public String loadText(String path) throws UnsupportedEncodingException,
+	public static String loadText(String path) throws IOException{
+		return loadText(path,ClasspathRoot.class.getClassLoader(),"utf-8");
+	}
+	public static String loadText(String path,ClassLoader loader,String encoding) throws UnsupportedEncodingException,
 			IOException {
 		InputStream in = loader.getResourceAsStream(path); 
 		if(in == null){
 			return null;
 		}
-		Reader reader = new InputStreamReader(in,this.encoding);
+		Reader reader = new InputStreamReader(in,encoding);
 		StringBuilder buf = new StringBuilder();
 		char[] cbuf = new char[1024];
 		for (int len = reader.read(cbuf); len > 0; len = reader.read(cbuf)) {

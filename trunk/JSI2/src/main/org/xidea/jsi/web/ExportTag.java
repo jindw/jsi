@@ -11,8 +11,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.ScriptLoader;
-import org.xidea.jsi.impl.DefaultJSILoadContext;
-import org.xidea.jsi.impl.FileJSIRoot;
+import org.xidea.jsi.impl.DefaultLoadContext;
+import org.xidea.jsi.impl.FileRoot;
 
 public class ExportTag extends javax.servlet.jsp.tagext.BodyTagSupport {
 	/**
@@ -32,7 +32,7 @@ public class ExportTag extends javax.servlet.jsp.tagext.BodyTagSupport {
 		try {
 			String imports = this.getBodyContent().getString();
 			JSIRoot root = getJSIRoot();
-			DefaultJSILoadContext context = new DefaultJSILoadContext();
+			DefaultLoadContext context = new DefaultLoadContext();
 			int p1 = 0;
 			while ((p1 = imports.indexOf(IMPORT_FN, p1)) > 0) {
 				p1 = imports.indexOf('"', p1) + 1;
@@ -75,7 +75,7 @@ public class ExportTag extends javax.servlet.jsp.tagext.BodyTagSupport {
 		ServletContext context = this.pageContext.getServletContext();
 		JSIRoot root = (JSIRoot) context.getAttribute(GLOBAL_JSI_ROOT_KEY);
 		if (root == null) {
-			root = new FileJSIRoot(context.getRealPath(scriptBase), "utf-8");
+			root = new FileRoot(context.getRealPath(scriptBase), "utf-8");
 			context.setAttribute(GLOBAL_JSI_ROOT_KEY, root);
 		}
 		return root;

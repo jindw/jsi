@@ -13,7 +13,7 @@ import org.xidea.jsi.JSIPackage;
  * @author jindw
  * 
  */
-public class DefaultJSIDependence implements JSIDependence {
+public class DefaultDependence implements JSIDependence {
 	protected final JSIPackage targetPackage;
 	protected String targetFileName;
 	protected String targetObjectName;
@@ -30,7 +30,7 @@ public class DefaultJSIDependence implements JSIDependence {
 	 * @param requiredBefore
 	 *            装在前依赖
 	 */
-	public DefaultJSIDependence(JSIPackage targetPackage,
+	public DefaultDependence(JSIPackage targetPackage,
 			String targetFileName, String targetObjectName, boolean afterLoad) {
 		this.afterLoad = afterLoad;
 		this.targetPackage = targetPackage;
@@ -44,8 +44,8 @@ public class DefaultJSIDependence implements JSIDependence {
 	 * @param thisObjectName
 	 * @return
 	 */
-	DefaultJSIDependence instanceFor(String thisObjectName) {
-		DefaultJSIDependence instance = new DefaultJSIDependence(
+	DefaultDependence instanceFor(String thisObjectName) {
+		DefaultDependence instance = new DefaultDependence(
 				this.targetPackage, this.targetFileName, this.targetObjectName,
 				this.afterLoad);
 		instance.thisObjectName = thisObjectName;

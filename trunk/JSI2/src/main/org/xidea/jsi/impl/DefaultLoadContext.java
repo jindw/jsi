@@ -14,7 +14,7 @@ import org.xidea.jsi.ScriptLoader;
  * @scope Session
  * @author jindw
  */
-public class DefaultJSILoadContext implements JSILoadContext {
+public class DefaultLoadContext implements JSILoadContext {
 	private Map<String, ScriptStatus> scriptStatusMap = new HashMap<String, ScriptStatus>();
 	private List<String> loadList = new ArrayList<String>();
 	private Map<String, ScriptLoader> loadMap = new HashMap<String, ScriptLoader>();
@@ -50,7 +50,7 @@ public class DefaultJSILoadContext implements JSILoadContext {
 			scriptStatusMap.put(id, status = new ScriptStatus());
 		}
 		pkg.initialize();
-		List<JSIDependence> list = ((DefaultJSIPackage) pkg).getDependenceMap()
+		List<JSIDependence> list = ((DefaultPackage) pkg).getDependenceMap()
 				.get(path);
 		if (list == null) {
 			if (!loadList.contains(id)) {
@@ -63,7 +63,7 @@ public class DefaultJSILoadContext implements JSILoadContext {
 				if (!dependence.isAfterLoad()
 						&& (dependenceThisObjectName == null || object == null || object
 								.equals(dependenceThisObjectName))) {
-					((DefaultJSIDependence) dependence).load(this);
+					((DefaultDependence) dependence).load(this);
 					if (status.isLoaded(object)) {
 						return;
 					}
@@ -81,7 +81,7 @@ public class DefaultJSILoadContext implements JSILoadContext {
 				if (dependence.isAfterLoad()
 						&& (dependenceThisObjectName == null || object == null || object
 								.equals(dependenceThisObjectName))) {
-					((DefaultJSIDependence) dependence).load(this);
+					((DefaultDependence) dependence).load(this);
 				}
 			}
 		}

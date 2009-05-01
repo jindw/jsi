@@ -14,12 +14,12 @@ import org.junit.Test;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.ScriptLoader;
-import org.xidea.jsi.impl.DataJSIRoot;
-import org.xidea.jsi.impl.DefaultJSILoadContext;
+import org.xidea.jsi.impl.DataRoot;
+import org.xidea.jsi.impl.DefaultLoadContext;
 
 public class DataJSIRootTest {
 
-	private DataJSIRoot root;
+	private DataRoot root;
 	private String packageName = this.getClass().getPackage().getName();
 	private static File destDir;
 	static{
@@ -35,7 +35,7 @@ public class DataJSIRootTest {
 	public void setUp() throws Exception {
 		HashMap data = new HashMap();
 		data.put(packageName.replace('.', '/') + "/utf8.js", "测试utf8");
-		root = new DataJSIRoot(data);
+		root = new DataRoot(data);
 	}
 
 	@Test
@@ -46,8 +46,8 @@ public class DataJSIRootTest {
 	@Test
 	public void testDataRoot() throws UnsupportedEncodingException, IOException {
 		String source = loadDestText("exported-all.xml");
-		JSIRoot root = new DataJSIRoot(source);
-		JSILoadContext loadContext = new DefaultJSILoadContext();
+		JSIRoot root = new DataRoot(source);
+		JSILoadContext loadContext = new DefaultLoadContext();
 		root.$import("example.*", loadContext);
 		//root.$import("example.alias.*", loadContext);
 //		root.$import("example.dependence.*", loadContext);
