@@ -24,7 +24,6 @@ function ObjectInfo(fileInfo,name,object,docEntry){
     this.packageInfo = fileInfo.packageInfo;
     this.docEntry = docEntry;
     this.type = guessType(object,docEntry);
-
 };
 /**
  * 创建对象信息

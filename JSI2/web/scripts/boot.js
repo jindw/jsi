@@ -577,8 +577,7 @@ var $import = function(freeEval,cachedScripts){
                 if(":debug"){
                     if(!targetPath){
                         if("org.xidea.jsi.boot:$log"){
-                            $log.error(dep.join('\n'));
-                            $log.error(list.join('\n'));
+                            $log.error("依赖异常",dep.join('\n'),list.join('\n'));
                         }
                     }
                 }
@@ -902,7 +901,7 @@ var $import = function(freeEval,cachedScripts){
                         cachedScripts[name] === undefined && loadTextByURL(scriptBase+name.replace(/\.|$/g,'/')+ '__package__.js');
                 }
                 if(pscript){
-                    return new Package(name,pscript);
+                    return packageMap[name] || new Package(name,pscript);
                 }
                 //注册空包，避免重复探测
                 //hack for null
@@ -948,7 +947,7 @@ var $import = function(freeEval,cachedScripts){
          */
         this.name = fileName;
 
-        ScriptLoader[this.name] = (ScriptLoader[this.name]||0)+1;
+        //DEBUG:ScriptLoader[this.name] = (ScriptLoader[this.name]||0)+1;
         /**
          * 脚本目录，可在托管脚本顶层上下文（非函数内）访问，<code>this&#46;scriptBase</code>
          * @friend
@@ -966,14 +965,11 @@ var $import = function(freeEval,cachedScripts){
          */
         //this.dependenceMap = null;
         
-        ScriptLoader[this.name] += 0x10;
         var loader = prepareScriptLoad(packageObject,this)
         if(loader){
             return loader;
         }
-        ScriptLoader[this.name] += 0x100;
         doScriptLoad(packageObject,this);
-        ScriptLoader[this.name] += 0x1000000;
     };
     /*
      * 前期准备，初始化装载单元的依赖表，包括依赖变量申明，装载前依赖的装载注入
@@ -1029,28 +1025,29 @@ var $import = function(freeEval,cachedScripts){
         var cachedScript = getCachedScript(packageName,loaderName);
         packageObject.loaderMap[loaderName] = loader;
         try{
-            ScriptLoader[loaderName] += 0x2000
+            //ScriptLoader[loaderName] += 0x2000
             
             if(cachedScript instanceof Function){
                 //$JSI.preload(pkgName,loaderName,'')
                 cachedScripts[packageName][loaderName]='';//clear cache
                 return cachedScript.call(loader);
             }else{
-            	if(loaderName == 'show-detail.js'){
-            	    $log.error(loaderName,loader)
-                }
                 if(":debug"){
+                    
+//            	    if(loaderName == 'show-detail.js'){
+//            	        $log.error(loaderName,loader)
+//                  }
                     //不要清除文本缓存
                     return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(scriptBase+"?path="+packageObject.name.replace(/\.|$/g,'/')+loaderName)));
+//            	    if(loaderName == 'show-detail.js'){
+//            	        $log.error(loaderName,loader)
+//                  }
                 }else{
                      //不要清除文本缓存
                     return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(packageObject.scriptBase+loaderName)));
                 }
-            	if(loaderName == 'show-detail.js'){
-            	    $log.error(loaderName,loader)
-                }
             }
-            ScriptLoader[loaderName] += 0x10000
+            //ScriptLoader[loaderName] += 0x10000
             
         }catch(e){
             if(":debug"){
@@ -1132,10 +1129,10 @@ var $import = function(freeEval,cachedScripts){
             	this.hook(vars.replace(/([^,]+)/g,'$1 = this.varMap.$1'));
             }catch(e){
             	$log.debug("奇怪的状态",
-            	this.varMap,this,
-            	this.constructor,
-            	this.hook == null,
-            	"status"+ScriptLoader[loaderName].toString(16)
+            	    this.varMap,this,
+            	    this.constructor,
+            	    this.hook == null,
+            	   "status"+ScriptLoader[loaderName].toString(16)
             	)
             	throw e;
             }

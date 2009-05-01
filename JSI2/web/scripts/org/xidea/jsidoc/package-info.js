@@ -7,10 +7,10 @@
  */
 
 
-function PackageInfo(name,packageName){
+function PackageInfo(name,packageObject){
     packageMap[name] = this;
     this.name = name;
-    this.packageObject = packageName;//
+    this.packageObject = packageObject;//
     if(this.packageObject.name != name){
         this.implementation = this.packageObject.name;
         return ;
