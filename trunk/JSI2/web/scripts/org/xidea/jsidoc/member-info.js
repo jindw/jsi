@@ -79,8 +79,10 @@ MemberInfo.createMembers = function(ownerInfo,isStatic){
             info.memberType = 'prototype';
         }
         try{
-            infos[memberName] = info;
-            infos.push(memberName);
+            if(!/^\d+$/.test(memberName)){
+                infos[memberName] = info;
+                infos.push(memberName);
+            }
         }catch(e){}
     }
     //文档取成员
@@ -91,8 +93,11 @@ MemberInfo.createMembers = function(ownerInfo,isStatic){
                 info.memberType = 'instance';
             }
             try{
-                infos[memberName] = info;
-                infos.push(memberName);
+                if(!/^\d+$/.test(memberName)){
+                    infos[memberName] = info;
+                    infos.push(memberName);
+                }
+                
             }catch(e){}
         }
     }
@@ -103,7 +108,14 @@ MemberInfo.createMembers = function(ownerInfo,isStatic){
         try{
             var av = infos[a].getAccess();
             var bv = infos[b].getAccess();
-        }catch(e){$log.debug("getAccess",a,b,e.message,infos[a].docEntry,infos[b].docEntry.constructor,infos[a].getAccess ,infos[b].getAccess)}
+        }catch(e){
+            try{
+                $log.debug("getAccess",isStatic,"a:"+a,"b:"+b,'infos:'+infos);
+                $log.debug(e.message,infos[a].docEntry,infos[b].docEntry.constructor,infos[a].getAccess ,infos[b].getAccess)
+            }catch(e){
+                $log.debug(e);
+            }
+        }
         return (accessOrder.indexOf(bv)-accessOrder.indexOf(av))||(a>b?1:-1);
     });
     //$log.info(infos.join('\n'));
