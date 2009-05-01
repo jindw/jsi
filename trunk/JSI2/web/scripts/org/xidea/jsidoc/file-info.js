@@ -74,7 +74,7 @@ FileInfo.prototype.getObjectMap = function(){
 	            //Avoid document.write
 	            var backup = document.write;
 	            document.write = voidWrite;
-	            importedMap[path] && $import(path,null);
+	            !importedMap[path] && $import(path,null);
 	            document.write = backup;
 	        }catch(e){
 	            $log.info("文档工具装载脚本失败：",path,e);
