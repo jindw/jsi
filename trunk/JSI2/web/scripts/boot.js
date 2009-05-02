@@ -185,7 +185,7 @@ var $import = function(freeEval,cachedScripts){
     }else{
     	if("org.xidea.jsi.boot:server"){
     	    $JSI.scriptBase= "classpath:///";
-    	    function loadTextByURL(url){
+    	    loadTextByURL=function(url){
     	        /*
     		     	url = url.replace(/^\w+:(\/)+(?:\?.*=)/,'$1');
     				var buf = new java.io.StringWriter();

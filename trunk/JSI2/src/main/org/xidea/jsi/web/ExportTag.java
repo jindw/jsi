@@ -14,7 +14,7 @@ import org.xidea.jsi.ScriptLoader;
 import org.xidea.jsi.impl.DefaultLoadContext;
 import org.xidea.jsi.impl.FileRoot;
 
-public class ExportTag extends javax.servlet.jsp.tagext.BodyTagSupport {
+class ExportTag extends javax.servlet.jsp.tagext.BodyTagSupport {
 	/**
 	 * 
 	 */
