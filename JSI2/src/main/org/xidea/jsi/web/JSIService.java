@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,41 +35,62 @@ public class JSIService {
 	/**
 	 * 只有默认的encoding没有设置的时候，才会设置
 	 */
-	protected String encoding = null;
+	protected String encoding = "utf-8";
+
 	public void setScriptBase(String scriptBase) {
 		this.scriptBase = scriptBase;
 	}
+
 	public void setScriptBaseDirectory(File scriptBaseFile) {
 		this.scriptBaseDirectory = scriptBaseFile;
 	}
+
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
 	}
+
 	public void setExternalLibraryDirectory(File externalLibraryFilr) {
 		this.externalLibraryDirectory = externalLibraryFilr;
 	}
 
-	public boolean print(String path, Map<String, String[]> param, OutputStream out)
+	public String service(String path, Map<String, String[]> param, Writer out)
 			throws IOException {
-		String encoding = this.encoding == null?"utf-8":this.encoding;
-		if(path == null || path.length() == 0){
-			out.write(buildDocumentHTML().getBytes(encoding));
-			return true;
-		}else if("export.action".equals(path)){
-			out.write(buildExportHTML(param).getBytes(encoding));
+		if (path == null || path.length() == 0) {
+			out.write(buildDocumentHTML());
+			return "text/plain";
+		} else if ("export.action".equals(path)) {
+			out.write(buildExportHTML(param));
+			return "text/html";
 		}
 		boolean isPreload = false;
 		if (path.endsWith(JSIText.PRELOAD_FILE_POSTFIX)) {
 			isPreload = true;
-			path = path.substring(0,path.length()-JSIText.PRELOAD_FILE_POSTFIX .length())+".js";
+			path = path.substring(0, path.length()
+					- JSIText.PRELOAD_FILE_POSTFIX.length())
+					+ ".js";
 		}
+
+		this.writeResource(path, isPreload, null);
+
+		return null;
+
+	}
+
+	protected boolean writeResource(String path, boolean isPreload,OutputStream out) throws IOException {
 		InputStream in = this.getResourceStream(path);
 		if (in != null) {
-			this.printResource(path, isPreload, in, out);
+			if (isPreload) {
+				out.write(JSIText.buildPreloadPerfix(path).getBytes());
+				output(in, out);
+				out.write(JSIText.buildPreloadPostfix("//").getBytes());
+			} else {
+				output(in, out);
+			}
+			return true;
+		}else {
+			output(in, out);
 			return true;
 		}
-		return false;
-
 	}
 
 
@@ -82,7 +104,8 @@ public class JSIService {
 			output(in, out);
 		}
 	}
-	protected String buildDocumentHTML() {
+
+	public String buildDocumentHTML() {
 		List<String> packageList = FileRoot
 				.findPackageList(this.scriptBaseDirectory);
 		StringWriter out = new StringWriter();
@@ -114,7 +137,8 @@ public class JSIService {
 		return out.toString();
 	}
 
-	protected String buildExportHTML(Map<String, String[]> param) throws IOException {
+	protected String buildExportHTML(Map<String, String[]> param)
+			throws IOException {
 		String[] contents = param.get("content");
 		if (contents != null) {
 			final DataRoot root = new DataRoot(contents[0]);
@@ -148,7 +172,7 @@ public class JSIService {
 	}
 
 	public InputStream getResourceStream(String path) {
-		if(path.startsWith("/")){
+		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
 		File file = new File(this.scriptBaseDirectory, path);
@@ -156,7 +180,8 @@ public class JSIService {
 			try {
 				return new FileInputStream(file);
 			} catch (FileNotFoundException e) {
-				log.debug(e);;
+				log.debug(e);
+				;
 			}
 		}
 		File[] list = this.scriptBaseDirectory.listFiles(new FilenameFilter() {
@@ -213,8 +238,7 @@ public class JSIService {
 			ps.loadFromXML(new FileInputStream(file));
 			String value = ps.getProperty(path);
 			if (value != null) {
-				byte[] data = value.getBytes(encoding == null ? "utf8"
-						: encoding);
+				byte[] data = value.getBytes(encoding);
 				return new ByteArrayInputStream(data);
 			} else {
 				value = ps.getProperty(path + "#base64");

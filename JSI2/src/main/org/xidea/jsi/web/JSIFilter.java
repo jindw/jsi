@@ -65,7 +65,7 @@ public class JSIFilter extends JSIService implements Filter {
 					resp.setContentType(metatype);
 				}
 				ServletOutputStream out = resp.getOutputStream();
-				printResource(path, isPreload, in, out);
+				writeResource(path, isPreload, out);
 				in.close();
 				return;
 			}
@@ -106,7 +106,7 @@ public class JSIFilter extends JSIService implements Filter {
 			if(result == null){
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			}else{
-				response.addHeader("Content-Type", "text/paint;charset="+(this.encoding == null ? "utf-8" : this.encoding));
+				response.addHeader("Content-Type", "text/paint;charset="+this.encoding);
 				response.getWriter().print(result);
 			}
 			return true;
@@ -117,7 +117,7 @@ public class JSIFilter extends JSIService implements Filter {
 			ServletResponse response) throws UnsupportedEncodingException {
 		if (request.getCharacterEncoding() == null) {
 			// request 默认情况下是null
-			String encoding = this.encoding == null ? "utf-8" : this.encoding;
+			String encoding = this.encoding;
 			request.setCharacterEncoding(encoding);
 			response.setCharacterEncoding(encoding);
 		}
