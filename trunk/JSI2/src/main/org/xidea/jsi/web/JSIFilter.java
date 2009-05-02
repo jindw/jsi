@@ -39,7 +39,6 @@ public class JSIFilter extends JSIService implements Filter {
 		if (path.startsWith(scriptBase)) {
 			path = path.substring(scriptBase.length());
 			if (this.processAttachedAction(request, response, path)) {
-				initializeEncodingIfNotSet(request, response);
 				return;
 			}
 			if (isIndex(path)) {
@@ -87,9 +86,10 @@ public class JSIFilter extends JSIService implements Filter {
 	private boolean processAttachedAction(HttpServletRequest request,
 			HttpServletResponse response, String path) throws IOException {
 		if (isIndex(path) && request.getParameter("path") == null) {
+			initializeEncodingIfNotSet(request, response);
 			String externalScript = request.getParameter("externalScript");
 			if (externalScript == null) {
-				response.getWriter().print(buildDocumentHTML());
+				response.getWriter().print(document());
 			} else {
 				response
 						.sendRedirect("org/xidea/jsidoc/index.html?externalScript="
@@ -99,14 +99,15 @@ public class JSIFilter extends JSIService implements Filter {
 			return true;
 		} else if ("export.action".equals(path)) {
 			//type =1,type=2,type=3
+			initializeEncodingIfNotSet(request, response);
 			@SuppressWarnings("unchecked")
 			Map param = request.getParameterMap();
 			@SuppressWarnings("unchecked")
-			String result = buildExportHTML(param);
+			String result = export(param);
 			if(result == null){
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			}else{
-				response.addHeader("Content-Type", "text/paint;charset="+this.encoding);
+				response.addHeader("Content-Type", "text/plain;charset="+this.encoding);
 				response.getWriter().print(result);
 			}
 			return true;
@@ -117,7 +118,6 @@ public class JSIFilter extends JSIService implements Filter {
 			ServletResponse response) throws UnsupportedEncodingException {
 		if (request.getCharacterEncoding() == null) {
 			// request 默认情况下是null
-			String encoding = this.encoding;
 			request.setCharacterEncoding(encoding);
 			response.setCharacterEncoding(encoding);
 		}

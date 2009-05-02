@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -53,30 +54,47 @@ public class JSIService {
 		this.externalLibraryDirectory = externalLibraryFilr;
 	}
 
-	public String service(String path, Map<String, String[]> param, Writer out)
+	public void service(String path, Map<String, String[]> param, Writer out)
 			throws IOException {
 		if (path == null || path.length() == 0) {
-			out.write(buildDocumentHTML());
-			return "text/plain";
+			out.write(document());
+			// "text/html";
 		} else if ("export.action".equals(path)) {
-			out.write(buildExportHTML(param));
-			return "text/html";
+			out.write(export(param));
+			// "text/plain";
+		} else {
+			boolean isPreload = false;
+			if (path.endsWith(JSIText.PRELOAD_FILE_POSTFIX)) {
+				isPreload = true;
+				path = path.substring(0, path.length()
+						- JSIText.PRELOAD_FILE_POSTFIX.length())
+						+ ".js";
+			}
+			this.writeResource(path, isPreload, out);
 		}
-		boolean isPreload = false;
-		if (path.endsWith(JSIText.PRELOAD_FILE_POSTFIX)) {
-			isPreload = true;
-			path = path.substring(0, path.length()
-					- JSIText.PRELOAD_FILE_POSTFIX.length())
-					+ ".js";
-		}
-
-		this.writeResource(path, isPreload, null);
-
-		return null;
-
+		out.flush();
 	}
 
-	protected boolean writeResource(String path, boolean isPreload,OutputStream out) throws IOException {
+	protected boolean writeResource(String path, boolean isPreload, Writer out)
+			throws IOException {
+		InputStream in = this.getResourceStream(path);
+		if (in != null) {
+			if (isPreload) {
+				out.write(JSIText.buildPreloadPerfix(path));
+				output(in, out);
+				out.write(JSIText.buildPreloadPostfix("//"));
+			} else {
+				output(in, out);
+			}
+			return true;
+		} else {
+			output(in, out);
+			return true;
+		}
+	}
+
+	protected boolean writeResource(String path, boolean isPreload,
+			OutputStream out) throws IOException {
 		InputStream in = this.getResourceStream(path);
 		if (in != null) {
 			if (isPreload) {
@@ -87,14 +105,13 @@ public class JSIService {
 				output(in, out);
 			}
 			return true;
-		}else {
+		} else {
 			output(in, out);
 			return true;
 		}
 	}
 
-
-	protected void printResource(String path, boolean isPreload,
+	protected void writeResource(String path, boolean isPreload,
 			InputStream in, OutputStream out) throws IOException {
 		if (isPreload) {
 			out.write(JSIText.buildPreloadPerfix(path).getBytes());
@@ -105,7 +122,7 @@ public class JSIService {
 		}
 	}
 
-	public String buildDocumentHTML() {
+	protected String document() {
 		List<String> packageList = FileRoot
 				.findPackageList(this.scriptBaseDirectory);
 		StringWriter out = new StringWriter();
@@ -137,7 +154,7 @@ public class JSIService {
 		return out.toString();
 	}
 
-	protected String buildExportHTML(Map<String, String[]> param)
+	protected String export(Map<String, String[]> param)
 			throws IOException {
 		String[] contents = param.get("content");
 		if (contents != null) {
@@ -253,7 +270,7 @@ public class JSIService {
 		return null;
 	}
 
-	private static void output(InputStream in, OutputStream out)
+	protected static void output(InputStream in, OutputStream out)
 			throws IOException {
 		byte[] buf = new byte[1024];
 		int len = in.read(buf);
@@ -263,4 +280,13 @@ public class JSIService {
 		}
 	}
 
+	protected void output(InputStream in2, Writer out) throws IOException {
+		char[] buf = new char[1024];
+		InputStreamReader in = new InputStreamReader(in2, this.encoding);
+		int len = in.read(buf);
+		while (len > 0) {
+			out.write(buf, 0, len);
+			len = in.read(buf);
+		}
+	}
 }
