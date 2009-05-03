@@ -91,13 +91,12 @@
 								<label>
 									<input name="level" id="level3"
 										onclick="ExportUI.checkLevel(this)" value="3" type="radio"
-										disabled="true" />
+										checked="true" />
 									隔离全部冲突
 								</label>
 								<label>
 									<input name="level" id="level2"
-										onclick="ExportUI.checkLevel(this)" value="2" type="radio"
-										disabled="true" />
+										onclick="ExportUI.checkLevel(this)" value="2" type="radio"/>
 									隔离内部冲突
 								</label>
 								<label>
@@ -109,13 +108,13 @@
 								<label>
 									<input name="level" id="level0"
 										onclick="ExportUI.checkLevel(this)" value="0" type="radio"
-										disabled="true" title="导出JSI分析报告" />
+										title="导出JSI分析报告" />
 									导出分析报告
 								</label>
 								<label>
 									<input name="level" id="level-1"
 										onclick="ExportUI.checkLevel(this)" value="-1" type="radio"
-										checked="true" title="导出后需要使用JSA处理成单个压缩文件,实现隔离冲突" />
+										title="导出后需要使用JSA处理成单个压缩文件,实现隔离冲突" />
 									导出为XML
 								</label>
 								<label>
@@ -153,23 +152,23 @@
 								</button>
 							</div>
 							<ul>
-								<li>
+								<li style="display:none">
 									将导出的数据保存于hta或者html中,查看时需要连接到网络,才能正确解析,您也可以指定一个本地的文档服务器.
 								</li>
-								<li>
+								<li style="display:none">
 									导出为xml格式的结果，
 									<b>无法直接正确执行</b>
 									,他只是一个多文件打包的合并方式,需要经过JSA的处理.
 								</li>
-								<li>输出脚本分析报告，可供代码复查时参考</li>
-								<li>脱离JSI后,直接合并可能有命名冲突的危险.不推荐.</li>
-								<li>
+								<li style="display:none">输出脚本分析报告，可供代码复查时参考</li>
+								<li style="display:none">脱离JSI后,直接合并可能有命名冲突的危险.不推荐.</li>
+								<li style="display:none">
 									隔离内部冲突是指混淆掉文件内部的未公开全局变量,这需要服务端支持,
 									<b>
 										如果你现在的导出环境不支持java,可以导出成xml,再交由JSA处理
 									</b>
 								</li>
-								<li>
+								<li style="display:inline">
 									隔离全部冲突有和JSI等价的隔离级别,这需要服务端支持,
 									<b>
 										如果你现在的导出环境不支持java,可以导出成xml,再交由JSA处理
