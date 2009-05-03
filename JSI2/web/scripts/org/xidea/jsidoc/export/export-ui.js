@@ -37,15 +37,7 @@ var ExportUI = {
         return packageNodes;
     },
     initialize:function(){
-        initializeForm();
-        var request1 = new Request(compressServiceURL,"post",function(success){
-            if(success){
-                updateDisabledForm('0');
-                updateDisabledForm('2');
-                updateDisabledForm('3');
-            }
-        });
-        request1.send("");
+        //initializeForm();
     },
     clickScript : function(objectId){
         var checked = checkMap[objectId];
@@ -162,17 +154,6 @@ function showResult(content,reuse){
     doc.write(content.replace(/[<>&]/g,xmlReplacer));
     doc.write("</textarea></body></html>");
     doc.close();
-}
-function initializeForm(){
-    var levels = exportDocument.forms[0].level;
-    for(var i=0; i<levels.length; i++) {
-        var input = levels[i];
-        if(input.value ==2 ||input.value ==3||input.value ==0){
-            input.disabled = true;
-        }else if(!input.disabled && input.checked ){
-            input.click();
-        }
-    }
 }
 function updateDisabledForm(value){
     var levels = exportDocument.forms[0].level;
