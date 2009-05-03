@@ -160,10 +160,7 @@ Exporter.prototype = {
         }else if(window.JSIDoc &&window.JSIDoc.getSource){
            var parentJSIDoc = window.JSIDoc;
         }
-        alert(111)
-        if(parentJSIDoc & parentJSIDoc.getSource){
-            
-        alert(parentJSDoc)
+        if(parentJSIDoc && parentJSIDoc.getSource){
             //$log.info(packageName,path.substr(packageName.length+1));
             var rtv = parentJSIDoc.getSource(path);
         }else{
