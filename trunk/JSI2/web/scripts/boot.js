@@ -720,7 +720,9 @@ var $import = function(freeEval,cachedScripts){
                 if(objectNames == '*'){
                     $log.trace("部署后不应出现的配置，需要压缩处理掉相关问题！！！");
                     objectNames = doObjectImport(
-                        realPackage(findPackage("org.xidea.jsidoc.util",true)),"findGlobals")(loadTextByURL(scriptBase+"?path="+this.name.replace(/\.|$/g,'/')+scriptPath));
+                        realPackage(
+                        	findPackage("org.xidea.jsidoc.util",true)
+                        ),"findGlobals")(getCachedScript(this.name,scriptPath)||loadTextByURL(scriptBase+"?path="+this.name.replace(/\.|$/g,'/')+scriptPath));
                     
                 }
             }
@@ -1267,7 +1269,8 @@ var $import = function(freeEval,cachedScripts){
 	                    if(location.protocol == 'file:'){
 	                        //alert(scriptBase+list[0].replace(/.js$/gm,"__preload__.js"))
 	                        try{
-	                            loadTextByURL(scriptBase+list[0].replace(/.js$/gm,"__preload__.js"))
+	                        	//WHY???
+	                            //loadTextByURL(scriptBase+list[0].replace(/.js$/gm,"__preload__.js"))
 	                            document.write(list.join("\n").
 	                                replace(/.js$/gm,"__preload__.js").
 	                                replace(/.+/g,"<script src='"+scriptBase+"?path=$&' onerror='return alert'></script>"));

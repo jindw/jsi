@@ -117,17 +117,19 @@ var ExportUI = {
             //导出时尽可能解决全部冲突
             var prefix = form.prefix.value;//PARAM_PREFIX
             var xmlContent = exporter.getXMLContent();
-            var result = ["content=",encodeURIComponent(xmlContent)]
-            var imports = exporter.getImports();
-            result.push("&exports=",imports.join(','));
-            result.push("&level=",level);
-            result.push("&internalPrefix=",encodeURIComponent(prefix));
-            result.push("&lineSeparator=",encodeURIComponent("\r\n"));
-            //submit to JSA
-            var request = new Request(compressServiceURL,"post",function(){
-                showResult(this.getText(),true)
-            });
-            request.send(result.join(""));
+            var result = {
+            	"content":xmlContent,
+            	"exports":exporter.getImports().join(','),
+            	"level":level,
+            	"internalPrefix":prefix,
+            	"lineSeparator":"\r\n"
+            }
+            if(location.protocol == "file:"){
+            	submitResult(result,"http://litecompiler.appspot.com")
+            }else{
+	            //submit to JSA
+	            submitResult(result,compressServiceURL);
+            }
             break;
         default:
             $log.error("不支持导出级别["+level+"],将导出xml格式打包文件");
@@ -154,6 +156,30 @@ function showResult(content,reuse){
     doc.write(content.replace(/[<>&]/g,xmlReplacer));
     doc.write("</textarea></body></html>");
     doc.close();
+}
+function submitResult(content,compressServiceURL){
+    if(dialog){
+        try{
+            dialog.close();
+        }catch(e){
+        }finally{
+        	dialog = null;
+        }
+    }
+    dialog = dialog || window.open('about:blank','source','modal=yes,left=200,top=100,width=600px,height=600px');
+    var form = document.createElement("form");
+    document.body.appendChild(form)
+    form.method = "POST";
+    form.target = "source"
+    form.action=compressServiceURL
+    for(var n in content){
+    	var input = document.createElement("input");
+    	input.name = n;
+    	input.value = content[n];
+        form.appendChild(input)
+    }
+    form.submit();
+    document.body.removeChild(form);
 }
 function updateDisabledForm(value){
     var levels = exportDocument.forms[0].level;
