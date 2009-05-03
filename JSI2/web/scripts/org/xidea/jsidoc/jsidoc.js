@@ -33,7 +33,7 @@ function onload(){
     var packageGroupMap = JSIDoc.packageGroupMap ;
     if(packageGroupMap.length == 0){
         packageGroupMap.push("托管脚本示例");
-        packageGroupMap["托管脚本示例"]= ["example","example.internal","org.xidea.jsidoc"]
+        packageGroupMap["托管脚本示例"]= ["example","example.alias","example.internal","example.dependence"]
     }
     JSIDoc.addPackageMap(packageGroupMap);
     setTimeout(function(){
@@ -66,15 +66,17 @@ var JSIDoc = {
                         document.write("<script src='"+value+"'><\/script>")
                     }
                     return value;//???
-                }else if(name == "group"){
-                    value = JSON.decode(value);
-                    for(name in value){
-                        packageGroupMap.push(name)
-                        packageGroupMap[name] = value[name];
-                    }
-                }else if(name = name.replace(/^group\.(.*)|.*/,'$1')){//old 
-                    packageGroupMap.push(name)
-                    packageGroupMap[name] = value.split(',');
+                }else if(value){
+                	if(name == "group"){
+	                    value = JSON.decode(value);
+	                    for(name in value){
+		                        packageGroupMap.push(name)
+		                        packageGroupMap[name] = value[name];
+	                    }
+	                }else if(name = name.replace(/^group\.(.+)|.+/,'$1')){//old 
+	                    packageGroupMap.push(name)
+	                    packageGroupMap[name] = value.split(',');
+	                }
                 }
             }
         }
@@ -302,7 +304,9 @@ var JSIDoc = {
             groupPackages = this.packageGroupMap[groupName] = [];
         }
         for(var packageName in packageMap){
-            groupPackages.push(packageName);
+        	if(packageName){
+                groupPackages.push(packageName);
+        	}
             preload(packageName,packageMap[packageName]);
         }
     },
@@ -312,6 +316,7 @@ var JSIDoc = {
      * @param fileName
      */
     getSource:function(filePath){
+    	filePath = filePath.replace(/^\//,'');
         var cache = cachedScripts[filePath];
         if(cache && cache.constructor == String){
             return cache;

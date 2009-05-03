@@ -26,12 +26,12 @@ Template.prototype.render = function(context){
 }
 var scriptBase = this.scriptBase
 var templateMap = {
+	"package.xhtml" : new Template(scriptBase+"html/package.xhtml"),
 	"constructor.xhtml" : new Template(scriptBase+"html/constructor.xhtml"),
 	"export.xhtml" : new Template(scriptBase+"html/export.xhtml"),
 	"function.xhtml" : new Template(scriptBase+"html/function.xhtml"),
 	"menu.xhtml" : new Template(scriptBase+"html/menu.xhtml"),
 	"native.xhtml" : new Template(scriptBase+"html/native.xhtml"),
 	"object.xhtml" : new Template(scriptBase+"html/object.xhtml"),
-	"package.xhtml" : new Template(scriptBase+"html/package.xhtml"),
 	"source.xhtml" : new Template(scriptBase+"html/source.xhtml")
 };

@@ -68,6 +68,9 @@ function replaceSpecialEntry(source){
 }
 
 function findGlobals(source){
+	if(source instanceof Function){
+		source = (''+source).replace(/^\s*function[^\}]*?\{|\}\s*$/g,'');
+	}
     source = replaceSpecialEntry(source.replace(/^\s*#.*/,''));
     //简单的实现，还以为考虑的问题很多很多：
     var varFlagMap = {};

@@ -6,47 +6,43 @@ import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
-
-import org.xidea.jsi.impl.FileRoot;
-import org.xidea.jsi.impl.JSIText;
 
 public class SimpleCacheBuilder {
 	private static String packageBase = "D:/workspace/JSI2/web/scripts";
-	private static String destBase = "D:/workspace/JSI2/build";
+	private static String destFile = "D:/workspace/JSI2/build/jsidoc-source.js";
 
 	public static void main(String[] args) throws IOException {
 		if(args!=null && args.length>=2){
 			packageBase = args[0];
-			destBase = args[1];
+			destFile = args[1];
 		}
-		List<String> packages = FileRoot.findPackageList(new File(packageBase));
-		packages.add("org.xidea.jsidoc.html");
-		packages.add("org.xidea.jsidoc.styles");
+		List<String> packages = new ArrayList<String>();
 		packages.add("");
+		packages.add("example");
+		packages.add("example.alias");
+		packages.add("example.dependence");
+		packages.add("example.internal");
 		
-		genPackageCache(new PrintStream(new File(destBase,"jsidoc-source.js"),"utf-8"),packages);
+		genPackageCache(new PrintStream(destFile,"utf-8"),packages);
 	}
 
 	private static void genPackageCache(PrintStream out,List<String> packages) throws IOException {
-		out.println("JSIDoc.cacheScript({");
 		boolean firstPackage = true;
 		for (String pkg : packages) {
 			File dir = new File(packageBase, pkg.replace('.', '/'));
 			//System.out.println(dir);
 			File[] files = dir.listFiles(new FilenameFilter() {
 				public boolean accept(File dir, String name) {
-					return name.endsWith(".xhtml");
+					return name.endsWith(".js");
 				}
 			});
 			if (files!=null && files.length > 0) {
 				//System.out.println(pkg);
-				if(firstPackage){
-					firstPackage = false;
-				}else{
-					out.print(",");
-				}
-				out.println("'" + pkg + "':{");
+
+				out.println("$JSI.preload(");
+				out.println("'" + pkg + "',{");
 				for (int j = 0; j < files.length; j++) {
 					File file = files[j];
 					String fileName = file.getName();
@@ -60,10 +56,9 @@ public class SimpleCacheBuilder {
 
 					out.print("'");
 				}
-				out.println("}");
+				out.println("});\n");
 			}
 		}
-		out.println("})");
 		out.flush();
 		out.close();
 	}

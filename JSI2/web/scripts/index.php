@@ -35,6 +35,7 @@ if($path == 'export.action'){
 		    )
 		);
 		$context  = stream_context_create($opts);
+		header('Content-type: text/plain');
 		echo file_get_contents($exportService, false, $context);
     }else{
         header("HTTP/1.0 404 Not Found");
