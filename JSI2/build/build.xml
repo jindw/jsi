@@ -7,10 +7,19 @@
 	<available file="../JSA/build/dest/JSA-CMD.jar" property="JSAPath" value="../JSA/classes;../JSA/build/dest/JSA-CMD.jar;../JSA/classes" />
 
 	<target name="init">
+		<delete>
+			<fileset dir="build/dest/">
+				<include name="JSI-*.jar" />
+				<include name="JSI-*.tar" />
+				<include name="JSI-*.zip" />
+				<include name="JSIDoc-*.zip" />
+			</fileset>
+		</delete>
 		<mkdir dir="build/dest" />
 		<mkdir dir="build/dest/scripts" />
 		<mkdir dir="build/dest/jsidoc" />
 		<mkdir dir="build/dest/jsidoc/util/" />
+		<mkdir dir="build/dest/jsidoc/export/" />
 	</target>
 	<target name="jar">
 		<jar destfile="build/dest/JSI.jar">
@@ -36,7 +45,7 @@
 		</jar>
 		<copy tofile="build/dest/JSI-${version}.jar" file="build/dest/JSI.jar" />
 	</target>
-	<target name="jar-compressed-jsidoc">
+	<target name="jar-compressed-jsidoc" depends="init">
 		<echo file="build/dest/jsidoc/export/__package__.js">this.setImplementation("org.xidea.jsidoc")</echo>
 		<echo file="build/dest/jsidoc/__package__.js">this.addScript("jsidoc.js",["JSIDoc",'DependenceInfo','Exporter','ExportUI'],['org.xidea.jsidoc.util.*'])</echo>
 		<jar destfile="build/dest/JSI.jar">
@@ -193,7 +202,7 @@ $JSI.preload("org.xidea.jsidoc.util",'util.js',function(){eval(this.varText);
 		</ftp>
 	</target>
 	<target name="JSIDoc" depends="init">
-		<delete file="build/dest/JSI-JSIDoc-${version}.zip">
+		<delete file="build/dest/JSIDoc-*.zip">
 		</delete>
 		<java classpath="web/WEB-INF/lib/commons-logging-1.0.4.jar;web/WEB-INF/classes/" classname="org.xidea.sandbox.SimpleCacheBuilder">
 			<arg value="${basedir}/web/scripts" />
@@ -208,18 +217,19 @@ $import("org.xidea.jsidoc:JSIDoc");</echo>
 			<path path="build/dest/jsidoc/temp.js" />
 			<path path="build/dest/jsidoc/source.js" />
 		</concat>
-		<zip destfile="build/dest/JSI-JSIDoc-${version}.zip" compress="true">
+		<zip destfile="build/dest/JSIDoc-${version}.zip" compress="true">
 			<zipfileset dir="web/scripts">
 				<include name="**/*.*" />
 				<exclude name="boot.js" />
 				<exclude name="**/*.db" />
 				<exclude name="*/**/*.js" />
+				<exclude name="*/**/*.png" />
 				<exclude name="*/**/*.xhtml" />
 				<exclude name="*/**/*test*.html" />
 				<exclude name="*/**/root-frame.html" />
 			</zipfileset>
 			<zipfileset dir="web/scripts/org/xidea/jsidoc/">
-				<include name="root-frame.html" />
+				<include name="index.html" />
 			</zipfileset>
 			<zipfileset dir="build/dest/jsidoc/">
 				<include name="boot.js" />
@@ -227,13 +237,6 @@ $import("org.xidea.jsidoc:JSIDoc");</echo>
 		</zip>
 	</target>
 	<target name="build" depends="compress-jsidoc,jar-compressed-jsidoc,JSIDoc">
-		<delete>
-			<fileset dir="build/dest/">
-				<include name="JSI-*.jar" />
-				<include name="JSI-*.tar" />
-				<include name="JSI-*.zip" />
-			</fileset>
-		</delete>
 		<tar destfile="build/dest/JSI-${version}.tar" compression="gzip">
 			<tarfileset dir="web">
 				<include name="**/*.*" />

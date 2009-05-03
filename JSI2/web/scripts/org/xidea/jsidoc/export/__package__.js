@@ -7,7 +7,7 @@ this.addScript('dependence-info.js','DependenceInfo');
 
 this.addScript('export.js','Exporter'
                 ,0
-                ,['DependenceInfo','org.xidea.jsidoc.util:findGlobals','org.xidea.jsidoc:findPackages','org.xidea.jsidoc.util:JSON','org.xidea.jsidoc.util:xmlReplacer','org.xidea.jsidoc.util:loadTextByURL']);
+                ,["org.xidea.jsidoc:getTemplate",'DependenceInfo','org.xidea.jsidoc.util:findGlobals','org.xidea.jsidoc:findPackages','org.xidea.jsidoc.util:JSON','org.xidea.jsidoc.util:xmlReplacer','org.xidea.jsidoc.util:loadTextByURL']);
 
 this.addScript('export-ui.js','ExportUI'
                 ,0

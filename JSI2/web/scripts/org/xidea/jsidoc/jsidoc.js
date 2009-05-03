@@ -5,11 +5,57 @@
  * @author jindw
  * @version $Id: jsidoc.js,v 1.9 2008/02/28 14:39:09 jindw Exp $
  */
-function onload(){
-    //
-    // "您需要把您的外部文件放在一个Web服务器上察看;",
-    // "如果您使用的是Firefox，您需要将当前站点添加本地文件访问权限"
-    this.onload = Function.prototype;
+/**
+ * @param packageGroupMap {"groupName":['example',"example.internal"]}
+ */
+function initializePackageFromQuery(packageGroupMap){
+    var search = window.location.search;
+    var hit = false;
+    if(search && search.length>2){
+        var exp = /([^\?=&]*)=([^=&]*)/g;
+        var match;
+        while(match = exp.exec(search)){
+            var name = decodeURIComponent(match[1]);
+            var value = decodeURIComponent(match[2]);
+            if(value){
+            	if(name == "group"){
+                    value = JSON.decode(value);
+                    for(name in value){
+	                    packageGroupMap.push(name)
+	                    packageGroupMap[name] = value[name];
+	                    hit = true;
+                    }
+                }else if(name = name.replace(/^group\.(.+)|.+/,'$1')){//old 
+                    packageGroupMap.push(name)
+                    packageGroupMap[name] = value.split(',');
+                    hit = true;
+                }
+            }
+        }
+    }
+    return hit;
+}
+function initializePackageAndDataDataFromHash(packageGroupMap){
+    var data,win = parent;
+    while(win && win != top){
+        data = win.location.hash;
+        if(data){
+            var packageMap = JSON.decode(data.substring(1));
+            var groupName ="未命名分组";
+            packageGroupMap.push(groupName);
+            groupPackages = packageGroupMap[groupName] = [];
+            for(var packageName in packageMap){
+            	if(packageName){
+                    groupPackages.push(packageName);
+            	}
+                preload(packageName,packageMap[packageName]);
+            }
+            return true;
+        }
+        win = win.parent;
+    }
+}
+function initializeHistory(){
     var contentWindow = document.getElementById("content").contentWindow;
 	if(checkInterval){
     	clearInterval(checkInterval);
@@ -21,24 +67,6 @@ function onload(){
             contentLocation.replace(url);
 		}
 	},100);
-    //可能是本地全线问题导致，无法加载脚本数据
-    if(JSIDoc.waitExternalScript){
-        var message = ["加载本机文档数据失败:","请直接输入文档源代码!!"].join('\n');
-        //var text = window.showModalDialog("javascript:document.write('<html><body><form><textarea id=text style=\"width:100%;height:120px;\"></textarea><br><button onclick=\"alert(window.returnValue = this.form.text.value);window.close();\">确定</button></form></body></html>')",window, "dialogHeight:225px;dialogwidth:250px;resizable:no")
-        var text = prompt(message);
-        if(text){
-            window.eval(text);
-        }
-    }
-    var packageGroupMap = JSIDoc.packageGroupMap ;
-    if(packageGroupMap.length == 0){
-        packageGroupMap.push("托管脚本示例");
-        packageGroupMap["托管脚本示例"]= ["example","example.alias","example.internal","example.dependence"]
-    }
-    JSIDoc.addPackageMap(packageGroupMap);
-    setTimeout(function(){
-        document.getElementById("menu").setAttribute("src","html/controller.html?@menu");
-    },1)
 }
 /**
  * @public
@@ -48,46 +76,27 @@ var JSIDoc = {
      * @return packageGroupMap 或者 false(发现有外部脚本文件)
      */
     prepare:function(){
-        window.onload = onload;
-        var search = window.location.search;
-        var packageGroupMap = this.packageGroupMap = [];
-        if(search && search.length>2){
-            var exp = /([^\?=&]*)=([^=&]*)/g;
-            var match;
-            while(match = exp.exec(search)){
-                var name = decodeURIComponent(match[1]);
-                var value = decodeURIComponent(match[2]);
-                if("externalScript" == name){
-                    if(window.clipboardData && value.indexOf("file://") == 0){
-                        var text = window.clipboardData.getData("Text");
-                        document.write("<script>"+text+"<\/script>")
-                    }else{
-                        this.waitExternalScript = true;
-                        document.write("<script src='"+value+"'><\/script>")
-                    }
-                    return value;//???
-                }else if(value){
-                	if(name == "group"){
-	                    value = JSON.decode(value);
-	                    for(name in value){
-		                        packageGroupMap.push(name)
-		                        packageGroupMap[name] = value[name];
-	                    }
-	                }else if(name = name.replace(/^group\.(.+)|.+/,'$1')){//old 
-	                    packageGroupMap.push(name)
-	                    packageGroupMap[name] = value.split(',');
-	                }
-                }
-            }
+        var packageGroupMap = [];
+        initializePackageAndDataDataFromHash(packageGroupMap) || initializePackageFromQuery(packageGroupMap);
+        //setup url history
+        initializeHistory();
+        if(packageGroupMap.length == 0){
+            var dkey = "托管脚本示例";
+            packageGroupMap.push(dkey);
+            packageGroupMap[dkey]= ["example","example.alias","example.internal","example.dependence"]
         }
+        JSIDoc.addPackageMap(packageGroupMap);
+        setTimeout(function(){
+            document.getElementById("menu").setAttribute("src","html/controller.html?@menu");
+        },100)
     },
+    
     /**
      * @public
      * @param packageGroupMap 包含那些包组
      * @param findDependence 是否查找依赖，来收集其他包
      */
     addPackageMap : function(packageGroupMap,findDependence){
-    	this.waitExternalScript = false;
         this.rootInfo = PackageInfo.requireRoot();
         this.packageInfoGroupMap = this.packageInfoGroupMap || [];
         this.packageInfoMap = this.packageInfoMap || {};
@@ -295,20 +304,6 @@ var JSIDoc = {
             JSIDoc:JSIDoc,
             lines:lines
         });
-    },
-    cacheScript:function(packageMap,groupName){
-        this.waitExternalScript = false;
-        groupName = groupName||"未命名分组";
-        var groupPackages = this.packageGroupMap[groupName];
-        if(!groupPackages){
-            groupPackages = this.packageGroupMap[groupName] = [];
-        }
-        for(var packageName in packageMap){
-        	if(packageName){
-                groupPackages.push(packageName);
-        	}
-            preload(packageName,packageMap[packageName]);
-        }
     },
     /**
      * 获取文档源代码
