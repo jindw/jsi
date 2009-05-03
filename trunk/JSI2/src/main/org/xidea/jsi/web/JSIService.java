@@ -169,7 +169,10 @@ public class JSIService {
 			if (exports != null) {
 				// 只有Data Root 才能支持这种方式
 				for (String item : exports) {
-					root.$import(item, context);
+					//PHP 不支持同名参数
+					for(String subitem:item.split("[^\\w\\.-]+")){
+						root.$import(subitem, context);
+					}
 				}
 			}
 			return exportor.export(context);

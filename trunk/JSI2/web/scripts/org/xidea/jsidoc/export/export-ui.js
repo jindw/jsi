@@ -127,10 +127,7 @@ var ExportUI = {
             var xmlContent = exporter.getXMLContent();
             var result = ["content=",encodeURIComponent(xmlContent)]
             var imports = exporter.getImports();
-            var i = imports.length;
-            while(i--){
-            	result.push("&exports=",imports[i]);
-            }
+            result.push("&exports=",imports.join(','));
             result.push("&level=",level);
             result.push("&internalPrefix=",encodeURIComponent(prefix));
             result.push("&lineSeparator=",encodeURIComponent("\r\n"));

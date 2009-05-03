@@ -218,4 +218,8 @@
 			<arg value="org.xidea.jsidoc.util" />
 		</java>
 	</target>
+	<target name="send">
+		<copy tofile="../JSA/lib/JSI.jar" file="build/dest/JSI.jar" />
+		<copy tofile="../Lite/web/WEB-INF/lib/JSI.jar" file="build/dest/JSI.jar" />
+	</target>
 </project>
