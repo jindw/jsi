@@ -33,5 +33,8 @@ var templateMap = {
 	"menu.xhtml" : new Template(scriptBase+"html/menu.xhtml"),
 	"native.xhtml" : new Template(scriptBase+"html/native.xhtml"),
 	"object.xhtml" : new Template(scriptBase+"html/object.xhtml"),
-	"source.xhtml" : new Template(scriptBase+"html/source.xhtml")
+	"source.xhtml" : new Template(scriptBase+"html/source.xhtml"),
+	
+	
+	"export-doc":new Template(scriptBase+"html/export-doc.xhtml")
 };
