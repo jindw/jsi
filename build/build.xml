@@ -7,6 +7,7 @@
 	<available file="../JSA/build/dest/JSA-CMD.jar" property="JSAPath" value="../JSA/classes;../JSA/build/dest/JSA-CMD.jar;../JSA/classes" />
 
 	<target name="init">
+		<mkdir dir="build/dest" />
 		<delete>
 			<fileset dir="build/dest/">
 				<include name="JSI-*.jar" />
@@ -15,7 +16,6 @@
 				<include name="JSIDoc-*.zip" />
 			</fileset>
 		</delete>
-		<mkdir dir="build/dest" />
 		<mkdir dir="build/dest/scripts" />
 		<mkdir dir="build/dest/jsidoc" />
 		<mkdir dir="build/dest/jsidoc/util/" />
@@ -236,7 +236,7 @@ $import("org.xidea.jsidoc:JSIDoc");</echo>
 			</zipfileset>
 		</zip>
 	</target>
-	<target name="build" depends="compress-jsidoc,jar-compressed-jsidoc,JSIDoc">
+	<target name="build" depends="init,compress-jsidoc,jar-compressed-jsidoc,JSIDoc">
 		<tar destfile="build/dest/JSI-${version}.tar" compression="gzip">
 			<tarfileset dir="web">
 				<include name="**/*.*" />
