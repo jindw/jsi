@@ -1,5 +1,6 @@
 this.addScript("request.js",["Request"]
-                ,"$log");
+                ,["$log","XMLHttpRequest"]);
+this.addScript("xhr.js","XMLHttpRequest");
 this.addScript("json.js",['JSON']);
 
 this.addScript("fn.js",['xmlReplacer','loadTextByURL']
