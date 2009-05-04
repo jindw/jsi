@@ -1,0 +1,120 @@
+.xidea--code-default{
+	background-color: gray;
+	border: 1px solid black;
+}
+.xidea--syntax-source .type-comment- ,.xidea--syntax-source .type-muti-comment-{
+	color: #3f5fbf;
+}
+.xidea--syntax-source .type-comment-{
+    color: #3f5fbf;
+}.xidea--syntax-source .type-muti-comment-{
+    color: #3f5fbf;
+}
+
+.xidea--syntax-source pre{
+	padding: 0px;
+	margin: 0px;
+}
+
+.xidea--syntax-source .type-document-{
+	color: #00F;
+}
+.xidea--syntax-source .type-regexp-{
+	color:#aa0;
+}
+.xidea--syntax-source .type-string-{
+	color: green;
+}
+.xidea--syntax-source .type-preprocessor- {
+	color: gray;
+}
+.xidea--syntax-source .type-prototype-,.xidea--syntax-source .type-function- {
+	color: #a00;
+	font-weight: bold;
+}
+.xidea--syntax-source .type-document- .tag-{
+    color:#7f9fbf;
+}
+.xidea--syntax-source .keyword-{
+    color:#7f0055;
+}
+
+
+
+
+
+.xidea-syntax-closehandle,.xidea-syntax-openhandle{
+	width:12px;height:12px;
+	font-size:9px;
+	border:1px solid #000;
+	padding:0px;
+	margin:0px;
+	background-color:#FFF;
+	display: block;
+}
+.xidea-syntax-open .xidea-syntax-openhandle,.xidea-syntax-closed .xidea-syntax-closehandle{
+	display:none;
+}
+.xidea--syntax-source .xidea-syntax-row0, .xidea-syntax-row1 {
+	padding-left: 1px;
+	border-bottom: 1px solid #F7F7F7;
+	white-space:nowrap;
+}
+
+.xidea--syntax-source .xidea-syntax-row1 {
+	background-color: #F7F7F7;
+}
+
+
+/* for action*/
+.xidea-syntax-more{
+	border:1px solid #000;
+	display: none;
+}
+.xidea-syntax-closed .xidea-syntax-more{
+	line-height:40%;
+	font-weight:normal;
+	font-size:xx-small;
+	display:inline;
+}
+
+.xidea-syntax-vrule0,.xidea-syntax-vrule1{
+}
+
+.xidea-syntax-bound .xidea-syntax-vrule1{
+	background-color:#99d;
+}
+.xidea-syntax-vrule0{
+	text-align: right;
+	padding-right:8px; 
+	margin-right:0px;
+	border-right: 1px solid gray; 
+	background-color: #eee; 
+	color: red;
+	
+}
+.xidea-syntax-vrule0 input{
+	border:0px;
+	padding:0px; 
+	margin:0px;
+	background-color: #eee; 
+}
+.xidea--syntax-source .xidea-syntax-content-bottom{
+	border-top: 1px solid gray; 
+	height:2px
+}
+.xidea--syntax-source tfoot,.xidea--syntax-source thead{
+	background-color: #eee; 
+	color: gray;
+}
+.xidea--syntax-source tfoot,.xidea--syntax-source thead a{
+	font-size: 12px;
+	color: gray;
+	text-decoration: none;
+}
+.xidea--syntax-source .xidea-syntax-content-top{
+	border-bottom: 1px solid gray; 
+}
+.xidea--syntax-source tbody{
+	border-right: 1px solid gray; 
+}

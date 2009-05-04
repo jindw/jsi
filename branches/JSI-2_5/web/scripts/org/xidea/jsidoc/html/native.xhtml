@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<html xmlns="http://www.xidea.org/ns/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core">
+<head>
+<link rel="stylesheet" type="text/css" href="../styles/default.css" />
+<meta http-equiv="Content-Type" content="text/html;utf-8" />
+<title>Native Type Information:${objectInfo.name}</title>
+</head>
+<body>
+<c:if test="${objectInfo.packageInfo.name}">
+	<h2><a
+		href="?${objectInfo.packageInfo.getPath()}">${objectInfo.packageInfo.name}</a></h2>
+</c:if>
+<h2>原始类型信息</h2>
+
+<table border="0" cellpadding="0" width="100%" cellspacing="0"
+	class="content">
+	<thead>
+		<tr>
+			<th><span class="item-${objectInfo.type}"> ${objectInfo.getAccess()}<a
+				href="?${objectInfo.fileInfo.getPath()}#${objectInfo.name}">${objectInfo.name}</a></span></th>
+		</tr>
+	</thead>
+	<tr>
+		<td>
+		<h3> ${objectInfo.type} 
+		<c:choose>
+            <c:when test="${objectInfo.type == 'string'}">
+                ${objectInfo.object == null?null:'"' + objectInfo.object + '"'}
+            </c:when>
+            <c:otherwise>
+                ${objectInfo.object}
+            </c:otherwise>
+        </c:choose>
+		</h3>
+		<ul>
+			<c:out value="${objectInfo.getDescription()}"/>
+		</ul>
+		</td>
+	</tr>
+</table>
+</body>
+</html>
+

@@ -1,0 +1,29 @@
+﻿<html>
+<head>
+<title>Hello jQuery And Scriptaculous</title>
+<!-- 加入引导脚本 -->
+<script src="../scripts/boot.js"></script>
+<script>
+//导入jQuery
+$import("org.jquery.$");
+//导入Scriptaculous
+$import("us.aculo.script.Effect");
+
+$(document).ready(function(){
+  //使用jQuery添加一段问候语
+  $("<p id='helloBox' style='background:#0F0;text-align:center;font-size:40px;cursor:pointer;'>Hello jQuery And Scriptaculous</p>")
+    .appendTo('body');
+  $('#helloBox').ready(function(){
+    //使用Scriptaculous高亮显示一下刚才添加的内容
+    new Effect.Highlight('helloBox');
+  }).click(function(){
+    //当用户单击该内容后使用jQuery实现渐出
+    $('#helloBox').fadeOut();
+  });
+ });
+</script>
+</head>
+<body>
+<p>文档装载后，jQuery将在后面添加一段问候语；并使用Scriptaculous高亮显示（Highlight）；在鼠标点击后在使用jQuery渐出（fadeOut）。</p>
+</body>
+</html>
