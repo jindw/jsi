@@ -36,5 +36,6 @@ var templateMap = {
 	"source.xhtml" : new Template(scriptBase+"html/source.xhtml"),
 	
 	
-	"export-doc":new Template(scriptBase+"html/export-doc.xhtml")
+	"export-data.xml":new Template(scriptBase+"html/export-data.xml"),
+	"export-doc.xhtml":new Template(scriptBase+"html/export-doc.xhtml")
 };

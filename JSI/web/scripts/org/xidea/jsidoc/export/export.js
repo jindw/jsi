@@ -89,9 +89,7 @@ Exporter.prototype = {
         var packageMap = {};
         var packageList = [];
         var compileFilter = this.buildSourceFilter();
-        var content = ['<?xml version="1.0" encoding="UTF-8"?>\n',
-			'<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">\n',
-			"<properties>\n"];
+        var content = [];
         //appendEntry(content,'#export',this.imports.join(','));
         for(var i = 0;i<this.result.length;i++){
             var path = this.result[i];
@@ -102,7 +100,7 @@ Exporter.prototype = {
             }
             
             var text = this.getSource(path,compileFilter);
-            appendEntry(content,path,text);
+            content.push({path:path,text:text});
         }
         for(var i = 0;i<this.externPackage.length;i++){
         	var packageName = this.externPackage[i];
@@ -121,10 +119,9 @@ Exporter.prototype = {
         for(var i = 0;i<packageList.length;i++){
             var path = packageList[i].replace(/\./g,'/')+"/__package__.js";
             var text = this.getSource(path,compileFilter);
-            appendEntry(content,path,text);
+            content.push({path:path,text:text});
         }
-        content.push("</properties>\n");
-        return content.join('')
+        return getTemplate("export-data.xml").render({data:content});
     },
     getDocumentContent : function(jsiDocURL){
         var packageMap = {};
@@ -149,7 +146,7 @@ Exporter.prototype = {
                 packageMap[packageName][file] = text;
             }
         }
-        return getTemplate("export-doc").render({
+        return getTemplate("export-doc.xhtml").render({
             documentURL:jsiDocURL,
             data:JSON.encode(packageMap)
         });
@@ -178,12 +175,6 @@ Exporter.prototype = {
 }
 
 
-var encodeMap = {
-    '--':'\\u002d-',
-    '<':'\\u003c',
-    '&':'\\u0026',
-    '>':'\\u003e'
-}
 var templateRegexp = /new\s+Template\s*\(((?:[\w\.\+\s]+|'.*?'|".*?")+)\)/g;
 function defaultTemplateFilter(text,path){
     if(templateRegexp.test(text)){
@@ -214,17 +205,6 @@ function defaultTemplateFilter(text,path){
         
     }
     return text;
-}
-
-function encodeReplacer(c){
-    return encodeMap[c];
-}
-function appendEntry(content,path,text){
-	content.push("<entry key='",path,"'>") ;
-    content.push(/[<>&]/.test(text) && text.indexOf(']]>')<0?
-	    "<![CDATA["+text + ']]>'
-	    :text.replace(/[<>&]/g,xmlReplacer));
-    content.push("</entry>\n");
 }
 
 function addDependenceInfo(dependenceInfo,result,cachedInfos){
