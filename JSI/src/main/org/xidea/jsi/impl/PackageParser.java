@@ -19,10 +19,11 @@ public abstract class PackageParser {
 	public static final String SET_IMPLEMENTATION = "setImplementation";
 	public static final String ADD_SCRIPT = "addScript";
 	public static final String ADD_DEPENDENCE = "addDependence";
-	static final String BIND_SCRIPT;
+	final static String BIND_SCRIPT ;
 	static {
-		InputStream in1 = Java6ScriptPackagePaser.class
+		InputStream in1 = PackageParser.class
 				.getResourceAsStream("package-parser.js");
+		String script = null;
 		try {
 			InputStreamReader reader = new InputStreamReader(in1, "utf-8");
 			StringWriter out = new StringWriter();
@@ -32,10 +33,12 @@ public abstract class PackageParser {
 				out.write(cbuf, 0, count);
 			}
 			out.flush();
-			BIND_SCRIPT = out.toString();
+			script = out.toString();
 		} catch (IOException e) {
+			script = "print('Error:"+e.getMessage().replaceAll("['\r\n]", "")+"')";
 			throw new RuntimeException(e);
 		}
+		BIND_SCRIPT = script;
 	}
 	protected List<List<Object>> addScriptCall = new ArrayList<List<Object>>();
 	protected List<List<Object>> addDependenceCall = new ArrayList<List<Object>>();

@@ -43,7 +43,7 @@ function initializePackageAndDataDataFromHash(packageGroupMap){
             var packageMap = JSON.decode(data.substring(1));
             var groupName ="未命名分组";
             packageGroupMap.push(groupName);
-            groupPackages = packageGroupMap[groupName] = [];
+            var groupPackages = packageGroupMap[groupName] = [];
             for(var packageName in packageMap){
             	if(packageName){
                     groupPackages.push(packageName);
