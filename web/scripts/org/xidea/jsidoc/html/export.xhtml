@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<html xmlns="http://www.xidea.org/ns/xhtml"
+	xmlns:c="http://www.xidea.org/ns/template">
+<head>
+<meta http-equiv="Content-Type" content="text/html;utf-8" />
+<link rel="stylesheet" type="text/css" href="../styles/export.css" />
+<script>
+//<!-- opera bug --><![CDATA[
+    parent.$import("org.xidea.jsidoc.export.ExportUI",this);
+//]]>
+</script>
+</head>
+<body style="filter: expression(document.execCommand('BackgroundImageCache', false, true))">
+<div id="header">脚本导出----脱离JSI环境</div>
+
+<div id="body">
+    <div id="treeContainer" >
+<c:for var="packageName" items="${packageNodes}">
+<c:set name="packageNode" value="${packageNodes[packageName]}"/>
+<table class="closed" border="0" cellpadding="0" cellspacing="0">
+    <thead>
+        <tr>
+            <td class="handlebox">
+                  <button class="openhandle" onclick="collapse(this)">+</button>
+                  <button class="closehandle" onclick="collapse(this)">-</button>
+            </td>
+            <td id="${packageNode.htmlId}" class="checkbox0" onclick="ExportUI.clickPackage('${packageNode.id}')">&#160;</td>
+            <td class="item-package" style="cursor:pointer" colspan="2" onclick="ExportUI.clickPackage('${packageNode.id}')">${packageName}</td>
+            <td class="flagbox">&#160;</td>
+        </tr>
+    </thead>
+    <tbody>
+        <c:for var="objectName" items="${packageNode.children}">
+        <c:set name="objectNode" value="${packageNode.children[objectName]}"/>
+        <tr>
+            <td>&#160;</td>
+            <td>&#160;</td>
+            <td id="${objectNode.htmlId}" class="checkbox0" onclick="ExportUI.clickScript('${objectNode.id}')">&#160;</td>
+            <td class="item-unknow" style="cursor:pointer" onclick="ExportUI.clickScript('${objectNode.id}')">${objectName}</td>
+            <td class="flagbox">&#160;</td>
+        </tr>
+        </c:for>
+    </tbody>
+</table>
+</c:for>
+    </div>
+    <div id="output">
+        <fieldset>
+            <legend>相关文件地址</legend>
+            <div id ="fileOutput"></div>
+        </fieldset>
+        <fieldset>
+            <legend>导出变量集</legend>
+            <div id ="objectOutput"></div>
+        </fieldset>
+        <fieldset>
+            <legend>导出操作</legend>
+            <form onsubmit="return false" ation="/servlet/JSA">
+            <div>
+                <div>
+                    <input name="level" id="level2" onclick="ExportUI.checkLevel(this)" value="2" type="radio" disabled="true" />
+                    <label for="level2" >隔离全部冲突</label>
+                    <input name="level" id="level1" onclick="ExportUI.checkLevel(this)" value="1" type="radio" disabled="true" />
+                    <label for="level1">隔离内部冲突</label>
+                    <input name="level" id="level0" onclick="ExportUI.checkLevel(this)" value="0" type="radio" />
+                    <label for="level0">直接合并</label>
+                    <br/>
+                    <input name="level" id="level-1" onclick="ExportUI.checkLevel(this)" value="-1" type="radio" checked="true"  title="导出后需要使用JSA处理成单个压缩文件,实现隔离冲突" />
+                    <label for="level-1">导出为XML</label>
+                    <input name="level" id="level-2" onclick="ExportUI.checkLevel(this)" value="-2" type="radio" title="导出JSIDoc文档" />
+                    <label for="level-2">导出文档</label>
+                    <input name="level" id="level-3" onclick="ExportUI.checkLevel(this)" value="-3" type="radio" disabled="true"  title="导出JSI分析报告" />
+                    <label for="level-3">导出分析报告</label>
+                </div>
+                <div>
+                    <span id="mixTemplateContainer">
+                       <label for="mixTemplate">编入模板:</label>
+                       <input type="checkbox"
+                            name="mixTemplate" id="mixTemplate" checked="true"/></span>
+                    <span id="prefixContainer">
+                       <label for="prefix">内部变量前缀:</label>
+                       <input size="4"
+                            name="prefix" id="prefix" value="_$" type="text" title="当选择隔离冲突时，需要指定混淆后内部变量前缀，以避免二次冲突"/></span>
+                    <span id="jsidocURLContainer"><br/>
+                       <label for="jsidocURL">服务地址:</label>
+                       <input size="40" name="jsidocURL" id="jsidocURL"
+                            value="http://www.xidea.org/project/jsidoc/"
+                            type="text" title="指定您架设的文档服务器"/></span>
+                    <button id="exportButton" disabled="true" onclick="ExportUI.doExport(this.form);return false;">   导出&gt;&gt;   </button>
+                </div>
+                <ul>
+                    <li>输出脚本分析报告，可供代码复查时参考</li>
+                    <li>将导出的数据保存于hta或者html中,查看时需要连接到网络,才能正确解析,您也可以指定一个本地的文档服务器.</li>
+                    <li>导出为xml格式的结果，<b>无法直接正确执行</b>,他只是一个多文件打包的合并方式,需要经过JSA的处理.</li>
+                    <li>脱离JSI后,直接合并可能有命名冲突的危险.不推荐.</li>
+                    <li>隔离内部冲突是指混淆掉文件内部的未公开全局变量,这需要服务端支持,<b>如果你现在的导出环境不支持java,可以导出成xml,再交由JSA处理</b></li>
+                    <li>隔离全部冲突有和JSI等价的隔离级别,这需要服务端支持,<b>如果你现在的导出环境不支持java,可以导出成xml,再交由JSA处理</b></li>
+                </ul>
+            </div>
+            </form>
+        </fieldset>
+    </div>
+</div>
+<style>
+#footer *{
+    float:left;
+}
+</style>
+<div id="footer">
+<table>
+	<tr>
+		<th>图例:</th>
+		<td>初始状态:</td>
+		<td class="checkbox0" title="初始状态,文件未装载">&#160;</td>
+		<td>&#160;</td>
+		<td>文件已装载(被动):</td>
+		<td class="checkbox1" title="文件已经装载,但缺乏相关依赖">&#160;</td>
+		<td>&#160;</td>
+		<td>依赖已装载(被动):</td>
+		<td class="checkbox3" title="文件及依赖文件已经装载">&#160;</td>
+		<td>&#160;</td>
+		<td>依赖已注入(被动):</td>
+		<td class="checkbox3" title="文件及依赖文件已经装载并且注入了相关依赖 (脱离JSI后装载与注入没有区别)">&#160;</td>
+		<td>&#160;</td>
+		<th>主动导出:</th>
+		<td class="checkbox4" title="导出的元素">&#160;</td>
+	</tr>
+</table>
+<script>
+//<!-- opera bug --><![CDATA[
+function collapse(el){
+    while(el && el.tagName!="TABLE"){
+        el = el.parentNode;
+    }
+    if(el.className.indexOf("open")>-1){
+        el.className = el.className.replace(/\bopen\b/,'closed');
+    }else{
+        el.className = el.className.replace(/\bclosed\b/,'open');
+    }
+}
+ExportUI.initialize();
+//]]>
+
+</script>
+</div>
+</body>
+</html>
