@@ -4,7 +4,7 @@
 		<format property="version" pattern="yyyyMMdd" />
 	</tstamp>
 
-	<available file="../JSA/build/dest/JSA-CMD.jar" property="JSAPath" value="../JSA/classes;../JSA/build/dest/JSA-CMD.jar;../JSA/classes" />
+	<available file="../JSA/build/dest/JSA-CMD.jar" property="JSAPath" value="web/WEB-INF/lib/Template.jar;web/WEB-INF/classes;../JSA/classes;../JSA/build/dest/JSA-CMD.jar;../JSA/classes" />
 
 	<target name="init">
 		<delete>
