@@ -33,20 +33,6 @@ var $JSI= {
      */
      //scriptBase : "http://localhost:8080/script2/"
 };
-if("org.xidea.jsi.boot:$log"){
-    /**
-     * 全局日志
-     * <p>JSI 可选功能,你也可以使用JSA将代码中的日志处理信息清除。<p>
-     * <p>自JSI2.1之后，只有全局日志，没有装在单元日志了。<p>
-     * @typeof object
-     * @public
-     */
-    var $log;//将在$import 闭包中初始化
-}
-
-
-
-
 /**
  * 导入指定元素（脚本、函数、类、变量）至指定目标,默认方式为同步导入，默认目标为全局对象（Global == window(html)）。
  * <pre class="code"><code>  //Example:
@@ -91,6 +77,24 @@ if("org.xidea.jsi.boot:$log"){
  *                    <p>一般可忽略返回值.因为默认情况下,导入为全局变量;无需再显示申明了.</p>
  */
 var $import = function(freeEval,cachedScripts){
+    if(":Debug"){
+        
+        /*
+         * 日志处理逻辑
+         */
+         
+        //var logLevel = 0;//{trace:-1,debug:0,info:1,error:2}
+        function reportError(){
+            var args = ["JSI 引导文件调试信息\n  "];
+            args.push(args.join.call(arguments,'\n  '),"\n继续弹出该调试信息？")
+            if(!confirm(args.join(''))){
+                reportError = Function.prototype;
+            }
+        }
+        var reportTrace = Function.prototype;
+        //reportTrace = reportError;
+    }
+    
     /*
      * 加载指定文本，找不到文件(404)返回null,调试时采用
      * @friend
@@ -98,7 +102,7 @@ var $import = function(freeEval,cachedScripts){
      * @return <string> 结果文本
      */
     function loadTextByURL(url){
-        if("org.xidea.jsi.boot:avoidBlock"){
+        if("org.xidea.jsi:Block"){
             var req = new XMLHttpRequest();
             req.open("GET",url,false);
             //for ie file 404 will throw exception 
@@ -110,14 +114,10 @@ var $import = function(freeEval,cachedScripts){
             }else{
                 //debug("load faild:",url,"status:",req.status);
             }
-        }else{
-            //debug(url);
-            //trace(url);
-            //return ''; //throw new Error("uncached url:"+url)
         }
     }
     if(this.document){
-        if(":debug"){
+        if(":Debug"){
     	    /**
     		 * 方便调试的支持
     		 */
@@ -183,7 +183,7 @@ var $import = function(freeEval,cachedScripts){
     
         }
     }else{
-    	if("org.xidea.jsi.boot:server"){
+    	if("org.xidea.jsi:Server"){
     	    $JSI.scriptBase= "classpath:///";
     	    loadTextByURL=function(url){
     	        /*
@@ -202,88 +202,10 @@ var $import = function(freeEval,cachedScripts){
     	}
     }
     
-    if("org.xidea.jsi.boot:$log"){
-        $log = function (){
-            var i = 0;
-            var temp = [];
-            if(this == $log){
-                var bindLevel = arguments[i++];
-                temp.push(arguments[i++],":\n\n");
-            }
-            while(i<arguments.length){
-                var msg = arguments[i++]
-                if(msg instanceof Object){
-                    temp.push(msg,"{");
-                    for(var n in msg){
-                        temp.push(n,":",msg[n],";");
-                    }
-                    temp.push("}\n");
-                }else{
-                    temp.push(msg,"\n");
-                }
-            }
-            if(bindLevel >= 0){
-                temp.push("\n\n继续弹出 ",temp[0]," 日志?");
-                if(!confirm(temp.join(''))){
-                    consoleLevel = bindLevel+1;
-                }
-            }else{
-                alert(temp.join(''));
-            }
-        }
-        /**
-         * 设置日志级别
-         * 默认级别为debug
-         * @protected
-         */
-        $log.setLevel = function(level){
-            if(logLevelNameMap[level]){
-                consoleLevel = level;
-            }else{
-                var i = logLevelNameMap.length;
-                level = level.toLowerCase();
-                while(i--){
-                    if(logLevelNameMap[i] == level){
-                        consoleLevel = i;
-                        return;
-                    }
-                }
-                $log("unknow logLevel:"+level);
-            }
-        };
-        /*
-         * @param bindLevel 绑定函数的输出级别，只有该级别大于等于输出级别时，才可输出日志
-         */
-        function buildLevelLog(bindLevel,bindName){
-        	var window = this;
-            return function(){
-                if(bindLevel>=consoleLevel){
-                    var msg = [bindLevel,bindName];
-                    msg.push.apply(msg,arguments);
-                    $log.apply($log,msg);
-                }
-                if(":debug"){
-                    if((typeof window && window.console == 'object') && (typeof console.log == 'function')){
-                        var msg = [bindLevel,bindName];
-                        msg.push.apply(msg,arguments);
-                        console.log(msg.join(';'))
-                        
-                    }
-                }
-            }
-        }
-        var logLevelNameMap = "trace,debug,info,warn,error,fatal".split(',');
-        var consoleLevel = 1;
-        /* 
-         * 允许输出的级别最小 
-         * @hack 先当作一个零时变量用了
-         */
-        var logLevelIndex = logLevelNameMap.length;
-        //日志初始化 推迟到后面，方便var 压缩
-    }
     var packageMap = {};
     var scriptBase = $JSI.scriptBase;
-    if("org.xidea.jsi.boot:col"){
+
+    if("org.xidea.jsi:COL"){
         var lazyTaskList = [];
         var lazyScript ="<script src='data:text/javascript,$import()'></script>";
         //
@@ -367,14 +289,6 @@ var $import = function(freeEval,cachedScripts){
             }
         }
     }
-    //这段代码放在后面，仅仅是为了区区4个字节的压缩。
-    if("org.xidea.jsi.boot:$log"){
-        while(logLevelIndex--){
-            var logName = logLevelNameMap[logLevelIndex];
-            $log[logName] = buildLevelLog(logLevelIndex,logName);
-        };
-
-    }
     /*
      * 获取脚本缓存。
      * @private
@@ -411,8 +325,8 @@ var $import = function(freeEval,cachedScripts){
     };
     //模拟XMLHttpRequest对象
     if(this.ActiveXObject ){
-        if("org.xidea.jsi.boot:col"){
-            if(":debug"){
+        if("org.xidea.jsi:COL"){
+            if(":Debug"){
                 lazyScript =lazyScript.replace(/'.*'/,scriptBase+"?path=lazy-trigger.js");
             }else{
                 lazyScript =lazyScript.replace(/'.*'/,scriptBase+"lazy-trigger.js");
@@ -540,11 +454,9 @@ var $import = function(freeEval,cachedScripts){
                 freeEval.call(this,pscript);
             }
         }catch(e){
-            if(":debug"){
+            if(":Debug"){
                 //packageMap[name] = null;
-                if("org.xidea.jsi.boot:$log"){
-                    $log.error("Package Syntax Error:["+name+"]\n\nException:"+e);
-                }
+                reportError("Package Syntax Error:["+name+"]\n\nException:"+e);
             }
             throw e;
         }
@@ -574,11 +486,9 @@ var $import = function(freeEval,cachedScripts){
                 var thisPath = dep[0];
                 var targetPath = dep[1];
                 var afterLoad = dep[2];
-                if(":debug"){
+                if(":Debug"){
                     if(!targetPath){
-                        if("org.xidea.jsi.boot:$log"){
-                            $log.error("依赖异常",dep.join('\n'),list.join('\n'));
-                        }
+                        reportError("依赖异常",dep.join('\n'),list.join('\n'));
                     }
                 }
     
@@ -621,15 +531,15 @@ var $import = function(freeEval,cachedScripts){
                             //targetObjectName = null;
                         }else{
                             distinctPackage = 1;
-                            if(":debug"){
+                            if(":Debug"){
                                 if(!targetPath){
                                     throw new Error("targetPath 不能为空")
                                 }
                             }
                             targetPackage = findPackageByPath(targetPath);
-                            if(":debug"){
+                            if(":Debug"){
                                 if(!targetPackage){
-                                    $log.error("targetPath:"+targetPath+" 不是有效对象路径",this.name);
+                                    reportError("targetPath:"+targetPath+" 不是有效对象路径",this.name);
                                 }
                             }
                             targetPath = targetPath.substring(targetPackage.name.length + 1);
@@ -667,15 +577,15 @@ var $import = function(freeEval,cachedScripts){
                     }else if(thisScriptObjectMap[targetPath]){
                         targetFileName = targetPath;
                     }else{
-                        if(":debug"){
+                        if(":Debug"){
                             if(!targetPath){
                                 throw new Error("targetPath 不能为空")
                             }
                         }
                         targetPackage = findPackageByPath(targetPath);
-                        if(":debug"){
+                        if(":Debug"){
                             if(!targetPackage){
-                                $log.error("targetPath:"+targetPath+" 不是有效对象路径",this.name);
+                                reportError("targetPath:"+targetPath+" 不是有效对象路径",this.name);
                             }
                         }
                         targetPath = targetPath.substr(targetPackage.name.length + 1);
@@ -716,9 +626,9 @@ var $import = function(freeEval,cachedScripts){
             }else{
                 objects = (this.scriptObjectMap[scriptPath] = []);
             }
-            if(":debug"){
+            if(":Debug"){
                 if(objectNames == '*'){
-                    $log.trace("部署后不应出现的配置，需要压缩处理掉相关问题！！！");
+                    reportTrace("部署后不应出现的配置，需要压缩处理掉相关问题！！！");
                     objectNames = doObjectImport(
                         realPackage(
                         	findPackage("org.xidea.jsidoc.util",true)
@@ -767,7 +677,7 @@ var $import = function(freeEval,cachedScripts){
                 }
             }else{
                 //TODO:可编译优化,进优化的脚本可以直接删除此运行时优化
-                if("org.xidea.jsi.boot:dependenceOptimize"){
+                if("org.xidea.jsi:PackageOptimize"){
                     if(!afterLoad ){
                         thisPath = this.objectScriptMap[thisPath] || thisPath;
                     }
@@ -805,18 +715,7 @@ var $import = function(freeEval,cachedScripts){
         }
         //,constructor : Package
     };
-//奇怪的问题
-//    if("org.xidea.jsi.boot:exportPackage"){
-//        Package.prototype.constructor = Package; 
-//    }
 
-
-//    if("org.xidea.jsi.boot:exportPackage"){
-//        $JSI.Package = Package; 
-//    }
-
-
-    
     /*
      * 创建一个新的类加载器，加载指定脚本
      * @private
@@ -837,7 +736,7 @@ var $import = function(freeEval,cachedScripts){
                 loader = new ScriptLoader(packageObject,fileName);
             }else{
                 //TODO: try parent
-                if(":debug"){
+                if(":Debug"){
                     throw new Error('Script:['+fileName+'] Not Found')
                 }
             }
@@ -870,7 +769,7 @@ var $import = function(freeEval,cachedScripts){
      * @param <string>name 包名
      */
     function realPackage(packageObject){
-        if(":debug"){
+        if(":Debug"){
             if(!packageObject){
                 alert('包对象不能为空:'+arguments.callee)
             }
@@ -895,7 +794,7 @@ var $import = function(freeEval,cachedScripts){
             }
             
             if(packageMap[name] === undefined){
-                if(":debug"){
+                if(":Debug"){
                     var pscript = getCachedScript(name,'') ||
                         loadTextByURL(scriptBase+"?path="+name.replace(/\.|$/g,'/')+ '__package__.js');
                 }else{
@@ -1034,7 +933,7 @@ var $import = function(freeEval,cachedScripts){
                 cachedScripts[packageName][loaderName]='';//clear cache
                 return cachedScript.call(loader);
             }else{
-                if(":debug"){
+                if(":Debug"){
                     
 //            	    if(loaderName == 'show-detail.js'){
 //            	        $log.error(loaderName,loader)
@@ -1052,10 +951,8 @@ var $import = function(freeEval,cachedScripts){
             //ScriptLoader[loaderName] += 0x10000
             
         }catch(e){
-            if(":debug"){
-                if("org.xidea.jsi.boot:$log"){
-                    $log.error("Load Error:\n"+loader.scriptBase + loaderName+"\n\nException:"+e);
-                }
+            if(":Debug"){
+                reportError("Load Error:\n"+loader.scriptBase + loaderName+"\n\nException:"+e);
             }
             throw e;
         }finally{
@@ -1130,12 +1027,14 @@ var $import = function(freeEval,cachedScripts){
             try{
             	this.hook(vars.replace(/([^,]+)/g,'$1 = this.varMap.$1'));
             }catch(e){
-            	$log.debug("奇怪的状态",
-            	    this.varMap,this,
-            	    this.constructor,
-            	    this.hook == null,
-            	   "status"+ScriptLoader[loaderName].toString(16)
-            	)
+                if(":Debug"){
+                	reportError("奇怪的状态",
+                	    this.varMap,this,
+                	    this.constructor,
+                	    this.hook == null,
+                	   "status"+ScriptLoader[loaderName].toString(16)
+                	)
+                }
             	throw e;
             }
             delete this.varMap;
@@ -1163,7 +1062,7 @@ var $import = function(freeEval,cachedScripts){
             }
         }
     }
-    if("org.xidea.jsi.boot:col"){
+    if("org.xidea.jsi:COL"){
     	var lazyScriptParentNode;//defined later
         var lazyCacheFileMap = {};
         function appendCacheScript(path,callback){
@@ -1178,7 +1077,7 @@ var $import = function(freeEval,cachedScripts){
             }
             script.onload = onload;
             script.onreadystatechange = onload;
-            if(":debug"){
+            if(":Debug"){
                 script.src=scriptBase +"?path="+ path.replace(/\.js$/,'__preload__.js');
             }else{
                 script.src=scriptBase + path.replace(/\.js$/,'__preload__.js');
@@ -1211,8 +1110,8 @@ var $import = function(freeEval,cachedScripts){
             var cacheFileMap = [];
             pkg = realPackage(pkg);
             
-            if(":debug"){
-                var t1 = new Date();
+            if(":Debug"){
+                 var t1 = new Date();
             }
             if(fileName == '*'){
                 for(var fileName in pkg.scriptObjectMap){
@@ -1225,7 +1124,7 @@ var $import = function(freeEval,cachedScripts){
                     appendCacheFiles(cacheFileMap,pkg,pkg.objectScriptMap[fileName],fileName);;
                 }
             }
-            if(":debug"){
+            if(":Debug"){
                 var t2 = new Date();
             }
             if(col instanceof Function){
@@ -1246,13 +1145,13 @@ var $import = function(freeEval,cachedScripts){
                             next();
                         }
                     }else{//complete..
-                        if(":debug"){
+                        if(":Debug"){
                             var t3 = new Date();
                         }
                         doAsynLoad(path,target,col,cacheFileMap)
-                        if(":debug"){
-                            $log.trace("异步装载("+path+")：前期依赖计算时间、缓存时间、装载时间 分别为："
-                                    ,t2-t1,t3-t2,new Date()-t3);
+                        if(":Debug"){
+                            reportTrace("异步装载("+path+")：前期依赖计算时间、缓存时间、装载时间 分别为："
+                                        ,t2-t1,t3-t2,new Date()-t3);
                         }
                     }
                 }
@@ -1265,7 +1164,7 @@ var $import = function(freeEval,cachedScripts){
 	                        list.push(filePath);
 	                    }
 	                }
-	                if(":debug"){
+	                if(":Debug"){
 	                    if(location.protocol == 'file:'){
 	                        //alert(scriptBase+list[0].replace(/.js$/gm,"__preload__.js"))
 	                        try{
@@ -1290,12 +1189,12 @@ var $import = function(freeEval,cachedScripts){
 	                        while(filePath = list.pop()){
 	                            delete lazyCacheFileMap[filePath];//无需再记录了
 	                        }
-	                        if(":debug"){
+	                        if(":Debug"){
 	                            var t3 = new Date();
 	                        }
 	                        $import(path,target)
-	                        if(":debug"){
-	                            $log.trace("延迟装载("+path+")：前期依赖计算时间、缓存时间、装载时间 分别为："
+	                        if(":Debug"){
+	                            reportTrace("延迟装载("+path+")：前期依赖计算时间、缓存时间、装载时间 分别为："
 	                                    ,t2-t1,t3-t2,new Date()-t3);
 	                        }
 	                    });
@@ -1316,11 +1215,9 @@ var $import = function(freeEval,cachedScripts){
         switch(arguments.length){
         case 0:
             col = lazyTaskList.shift();
-            if(":debug"){
+            if(":Debug"){
                 if(!(col instanceof Function)){
-                    if("org.xidea.jsi.boot:$log"){
-                        $log.error("延迟导入错误，非法内部状态！！ ");
-                    }
+                    reportError("延迟导入错误，非法内部状态！！ ");
                 }
             }
             //hack return void;
@@ -1336,7 +1233,7 @@ var $import = function(freeEval,cachedScripts){
                 target = this;
             }
         }
-        if("org.xidea.jsi.boot:col"){
+        if("org.xidea.jsi:COL"){
             if(col){
                 return lazyImport(path,target,col); 
             }

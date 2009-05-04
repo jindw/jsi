@@ -1,55 +1,49 @@
-/*
- * JavaScript Integration Doc Tool
- */
-this.addScript('doc-entry.js','DocEntry'
-                            ,['valuesTag','accessTag','flagTag','valueTag'])
+this.addScript('globals-info.js','RootInfo'
+                ,['createPrototypeStack','FileInfo','PackageInfo']
+                ,['org.xidea.jsidoc.util:$log','SourceEntry','computeURL','ObjectInfo']);
 
-this.addScript('file-info.js',['FileInfo']
-                            ,null
-                            ,['SourceEntry','ObjectInfo','PackageInfo','org.xidea.jsidoc.export:DependenceInfo'])
+this.addScript('package-info.js','PackageInfo'
+                ,0
+                ,['SourceEntry','FileInfo','RootInfo']);
 
-this.addScript("fn.js",['computeURL','createPrototypeStack','accessOrder','findSupperInfo','scrollOut','findPackages']);
+this.addScript('file-info.js','FileInfo'
+                ,0
+                ,['org.xidea.jsidoc.util:$log','org.xidea.jsidoc.export:DependenceInfo','SourceEntry','PackageInfo','ObjectInfo']);
+
+this.addScript('type-info.js',['TypeInfo','ParamInfo']);
+
+this.addScript('fn.js',['accessOrder','scrollOut','computeURL','findPackages','findSupperInfo','createPrototypeStack']);
+
+this.addScript('source-entry.js','SourceEntry'
+                ,'ECMAParser'
+                ,['JSIDoc','DocEntry']);
+
+this.addScript('template.js','getTemplate');
+
+this.addScript('jsidoc.js','JSIDoc'
+                ,0
+                ,['MenuUI','SourceEntry','findPackages','org.xidea.jsidoc.util:JSON','org.xidea.jsidoc.export:ExportUI','org.xidea.jsidoc.util:loadTextByURL','PackageInfo','getTemplate']);
+
+this.addScript('syntax-parser.js',['SyntaxParser','ECMAParser','LineIterator']);
 
 this.addScript('function-info.js',['FunctionInfo','ConstructorInfo']
-                            ,['ObjectInfo','createPrototypeStack']
-                            ,['TypeInfo','DocEntry','ParamInfo','MemberInfo','findSupperInfo'])
-
-this.addScript('globals-info.js','RootInfo'
-                            ,['FileInfo','PackageInfo','createPrototypeStack']
-                            ,['SourceEntry','ObjectInfo','computeURL'])
-
-this.addScript('template.js',['getTemplate'])
-this.addScript('jsidoc.js',['JSIDoc']
-                            ,0
-                            ,['getTemplate','MenuUI','SourceEntry','PackageInfo','findPackages',
-                                "org.xidea.jsidoc.util:JSON",
-                                "org.xidea.jsidoc.util:loadTextByURL",
-                                'org.xidea.jsidoc.export:ExportUI'])
-
-this.addScript('member-info.js','MemberInfo'
-                            ,['DocEntry','ObjectInfo','createPrototypeStack']
-                            ,['accessOrder'])
-
-this.addScript("menu.js",'MenuUI'
-                ,0
-                ,'org.xidea.jsidoc:JSIDoc');
+                ,['createPrototypeStack','ObjectInfo']
+                ,['findSupperInfo','DocEntry','MemberInfo','type-info.js']);
 
 this.addScript('object-info.js',['ObjectInfo','UnknowInfo']
-                            ,['DocEntry','createPrototypeStack']
-                            ,['FunctionInfo','MemberInfo','ConstructorInfo','findSupperInfo'])
+                ,['createPrototypeStack','DocEntry']
+                ,['findSupperInfo','function-info.js','MemberInfo']);
 
-this.addScript('package-info.js',['PackageInfo']
-                            ,null
-                            ,['SourceEntry','RootInfo','FileInfo'])
+this.addScript('member-info.js','MemberInfo'
+                ,['createPrototypeStack','DocEntry','ObjectInfo']
+                ,['org.xidea.jsidoc.util:$log','accessOrder']);
 
-this.addScript('source-entry.js',['SourceEntry']
-                            ,['ECMAParser']
-                            ,['DocEntry','JSIDoc'])
+this.addScript('menu.js','MenuUI'
+                ,0
+                ,'JSIDoc');
 
-this.addScript("syntax-parser.js",['SyntaxParser','ECMAParser','LineIterator']);
+this.addScript('tags.js',['accessTag','valuesTag','flagTag','valueTag']);
 
-this.addScript('tags.js',['valuesTag','accessTag','flagTag','valueTag']);
+this.addScript('doc-entry.js','DocEntry'
+                ,'tags.js');
 
-this.addScript('type-info.js',['TypeInfo','ParamInfo'])
-
-//this.addDependence('jsidoc.js','org.xidea.lite:XMLParser');

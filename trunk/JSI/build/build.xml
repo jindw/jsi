@@ -52,6 +52,7 @@
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
 				<include name="org/xidea/test/**/*.*" />
+				<include name="org/xidea/jsi/impl/**/*.*" />
 				<exclude name="**/jsidoc/styles/*.png" />
 				<exclude name="**/jsidoc/html/*.xhtml" />
 				<exclude name="**/jsidoc/*.js" />
@@ -84,7 +85,15 @@
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-config.ascii" />
 			<arg value="false" />
-
+			<!--
+			<arg value="-config.features" />
+			<arg value=":Debug" />
+			<arg value="org.xidea.jsi:Block" />
+			<arg value="org.xidea.jsi:Server" />
+			<arg value="org.xidea.jsi:COL" />
+			<arg value="org.xidea.jsi:PackageOptimize" />
+			-->
+			
 			<arg value="-exports" />
 			<arg value="org.xidea.jsidoc.util.*" />
 
@@ -100,7 +109,8 @@
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-config.ascii" />
 			<arg value="false" />
-
+			
+			
 			<arg value="-bootCached" />
 			<arg value="org.xidea.jsidoc.util.*" />
 
@@ -126,32 +136,32 @@ $JSI.preload("org.xidea.jsidoc",'jsidoc.js',function(){eval(this.varText);
 });
 $JSI.preload("org.xidea.jsidoc.util",'',function(){
 		</echo>
-		<copy tofile="build/dest/jsidoc/preload2.js" file="build/dest/jsidoc/preload.js"/>
+		<copy tofile="build/dest/jsidoc/preload2.js" file="build/dest/jsidoc/preload.js" />
 		<concat encoding="utf-8" destfile="build/dest/jsidoc/preload.js">
-			<path path="build/dest/jsidoc/preload2.js"/>
-			<path path="build/dest/jsidoc/jsidoc.js"/>
-			<path path="build/dest/jsidoc/temp.js"/>
-			<path path="build/dest/jsidoc/util/__package__.js"/>
+			<path path="build/dest/jsidoc/preload2.js" />
+			<path path="build/dest/jsidoc/jsidoc.js" />
+			<path path="build/dest/jsidoc/temp.js" />
+			<path path="build/dest/jsidoc/util/__package__.js" />
 		</concat>
 
-		<echo  file="build/dest/jsidoc/temp.js">
+		<echo file="build/dest/jsidoc/temp.js">
 });
 $JSI.preload("org.xidea.jsidoc.util",'util.js',function(){eval(this.varText);
 		</echo>
-		<copy tofile="build/dest/jsidoc/preload2.js" file="build/dest/jsidoc/preload.js"/>
+		<copy tofile="build/dest/jsidoc/preload2.js" file="build/dest/jsidoc/preload.js" />
 		<concat encoding="utf-8" destfile="build/dest/jsidoc/preload.js">
-			<path path="build/dest/jsidoc/preload2.js"/>
-			<path path="build/dest/jsidoc/temp.js"/>
-			<path path="build/dest/jsidoc/util/util.js"/>
-			
+			<path path="build/dest/jsidoc/preload2.js" />
+			<path path="build/dest/jsidoc/temp.js" />
+			<path path="build/dest/jsidoc/util/util.js" />
+
 		</concat>
-		<echo  file="build/dest/jsidoc/temp.js">
+		<echo file="build/dest/jsidoc/temp.js">
 });
 		</echo>
-		<copy tofile="build/dest/jsidoc/preload2.js" file="build/dest/jsidoc/preload.js"/>
+		<copy tofile="build/dest/jsidoc/preload2.js" file="build/dest/jsidoc/preload.js" />
 		<concat encoding="utf-8" destfile="build/dest/jsidoc/preload.js">
-			<path path="build/dest/jsidoc/preload2.js"/>
-			<path path="build/dest/jsidoc/temp.js"/>
+			<path path="build/dest/jsidoc/preload2.js" />
+			<path path="build/dest/jsidoc/temp.js" />
 		</concat>
 	</target>
 	<target name="compress-all">
@@ -209,7 +219,7 @@ $JSI.preload("org.xidea.jsidoc.util",'util.js',function(){eval(this.varText);
 			<arg value="${basedir}/build/dest/jsidoc/source.js/" />
 		</java>
 
-		<echo  file="build/dest/jsidoc/temp.js">
+		<echo file="build/dest/jsidoc/temp.js">
 $import("org.xidea.jsidoc:JSIDoc");</echo>
 		<concat encoding="utf-8" destfile="${basedir}/build/dest/jsidoc/boot.js/">
 			<path path="web/scripts/boot.js" />
@@ -255,17 +265,17 @@ $import("org.xidea.jsidoc:JSIDoc");</echo>
 		</zip>
 	</target>
 	<target name="packageOptimize">
-		<java classname="org.jside.jsi.tools.web.PackageAction" classpath="../JSA/build/dest/JSA-CMD.jar">
+		<java classname="org.jside.jsi.tools.web.PackageAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
 			<arg value="-output" />
 			<arg value="${basedir}/build/dest/package-gen.js" />
 
 			<arg value="-packageName" />
-			<arg value="org.xidea.jsidoc.export" />
+			<arg value="org.xidea.jsidoc" />
 
 			<arg value="-dependences" />
-			<arg value="org.xidea.jsidoc" />
+			<arg value="org.xidea.jsidoc.export" />
 			<arg value="org.xidea.jsidoc.util" />
 		</java>
 	</target>
