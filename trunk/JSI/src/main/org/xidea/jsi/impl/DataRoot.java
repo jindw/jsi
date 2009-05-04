@@ -12,11 +12,17 @@ import org.xidea.jsi.JSIRoot;
 
 public class DataRoot extends AbstractRoot implements JSIRoot {
 	private static final Log log = LogFactory.getLog(DataRoot.class);
+	private static final String PROP_DOCTYPE = "<!DOCTYPE properties SYSTEM 'http://java.sun.com/dtd/properties.dtd'>";
 	protected Properties dataMap;
+
 	public DataRoot(String source) {
 		if (source != null) {
-			source = source.replaceAll("$\\s*<\\?[^>]\\?>", "");
+			source = source.replaceAll("$\\s*<\\?[^>]\\?>", "").trim();
 			try {
+				if(!source.startsWith("<!DOCTYPE properties")){
+					log.error("JavaProperties 必须带DOCTYPE 信息");
+					source = PROP_DOCTYPE+source;
+				}
 				Properties data = new Properties();
 				data.loadFromXML(new ByteArrayInputStream(source
 						.getBytes("utf-8")));
@@ -44,7 +50,7 @@ public class DataRoot extends AbstractRoot implements JSIRoot {
 	}
 
 	public String loadText(String pkgName, String scriptName) {
-		if(pkgName!=null&&pkgName.length()>0){
+		if (pkgName != null && pkgName.length() > 0) {
 			scriptName = pkgName.replace('.', '/') + '/' + scriptName;
 		}
 		return dataMap.getProperty(scriptName);

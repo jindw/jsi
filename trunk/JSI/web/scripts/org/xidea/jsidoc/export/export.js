@@ -100,7 +100,7 @@ Exporter.prototype = {
             }
             
             var text = this.getSource(path,compileFilter);
-            content.push({path:path,text:text});
+            content.push({path:path,content:text});
         }
         for(var i = 0;i<this.externPackage.length;i++){
         	var packageName = this.externPackage[i];
@@ -119,7 +119,7 @@ Exporter.prototype = {
         for(var i = 0;i<packageList.length;i++){
             var path = packageList[i].replace(/\./g,'/')+"/__package__.js";
             var text = this.getSource(path,compileFilter);
-            content.push({path:path,text:text});
+            content.push({path:path,content:text});
         }
         return getTemplate("export-data.xml").render({data:content});
     },
