@@ -123,7 +123,10 @@ public class JSIFilter extends JSIService implements Filter {
 		}
 	}
 
-	public InputStream getResourceStream(String path) {
+	/**
+	 * 打开的流使用完成后需要自己关掉
+	 */
+	protected InputStream getResourceStream(String path) {
 		InputStream in = context.getResourceAsStream(scriptBase + path);
 		if (in == null) {
 			in = super.getResourceStream(path);
