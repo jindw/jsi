@@ -50,24 +50,19 @@ public class JSIFilter extends JSIService implements Filter {
 				path = path.substring(0,path.length()-JSIText.PRELOAD_FILE_POSTFIX .length())+".js";
 
 			}
-			InputStream in = getResourceStream(path);
-			if (in != null) {
-				// 经测试，metaType是不会自动设置的;
-				// 对于静态文件的设置，我估计是提供静态文件服务的servlet内做的事情。
+			// 经测试，metaType是不会自动设置的;
+			// 对于静态文件的设置，我估计是提供静态文件服务的servlet内做的事情。
 
-				// setContentType 和 setCharacterEncoding.在encoding上相互影响
-				// response.getCharacterEncoding 默认是ISO-8895-1
-				// request.getCharacterEncoding 默认是null
-				initializeEncodingIfNotSet(request, resp);
-				String metatype = context.getMimeType(path);
-				if (metatype != null) {
-					resp.setContentType(metatype);
-				}
-				ServletOutputStream out = resp.getOutputStream();
-				writeResource(path, isPreload, out);
-				in.close();
-				return;
+			// setContentType 和 setCharacterEncoding.在encoding上相互影响
+			// response.getCharacterEncoding 默认是ISO-8895-1
+			// request.getCharacterEncoding 默认是null
+			initializeEncodingIfNotSet(request, resp);
+			String metatype = context.getMimeType(path);
+			if (metatype != null) {
+				resp.setContentType(metatype);
 			}
+			ServletOutputStream out = resp.getOutputStream();
+			writeResource(path, isPreload, out);
 
 		}
 		// 走这条分支的情况：1、无法找到资源，2、根本不在脚本目录下
@@ -126,7 +121,7 @@ public class JSIFilter extends JSIService implements Filter {
 	/**
 	 * 打开的流使用完成后需要自己关掉
 	 */
-	protected InputStream getResourceStream(String path) {
+	public InputStream getResourceStream(String path) {
 		InputStream in = context.getResourceAsStream(scriptBase + path);
 		if (in == null) {
 			in = super.getResourceStream(path);

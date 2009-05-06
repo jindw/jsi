@@ -1,5 +1,6 @@
 package org.xidea.jsi.web;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -47,57 +48,28 @@ public class JSIService extends JSIResourceLoader {
 
 	protected boolean writeResource(String path, boolean isPreload, Writer out)
 			throws IOException {
-		InputStream in = this.getResourceStream(path);
-		try {
-			if (in != null) {
-				if (isPreload) {
-					out.write(JSIText.buildPreloadPerfix(path));
-					output(in, out);
-					out.write(JSIText.buildPreloadPostfix("//"));
-				} else {
-					output(in, out);
-				}
-
-			} else {
-				output(in, out);
-			}
-		} finally {
-			in.close();
+		if (isPreload) {
+			out.write(JSIText.buildPreloadPerfix(path));
+			output(path, out);
+			out.write(JSIText.buildPreloadPostfix("//"));
+		} else {
+			output(path, out);
 		}
 		return true;
 	}
 
 	protected boolean writeResource(String path, boolean isPreload,
 			OutputStream out) throws IOException {
-		InputStream in = this.getResourceStream(path);
-		try {
-			if (in != null) {
-				if (isPreload) {
-					out.write(JSIText.buildPreloadPerfix(path).getBytes());
-					output(in, out);
-					out.write(JSIText.buildPreloadPostfix("//").getBytes());
-				} else {
-					output(in, out);
-				}
-			} else {
-				output(in, out);
-			}
-		} finally {
-			in.close();
+		if (isPreload) {
+			out.write(JSIText.buildPreloadPerfix(path).getBytes());
+			output(path, out);
+			out.write(JSIText.buildPreloadPostfix("//").getBytes());
+		} else {
+			output(path, out);
 		}
 		return true;
 	}
 
-	protected void writeResource(String path, boolean isPreload,
-			InputStream in, OutputStream out) throws IOException {
-		if (isPreload) {
-			out.write(JSIText.buildPreloadPerfix(path).getBytes());
-			output(in, out);
-			out.write(JSIText.buildPreloadPostfix("//").getBytes());
-		} else {
-			output(in, out);
-		}
-	}
 
 	protected String document() {
 		List<String> packageList = FileRoot
@@ -168,23 +140,4 @@ public class JSIService extends JSIResourceLoader {
 	}
 
 
-	protected static void output(InputStream in, OutputStream out)
-			throws IOException {
-		byte[] buf = new byte[1024];
-		int len = in.read(buf);
-		while (len > 0) {
-			out.write(buf, 0, len);
-			len = in.read(buf);
-		}
-	}
-
-	protected void output(InputStream in2, Writer out) throws IOException {
-		char[] buf = new char[1024];
-		InputStreamReader in = new InputStreamReader(in2, this.encoding);
-		int len = in.read(buf);
-		while (len > 0) {
-			out.write(buf, 0, len);
-			len = in.read(buf);
-		}
-	}
 }
