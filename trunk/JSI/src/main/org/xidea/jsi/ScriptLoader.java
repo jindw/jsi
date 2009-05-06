@@ -25,6 +25,15 @@ public interface ScriptLoader {
 	 */
 	public abstract String getName();
 
+	/**
+	 * 返回当前脚本的源代码数据
+	 * @return
+	 */
+	public abstract String getSource();
+
+	/**
+	 * @return full path
+	 */
 	public abstract String getPath();
 
 	/**
@@ -36,7 +45,5 @@ public interface ScriptLoader {
 	public abstract Collection<String> getDependenceVars();
 
 	public abstract Collection<String> getLocalVars();
-
-	public abstract String getSource();
 
 }

@@ -30,6 +30,10 @@ public class DefaultExportorFactory {
 	 */
 	public static final int TYPE_EXPORT_CONFUSE = 3;
 	/**
+	 * 混淆隔离支持的导出合并实现
+	 */
+	public static final int TYPE_EXPORT_PRELOAD = 4;
+	/**
 	 * 创建XML数据打包实现 创建问题报告实现
 	 */
 	public static final int TYPE_XML = -1;
@@ -69,7 +73,13 @@ public class DefaultExportorFactory {
 			return createXMLExplorter(param);
 		case TYPE_REPORT:
 			return createReportExplorter(param);
+		case TYPE_EXPORT_PRELOAD:
+			return createPreloadExplorter(param);
 		}
+		return null;
+	}
+
+	protected JSIExportor createPreloadExplorter(Map<String, String[]> param) {
 		return null;
 	}
 
@@ -100,7 +110,7 @@ class SimpleExporter implements JSIExportor {
 		StringBuilder result = new StringBuilder();
 		List<ScriptLoader> scriptList = context.getScriptList();
 		for (ScriptLoader entry : scriptList) {
-			result.append(entry.getSource());
+			result.append(entry.getPackage().loadText(entry.getName()));
 			result.append("\r\n;\r\n");
 		}
 		return result.toString();
@@ -130,7 +140,7 @@ class XMLExporter implements JSIExportor {
 		content.append("</entry>\n");
 		HashMap<String, Object> packageFileMap = new HashMap<String, Object>();
 		for (ScriptLoader entry : scriptList) {
-			appendEntry(content, entry.getPath(), entry.getSource());
+			appendEntry(content, entry.getPath(), entry.getPackage().loadText(entry.getName()));
 			String packageName = entry.getPackage().getName();
 			if (packageFileMap.get(packageName) == null) {
 				packageFileMap.put(packageName, "");

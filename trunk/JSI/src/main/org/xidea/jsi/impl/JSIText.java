@@ -11,16 +11,19 @@ public abstract class JSIText {
 
 
 	public final static String buildPreloadPerfix(String path) {
-		String pkg = path.substring(0, path.lastIndexOf('/')).replace('/', '.');
-		String file = path.substring(pkg.length() + 1);
-		if(JSIPackage.PACKAGE_FILE_NAME.equals(file)){
-			file= "";
+		String packageName = path.substring(0, path.lastIndexOf('/')).replace('/', '.');
+		String fileName = path.substring(packageName.length() + 1);
+		return buildPreloadPerfix(packageName, fileName);
+	}
+	public final static String buildPreloadPerfix(String packageName,String fileName) {
+		if(JSIPackage.PACKAGE_FILE_NAME.equals(fileName)){
+			fileName= "";
 		}
 		StringBuffer buf = new StringBuffer();
 		buf.append(JSIText.PRELOAD_PREFIX);
-		buf.append("'" + pkg + "',");
-		buf.append("'" + file + "',function(){");
-		if(file.length()>0){
+		buf.append("'" + packageName + "',");
+		buf.append("'" + fileName + "',function(){");
+		if(fileName.length()>0){
 			buf.append(JSIText.PRELOAD_CONTENT_PREFIX);
 		}
 		return buf.toString();

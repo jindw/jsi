@@ -104,6 +104,8 @@ function findFromZip($file,$path){
 		            zip_entry_close($entry);
 		            zip_close($zip);
 		            return true;
+		        }else{
+		            zip_entry_close($entry);
 		        }
 		    }
 		    zip_close($zip);
