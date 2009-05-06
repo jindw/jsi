@@ -7,12 +7,16 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xidea.jsi.impl.JSIText;
 
 class JSIResourceLoader {
 	private static final Log log = LogFactory.getLog(JSIResourceLoader.class);
@@ -40,6 +44,38 @@ class JSIResourceLoader {
 	public void setExternalLibraryDirectory(File externalLibraryFilr) {
 		this.externalLibraryDirectory = externalLibraryFilr;
 	}
+
+	protected boolean output(String path, Writer out) throws IOException {
+		char[] buf = new char[1024];
+		InputStream in = this.getResourceStream(path);
+		if (in == null) {
+			return false;
+		} else {
+			InputStreamReader reader = new InputStreamReader(in, this.encoding);
+			int len = reader.read(buf);
+			while (len > 0) {
+				out.write(buf, 0, len);
+				len = reader.read(buf);
+			}
+			return true;
+		}
+	}
+
+	protected boolean output(String path, OutputStream out) throws IOException {
+		InputStream in = this.getResourceStream(path);
+		if (in == null) {
+			return false;
+		} else {
+			byte[] buf = new byte[1024];
+			int len = in.read(buf);
+			while (len > 0) {
+				out.write(buf, 0, len);
+				len = in.read(buf);
+			}
+			return true;
+		}
+	}
+
 	/**
 	 * 打开的流使用完成后需要自己关掉
 	 */
