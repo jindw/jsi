@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
@@ -45,6 +46,19 @@ class JSIResourceLoader {
 		this.externalLibraryDirectory = externalLibraryFilr;
 	}
 
+	public String getResourceAsString(String path){
+		StringWriter out = new StringWriter();
+		try {
+			if(this.output(path, out)){
+				return out.toString();
+			}else{
+				return null;
+			}
+		} catch (IOException e) {
+			throw new RuntimeException();
+		}
+	}
+	
 	protected boolean output(String path, Writer out) throws IOException {
 		char[] buf = new char[1024];
 		InputStream in = this.getResourceStream(path);
@@ -75,6 +89,7 @@ class JSIResourceLoader {
 			return true;
 		}
 	}
+
 
 	/**
 	 * 打开的流使用完成后需要自己关掉
