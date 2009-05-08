@@ -15,10 +15,10 @@ import org.xidea.jsi.ScriptLoader;
  * @author jindw
  */
 public class DefaultLoadContext implements JSILoadContext {
-	private Map<String, ScriptStatus> scriptStatusMap = new HashMap<String, ScriptStatus>();
-	private List<String> loadList = new ArrayList<String>();
-	private Map<String, ScriptLoader> loadMap = new HashMap<String, ScriptLoader>();
-	private Map<String, String> exportMap = new HashMap<String, String>();
+	protected Map<String, ScriptStatus> scriptStatusMap = new HashMap<String, ScriptStatus>();
+	protected List<String> loadList = new ArrayList<String>();
+	protected Map<String, ScriptLoader> loadMap = new HashMap<String, ScriptLoader>();
+	protected Map<String, String> exportMap = new HashMap<String, String>();
 
 	/*
 	 * (non-Javadoc)
@@ -27,19 +27,19 @@ public class DefaultLoadContext implements JSILoadContext {
 	 *      java.lang.String, java.lang.String, boolean)
 	 */
 	public void loadScript(JSIPackage pkg, final String path,
-			final String object, final boolean export) {
+			final String objectName, final boolean export) {
 		String id = pkg.getName().replace('.', '/') + "/" + path;
 		if (export) {
-			if (object == null) {
+			if (objectName == null) {
 				org.xidea.jsi.ScriptLoader loader = pkg.getLoaderMap()
 						.get(path);
 				for (String var : loader.getLocalVars()) {
 					exportMap.put(var, pkg.getName());
 				}
 			} else {
-				int pos = object.indexOf(".");
+				int pos = objectName.indexOf(".");
 				// 命名空间也算
-				exportMap.put(pos < 0 ? object : object.substring(0, pos), pkg
+				exportMap.put(pos < 0 ? objectName : objectName.substring(0, pos), pkg
 						.getName());
 			}
 		}
@@ -61,28 +61,32 @@ public class DefaultLoadContext implements JSILoadContext {
 				String dependenceThisObjectName = dependence
 						.getThisObjectName();
 				if (!dependence.isAfterLoad()
-						&& (dependenceThisObjectName == null || object == null || object
+						&& (dependenceThisObjectName == null || objectName == null || objectName
 								.equals(dependenceThisObjectName))) {
 					((DefaultDependence) dependence).load(this);
-					if (status.isLoaded(object)) {
+					if (status.isLoaded(objectName)) {
 						return;
 					}
 				}
 			}
-			if (status.load(object)) {
+			if (status.load(objectName)) {
 				return;
 			}
 			if (!loadList.contains(id)) {
 				loadList.add(id);
 			}
-			for (JSIDependence dependence : list) {
-				String dependenceThisObjectName = dependence
-						.getThisObjectName();
-				if (dependence.isAfterLoad()
-						&& (dependenceThisObjectName == null || object == null || object
-								.equals(dependenceThisObjectName))) {
-					((DefaultDependence) dependence).load(this);
-				}
+			loadAfter(objectName, list);
+		}
+	}
+
+	protected void loadAfter(final String objectName, List<JSIDependence> list) {
+		for (JSIDependence dependence : list) {
+			String dependenceThisObjectName = dependence
+					.getThisObjectName();
+			if (dependence.isAfterLoad()
+					&& (dependenceThisObjectName == null || objectName == null || objectName
+							.equals(dependenceThisObjectName))) {
+				((DefaultDependence) dependence).load(this);
 			}
 		}
 	}

@@ -12,17 +12,16 @@ this.addScript('file-info.js','FileInfo'
 
 this.addScript('type-info.js',['TypeInfo','ParamInfo']);
 
-this.addScript('fn.js',['accessOrder','scrollOut','computeURL','findPackages','findSupperInfo','createPrototypeStack']);
+this.addScript('fn.js',['accessOrder','scrollOut','computeURL','findSupperInfo','createPrototypeStack']);
 
 this.addScript('source-entry.js','SourceEntry'
                 ,'ECMAParser'
                 ,['JSIDoc','DocEntry']);
 
-this.addScript('template.js','getTemplate');
 
 this.addScript('jsidoc.js','JSIDoc'
                 ,0
-                ,['MenuUI','SourceEntry','findPackages','org.xidea.jsidoc.util:JSON','org.xidea.jsidoc.export:ExportUI','org.xidea.jsidoc.util:loadTextByURL','PackageInfo','getTemplate']);
+                ,['MenuUI','SourceEntry','org.xidea.jsidoc.export:findPackages','org.xidea.jsidoc.util:JSON','org.xidea.jsidoc.export:ExportUI','org.xidea.jsidoc.util:loadTextByURL','PackageInfo']);
 
 this.addScript('syntax-parser.js',['SyntaxParser','ECMAParser','LineIterator']);
 

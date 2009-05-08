@@ -121,7 +121,7 @@ Exporter.prototype = {
             var text = this.getSource(path,compileFilter);
             content.push({path:path,content:text});
         }
-        return getTemplate("export-data.xml").render({data:content});
+        return exportDataTemplate.render({data:content});
     },
     getDocumentContent : function(jsiDocURL){
         var packageMap = {};
@@ -146,7 +146,7 @@ Exporter.prototype = {
                 packageMap[packageName][file] = text;
             }
         }
-        return getTemplate("export-doc.xhtml").render({
+        return exportDocTemplate.render({
             documentURL:jsiDocURL,
             data:JSON.encode(packageMap)
         });
@@ -253,3 +253,22 @@ function addDependenceInfo(dependenceInfo,result,cachedInfos){
     
 }
 
+/**
+ * @internal
+ */
+function Template(path){
+    if(path instanceof Function){
+        this.data = path;
+    }else{
+        var t = $import('org.xidea.lite:Template',{} );
+        t = new t(path);
+        return t;
+    }
+}
+Template.prototype.render = function(context){
+    return this.data(context)
+}
+
+
+var exportDataTemplate = new Template(this.scriptBase+"../html/export-data.xml");
+var exportDocTemplate = new Template(this.scriptBase+"../html/export-doc.xhtml");

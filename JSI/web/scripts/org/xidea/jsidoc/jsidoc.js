@@ -167,7 +167,7 @@ var JSIDoc = {
      * @public
      */
     genMenu : function(){
-        var template = getTemplate("menu.xhtml");
+        var template = menuTemplate;
         //out.open();
         var text =  template.render(
         {
@@ -184,7 +184,7 @@ var JSIDoc = {
      * @public
      */
     genExport : function(document){
-        var template = getTemplate("export.xhtml");
+        var template = exportTemplate;
         var packageNames = [];
         for(var name in this.packageInfoMap){
             packageNames.push(name);
@@ -199,7 +199,7 @@ var JSIDoc = {
      * @public
      */
     genPackage : function(packageName,document){
-        var template = getTemplate("package.xhtml");
+        var template = packageTemplate;
         var packageInfo = PackageInfo.require(packageName);
         //TODO: 有待改进
         var tasks = packageInfo.getInitializers();
@@ -256,16 +256,16 @@ var JSIDoc = {
         var objectInfo = packageInfo.getObjectInfoMap()[objectName];
         switch(objectInfo.type){
             case "constructor":
-                var template = getTemplate("constructor.xhtml");
+                var template = constructorTemplate;
                 break;
             case "function":
-                var template = getTemplate("function.xhtml");
+                var template = functionTemplate;
                 break;
             case "object":
-                var template = getTemplate("object.xhtml");
+                var template = objectTemplate;
                 break;
             default:
-                var template = getTemplate("native.xhtml");
+                var template = nativeTemplate;
         }
         //out.open();
         return template.render({
@@ -294,7 +294,7 @@ var JSIDoc = {
         }
         sourceEntry.anchors = anchors;
         var lines = sourceEntry.parse();
-        var template = getTemplate("source.xhtml");
+        var template = sourceTemplate;
         template.beforeOutput = function(){
             //JSIDoc.context.evalString = function(){};
         }
@@ -377,3 +377,29 @@ function preload(pkg,file2dataMap,value){
 
 };
 $JSI.preload = preload;
+
+/**
+ * @internal
+ */
+var Template=function (path){
+    if(path instanceof Function){
+        this.data = path;
+    }else{
+        var t = $import('org.xidea.lite:Template',{} );
+        t = new t(path);
+        return t;
+    }
+}
+Template.prototype.render = function(context){
+    return this.data(context)
+}
+
+var scriptBase = this.scriptBase
+var packageTemplate = new Template(scriptBase+"html/package.xhtml");
+var constructorTemplate= new Template(scriptBase+"html/constructor.xhtml");
+var exportTemplate =  new Template(scriptBase+"html/export.xhtml");
+var functionTemplate =  new Template(scriptBase+"html/function.xhtml");
+var menuTemplate =  new Template(scriptBase+"html/menu.xhtml");
+var nativeTemplate =  new Template(scriptBase+"html/native.xhtml");
+var objectTemplate =  new Template(scriptBase+"html/object.xhtml");
+var sourceTemplate =  new Template(scriptBase+"html/source.xhtml");

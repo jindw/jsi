@@ -1,10 +1,12 @@
 package org.xidea.jsi.web;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,7 +19,6 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.jsi.impl.JSIText;
 
 class JSIResourceLoader {
 	private static final Log log = LogFactory.getLog(JSIResourceLoader.class);
@@ -26,16 +27,19 @@ class JSIResourceLoader {
 	 */
 	protected String encoding = "utf-8";
 
-	protected String scriptBase;
-	protected File scriptBaseDirectory;
-	protected File externalLibraryDirectory;
-
-	public void setScriptBase(String scriptBase) {
-		this.scriptBase = scriptBase;
-	}
+	private File scriptBaseDirectory;
+	private File externalLibraryDirectory;
 
 	public void setScriptBaseDirectory(File scriptBaseFile) {
 		this.scriptBaseDirectory = scriptBaseFile;
+	}
+
+	public File getScriptBaseDirectory() {
+		return scriptBaseDirectory;
+	}
+
+	public File getExternalLibraryDirectory() {
+		return externalLibraryDirectory;
 	}
 
 	public void setEncoding(String encoding) {
@@ -46,32 +50,51 @@ class JSIResourceLoader {
 		this.externalLibraryDirectory = externalLibraryFilr;
 	}
 
-	public String getResourceAsString(String path){
-		StringWriter out = new StringWriter();
+	public byte[] getResourceAsBinary(String path) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
-			if(this.output(path, out)){
-				return out.toString();
-			}else{
+			if (this.output(path, out)) {
+				return out.toByteArray();
+			} else {
 				return null;
 			}
 		} catch (IOException e) {
 			throw new RuntimeException();
 		}
 	}
-	
+
+	public String getResourceAsString(String path) {
+		StringWriter out = new StringWriter();
+		try {
+			if (this.output(path, out)) {
+				return out.toString();
+			} else {
+				return null;
+			}
+		} catch (IOException e) {
+			throw new RuntimeException();
+		}
+	}
+
 	protected boolean output(String path, Writer out) throws IOException {
 		char[] buf = new char[1024];
 		InputStream in = this.getResourceStream(path);
+
 		if (in == null) {
 			return false;
 		} else {
-			InputStreamReader reader = new InputStreamReader(in, this.encoding);
-			int len = reader.read(buf);
-			while (len > 0) {
-				out.write(buf, 0, len);
-				len = reader.read(buf);
+			try {
+				InputStreamReader reader = new InputStreamReader(in,
+						this.encoding);
+				int len = reader.read(buf);
+				while (len > 0) {
+					out.write(buf, 0, len);
+					len = reader.read(buf);
+				}
+				return true;
+			} finally {
+				in.close();
 			}
-			return true;
 		}
 	}
 
@@ -80,16 +103,19 @@ class JSIResourceLoader {
 		if (in == null) {
 			return false;
 		} else {
-			byte[] buf = new byte[1024];
-			int len = in.read(buf);
-			while (len > 0) {
-				out.write(buf, 0, len);
-				len = in.read(buf);
+			try {
+				byte[] buf = new byte[1024];
+				int len = in.read(buf);
+				while (len > 0) {
+					out.write(buf, 0, len);
+					len = in.read(buf);
+				}
+				return true;
+			} finally {
+				in.close();
 			}
-			return true;
 		}
 	}
-
 
 	/**
 	 * 打开的流使用完成后需要自己关掉
@@ -104,7 +130,6 @@ class JSIResourceLoader {
 				return new FileInputStream(file);
 			} catch (FileNotFoundException e) {
 				log.debug(e);
-				;
 			}
 		}
 		File[] list = this.scriptBaseDirectory.listFiles(new FilenameFilter() {
@@ -113,9 +138,8 @@ class JSIResourceLoader {
 			}
 		});
 		if (list != null) {
-			int i = list.length;
-			while (i-- > 0) {
-				InputStream in = findByXML(list[i], path);
+			for (File item : list) {
+				InputStream in = findByXML(item, path);
 				if (in != null) {
 					return in;
 				}
@@ -131,9 +155,8 @@ class JSIResourceLoader {
 						}
 					});
 			if (list != null) {
-				int i = list.length;
-				while (i-- > 0) {
-					InputStream in = findByJAR(list[i], path);
+				for (File item : list) {
+					InputStream in = findByZip(item, path);
 					if (in != null) {
 						return in;
 					}
@@ -143,15 +166,19 @@ class JSIResourceLoader {
 		return this.getClass().getClassLoader().getResourceAsStream(path);
 	}
 
-	private InputStream findByJAR(File file, String path) {
+	private InputStream findByZip(File file, String path) {
 		try {
-			ZipFile jarFile = new ZipFile(file);
+			final ZipFile jarFile = new ZipFile(file);
 			ZipEntry ze = jarFile.getEntry(path);
 			if (ze != null) {
-				return jarFile.getInputStream(ze);
+				return new FilterInputStream(jarFile.getInputStream(ze)) {
+					public void close() throws IOException {
+						super.close();
+						jarFile.close();
+					}
+				};
 			}
 		} catch (IOException e) {
-		} finally {
 		}
 		return null;
 	}

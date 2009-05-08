@@ -80,6 +80,7 @@
 		<copy tofile="build/dest/JSI-${version}.jar" file="build/dest/JSI.jar" />
 	</target>
 	<target name="compress-jsidoc" depends="init">
+		<!-- export util -->
 		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
@@ -93,30 +94,41 @@
 			<arg value="org.xidea.jsi:COL" />
 			<arg value="org.xidea.jsi:PackageOptimize" />
 			-->
-			
 			<arg value="-exports" />
 			<arg value="org.xidea.jsidoc.util.*" />
 
-			<arg value="-outputBoot" />
-			<arg value="${basedir}/build/dest/jsidoc/boot-compress.js" />
 			<arg value="-outputPackage" />
 			<arg value="${basedir}/build/dest/jsidoc/util/__package__.js" />
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jsidoc/util/util.js" />
 		</java>
+		<!-- export export -->
 		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
-			<arg value="-config.ascii" />
-			<arg value="false" />
-			
 			
 			<arg value="-bootCached" />
 			<arg value="org.xidea.jsidoc.util.*" />
+			
+			<arg value="-exports" />
+			<arg value="org.xidea.jsidoc.export.*" />
+
+			<arg value="-outputPackage" />
+			<arg value="${basedir}/build/dest/jsidoc/export/__package__.js" />
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/jsidoc/export/export.js" />
+		</java>
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+
+
+			<arg value="-bootCached" />
+			<arg value="org.xidea.jsidoc.util.*" />
+			<arg value="org.xidea.jsidoc.export.*" />
 
 			<arg value="-exports" />
 			<arg value="org.xidea.jsidoc:JSIDoc" />
-			<arg value="org.xidea.jsidoc.export.*" />
 
 			<arg value="-outputPackage" />
 			<arg value="${basedir}/build/dest/jsidoc/__package__.js" />

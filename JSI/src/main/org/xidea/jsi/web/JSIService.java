@@ -1,9 +1,6 @@
 package org.xidea.jsi.web;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -73,7 +70,7 @@ public class JSIService extends JSIResourceLoader {
 
 	protected String document() {
 		List<String> packageList = FileRoot
-				.findPackageList(this.scriptBaseDirectory);
+				.findPackageList(this.getScriptBaseDirectory());
 		StringWriter out = new StringWriter();
 		if (packageList.isEmpty()) {
 			out.append("<html><body> 未发现任何托管脚本包，无法显示JSIDoc。<br /> ");
