@@ -27,6 +27,7 @@ import org.xidea.jsi.impl.JSIText;
  */
 public class JSIFilter extends JSIService implements Filter {
 	protected ServletContext context;
+	private String scriptBase;
 	public void destroy() {
 	}
 
@@ -144,7 +145,7 @@ public class JSIFilter extends JSIService implements Filter {
 			scriptBase = "/scripts/";
 		}
 		this.scriptBase = scriptBase;
-		this.scriptBaseDirectory = new File(context.getRealPath(this.scriptBase));
-		this.scriptBaseDirectory = new File(context.getRealPath(this.scriptBase));
+		this.setScriptBaseDirectory(new File(context.getRealPath(this.scriptBase)));
+		this.setScriptBaseDirectory(new File(context.getRealPath(this.scriptBase)));
 	}
 }
