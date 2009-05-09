@@ -241,9 +241,9 @@ var $import = function(freeEval,cachedScripts){
                     }
                 }
             }else{//未装载，先用实际装载的信息填充之
-                cacheFileMap[path] = data = {}
+                cacheFileMap[path] = data = {},
                 //更新该装载节点状态
-                data[object||0] = 1;
+                data[object||0] = 1,
                 //表示缓存数据是否空缺
                  data[1] = !loader && getCachedScript(packageObject.name,file) == null ;
             }
@@ -1070,7 +1070,7 @@ var $import = function(freeEval,cachedScripts){
             var script = document.createElement("script");
             lazyScriptParentNode.appendChild(script);
             function onload(){//complete
-                if(callback && (this.readyState==null || /complete|loaded/.test(this.readyState))){
+                if(callback && /complete|loaded|null/.test(this.readyState)){
                     callback();
                     callback = null;
                 }
@@ -1212,31 +1212,30 @@ var $import = function(freeEval,cachedScripts){
         if(/\:$/.test(path)){
             return realPackage(findPackageByPath(path));
         }
-        switch(arguments.length){
-        case 0:
-            col = lazyTaskList.shift();
-            if(":Debug"){
-                if(!(col instanceof Function)){
-                    reportError("延迟导入错误，非法内部状态！！ ");
-                }
-            }
-            //hack return void;
-            return col && col();
-        case 1:
+        //hack objectName as args.length;var lazy
+        objectName = arguments.length;
+        if(objectName == 1){
             target = this;
-            break;
-        case 2:
-            switch(typeof target){
-            case 'boolean':
-            case 'function':
-                col = target;
-                target = this;
+        }else if(objectName == 2){
+            if(/boolean|function/.test(typeof target)){
+                col = target,target = this;
             }
+        }else if("org.xidea.jsi:COL"){
+        	if(objectName == 0){
+        		col = lazyTaskList.shift();
+	            if(":Debug"){
+	                if(!(col instanceof Function)){
+	                    reportError("延迟导入错误，非法内部状态！！ ");
+	                }
+	            }
+	            //hack return void;
+	            return col && col();
+        	}
         }
         if("org.xidea.jsi:COL"){
             if(col){
                 return lazyImport(path,target,col); 
-            }
+        	}
         }
         var pkg2obj = findPackageByPath(path);
         var objectName = path.substr(pkg2obj.name.length+1);

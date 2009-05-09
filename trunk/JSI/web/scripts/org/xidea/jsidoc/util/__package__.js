@@ -7,4 +7,5 @@ this.addScript("fn.js",['xmlReplacer','loadTextByURL']
                 ,"$log");
 this.addScript("log.js","$log")
 //findGlobalsAsList 是为java提供的接口的。
-this.addScript("find-globals.js",['findGlobals','findGlobalsAsList']);
+this.addScript("find-globals.js",['findGlobals','findGlobalsAsList']
+				,"$log");

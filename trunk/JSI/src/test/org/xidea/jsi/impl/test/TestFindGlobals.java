@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
+import java.util.Collections;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -28,14 +29,16 @@ public class TestFindGlobals {
 	public static final String FIND_GLOBALS = "findGlobalsAsList";
 
 	static {
-		InputStream in = Java6ScriptPackagePaser.class.getResourceAsStream(
-				"/org/xidea/jsidoc/util/find-globals.js"
+		InputStream in = Java6ScriptPackagePaser.class
+				.getResourceAsStream("/boot.js"
 				// "find-globals.js"
 				);
 		try {
 			String source = loadText(in);
 			try {
 				engine.eval(source);
+				engine
+						.eval("$import('org.xidea.jsidoc.util:findGlobalsAsList')");
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new RuntimeException(e);
@@ -44,7 +47,18 @@ public class TestFindGlobals {
 			throw new RuntimeException(e);
 		}
 	}
+	final Java6ScriptPackagePaser parser = new Java6ScriptPackagePaser(
+			new DefaultPackage(null, "test") {
+				@Override
+				public String loadText(String scriptName) {
+					if (JSIPackage.PACKAGE_FILE_NAME.equals(scriptName)) {
+						return "";
+					} else {
+						return scriptName;
+					}
+				}
 
+			});
 	private static String loadText(InputStream in)
 			throws UnsupportedEncodingException, IOException {
 		InputStreamReader reader = new InputStreamReader(in, "utf-8");
@@ -69,68 +83,60 @@ public class TestFindGlobals {
 		}
 	}
 
-
 	private int javaTime = 0;
 	private int scriptTime = 0;
+
+	@Test
+	public void testFindFile() {
+testParser( new File("C:/Users/jindw/workspace/JSI2/web/WEB-INF/classes/example/internal/guest.js"));
+	}
 
 	@Test
 	public void testFindFromDir() {
 		File dir = new File(this.getClass().getResource("/").getFile());
 		processDir(dir);
-		//processDir(new File("D:\\eclipse\\workspace\\JSISide\\web\\scripts"));
-		//processDir(new File("D:\\eclipse\\workspace\\JSI-thirdparty\\web\\scripts"));
+		// processDir(new
+		// File("D:\\eclipse\\workspace\\JSISide\\web\\scripts"));
+		// processDir(new
+		// File("D:\\eclipse\\workspace\\JSI-thirdparty\\web\\scripts"));
 		System.out.println("javaTime:" + this.javaTime);
 		System.out.println("scriptTime:" + this.scriptTime);
 	}
 
+	private void testParser(File file) {
+		try {
+			String source = loadText(new FileInputStream(file));
+			System.out.println(file);
+			long p1 = System.currentTimeMillis();
+			Collection<String> result1 = Collections.EMPTY_LIST;
+			@SuppressWarnings("unused")
+			Collection<String> result2 = null;
+			result1 = parser.findGlobals(source, "*");
+			long p2 = System.currentTimeMillis();
+			result2 = findGlobalsFromScript(source);
+			long p3 = System.currentTimeMillis();
+			javaTime += (int) (p2 - p1);
+			scriptTime += (int) (p3 - p2);
+			Assert.assertEquals("通过java方式和通过JS方式计算的全局变量应该相同", result1, result1);
+			System.out.println("结果一致：" + result1);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	private void processDir(final File files) {
-		final Java6ScriptPackagePaser parser = new Java6ScriptPackagePaser(new DefaultPackage(null, "test"){
-			@Override
-			public String loadText(String scriptName) {
-				if(JSIPackage.PACKAGE_FILE_NAME.equals(scriptName)){
-					return "";
-				}else{
-					return scriptName;
-				}
-			}
-			
-		});
 		files.listFiles(new FileFilter() {
 			public boolean accept(File file) {
 				if (file.isDirectory()) {
 					file.listFiles(this);
 				} else {
 					if (file.getName().endsWith(".js")) {
-						try {
-							String source = loadText(new FileInputStream(file));
-							System.out.println(file);
-							long p1 = System.currentTimeMillis();
-							Collection<String> result1 = null;
-							@SuppressWarnings("unused")
-							Collection<String> result2 = null;
-							try {
-								result1 = parser.findGlobals(source,"*");
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-							long p2 = System.currentTimeMillis();
-							try {
-								result2 = findGlobalsFromScript(source);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-							long p3 = System.currentTimeMillis();
-							javaTime += (int) (p2 - p1);
-							scriptTime += (int) (p3 - p2);
-							Assert.assertEquals("通过java方式和通过JS方式计算的全局变量应该相同",
-									result1, result1);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+						testParser(file);
 					}
 				}
 				return false;
 			}
+
 		});
 	}
 

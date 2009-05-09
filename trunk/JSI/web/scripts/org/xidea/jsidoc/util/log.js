@@ -31,7 +31,7 @@ function $log(){
             consoleLevel = bindLevel+1;
         }
     }else{
-        alert(temp.join(''));
+        confirm(temp.join(''));
     }
 }
 /**
@@ -59,6 +59,9 @@ $log.setLevel = function(level){
  */
 function buildLevelLog(bindLevel,bindName){
 	var window = this;
+	if(!window.confirm){
+		window.confirm = print;
+	}
     return function(){
         if(bindLevel>=consoleLevel){
             var msg = [bindLevel,bindName];

@@ -15,7 +15,9 @@ var specialRegExp = new RegExp([
             "'(?:\\\\(?:.|\\r|\\n|\\r\\n)|[^'\\n\\r])*'",      
             '/.*/'
           ].join('|'),'m');
-
+/**
+ * 删除注释，长字符串=>"",正则=>/./
+ */
 function replaceSpecialEntry(source){
     var head = '';
     var tail = source;
@@ -66,101 +68,163 @@ function replaceSpecialEntry(source){
     }
     return head + tail;
 }
-
+/**
+ * 替换代码
+ */
+function replaceFunctionBody(text){
+	var result = [];
+	var fnExp = /\bfunction\b\s*([\w\$]+)?[^\{]+\{/;
+	fnExp.test('')
+	var m;
+	while(m = fnExp.exec(text)) {
+		result.push(text.substring(0,m.index))
+		if(m[1]){
+			result.push("function ",m[1],"(){}");
+		}else{
+			result.push("function(){}");
+		}
+		var begin = m.index+m[0].length-1;
+		text = text.substring(begin);
+		var end = 0;
+		var depth=0;
+		var groupExp = /[\{\}]/g;
+		groupExp.test('')
+		while(m = groupExp.exec(text)){
+			if(m[0] == '{'){
+				depth++;
+			}else{
+				depth--;
+				if(depth == 0){
+					end = m.index;
+					//print("!!!"+end+"---"+text)
+					break;
+				}
+			}
+		}
+		if(end>0){
+			text = text.substring(end+1);
+		}else{
+			$log.error("function not end:"+text+"#"+depth)
+			throw Error("function not end:"+text+"#"+depth);
+		}
+	}
+	result.push(text);
+	return result.join('')
+}
+function replaceQuteBody(text){
+	var result = [];
+	var m;
+	while(m = /\[|(\bfor\b)?\s*\(/.exec(text)) {//if switch
+		var begin = m.index+m[0].length;
+		var tail = text.substring(begin);
+		result.push(text.substring(0,begin)); 
+		if(m[1]){
+			text = tail;
+			continue;
+		}
+		var end =0;
+		var depth=0;
+		while(m = /([\[\(])|[\]\)]/g.exec(tail)){
+			if(m[1]){
+				depth++;
+			}else{
+				depth--;
+				if(depth == -1){
+					end = m.index;
+					break;
+				}
+			}
+		}
+		var value = tail.substring(0,end)
+		if(/[^\s\t\u3000]/.test(value)){
+			result.push(0);//函数申明一起替换了，安全的用0吧
+		}
+		text = tail.substring(end);
+		
+	}
+	result.push(text);
+	return result.join('')
+}
+/**
+ * 补全全部缺少的；
+ */
+function formualSource(source){
+	var lines = source.replace(/^\s*$/mg,'').split(/[\r\n]/);
+	while(lines.length>1){
+		var tail2 = lines.pop().replace(/\s+$/,'');
+		var tail1 = lines.pop();
+		lines.push(tail2+tail1);
+		if(tail1.charCodeAt(tail1.length-1) != ';'){
+			try{
+				//$log.error(lines.join('\n'))
+				new Function(lines.join('\n'),"xx")
+				//$log.info(2222)
+			}catch(e){
+				lines.pop();
+				lines.push(tail2+';\n'+tail1);
+			}
+		}
+		
+		
+	}
+	return lines[0];
+}
 function findGlobals(source){
 	if(source instanceof Function){
 		source = (''+source).replace(/^\s*function[^\}]*?\{|\}\s*$/g,'');
 	}
-    source = replaceSpecialEntry(source.replace(/^\s*#.*/,''));
-    //简单的实现，还以为考虑的问题很多很多：
-    var varFlagMap = {};
-    var scopePattern = /\b(function\b[^\(]*)[^{]+\{|\{|\}|\[|\]/mg;//|{\s*(?:[\$\w\d]+\s*\:\s*(?:for|while|do)\b|""\:)
+	var source1 = replaceSpecialEntry(source.replace(/^\s*#.*/,''));
+    source2 = replaceFunctionBody(source1);
+    source3 = replaceQuteBody(source2);
     //找到办法不用判断了，省心了。。。。
     //var objectPattern = /\{\s*(?:[\$\w\d]+|"")\:/mg
-    var varPattern = /\b(var|function|,)\b\s*([\w\$]+)\s*/mg;
-    //var lineParrern = /([\$\w]+|[^\$\w])\s*[\r\n]+\s*([\$\w]+|[^\$\w])/g
-    var buf = [];
-    var fnDepth = 0;
-    var arrayDepth = 0;
+    //吧object 空白连接起来
+    source = source3.replace(/\s+\:/g,':');
+    try{
+    	new Function(source);
+    }catch(e){
+    	$log.error("全局变量探测异常警告",[source1,source2,source3,source].join("\n=====\n"),e);
+    }
+    
+    source1=source2=source3=0;
+    source = formualSource(source);
+    //简单的实现，还以为考虑的问题很多很多：
+    var varFlagMap = {};
+    var varPattern = /\b(var|function)\b\s*([\w\$]+)\s*/mg;
     var begin = 0;
     var match;
-    while(match = scopePattern.exec(source)){
-        switch(match[0] ){
-        //array
-        case '[':
-            if(!fnDepth){
-                if(!arrayDepth){
-                    buf.push(source.substring(begin,match.index),'[]');
-                }
-                arrayDepth ++;
-            }
-            break;
-        case ']':
-            if(!fnDepth){
-                arrayDepth --;
-                if(!arrayDepth){
-                    begin = match.index+1;
-                }
-            }
-            break;
-        //function
-        case '{':
-            if(!arrayDepth && fnDepth){//in function
-                fnDepth++;
-            }
-            break;
-        case '}':
-            if(!arrayDepth && fnDepth){//in function
-                fnDepth--;
-                if(fnDepth == 0){
-                    begin = match.index+1;
-                }
-            }
-            break;
-        default://function.. 
-            if(!arrayDepth){
-                if(!fnDepth){
-                    buf.push(source.substring(begin,match.index),match[1],'}');
-                }
-                fnDepth++;
-            }
-            break;
-        }
-    }
-    buf.push(source.substr(begin))
-    source=buf.join('');
-    source = source.replace(/([\w\$\]])\s*\([\w\$\d,]*\)/m,'$1()');
-    begin = 0;
     while(match = varPattern.exec(source)){
         switch(match[1]){
         case 'var':
             begin = match.index;
+            varFlagMap[match[2]] = 1;
+            var temp = source.indexOf(';',begin);
+            try{
+                temp = source.substring(begin,temp);
+                //确保，函数，数组，函数调用，都清理完毕
+                var subVarReg = /,\s*([\w\$]+)/g;
+                while(match=subVarReg.exec(temp)){
+		            var next = source.charAt(match.index + match[0].length);
+		            switch(next){
+		            	case ',':
+		            	case ';':
+		            	case '=':
+	                    varFlagMap[match[1]] = 1;
+		            }
+                }
+            }catch(e){
+                continue;
+            }
+            break;
         case 'function':
             varFlagMap[match[2]] = 1;
-        default://,
-            var next = source.charAt(match.index + match[0].length);
-            if(next!=':'){
-                var temp = source.indexOf(';',begin);
-                if(temp>0 && temp<match.index){
-                    continue;
-                }
-                try{
-                    //不知道是不是还有什么问题
-                    temp = source.substring(begin,match.index);
-                    //if(/var|if|else/.test(temp)){continue;}
-                    temp = temp.replace(/[\r\n]/g,' ');
-                    new Function(temp+',a;')
-                }catch(e){
-                    continue;
-                }
-                varFlagMap[match[2]] = 1;
-            }
         }
     }
     var result = [];
     for(match in varFlagMap){
         result.push(match)
     }
+    //alert(result.join('\n'))
     return result;
 }
 /**
