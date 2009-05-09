@@ -1,15 +1,18 @@
 function preparePackage(name){
 	var pkg = $import(name+':');
-	$JSI.preload(name+'.test','',function(){
-		for(var file in pkg.scriptObjectMap){
-			this.addScript(file,"*",
-			    ["org/xidea/test/util.js",
-			    "org/xidea/test/jsmock.js",
-			    "org.xidea.test:TestSuite",
-			    "org.xidea.test:assertEquals",
-			    name.replace(/\.|$/g,'/')+file]);
-		}
-	});
+//	$JSI.preload(name+'.test','',function(){
+//		for(var file in pkg.scriptObjectMap){
+//			this.addScript(file,"*",
+//			    ["org/xidea/test/util.js",
+//			    "org/xidea/test/jsmock.js",
+//			    "org.xidea.test:TestSuite",
+//			    "org.xidea.test:assertEquals",
+//			    name.replace(/\.|$/g,'/')+file]);
+//		}
+//	});
+
+	$import("org.xidea.test:assertEquals");
+	$import("org.xidea.test:JSMock");
 	return $import(name+'.test:')
 }
 
@@ -89,7 +92,7 @@ var TestSuite = {
 					var item = objectMap[n];
 					testMap[n] = item;
 					if(item instanceof Function){
-						if(item2.length == 0){
+						if(item.length == 0){
 						    objects.push(n);
 						}
 					}else{

@@ -17,7 +17,7 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-JSMock = {
+var JSMock = {
   extend: function(object) {
     var mockControl = new MockControl();
     object.createMock = function(objectToMock) {return mockControl.createMock(objectToMock)};
@@ -257,7 +257,7 @@ function TypeOf(type) {
 
 TypeOf.isA = function(type) { return new TypeOf(type); };
 
-ArgumentMatcher = {
+var ArgumentMatcher = {
 
 	matches: function(expected, actual) {
 		return this.__delegateMatching(expected, actual);
@@ -309,7 +309,7 @@ function Discrepancy(message, behavior) {
 	this.behavior = behavior;
 }
 
-ArgumentFormatter = {
+var ArgumentFormatter = {
 
 	format: function(args) {
 		var formattedArgs = "";

@@ -175,10 +175,9 @@ Exporter.prototype = {
 }
 
 
-var templateRegexp = /new\s+Template\s*\(((?:[\w\.\+\s]+|'.*?'|".*?")+)\)/g;
+var templateRegexp = /\bnew\s+Template\s*\(((?:[\w\.\+\s]+|'.*?'|".*?")+)\)/g;
 function defaultTemplateFilter(text,path){
     if(templateRegexp.test(text)){
-    
         $import(path,{});
         var packageObject = $import(path.replace(/\/[^\/]+$/,':').replace(/\//g,'.'));
         var loader = packageObject.loaderMap[path.replace(/.*\//,'')];
