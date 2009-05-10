@@ -179,8 +179,8 @@ function findGlobals(source){
 		source = (''+source).replace(/^\s*function[^\}]*?\{|\}\s*$/g,'');
 	}
 	var source1 = replaceSpecialEntry(source.replace(/^\s*#.*/,''));
-    source2 = replaceFunctionBody(source1);
-    source3 = replaceQuteBody(source2);
+    var source2 = replaceFunctionBody(source1);
+    var source3 = replaceQuteBody(source2);
     //找到办法不用判断了，省心了。。。。
     //var objectPattern = /\{\s*(?:[\$\w\d]+|"")\:/mg
     //吧object 空白连接起来
