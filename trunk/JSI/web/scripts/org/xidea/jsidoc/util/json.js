@@ -9,6 +9,8 @@
  * @param data
  * @return JSON
  */
+ 
+var window  = function(){return this}();
 var JSON = {
     /**
      * 解析JSON文本

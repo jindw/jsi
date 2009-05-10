@@ -1,3 +1,4 @@
+var window = function(){return this}();
 var XMLHttpRequest = window.XMLHttpRequest;
 if(window.ActiveXObject ){
     if(location.protocol == "file:" || !XMLHttpRequest ){
