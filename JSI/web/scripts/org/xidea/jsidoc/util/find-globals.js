@@ -69,7 +69,7 @@ function replaceSpecialEntry(source){
     return head + tail;
 }
 /**
- * 替换代码
+ * 刪除函數體及其参数集
  */
 function replaceFunctionBody(text){
 	var result = [];
@@ -111,10 +111,13 @@ function replaceFunctionBody(text){
 	result.push(text);
 	return result.join('')
 }
+/**
+ * 删除[]()等括弧内容
+ */
 function replaceQuteBody(text){
 	var result = [];
 	var m;
-	while(m = /\[|(\bfor\b)?\s*\(/.exec(text)) {//if switch
+	while(m = /\[|(\bfor|catch\b)?\s*\(/.exec(text)) {//if switch
 		var begin = m.index+m[0].length;
 		var tail = text.substring(begin);
 		result.push(text.substring(0,begin)); 
@@ -124,7 +127,9 @@ function replaceQuteBody(text){
 		}
 		var end =0;
 		var depth=0;
-		while(m = /([\[\(])|[\]\)]/g.exec(tail)){
+		var quteReg = /([\[\(])|[\]\)]/g;
+		quteReg.test("");
+		while(m = quteReg.exec(tail)){
 			if(m[1]){
 				depth++;
 			}else{

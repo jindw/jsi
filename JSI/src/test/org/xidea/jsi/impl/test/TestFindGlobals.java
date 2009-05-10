@@ -59,6 +59,7 @@ public class TestFindGlobals {
 				}
 
 			});
+
 	private static String loadText(InputStream in)
 			throws UnsupportedEncodingException, IOException {
 		InputStreamReader reader = new InputStreamReader(in, "utf-8");
@@ -88,13 +89,18 @@ public class TestFindGlobals {
 
 	@Test
 	public void testFindFile() {
-testParser( new File("C:/Users/jindw/workspace/JSI2/web/WEB-INF/classes/example/internal/guest.js"));
+		testText("tagAlias[info.alias[j]] = n");
+		testFile(new File(
+				"C:/Users/jindw/workspace/JSI2/web/WEB-INF/classes/org/xidea/jsidoc/doc-entry.js"));
+		// testFile( new
+		// File("C:/Users/jindw/workspace/JSI2/web/WEB-INF/classes/example/internal/guest.js"));
 	}
 
 	@Test
 	public void testFindFromDir() {
 		File dir = new File(this.getClass().getResource("/").getFile());
 		processDir(dir);
+		processDir(new File(dir,"../../../build"));
 		// processDir(new
 		// File("D:\\eclipse\\workspace\\JSISide\\web\\scripts"));
 		// processDir(new
@@ -103,25 +109,29 @@ testParser( new File("C:/Users/jindw/workspace/JSI2/web/WEB-INF/classes/example/
 		System.out.println("scriptTime:" + this.scriptTime);
 	}
 
-	private void testParser(File file) {
+	private void testFile(File file) {
 		try {
 			String source = loadText(new FileInputStream(file));
 			System.out.println(file);
-			long p1 = System.currentTimeMillis();
-			Collection<String> result1 = Collections.EMPTY_LIST;
-			@SuppressWarnings("unused")
-			Collection<String> result2 = null;
-			result1 = parser.findGlobals(source, "*");
-			long p2 = System.currentTimeMillis();
-			result2 = findGlobalsFromScript(source);
-			long p3 = System.currentTimeMillis();
-			javaTime += (int) (p2 - p1);
-			scriptTime += (int) (p3 - p2);
-			Assert.assertEquals("通过java方式和通过JS方式计算的全局变量应该相同", result1, result1);
-			System.out.println("结果一致：" + result1);
+			testText(source);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void testText(String source) {
+		long p1 = System.currentTimeMillis();
+		Collection<String> result1 = Collections.EMPTY_LIST;
+		@SuppressWarnings("unused")
+		Collection<String> result2 = null;
+		result1 = parser.findGlobals(source, "*");
+		long p2 = System.currentTimeMillis();
+		result2 = findGlobalsFromScript(source);
+		long p3 = System.currentTimeMillis();
+		javaTime += (int) (p2 - p1);
+		scriptTime += (int) (p3 - p2);
+		Assert.assertEquals("通过java方式和通过JS方式计算的全局变量应该相同", result1, result1);
+		System.out.println("结果一致：" + result1);
 	}
 
 	private void processDir(final File files) {
@@ -131,7 +141,7 @@ testParser( new File("C:/Users/jindw/workspace/JSI2/web/WEB-INF/classes/example/
 					file.listFiles(this);
 				} else {
 					if (file.getName().endsWith(".js")) {
-						testParser(file);
+						testFile(file);
 					}
 				}
 				return false;
