@@ -46,8 +46,6 @@
 		<copy tofile="build/dest/JSI-${version}.jar" file="build/dest/JSI.jar" />
 	</target>
 	<target name="jar-compressed-jsidoc" depends="init">
-		<echo file="build/dest/jsidoc/export/__package__.js">this.setImplementation("org.xidea.jsidoc")</echo>
-		<echo file="build/dest/jsidoc/__package__.js">this.addScript("jsidoc.js",["JSIDoc",'DependenceInfo','Exporter','ExportUI'],['org.xidea.jsidoc.util.*'])</echo>
 		<jar destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
@@ -70,6 +68,7 @@
 				<include name="__package__.js" />
 				<include name="jsidoc.js" />
 				<include name="export/__package__.js" />
+				<include name="export/export.js" />
 				<include name="util/__package__.js" />
 				<include name="util/util.js" />
 			</zipfileset>
