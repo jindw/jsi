@@ -26,7 +26,7 @@ function $log(){
         }
     }
     if(bindLevel >= 0){
-        temp.push("\n\n继续弹出 ",temp[0]," 日志?");
+        temp.push("\n\n继续弹出 ",temp[0]," 日志?\r\n");
         if(!confirm(temp.join(''))){
             consoleLevel = bindLevel+1;
         }
