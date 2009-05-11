@@ -32,7 +32,9 @@ public class RhinoSupportTest {
 			Context cx = Context.enter();
 			cx.evaluateString(
 				ScriptRuntime.getGlobal(cx),
-				"Packages.org.xidea.jsi.impl.RhinoSupport.buildEvaler({scriptBase:'/ss/',name:'33.js'})('...')", "#", 1, null);
+				"Packages.org.xidea.jsi.impl.RhinoSupport.buildEvaler({scriptBase:'/dir/',name:'file.js'})('...')", "#", 1, null);
+		}catch (Exception e) {
+			checkLogContains(e,"dir/file.js");
 		}finally{
 			Context.exit();
 		}
@@ -59,19 +61,24 @@ public class RhinoSupportTest {
 			cx.evaluateString(
 					globals,
 					"len()", "#", 1, null);
+			fail("");
 			}catch (Exception e) {
-				StringWriter buf = new StringWriter();
-				PrintWriter out = new PrintWriter(buf);
-				e.printStackTrace(out);
-				out.flush();
-				buf.flush();
-				System.out.println(buf);
-				assertTrue(buf.toString().indexOf("test-file2009.js")>0);
+				checkLogContains(e,"mytest/test-file2009.js");
 			}
 	
 		}finally{
 			Context.exit();
 		}
+	}
+
+	private void checkLogContains(Exception e, String key) {
+		StringWriter buf = new StringWriter();
+		PrintWriter out = new PrintWriter(buf);
+		e.printStackTrace(out);
+		out.flush();
+		buf.flush();
+		System.out.println(buf);
+		assertTrue(buf.toString().indexOf(key)>0);
 	}
 
 }
