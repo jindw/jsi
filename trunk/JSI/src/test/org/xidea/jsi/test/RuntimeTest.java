@@ -14,13 +14,14 @@ import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.xidea.jsi.impl.ClasspathRoot;
 import org.xidea.jsi.impl.RhinoScriptPackagePaser;
+import org.xidea.jsi.impl.RhinoSupport;
 
 
 public class RuntimeTest {
 	@Test
 	public void testJava6() throws UnsupportedEncodingException, ScriptException, IOException{
 		ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");
-		engine.eval(new ClasspathRoot().loadText("boot.js"));
+		engine.eval(RhinoSupport.loadText("boot.js"));
 		System.out.println(engine.eval("$import('example:sayHello')"));
 		System.out.println(engine.eval("$import('org.xidea.lite:Template')"));
 		//System.out.println(engine.eval("$import('example:sayHello')"));
@@ -32,7 +33,7 @@ public class RuntimeTest {
 			public Object run(final Context cx) {
 				Scriptable scope = ScriptRuntime.getGlobal(cx);
 				try {
-					cx.evaluateString(scope, cp.loadText("boot.js"), "<package-wrapper.js>", 1, null);
+					cx.evaluateString(scope, RhinoSupport.loadText("boot.js"), "<package-wrapper.js>", 1, null);
 				} catch (UnsupportedEncodingException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

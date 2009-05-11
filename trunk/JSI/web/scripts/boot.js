@@ -87,7 +87,7 @@ var $import = function(freeEval,cachedScripts){
         function reportError(){
             var args = ["JSI 引导文件调试信息\n  "];
             args.push(args.join.call(arguments,'\n  '),"\n继续弹出该调试信息？")
-            if(!confirm(args.join(''))){
+            if(!(this.confirm||print)(args.join(''))){
                 reportError = Function.prototype;
             }
         }
@@ -185,6 +185,7 @@ var $import = function(freeEval,cachedScripts){
     }else{
     	if("org.xidea.jsi:Server"){
     	    $JSI.scriptBase= "classpath:///";
+    	    var RhinoSupport = Packages.org.xidea.jsi.impl.RhinoSupport;
     	    loadTextByURL=function(url){
     	        /*
     		     	url = url.replace(/^\w+:(\/)+(?:\?.*=)/,'$1');
@@ -197,11 +198,14 @@ var $import = function(freeEval,cachedScripts){
     				}
     		     */
     		     url = url.replace(/^\w+:(\/)+(?:\?.*=)?/,'');
-        		 return Packages.org.xidea.jsi.impl.ClasspathRoot.loadText(url)+'';
+        		 return RhinoSupport.loadText(url)+'';
     	    }
+    	    
+    	   freeEval = function(code){
+    	       RhinoSupport.buildEvaler(this).call(this,code);
+    	   }
     	}
     }
-    
     var packageMap = {};
     var scriptBase = $JSI.scriptBase;
 
@@ -939,13 +943,13 @@ var $import = function(freeEval,cachedScripts){
 //            	        $log.error(loaderName,loader)
 //                  }
                     //不要清除文本缓存
-                    return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(scriptBase+"?path="+packageObject.name.replace(/\.|$/g,'/')+loaderName)));
+                    return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(scriptBase+"?path="+packageName.replace(/\.|$/g,'/')+loaderName)),packageObject.scriptBase+loaderName);
 //            	    if(loaderName == 'show-detail.js'){
 //            	        $log.error(loaderName,loader)
 //                  }
                 }else{
                      //不要清除文本缓存
-                    return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(packageObject.scriptBase+loaderName)));
+                    return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(packageObject.scriptBase+loaderName)),loaderName);
                 }
             }
             //ScriptLoader[loaderName] += 0x10000
