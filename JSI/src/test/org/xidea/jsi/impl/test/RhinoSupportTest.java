@@ -32,7 +32,7 @@ public class RhinoSupportTest {
 			Context cx = Context.enter();
 			cx.evaluateString(
 				ScriptRuntime.getGlobal(cx),
-				"Packages.org.xidea.jsi.impl.RhinoSupport.buildEvaler({scriptBase:'/dir/',name:'file.js'})('...')", "#", 1, null);
+				"Packages.org.xidea.jsi.impl.RhinoSupport.buildEvaler(this).call({scriptBase:'/dir/',name:'file.js'},'...')", "#", 1, null);
 		}catch (Exception e) {
 			checkLogContains(e,"dir/file.js");
 		}finally{
