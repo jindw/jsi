@@ -201,9 +201,7 @@ var $import = function(freeEval,cachedScripts){
         		 return RhinoSupport.loadText(url)+'';
     	    }
     	    
-    	   freeEval = function(code){
-    	       RhinoSupport.buildEvaler(this).call(this,code);
-    	   }
+    	   freeEval = RhinoSupport.buildEvaler(freeEval);
     	}
     }
     var packageMap = {};

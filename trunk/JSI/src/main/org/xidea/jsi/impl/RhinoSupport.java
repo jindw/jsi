@@ -7,37 +7,51 @@ import java.io.IOException;
 
 
 public class RhinoSupport {
+	static final String EVAL = "(function(code){return Packages."+RhinoSupport.class.getName()+".buildInnerEvaler(this,String(this.scriptBase)+this.name).call(this,code);})";
+	static final String EVALER = "(function(x){return eval(x)})";
 	public static String loadText(String path) throws IOException{
 		return ClasspathRoot.loadText(path,ClasspathRoot.class.getClassLoader(),"utf-8");
 	}
+
 	public static Object buildEvaler(Object thiz){
+		RhinoSupport s = get(thiz);
+		return s.eval(EVAL,"<new_freeEval>");
+	}
+	/**
+	 * @internal
+	 * @param thiz
+	 * @param path
+	 * @return
+	 */
+	public static Object buildInnerEvaler(Object thiz,String path){
+		RhinoSupport s = get(thiz);
+		return s.eval(EVALER,path);
+	}
+	private static RhinoSupport get(Object thiz){
 		if(thiz.getClass().getName().startsWith("sun.")){
-			return Java6Impl.buildEvaler(thiz);
+			return new Java6Impl();
 		}else{
-			return RhinoImpl.buildEvaler(thiz);
+			return new RhinoImpl();
 		}
 	}
-}
-class Java6Impl{
-
-	//function(code){return evaler(this,code);}
-	public static Object buildEvaler(Object thiz){
-		sun.org.mozilla.javascript.internal.Scriptable sthiz = (sun.org.mozilla.javascript.internal.Scriptable) thiz;
-		String path = String.valueOf(sthiz.get("scriptBase", sthiz));
-		path += sthiz.get("name", sthiz);
-		sun.org.mozilla.javascript.internal.Context cx = sun.org.mozilla.javascript.internal.Context.getCurrentContext();
-		return (sun.org.mozilla.javascript.internal.Callable) cx.evaluateString(
-				sun.org.mozilla.javascript.internal.ScriptRuntime.getTopCallScope(cx), "(function(x){return eval(x)})", path, 1, null);
+	public Object eval(String code,String path){
+		return null;
 	}
 }
-class RhinoImpl{
+class Java6Impl extends RhinoSupport{
 	//function(code){return evaler(this,code);}
-	public static Object buildEvaler(Object thiz){
-		org.mozilla.javascript.Scriptable sthiz = (org.mozilla.javascript.Scriptable) thiz;
-		String path = String.valueOf(sthiz.get("scriptBase", sthiz));
-		path += sthiz.get("name", sthiz);
+	public Object eval(String code,String path){
+		sun.org.mozilla.javascript.internal.Context cx = sun.org.mozilla.javascript.internal.Context.getCurrentContext();
+		return cx.evaluateString(
+				sun.org.mozilla.javascript.internal.ScriptRuntime.getTopCallScope(cx), code, path, 1, null);
+
+	}
+}
+class RhinoImpl extends RhinoSupport{
+	//function(code){return evaler(this,code);}
+	public Object eval(String code,String path){
 		org.mozilla.javascript.Context cx = org.mozilla.javascript.Context.getCurrentContext();
 		return cx.evaluateString(
-				org.mozilla.javascript.ScriptRuntime.getTopCallScope(cx), "(function(x){return eval(x)})", path, 1, null);
+				org.mozilla.javascript.ScriptRuntime.getTopCallScope(cx), code, path, 1, null);
 	}
 }
