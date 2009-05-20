@@ -64,6 +64,7 @@ public class JSIFilter extends JSIService implements Filter {
 			}
 			ServletOutputStream out = resp.getOutputStream();
 			writeResource(path, isPreload, out);
+			return;
 
 		}
 		// 走这条分支的情况：1、无法找到资源，2、根本不在脚本目录下
