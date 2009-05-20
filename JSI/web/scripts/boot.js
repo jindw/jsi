@@ -1072,7 +1072,7 @@ var $import = function(freeEval,cachedScripts){
             var script = document.createElement("script");
             lazyScriptParentNode.appendChild(script);
             function onload(){//complete
-                if(callback && /complete|loaded|null/.test(this.readyState)){
+                if(callback && /complete|loaded|undefined/.test(this.readyState)){
                     callback();
                     callback = null;
                 }
