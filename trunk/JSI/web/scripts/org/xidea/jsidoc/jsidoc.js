@@ -57,17 +57,29 @@ function initializePackageAndDataDataFromHash(packageGroupMap){
 }
 function initializeHistory(){
     var contentWindow = document.getElementById("content").contentWindow;
-	if(checkInterval){
-    	clearInterval(checkInterval);
+	if(checkTimeout){
+    	clearTimeout(checkTimeout);
     }
-	checkInterval = setInterval(function(){
+	checkTimeout = setTimeout(function(){
 		var url = decodeURIComponent(checkLocation.hash.substr(1));
 		var contentLocation = contentWindow.location;
-		if(url && url != contentLocation.href){
+		var href = contentLocation.href;
+		var pos = href.lastIndexOf('#');
+		if(pos>0){
+			href = href.substring(0,pos)
+		}
+		if(url && url != href){
             contentLocation.replace(url);
 		}
 	},100);
 }
+var MENU_FRAME_ID = "menu";
+var CONTENT_FRAME_ID = "content";
+//var loadingHTML = '<img style="margin:40%" src="../styles/loading2.gif"/>';
+
+var checkLocation = top.location;
+var checkTimeout;
+
 /**
  * @public
  */
@@ -142,7 +154,9 @@ var JSIDoc = {
             document.write(this.genMenu());
         }else{
         	var url = '#'+encodeURIComponent(document.location.href);
-        	checkLocation.hash = url;
+        	if(window.ActiveXObject){
+        		checkLocation.hash = url;
+        	}
         	if(path == "@export"){
 	            document.write(this.genExport(document));
 	        }else{
@@ -348,22 +362,9 @@ var documentBase = (scriptBase + 'html/').substr($JSI.scriptBase.length);
 var jsiCacher = $JSI.preload;
 var cachedScripts = {};
 
-var MENU_FRAME_ID = "menu";
-var CONTENT_FRAME_ID = "content";
-//var loadingHTML = '<img style="margin:40%" src="../styles/loading2.gif"/>';
 
-var win = window;
-var checkLocation = win.location;
-var checkInterval;
 
-while(win!=win.top){
-	try{
-		win.parent.document.forms.length;
-	}catch(e){
-		break;
-	}
-	win = win.parent;
-}
+
 function preload(pkg,file2dataMap,value){
     jsiCacher.apply($JSI,arguments);
     var base = pkg.replace(/\.|(.)$/g,'$1/');

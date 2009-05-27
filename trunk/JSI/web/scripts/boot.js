@@ -82,11 +82,23 @@ var $import = function(freeEval,cachedScripts){
         /*
          * 日志处理逻辑
          */
-         
+        function appendObjectInfo(args,arg){
+         	if(typeof arg == 'object'){
+         		for(var n in arg){
+         			args.push(n,'=',arg[n],',')
+         		}
+         	}else{
+         		args.push(arg);
+         	}
+         	args.push('\n  ');
+        }
         //var logLevel = 0;//{trace:-1,debug:0,info:1,error:2}
         function reportError(){
             var args = ["JSI 引导文件调试信息\n  "];
-            args.push(args.join.call(arguments,'\n  '),"\n继续弹出该调试信息？")
+            for(var i = 0;i<arguments.length;i++){
+            	appendObjectInfo(args,arguments[i]);
+            }
+            args.push("\n继续弹出该调试信息？");
             if(!(this.confirm||print)(args.join(''))){
                 reportError = Function.prototype;
             }
@@ -458,7 +470,7 @@ var $import = function(freeEval,cachedScripts){
         }catch(e){
             if(":Debug"){
                 //packageMap[name] = null;
-                reportError("Package Syntax Error:["+name+"]\n\nException:"+e);
+                reportError("Package Syntax Error:["+name+"]\n\nException:",e);
             }
             throw e;
         }
@@ -954,7 +966,7 @@ var $import = function(freeEval,cachedScripts){
             
         }catch(e){
             if(":Debug"){
-                reportError("Load Error:\n"+loader.scriptBase + loaderName+"\n\nException:"+e);
+                reportError("Load Error:\n"+loader.scriptBase + loaderName+"\n\nException:",e);
             }
             throw e;
         }finally{
