@@ -5,7 +5,6 @@
  * @author jindw
  * @version $Id: export.js,v 1.8 2008/02/24 08:58:15 jindw Exp $
  */
-
 function Exporter(){
     this.imports = [];
     this.externPackage = [];
@@ -267,7 +266,6 @@ function Template(path){
 Template.prototype.render = function(context){
     return this.data(context)
 }
-
-
-var exportDataTemplate = new Template(this.scriptBase+"../html/export-data.xml");
-var exportDocTemplate = new Template(this.scriptBase+"../html/export-doc.xhtml");
+alert(this.scriptBase.replace(/\w+\/$/,"html/export-data.xml"))
+var exportDataTemplate = new Template(this.scriptBase.replace(/\w+\/$/,"html/export-data.xml"));
+var exportDocTemplate = new Template(this.scriptBase.replace(/\w+\/$/,"html/export-doc.xhtml"));
