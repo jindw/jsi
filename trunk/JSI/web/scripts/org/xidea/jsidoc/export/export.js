@@ -176,46 +176,68 @@ Exporter.prototype = {
 
 var templateRegexp = /\bnew\s+Template\s*\(/;
 function defaultTemplateFilter(text,path){
-var begin = new Date()
-var result = []
-    if(templateRegexp.test(text)){
-var result = [(new Date - begin)];
-        $import(path,{});
-        var packageObject = $import(path.replace(/\/[^\/]+$/,':').replace(/\//g,'.'));
-        var loader = packageObject.loaderMap[path.replace(/.*\//,'')];
-result.push("load:"+path+(new Date - begin))
-		var result = [];
-		while(p = text.search(templateRegexp))
-        text = text.replace(templateRegexp,function(templateCode,path){
-result.push("replace1:"+templateCode+(new Date - begin))
-            try{
-                if(path && (typeof loader.hook(path) == 'string')){
-                    var object = loader.hook(templateCode);
-                    if(object && (object = object.compileData)){
-                    	if(object instanceof Function){
-                    		object = object.toString();
-                    	}else{
-                    		object = JSON.encode(object);
-                    	}
-                    	
-                        return "new Template"+"("+object+")";
-                        
-                    }
-                }
-
-            }catch(e){$log.error("替换出错：",templateCode)}
-result.push("replace2:"+templateCode+(new Date - begin))
-            return templateCode;
-        });
+	var templateBegin = text.search(templateRegexp);
+	var packageName = path.replace(/\/[^\/]+$/,':').replace(/\//g,'.');
+    var fileName = path.substring(packageName.length)
+    if(fileName == '__package__.js'){
+    	return text;
     }
-var offset = new Date - begin;
-if(offset > 10){
-result.push(offset)
-$log.error("reg exp",result.join('\n'))
-}
+    if(templateBegin >=0){
+        $import(path,{});
+        var result = [];
+		var packageObject = $import(packageName);
+        var loader = packageObject.loaderMap[fileName];
+		do{
+			result.push(text.substring(0,templateBegin));
+			text = text.substring(templateBegin);
+			tryCount = 32;
+			var pathEnd=0;
+			templateCode='';
+			while(tryCount -- && (pathEnd=text.indexOf(')',pathEnd))){
+				try{
+					var templateCode = text.substring(0,pathEnd+1);
+					new Function(templateCode);
+					break;
+				}catch(e){
+					templateCode = '';
+				}
+			}
+			if(templateCode){
+				text = text.substring(templateCode.length);
+				templateCode = getTemplateCode(loader,templateCode);
+				result.push(templateCode);
+			}else{
+				templateCode = text.substring(0,Math.max(text.indexOf('('),1));
+				result.push(templateCode)
+				text = text.substring(templateCode.length);
+			}
+		}while((templateBegin = text.search(templateRegexp))>=0);
+		result.push(text);
+		text = result.join('')
+    }
     return text;
 }
 
+function getTemplateCode(loader,templateCode){
+	try{
+		var path = templateCode.substring(templateCode.indexOf('('));
+		path = loader.hook(path);
+		if((typeof path == 'string')){
+            var object = loader.hook(templateCode);
+		    if(object && (object = object.compileData)){
+		    	if(object instanceof Function){
+		    		object = object.toString();
+		    	}else{
+		    		object = JSON.encode(object);
+		    	}
+		    	
+		        return "new Template"+"("+object+")";
+		    }
+        }
+	}catch(e){
+	}
+	return templateCode;
+}
 function addDependenceInfo(dependenceInfo,result,cachedInfos){
     var befores = dependenceInfo.getBeforeInfos();
     var i = befores.length;

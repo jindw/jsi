@@ -751,7 +751,7 @@ var $import = function(freeEval,cachedScripts){
             }else{
                 //TODO: try parent
                 if(":Debug"){
-                    throw new Error('Script:['+fileName+'] Not Found')
+                    throw new Error('Script:['+packageObject.name+':'+fileName+'] Not Found')
                 }
             }
         }
