@@ -57,23 +57,53 @@ function initializePackageAndDataDataFromHash(packageGroupMap){
 }
 function initializeHistory(){
     var contentWindow = document.getElementById("content").contentWindow;
-	if(checkInterval){
-    	clearTimeout(checkInterval);
-    }
-	checkInterval = setTimeout(function(){
-		var contentLocation = contentWindow.location;
-		var contentHref = getPureHref(contentLocation.href);
-		
-		if(checkURL){
-			if(checkURL && checkURL != contentHref){
-				if(checkURL.substring(0,2) == "#/"){
-	                contentLocation.replace(urlPrefix+ checkURL.substring(2));
-				}
-			}
-		}else{
-			checkURL = contentHref;
+	
+	setInterval(function(){
+		if(initializeURL){
+			contentWindow.location.replace(getTrueHref(initializeURL));
+			initializeURL = null;
 		}
 	},100);
+	if(checkInterval){
+    	clearInterval(checkInterval);
+    }
+    /**
+     * >/       ==       </   #
+     *     1    ==  2
+     */
+	checkInterval = setInterval(function(){
+		var offset = getHistoryOffset();
+		var i = 10;
+		while(offset && i--){
+			top.history.go(offset);
+			if(getHistoryOffset() == 0){
+				var dest = getTrueHref(checkLocation.hash.substring(1));
+				contentWindow.location.replace(dest)
+				//抛掉向前记录
+				//contentWindow.history.go(offset);
+				break;
+			}
+		}
+		
+	},100);
+}
+function getHistoryOffset(){
+	var hash = checkLocation.hash;
+	var flag = hash.substring(1,3);
+	if(flag == '>/'){
+		return 1;
+
+	}else if(flag == '</'){
+		return -1;
+	}else{
+		return 0;
+	}
+}
+function getTrueHref(href){
+	if(href.substring(0,2) == ":/"){
+        href = urlPrefix+ href.substring(2);
+	}
+	return href;
 }
 function getPureHref(contentHref){
 	var pos = contentHref.lastIndexOf('#');
@@ -82,7 +112,7 @@ function getPureHref(contentHref){
 		contentHref = contentHref.substring(0,pos)
 	}
 	if(contentHref.indexOf(urlPrefix) ==0){
-		contentHref = "#/"+contentHref.substring(urlPrefix.length)
+		contentHref = ":/"+contentHref.substring(urlPrefix.length)
 	}
 	return contentHref;
 }
@@ -92,7 +122,7 @@ var CONTENT_FRAME_ID = "content";
 
 var checkInterval;
 var checkLocation = top.location;
-var checkURL = (checkLocation.hash || '').substr(1);
+var initializeURL = (checkLocation.hash || '').substr(1);
 var urlPrefix = location.href;
 urlPrefix = urlPrefix.replace(/[^\/]*[\?#][\s\S]+/,'');
 
@@ -157,6 +187,8 @@ var JSIDoc = {
         MenuUI.loadPackage(menuDocument,name);
     },
     jump:function(a){
+    	var url = '#'+encodeURIComponent(getPureHref(a.href));
+    	checkLocation.hash = ">/"+url;
     },
     /**
      * 渲染文档，输出页面
@@ -168,11 +200,11 @@ var JSIDoc = {
         if(path == "@menu"){
             document.write(this.genMenu());
         }else{
-        	var url = '#'+encodeURIComponent(document.location.href);
-        	if(window.ActiveXObject){
-        		checkLocation.hash = "@firefox:"+url;
-        		checkLocation.hash = url;
-        	}
+        	var url = '#'+encodeURIComponent(getPureHref(document.location.href));
+        	//if(window.ActiveXObject){
+        	checkLocation.hash = "</"+url;
+        	checkLocation.hash = url;
+        	//}
         	if(path == "@export"){
 	            document.write(this.genExport(document));
 	        }else{
@@ -406,8 +438,8 @@ var Template=function (path){
         var XMLParser = $import('org.xidea.lite:XMLParser',{} );
         var parser = new XMLParser(true);
         parser.parserList.unshift(function(node,context,chain){
-		    if(node.tagName == 'a'){
-			    if(!node.hasAttribute("onclick")){
+		    if(node.localName == 'a'){
+			    if(!node.getAttribute("onclick")){
 			    	node = node.cloneNode(true);
 			    	node.setAttribute("onclick","return parent.JSIDoc.jump(this)");
 			    }
@@ -420,7 +452,6 @@ var Template=function (path){
 Template.prototype.render = function(context){
     return this.data(context)
 }
-
 var scriptBase = this.scriptBase
 var packageTemplate = new Template(scriptBase+"html/package.xhtml");
 var constructorTemplate= new Template(scriptBase+"html/constructor.xhtml");
