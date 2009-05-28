@@ -174,14 +174,20 @@ Exporter.prototype = {
 }
 
 
-var templateRegexp = /\bnew\s+Template\s*\(((?:[\w\.\+\s]+|'.*?'|".*?")+)\)/g;
+var templateRegexp = /\bnew\s+Template\s*\(/;
 function defaultTemplateFilter(text,path){
+var begin = new Date()
+var result = []
     if(templateRegexp.test(text)){
+var result = [(new Date - begin)];
         $import(path,{});
         var packageObject = $import(path.replace(/\/[^\/]+$/,':').replace(/\//g,'.'));
         var loader = packageObject.loaderMap[path.replace(/.*\//,'')];
-        
+result.push("load:"+path+(new Date - begin))
+		var result = [];
+		while(p = text.search(templateRegexp))
         text = text.replace(templateRegexp,function(templateCode,path){
+result.push("replace1:"+templateCode+(new Date - begin))
             try{
                 if(path && (typeof loader.hook(path) == 'string')){
                     var object = loader.hook(templateCode);
@@ -196,12 +202,17 @@ function defaultTemplateFilter(text,path){
                         
                     }
                 }
+
             }catch(e){$log.error("替换出错：",templateCode)}
-            
+result.push("replace2:"+templateCode+(new Date - begin))
             return templateCode;
         });
-        
     }
+var offset = new Date - begin;
+if(offset > 10){
+result.push(offset)
+$log.error("reg exp",result.join('\n'))
+}
     return text;
 }
 
@@ -267,5 +278,5 @@ Template.prototype.render = function(context){
     return this.data(context)
 }
 //alert(this.scriptBase.replace(/\w+\/$/,"html/export-data.xml"))
-var exportDataTemplate = new Template(this.scriptBase.replace(/\w+\/$/,"html/export-data.xml#//*[@id='properties']/*"));
-var exportDocTemplate = new Template(this.scriptBase.replace(/\w+\/$/,"html/export-data.xml#//*[@id='document']/*"));
+var exportDataTemplate = new Template(this.scriptBase+"../html/export-data.xml#//*[@id='properties']/*");
+var exportDocTemplate = new Template(this.scriptBase+"../html/export-data.xml#//*[@id='document']/*");
