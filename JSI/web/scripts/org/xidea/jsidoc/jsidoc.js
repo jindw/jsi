@@ -15,19 +15,19 @@ function initializePackageFromQuery(packageGroupMap){
         var exp = /([^\?=&]*)=([^=&]*)/g;
         var match;
         while(match = exp.exec(search)){
-            var name = decodeURIComponent(match[1]);
+            var groupName = decodeURIComponent(match[1]);
             var value = decodeURIComponent(match[2]);
             if(value){
-            	if(name == "group"){
+            	if(groupName == "group"){
                     value = JSON.decode(value);
-                    for(name in value){
-	                    packageGroupMap.push(name)
-	                    packageGroupMap[name] = value[name];
+                    for(groupName in value){
+	                    packageGroupMap.push(groupName)
+	                    packageGroupMap[groupName] = value[groupName];
 	                    hit = true;
                     }
-                }else if(name = name.replace(/^group\.(.+)|.+/,'$1')){//old 
-                    packageGroupMap.push(name)
-                    packageGroupMap[name] = value.split(',');
+                }else if(groupName = groupName.replace(/^group\.(.+)|.+/,'$1')){//old 
+                    packageGroupMap.push(groupName)
+                    packageGroupMap[groupName] = value.split(',');
                     hit = true;
                 }
             }
@@ -57,28 +57,44 @@ function initializePackageAndDataDataFromHash(packageGroupMap){
 }
 function initializeHistory(){
     var contentWindow = document.getElementById("content").contentWindow;
-	if(checkTimeout){
-    	clearTimeout(checkTimeout);
+	if(checkInterval){
+    	clearTimeout(checkInterval);
     }
-	checkTimeout = setTimeout(function(){
-		var url = decodeURIComponent(checkLocation.hash.substr(1));
+	checkInterval = setTimeout(function(){
 		var contentLocation = contentWindow.location;
-		var href = contentLocation.href;
-		var pos = href.lastIndexOf('#');
-		if(pos>0){
-			href = href.substring(0,pos)
-		}
-		if(url && url != href){
-            contentLocation.replace(url);
+		var contentHref = getPureHref(contentLocation.href);
+		
+		if(checkURL){
+			if(checkURL && checkURL != contentHref){
+				if(checkURL.substring(0,2) == "#/"){
+	                contentLocation.replace(urlPrefix+ checkURL.substring(2));
+				}
+			}
+		}else{
+			checkURL = contentHref;
 		}
 	},100);
+}
+function getPureHref(contentHref){
+	var pos = contentHref.lastIndexOf('#');
+	if(pos>0){
+		var url = checkLocation.protocol+checkLocation.host
+		contentHref = contentHref.substring(0,pos)
+	}
+	if(contentHref.indexOf(urlPrefix) ==0){
+		contentHref = "#/"+contentHref.substring(urlPrefix.length)
+	}
+	return contentHref;
 }
 var MENU_FRAME_ID = "menu";
 var CONTENT_FRAME_ID = "content";
 //var loadingHTML = '<img style="margin:40%" src="../styles/loading2.gif"/>';
 
+var checkInterval;
 var checkLocation = top.location;
-var checkTimeout;
+var checkURL = (checkLocation.hash || '').substr(1);
+var urlPrefix = location.href;
+urlPrefix = urlPrefix.replace(/[^\/]*[\?#][\s\S]+/,'');
 
 /**
  * @public
@@ -91,16 +107,14 @@ var JSIDoc = {
         var packageGroupMap = [];
         initializePackageAndDataDataFromHash(packageGroupMap) || initializePackageFromQuery(packageGroupMap);
         //setup url history
-        initializeHistory();
         if(packageGroupMap.length == 0){
             var dkey = "托管脚本示例";
             packageGroupMap.push(dkey);
             packageGroupMap[dkey]= ["example","example.alias","example.internal","example.dependence"]
         }
         JSIDoc.addPackageMap(packageGroupMap);
-        setTimeout(function(){
-            document.getElementById("menu").setAttribute("src","html/controller.html?@menu");
-        },100)
+        document.getElementById("menu").setAttribute("src","html/controller.html?@menu");
+        initializeHistory();
     },
     
     /**
@@ -142,19 +156,21 @@ var JSIDoc = {
         var menuDocument = document.getElementById(MENU_FRAME_ID).contentWindow.document;
         MenuUI.loadPackage(menuDocument,name);
     },
+    jump:function(a){
+    },
     /**
      * 渲染文档，输出页面
      * @param document 目标文档,menu 或content frame 的文档
      */
     render:function(document){
         var path = document.location.href;
-        
         path = path.replace(/^([^#\?]+[#\?])([^#]+)(#.*)?$/g,"$2");
         if(path == "@menu"){
             document.write(this.genMenu());
         }else{
         	var url = '#'+encodeURIComponent(document.location.href);
         	if(window.ActiveXObject){
+        		checkLocation.hash = "@firefox:"+url;
         		checkLocation.hash = url;
         	}
         	if(path == "@export"){
@@ -386,9 +402,19 @@ var Template=function (path){
     if(path instanceof Function){
         this.data = path;
     }else{
-        var t = $import('org.xidea.lite:Template',{} );
-        t = new t(path);
-        return t;
+        var impl = $import('org.xidea.lite:Template',{} );
+        var XMLParser = $import('org.xidea.lite:XMLParser',{} );
+        var parser = new XMLParser(true);
+        parser.parserList.unshift(function(node,context,chain){
+		    if(node.tagName == 'a'){
+			    if(!node.hasAttribute("onclick")){
+			    	node = node.cloneNode(true);
+			    	node.setAttribute("onclick","return parent.JSIDoc.jump(this)");
+			    }
+		    }
+		    chain.process(node);
+        });
+        return new impl(path,parser);
     }
 }
 Template.prototype.render = function(context){

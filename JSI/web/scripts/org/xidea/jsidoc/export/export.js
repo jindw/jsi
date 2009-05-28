@@ -266,6 +266,6 @@ function Template(path){
 Template.prototype.render = function(context){
     return this.data(context)
 }
-alert(this.scriptBase.replace(/\w+\/$/,"html/export-data.xml"))
-var exportDataTemplate = new Template(this.scriptBase.replace(/\w+\/$/,"html/export-data.xml"));
-var exportDocTemplate = new Template(this.scriptBase.replace(/\w+\/$/,"html/export-doc.xhtml"));
+//alert(this.scriptBase.replace(/\w+\/$/,"html/export-data.xml"))
+var exportDataTemplate = new Template(this.scriptBase.replace(/\w+\/$/,"html/export-data.xml#//*[@id='properties']/*"));
+var exportDocTemplate = new Template(this.scriptBase.replace(/\w+\/$/,"html/export-data.xml#//*[@id='document']/*"));
