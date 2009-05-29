@@ -18,10 +18,11 @@ import org.xidea.jsi.impl.DefaultLoadContext;
 import org.xidea.jsi.impl.FileRoot;
 import org.xidea.jsi.impl.JSIText;
 
-public class JSIService extends JSIResourceLoader {
+public class JSIService extends JSIResourceLoader{
 	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(JSIService.class);
 
+	
 	public void service(String path, Map<String, String[]> param, Writer out)
 			throws IOException {
 		if (path == null || path.length() == 0) {
@@ -47,24 +48,25 @@ public class JSIService extends JSIResourceLoader {
 			throws IOException {
 		if (isPreload) {
 			out.write(JSIText.buildPreloadPerfix(path));
-			output(path, out);
+			this.output(path, out);
 			out.write(JSIText.buildPreloadPostfix("//"));
 		} else {
-			output(path, out);
+			this.output(path, out);
 		}
 		return true;
 	}
 
 	protected boolean writeResource(String path, boolean isPreload,
 			OutputStream out) throws IOException {
+		boolean hasResource;
 		if (isPreload) {
 			out.write(JSIText.buildPreloadPerfix(path).getBytes());
-			output(path, out);
+			hasResource = this.output(path, out);
 			out.write(JSIText.buildPreloadPostfix("//").getBytes());
 		} else {
-			output(path, out);
+			hasResource = this.output(path, out);
 		}
-		return true;
+		return hasResource;
 	}
 
 
@@ -73,7 +75,12 @@ public class JSIService extends JSIResourceLoader {
 				.findPackageList(this.getScriptBaseDirectory());
 		StringWriter out = new StringWriter();
 		if (packageList.isEmpty()) {
-			out.append("<html><body> 未发现任何托管脚本包，无法显示JSIDoc。<br /> ");
+			//
+
+			out.append("<html><head>");
+			out.append("<meta http-equiv='Content-Type' content='text/html;utf-8'/>");
+			out.append("</head>");
+			out.append("<body> 未发现任何托管脚本包，无法显示JSIDoc。<br /> ");
 			out.append("请添加脚本包，并在包目录下正确添加相应的包定义文件 。");
 			out
 					.append("<a href='org/xidea/jsidoc/index.html?group={\"example\":[\"example\",\"example.internal\",\"example.dependence\",\"org.xidea.jsidoc.util\"]}'>");

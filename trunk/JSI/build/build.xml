@@ -130,7 +130,7 @@
 	</target>
 	<target name="_buildPreload">
 		<echo>${dest}</echo>
-		<echo file="${dest}"/>
+		<echo file="${dest}" />
 		<property name="packageName" value="org.xidea.jsidoc.export" />
 		<antcall target="_appendPreload">
 			<param name="source" value="build/dest/jsidoc/__package__.js" />
@@ -274,7 +274,10 @@ $import("org.xidea.jsidoc:JSIDoc");</echo>
 			</zipfileset>
 		</zip>
 	</target>
-	<target name="build" depends="compress-jsidoc,jar-compressed-jsidoc,JSIDoc">
+	<target name="build" depends="compress-jsidoc,jar-compressed-jsidoc,JSIDoc,zip-jsidoc">
+
+	</target>
+	<target name="zip-jsidoc">
 		<tar destfile="build/dest/JSI-${version}.tar" compression="gzip">
 			<tarfileset dir="web">
 				<include name="**/*.*" />
