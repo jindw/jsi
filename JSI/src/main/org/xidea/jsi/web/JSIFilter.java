@@ -10,6 +10,8 @@ import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
+import javax.servlet.Servlet;
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -25,14 +27,36 @@ import org.xidea.jsi.impl.JSIText;
  * 
  * @author jindw
  */
-public class JSIFilter extends JSIService implements Filter {
+public class JSIFilter extends JSIService implements Filter ,Servlet{
 	protected ServletContext context;
-	private String scriptBase;
-	public void destroy() {
+	protected ServletConfig config;
+	protected String scriptBase = "/scripts/";
+	@Override
+	public void service(ServletRequest req, ServletResponse resp)
+			throws ServletException, IOException {
+		if(!process(req, resp)){
+			// 走这条分支的情况：1、无法找到资源，2、根本不在脚本目录下
+			HttpServletResponse response = (HttpServletResponse) resp;
+			response.sendError(HttpServletResponse.SC_NOT_FOUND,"找不到指定的资源");
+		}
 	}
-
 	public void doFilter(ServletRequest req, final ServletResponse resp,
 			FilterChain chain) throws IOException, ServletException {
+		if(!process(req, resp)){
+			// 走这条分支的情况：1、无法找到资源，2、根本不在脚本目录下
+			chain.doFilter(req, resp);
+		}
+	}
+	/**
+	 * 处理指定资源，如果该资源存在，返回真
+	 * @param req
+	 * @param resp
+	 * @return
+	 * @throws IOException
+	 * @throws UnsupportedEncodingException
+	 */
+	protected boolean process(ServletRequest req, final ServletResponse resp)
+			throws IOException, UnsupportedEncodingException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;
 		String path = request.getRequestURI().substring(
@@ -40,7 +64,7 @@ public class JSIFilter extends JSIService implements Filter {
 		if (path.startsWith(scriptBase)) {
 			path = path.substring(scriptBase.length());
 			if (this.processAttachedAction(request, response, path)) {
-				return;
+				return true;
 			}
 			if (isIndex(path)) {
 				path = req.getParameter("path");
@@ -63,12 +87,10 @@ public class JSIFilter extends JSIService implements Filter {
 				resp.setContentType(metatype);
 			}
 			ServletOutputStream out = resp.getOutputStream();
-			writeResource(path, isPreload, out);
-			return;
+			return writeResource(path, isPreload, out);
 
 		}
-		// 走这条分支的情况：1、无法找到资源，2、根本不在脚本目录下
-		chain.doFilter(req, resp);
+		return false;
 	}
 
 	/**
@@ -80,7 +102,7 @@ public class JSIFilter extends JSIService implements Filter {
 	 * @return
 	 * @throws IOException
 	 */
-	private boolean processAttachedAction(HttpServletRequest request,
+	protected boolean processAttachedAction(HttpServletRequest request,
 			HttpServletResponse response, String path) throws IOException {
 		if (isIndex(path) && request.getParameter("path") == null) {
 			initializeEncodingIfNotSet(request, response);
@@ -104,7 +126,7 @@ public class JSIFilter extends JSIService implements Filter {
 			if(result == null){
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			}else{
-				response.addHeader("Content-Type", "text/plain;charset="+this.encoding);
+				response.addHeader("Content-Type", "text/plain;charset="+this.getEncoding());
 				response.getWriter().print(result);
 			}
 			return true;
@@ -115,8 +137,8 @@ public class JSIFilter extends JSIService implements Filter {
 			ServletResponse response) throws UnsupportedEncodingException {
 		if (request.getCharacterEncoding() == null) {
 			// request 默认情况下是null
-			request.setCharacterEncoding(encoding);
-			response.setCharacterEncoding(encoding);
+			request.setCharacterEncoding(this.getEncoding());
+			response.setCharacterEncoding(this.getEncoding());
 		}
 	}
 
@@ -135,18 +157,42 @@ public class JSIFilter extends JSIService implements Filter {
 		this.context = config.getServletContext();
 		String scriptBase = config.getInitParameter("scriptBase");
 		String encoding = config.getInitParameter("encoding");
+		init(scriptBase, encoding);
+	}
+
+	@Override
+	public void init(ServletConfig config) throws ServletException {
+		this.config = config;
+		this.context = config.getServletContext();
+		String scriptBase = config.getInitParameter("scriptBase");
+		String encoding = config.getInitParameter("encoding");
+		init(scriptBase, encoding);
+	}
+	private void init(String scriptBase, String encoding) {
 		if (encoding != null) {
-			this.encoding = encoding;
+			this.setEncoding(encoding);
 		}
 		if (scriptBase != null && (scriptBase = scriptBase.trim()).length() > 0) {
 			if (!scriptBase.endsWith("/")) {
-				scriptBase = scriptBase + '/';
+				scriptBase += '/';
 			}
-		} else {
-			scriptBase = "/scripts/";
+			this.scriptBase = scriptBase;
 		}
-		this.scriptBase = scriptBase;
 		this.setScriptBaseDirectory(new File(context.getRealPath(this.scriptBase)));
-		this.setScriptBaseDirectory(new File(context.getRealPath(this.scriptBase)));
+		this.setExternalLibraryDirectory(new File(context.getRealPath(this.scriptBase)));
 	}
+
+	@Override
+	public ServletConfig getServletConfig() {
+		return this.config;
+	}
+
+	@Override
+	public String getServletInfo() {
+		return config.getServletName();
+	}
+	public void destroy() {
+	}
+
+
 }

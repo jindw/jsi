@@ -19,13 +19,14 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xidea.jsi.impl.AbstractRoot;
 
-class JSIResourceLoader {
+public class JSIResourceLoader extends AbstractRoot{
 	private static final Log log = LogFactory.getLog(JSIResourceLoader.class);
 	/**
 	 * 只有默认的encoding没有设置的时候，才会设置
 	 */
-	protected String encoding = "utf-8";
+	private String encoding = "utf-8";
 
 	private File scriptBaseDirectory;
 	private File externalLibraryDirectory;
@@ -46,6 +47,10 @@ class JSIResourceLoader {
 		this.encoding = encoding;
 	}
 
+	public String getEncoding() {
+		return this.encoding;
+	}
+
 	public void setExternalLibraryDirectory(File externalLibraryFilr) {
 		this.externalLibraryDirectory = externalLibraryFilr;
 	}
@@ -63,6 +68,10 @@ class JSIResourceLoader {
 		}
 	}
 
+	@Override
+	public String loadText(String pkgName, String scriptName) {
+		return getResourceAsString(pkgName.replace('.', '/')+'/'+scriptName);
+	}
 	public String getResourceAsString(String path) {
 		StringWriter out = new StringWriter();
 		try {
@@ -76,6 +85,13 @@ class JSIResourceLoader {
 		}
 	}
 
+	/**
+	 * 输出指定资源，如果该资源存在，返回真
+	 * @param path
+	 * @param out
+	 * @return
+	 * @throws IOException
+	 */
 	protected boolean output(String path, Writer out) throws IOException {
 		char[] buf = new char[1024];
 		InputStream in = this.getResourceStream(path);
@@ -98,6 +114,13 @@ class JSIResourceLoader {
 		}
 	}
 
+	/**
+	 * 输出指定资源，如果该资源存在，返回真
+	 * @param path
+	 * @param out
+	 * @return
+	 * @throws IOException
+	 */
 	protected boolean output(String path, OutputStream out) throws IOException {
 		InputStream in = this.getResourceStream(path);
 		if (in == null) {
@@ -203,4 +226,5 @@ class JSIResourceLoader {
 		}
 		return null;
 	}
+
 }
