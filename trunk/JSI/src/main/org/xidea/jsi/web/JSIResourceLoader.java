@@ -70,7 +70,10 @@ public class JSIResourceLoader extends AbstractRoot{
 
 	@Override
 	public String loadText(String pkgName, String scriptName) {
-		return getResourceAsString(pkgName.replace('.', '/')+'/'+scriptName);
+		if(pkgName!=null && pkgName.length()>0){
+			scriptName = pkgName.replace('.', '/')+'/'+scriptName;
+		}
+		return getResourceAsString(scriptName);
 	}
 	public String getResourceAsString(String path) {
 		StringWriter out = new StringWriter();
