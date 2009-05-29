@@ -14,8 +14,12 @@
 /**
  * 创建一个Zip档案
  */
-function Zip() {
+function Zip(comment) {
     this.members = [];
+    /**
+     * 档案文件注释
+     */
+    this.comment = comment ||''
 }
 
 Zip.prototype = {
@@ -23,10 +27,6 @@ Zip.prototype = {
 	 * 档案文件MimeType
 	 */
     mimeType: 'application/zip',
-    /**
-     * 档案文件注释
-     */
-    comment:"",
     /**
      * 添加纯文本内容（utf8）
      */
