@@ -187,8 +187,10 @@ var JSIDoc = {
         MenuUI.loadPackage(menuDocument,name);
     },
     jump:function(a){
-    	var url = '#'+encodeURIComponent(getPureHref(a.href));
-    	checkLocation.hash = ">/"+url;
+    	if(h.getAttribute('href').charAt() != '#'){
+	    	var url = '#'+encodeURIComponent(getPureHref(a.href));
+	    	checkLocation.hash = ">/"+url;
+    	}
     },
     /**
      * 渲染文档，输出页面

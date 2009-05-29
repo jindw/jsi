@@ -21,6 +21,7 @@ this.addScript('export-ui.js','ExportUI'
                 ,"org.xidea.jsidoc.util:$log"
                 ,['Exporter','DependenceInfo',
                 'findPackages',
+                'org.xidea.jsidoc.util:Zip',
                 'org.xidea.jsidoc.util:xmlReplacer',
                 'org.xidea.jsidoc.util:Request']);
 

@@ -27,6 +27,7 @@ Exporter.prototype = {
             this.imports.push(path);
             addDependenceInfo(new DependenceInfo(path),this.result,this.cachedInfos)
     	}
+    	this.content = null;
     },
     getResult : function(){
         return this.result;
@@ -49,6 +50,9 @@ Exporter.prototype = {
         list.reverse();
         return filter;
     },
+    /**
+     * 按需导出并直接合并源代码
+     */
     getTextContent : function(){
         var content = [];
         var objectMap = {}
@@ -84,11 +88,27 @@ Exporter.prototype = {
     getImports:function(){
     	return this.imports
     },
+    /**
+     * 将getContent 获取的数据转化为xml文件
+     */
     getXMLContent : function(){
-        var packageMap = {};
+    	var content = this.getContent();
+    	for(var n in content){
+            result.push({path:n,content:content[n]});
+    	}
+        return exportDataTemplate.render({data:content});
+    },
+    /**
+     * 按需导出部分URL，转化模板等
+     */
+    getContent : function(){
+    	if(this.content){
+    		return content;
+    	}
+    	var packageMap = {};
         var packageList = [];
         var compileFilter = this.buildSourceFilter();
-        var content = [];
+        var content = {};
         //appendEntry(content,'#export',this.imports.join(','));
         for(var i = 0;i<this.result.length;i++){
             var path = this.result[i];
@@ -97,9 +117,8 @@ Exporter.prototype = {
                 packageMap[packageName] = true;
                 packageList.push(packageName)
             }
-            
             var text = this.getSource(path,compileFilter);
-            content.push({path:path,content:text});
+            content[path]=text;
         }
         for(var i = 0;i<this.externPackage.length;i++){
         	var packageName = this.externPackage[i];
@@ -108,8 +127,6 @@ Exporter.prototype = {
                 packageList.push(packageName)
             }
         }
-        //alert("xxx.yyy.zz".replace(/\./g,'/'));
-        //alert("xxx.yyy.zz".replace(/\./g,'/'));
         
         //mozilla bug fix
         //Why?
@@ -118,10 +135,14 @@ Exporter.prototype = {
         for(var i = 0;i<packageList.length;i++){
             var path = packageList[i].replace(/\./g,'/')+"/__package__.js";
             var text = this.getSource(path,compileFilter);
-            content.push({path:path,content:text});
+            content[path]=text;
         }
-        return exportDataTemplate.render({data:content});
+        this.content = content;
+        return content;
     },
+    /**
+     * 需要抓取全部相关包的全部源代码（也包括未导出的部分）
+     */
     getDocumentContent : function(jsiDocURL){
         var packageMap = {};
         var packageList = [];
