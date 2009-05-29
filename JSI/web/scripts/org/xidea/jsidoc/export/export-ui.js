@@ -17,6 +17,7 @@ var PREFIX_CONTAINER_ID = "prefixContainer";
 var JSIDOC_URL_CONTAINER_ID = "jsidocURLContainer";
 var MIX_TEMPLATE_CONTAINER_ID = "mixTemplateContainer";
 var compressServiceURL = parent.exportService || $JSI.scriptBase + "export.action";
+var resultDialogName = "result";
 
 var inc = 0;
 var exportDocument;
@@ -103,6 +104,14 @@ var ExportUI = {
             showResult(exporter.getDocumentContent(form.jsidocURL.value),true);
             break;
         case -1:
+        	if(!window.ActiveXObject){//忽略ie8
+	        	var content = exporter.getContent();
+	        	var zip = new Zip();
+	        	for(var n in content){
+	        		zip.addTextContent(n,content[n]);
+	        	}
+	        	window.open(zip.toDataURL(),"about:blank")//resultDialogName
+        	}
             showResult(exporter.getXMLContent(),true);
             break;
         case 1:
@@ -149,7 +158,7 @@ function showResult(content,reuse){
         	dialog = null;
         }
     }
-    dialog = dialog || window.open('about:blank','source','modal=yes,left=200,top=100,width=600px,height=600px');
+    dialog = dialog || window.open('about:blank',resultDialogName,'modal=yes,left=200,top=100,width=600px,height=600px');
     var doc = dialog.document;
     doc.open();
     doc.write("<html><title>==请将文本筐中的内容拷贝到目标文件(js,xml,html,hta)==</title><style>*{width:100%;height:100%;padding:0px;margin:0px;}</style><body><textarea readonly='true' wrap='off'>");
@@ -166,7 +175,7 @@ function submitResult(content,compressServiceURL){
         	dialog = null;
         }
     }
-    dialog = dialog || window.open('about:blank','source','modal=yes,left=200,top=100,width=600px,height=600px');
+    dialog = dialog || window.open('about:blank',resultDialogName,'modal=yes,left=200,top=100,width=600px,height=600px');
     var form = document.createElement("form");
     document.body.appendChild(form)
     form.method = "POST";
