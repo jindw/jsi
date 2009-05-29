@@ -51,7 +51,7 @@ Zip.prototype = {
             path = paths.pop();
         }
         var stream = loadBinData(path)
-        member = new StreamMember(stream, path)
+        var member = new StreamMember(stream, path)
         return appendMember(this,member);
     },
     /**
@@ -160,7 +160,7 @@ function toResponseStream(xhr){
 	}
 	return stringToByteArray(result)
 }
-function loadBinData(path,callback){
+function loadBinData(url,callback){
     var xhr = new XMLHttpRequest();
     var isAsyn = !!callback;
     var overrideMimeType = xhr.overrideMimeType;
