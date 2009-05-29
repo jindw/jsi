@@ -104,7 +104,7 @@ Exporter.prototype = {
      */
     getContent : function(){
     	if(this.content){
-    		return content;
+    		return this.content;
     	}
     	var packageMap = {};
         var packageList = [];

@@ -104,15 +104,15 @@ var ExportUI = {
             showResult(exporter.getDocumentContent(form.jsidocURL.value),true);
             break;
         case -1:
+        	var content = exporter.getContent();
+            showResult(exporter.getXMLContent(),true);
         	if(!window.ActiveXObject){//忽略ie8
-	        	var content = exporter.getContent();
-	        	var zip = new Zip();
+	        	var zip = new Zip("JSI Archive\n\n$import paths:\n"+exporter.getImports().join('\n')+"\n\nFile List:\n"+exporter.getResult().join('\n'));
 	        	for(var n in content){
 	        		zip.addTextContent(n,content[n]);
 	        	}
 	        	window.open(zip.toDataURL(),"about:blank")//resultDialogName
         	}
-            showResult(exporter.getXMLContent(),true);
             break;
         case 1:
             showResult(exporter.getTextContent(),true);
