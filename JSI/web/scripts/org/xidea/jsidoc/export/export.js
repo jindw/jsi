@@ -93,10 +93,11 @@ Exporter.prototype = {
      */
     getXMLContent : function(){
     	var content = this.getContent();
+    	var result = [];
     	for(var n in content){
             result.push({path:n,content:content[n]});
     	}
-        return exportDataTemplate.render({data:content});
+        return exportDataTemplate.render({data:result});
     },
     /**
      * 按需导出部分URL，转化模板等

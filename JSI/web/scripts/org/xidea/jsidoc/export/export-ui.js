@@ -179,7 +179,7 @@ function submitResult(content,compressServiceURL){
     var form = document.createElement("form");
     document.body.appendChild(form)
     form.method = "POST";
-    form.target = "source"
+    form.target = resultDialogName
     form.action=compressServiceURL
     for(var n in content){
     	var input = document.createElement("input");
