@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIPackage;
+import org.xidea.jsi.ScriptNotFoundException;
 import org.xidea.jsi.impl.AbstractRoot;
 import org.xidea.jsi.impl.ClasspathRoot;
 import org.xidea.jsi.impl.DefaultLoadContext;
@@ -59,15 +60,16 @@ public class AbstractJSIRootTest {
 		context = root.$import("example.dependence.*");
 		assertEquals(ALL_EXAMPLE_DEPENDENCE_MAP, context.getExportMap());
 		assertEquals(2, context.getScriptList().size());
-		
+
 		context = root.$import("org.xidea.jsidoc.JSIDoc");
-		assertTrue(context.getExportMap().size()>0);
+		assertTrue(context.getExportMap().size() > 0);
 	}
 
 	@Test
 	public void test$importStringJSILoadContext() {
 		JSILoadContext context = new DefaultLoadContext();
-		Map<String, String> expect = new HashMap<String, String>(ALL_EXAMPLE_MAP);
+		Map<String, String> expect = new HashMap<String, String>(
+				ALL_EXAMPLE_MAP);
 		root.$import("example.*", context);
 		assertEquals(expect, context.getExportMap());
 		assertEquals(1, context.getScriptList().size());
@@ -90,9 +92,11 @@ public class AbstractJSIRootTest {
 		assertEquals("example.dependence", pkg.getName());
 		pkg = root.requirePackage("example.dependence.xxx", false);
 		assertEquals("example.dependence", pkg.getName());
-		pkg = root.requirePackage("example.dependence.xxx", true);
-		if (pkg != null) {
+		try {
+			pkg = root.requirePackage("example.dependence.xxx", true);
 			fail("无效包路径应该抛出异常");
+		} catch (ScriptNotFoundException e) {
+
 		}
 
 	}

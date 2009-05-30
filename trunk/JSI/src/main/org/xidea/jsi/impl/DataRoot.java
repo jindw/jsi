@@ -17,7 +17,7 @@ public class DataRoot extends AbstractRoot implements JSIRoot {
 
 	public DataRoot(String source) {
 		if (source != null) {
-			source = source.replaceAll("$\\s*<\\?[^>]\\?>", "").trim();
+			source = source.replaceAll("^\\s*<\\?[^>]+\\?>", "").trim();
 			try {
 				if(!source.startsWith("<!DOCTYPE properties")){
 					log.error("JavaProperties 必须带DOCTYPE 信息");

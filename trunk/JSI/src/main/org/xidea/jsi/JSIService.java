@@ -1,4 +1,4 @@
-package org.xidea.jsi.web;
+package org.xidea.jsi;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,8 +10,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.jsi.JSIExportor;
-import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.impl.DataRoot;
 import org.xidea.jsi.impl.DefaultExportorFactory;
 import org.xidea.jsi.impl.DefaultLoadContext;

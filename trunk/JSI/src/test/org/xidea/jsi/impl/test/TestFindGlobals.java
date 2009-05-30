@@ -97,14 +97,13 @@ public class TestFindGlobals {
 	}
 
 	@Test
-	public void testFindFromDir() {
+	public void testFindFromDir() throws IOException {
 		File dir = new File(this.getClass().getResource("/").getFile());
-		processDir(dir);
-		processDir(new File(dir,"../../../build"));
-		// processDir(new
-		// File("D:\\eclipse\\workspace\\JSISide\\web\\scripts"));
+
+		processDir(new File("D:\\eclipse\\workspace\\JSISide\\web\\scripts"));
 		// processDir(new
 		// File("D:\\eclipse\\workspace\\JSI-thirdparty\\web\\scripts"));
+		processDir(new File(dir, "../../../build"));
 		System.out.println("javaTime:" + this.javaTime);
 		System.out.println("scriptTime:" + this.scriptTime);
 	}
@@ -134,7 +133,17 @@ public class TestFindGlobals {
 		System.out.println("结果一致：" + result1);
 	}
 
-	private void processDir(final File files) {
+	private void processDir(final File files) throws IOException {
+		while (true) {
+			System.out.println("是否测试路径：" + files + "(y 继续 n 退出)");
+			int in = System.in.read();
+			System.out.println((char)in);
+			if (in == 'y' || in == 'Y') {
+				break;
+			} else if (in == 'n' || in == 'N') {
+				return;
+			}
+		}
 		files.listFiles(new FileFilter() {
 			public boolean accept(File file) {
 				if (file.isDirectory()) {
