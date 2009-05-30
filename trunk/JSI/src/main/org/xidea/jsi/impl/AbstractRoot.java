@@ -42,7 +42,7 @@ public abstract class AbstractRoot implements JSIRoot {
 			if (script != null) {
 				context.loadScript(pkg, script,  fileNames, true);
 			} else {
-				throw new RuntimeException("无效脚本路径:" +  path);
+				throw new ScriptNotFoundException("无效脚本路径:" +  path);
 			}
 		}
 		return context;

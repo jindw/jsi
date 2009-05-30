@@ -43,7 +43,7 @@
 				<include name="*.tld" />
 			</zipfileset>
 		</jar>
-		<copy tofile="build/dest/JSI-${version}.jar" file="build/dest/JSI.jar" />
+		<copy tofile="../CDN/war/WEB-INF/lib/JSI.jar" file="build/dest/JSI.jar" />
 	</target>
 	<target name="jar-compressed-jsidoc" depends="init">
 		<jar destfile="build/dest/JSI.jar">
