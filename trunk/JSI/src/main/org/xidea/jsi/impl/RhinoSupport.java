@@ -7,14 +7,27 @@ import java.io.IOException;
 
 
 public class RhinoSupport {
-	static final String EVAL = "(function(code){return Packages."+RhinoSupport.class.getName()+".buildInnerEvaler(this,String(this.scriptBase)+this.name).call(this,code);})";
+	/*
+var window = this;
+(function(code){
+	return Packages.<cp>.buildInnerEvaler(this,
+		String(this.scriptBase)+this.name
+	).call(this,code);
+})";
+	*/
+	static final String EVAL = "var window = this;(function(code){return Packages."+RhinoSupport.class.getName()+".buildInnerEvaler(this,String(this.scriptBase)+this.name).call(this,code);})";
 	static final String EVALER = "(function(x){return eval(x)})";
 	public static String loadText(String path) throws IOException{
 		return ClasspathRoot.loadText(path,ClasspathRoot.class.getClassLoader(),"utf-8");
 	}
 
-	public static Object buildEvaler(Object thiz){
-		RhinoSupport s = get(thiz);
+	/**
+	 * JSI 初始化的时候，会调用这个
+	 * @param thiz
+	 * @return
+	 */
+	public static Object buildEvaler(Object jsobject){
+		RhinoSupport s = get(jsobject);
 		return s.eval(EVAL,"<new_freeEval>");
 	}
 	/**
