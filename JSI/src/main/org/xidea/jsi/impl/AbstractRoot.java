@@ -48,6 +48,10 @@ public abstract class AbstractRoot implements JSIRoot {
 		return context;
 	}
 
+	/**
+	 * 不能返回null
+	 * @see org.xidea.jsi.JSIRoot#requirePackage(java.lang.String, boolean)
+	 */
 	public JSIPackage requirePackage(String name, boolean exact) {
 		JSIPackage pkg = findPackage(name, exact);
 		if(pkg == null){
@@ -59,16 +63,26 @@ public abstract class AbstractRoot implements JSIRoot {
 		}
 	}
 
+	/**
+	 * 不能返回null
+	 * @see org.xidea.jsi.JSIRoot#findPackageByPath(java.lang.String)
+	 */
 	public JSIPackage findPackageByPath(String path) {
 		int splitPos = path.lastIndexOf('/');
 		if (splitPos > 0) {
 			path = path.substring(0, splitPos).replace('/', '.');
-			return findPackage(path, true);
+			JSIPackage pkg = findPackage(path, true);
+			if (pkg != null) {
+				return pkg;
+			}
 		} else {
 			splitPos = path.indexOf(':');
 			if (splitPos >= 0) {
 				path = path.substring(0, splitPos);
-				return findPackage(path, true);
+				JSIPackage pkg =  findPackage(path, true);
+				if (pkg != null) {
+					return pkg;
+				}
 			} else {
 				splitPos = path.length();
 				while ((splitPos = path.lastIndexOf('.', splitPos)) > 0) {
@@ -78,10 +92,9 @@ public abstract class AbstractRoot implements JSIRoot {
 						return pkg;
 					}
 				}
-				throw new ScriptNotFoundException("package not find :"+path);
 			}
 		}
-
+		throw new ScriptNotFoundException("package not find :"+path);
 	}
 
 	protected synchronized JSIPackage findPackage(String name, boolean exact) {

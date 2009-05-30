@@ -1,8 +1,8 @@
-package org.xidea.jsi.web;
+package org.xidea.jsi;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
@@ -13,16 +13,24 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Properties;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.impl.AbstractRoot;
+import org.xidea.jsi.impl.FileRoot;
+import org.xidea.jsi.impl.JSIText;
 
-public class JSIResourceLoader extends AbstractRoot{
+
+public class JSIResourceLoader extends AbstractRoot {
 	private static final Log log = LogFactory.getLog(JSIResourceLoader.class);
+	
 	/**
 	 * 只有默认的encoding没有设置的时候，才会设置
 	 */
@@ -58,7 +66,7 @@ public class JSIResourceLoader extends AbstractRoot{
 	public byte[] getResourceAsBinary(String path) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
-			if (this.output(path, out,null,null)) {
+			if (this.output(path, out, null, null)) {
 				return out.toByteArray();
 			} else {
 				return null;
@@ -70,15 +78,16 @@ public class JSIResourceLoader extends AbstractRoot{
 
 	@Override
 	public String loadText(String pkgName, String scriptName) {
-		if(pkgName!=null && pkgName.length()>0){
-			scriptName = pkgName.replace('.', '/')+'/'+scriptName;
+		if (pkgName != null && pkgName.length() > 0) {
+			scriptName = pkgName.replace('.', '/') + '/' + scriptName;
 		}
 		return getResourceAsString(scriptName);
 	}
+
 	public String getResourceAsString(String path) {
 		StringWriter out = new StringWriter();
 		try {
-			if (this.output(path, out,null,null)) {
+			if (this.output(path, out, null, null)) {
 				return out.toString();
 			} else {
 				return null;
@@ -90,12 +99,14 @@ public class JSIResourceLoader extends AbstractRoot{
 
 	/**
 	 * 输出指定资源，如果该资源存在，返回真
+	 * 
 	 * @param path
 	 * @param out
 	 * @return
 	 * @throws IOException
 	 */
-	protected boolean output(String path, Writer out,String prefix,String postfix) throws IOException {
+	protected boolean output(String path, Writer out, String prefix,
+			String postfix) throws IOException {
 		char[] buf = new char[1024];
 		InputStream in = this.getResourceStream(path);
 
@@ -106,14 +117,14 @@ public class JSIResourceLoader extends AbstractRoot{
 				InputStreamReader reader = new InputStreamReader(in,
 						this.encoding);
 				int len = reader.read(buf);
-				if(prefix != null){
+				if (prefix != null) {
 					out.write(prefix);
 				}
 				while (len > 0) {
 					out.write(buf, 0, len);
 					len = reader.read(buf);
 				}
-				if(postfix != null){
+				if (postfix != null) {
 					out.write(postfix);
 				}
 				return true;
@@ -125,12 +136,14 @@ public class JSIResourceLoader extends AbstractRoot{
 
 	/**
 	 * 输出指定资源，如果该资源存在，返回真
+	 * 
 	 * @param path
 	 * @param out
 	 * @return
 	 * @throws IOException
 	 */
-	protected boolean output(String path, OutputStream out,byte[] prefix,byte[] postfix) throws IOException {
+	protected boolean output(String path, OutputStream out, byte[] prefix,
+			byte[] postfix) throws IOException {
 		InputStream in = this.getResourceStream(path);
 		if (in == null) {
 			return false;
@@ -138,14 +151,14 @@ public class JSIResourceLoader extends AbstractRoot{
 			try {
 				byte[] buf = new byte[1024];
 				int len = in.read(buf);
-				if(prefix != null){
+				if (prefix != null) {
 					out.write(prefix);
 				}
 				while (len > 0) {
 					out.write(buf, 0, len);
 					len = in.read(buf);
 				}
-				if(postfix != null){
+				if (postfix != null) {
 					out.write(postfix);
 				}
 				return true;
@@ -170,21 +183,34 @@ public class JSIResourceLoader extends AbstractRoot{
 				log.debug(e);
 			}
 		}
-		File[] list = this.scriptBaseDirectory.listFiles(new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				return name.toLowerCase().endsWith(".xml");
-			}
-		});
-		if (list != null) {
-			for (File item : list) {
-				InputStream in = findByXML(item, path);
+		File[] libs = findLibFiles();
+		if (libs != null) {
+			for (File item : libs) {
+				InputStream in = findByZip(item, path);
 				if (in != null) {
 					return in;
 				}
 			}
 		}
+		return this.getClass().getClassLoader().getResourceAsStream(path);
+	}
+	
+	public List<String> getPackageList(){
+		final List<String> result = FileRoot.findPackageList(this.scriptBaseDirectory);
+		File[] libs = findLibFiles();
+		if(libs != null){
+			for(File lib : libs){
+				appendZipPackage(lib, result);
+			}
+		}
+		return result;
+	}
+
+	
+
+	private File[] findLibFiles() {
 		if (this.externalLibraryDirectory != null) {
-			list = this.externalLibraryDirectory
+			return this.externalLibraryDirectory
 					.listFiles(new FilenameFilter() {
 						public boolean accept(File dir, String name) {
 							name = name.toLowerCase();
@@ -192,18 +218,29 @@ public class JSIResourceLoader extends AbstractRoot{
 									|| name.endsWith(".zip");
 						}
 					});
-			if (list != null) {
-				for (File item : list) {
-					InputStream in = findByZip(item, path);
-					if (in != null) {
-						return in;
-					}
-				}
-			}
 		}
-		return this.getClass().getClassLoader().getResourceAsStream(path);
+		return null;
 	}
 
+	private void appendZipPackage(File file, Collection<String> result) {
+		try {
+			final ZipFile jarFile = new ZipFile(file);
+			Enumeration<? extends ZipEntry> ze = jarFile.entries();
+			while (ze.hasMoreElements()) {
+				ZipEntry zipEntry = ze.nextElement();
+				String name = zipEntry.getName();
+				if(name.endsWith(JSIPackage.PACKAGE_FILE_NAME)){
+					name = name.substring(name.lastIndexOf('/'));
+					if(name.startsWith("/")){
+						name = name.substring('/');
+					}
+					result.add(name.replace('/', '.'));
+				}
+			}
+			
+		} catch (IOException e) {
+		}
+	}
 	private InputStream findByZip(File file, String path) {
 		try {
 			final ZipFile jarFile = new ZipFile(file);
@@ -220,26 +257,4 @@ public class JSIResourceLoader extends AbstractRoot{
 		}
 		return null;
 	}
-
-	private InputStream findByXML(File file, String path) {
-		Properties ps = new Properties();
-		try {
-			ps.loadFromXML(new FileInputStream(file));
-			String value = ps.getProperty(path);
-			if (value != null) {
-				byte[] data = value.getBytes(encoding);
-				return new ByteArrayInputStream(data);
-			} else {
-				value = ps.getProperty(path + "#base64");
-				if (value != null) {
-					byte[] data = new sun.misc.BASE64Decoder()
-							.decodeBuffer(value);
-					return new ByteArrayInputStream(data);
-				}
-			}
-		} catch (Exception e) {
-		}
-		return null;
-	}
-
 }

@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,6 +16,7 @@ import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRoot;
 
 public class FileRoot extends AbstractRoot implements JSIRoot {
+	private static final Pattern NS_PATTERN = Pattern.compile("^[a-zA-Z$_][\\w\\$_]*$");
 	private static final Log log = LogFactory.getLog(FileRoot.class);
 	private File scriptBase;
 	private String encoding = "utf-8";
@@ -50,34 +52,33 @@ public class FileRoot extends AbstractRoot implements JSIRoot {
 
 	public static List<String> findPackageList(File root) {
 		ArrayList<String> result = new ArrayList<String>();
-		walkPackageTree(root, null, result);
+		walkFileTree(root, result);
 		return result;
 	}
-
-	private static void walkPackageTree(final File dir, String prefix,
-			final List<String> result) {
-		final String subPrefix;
-		if (prefix == null) {
-			subPrefix = "";
-		} else if (prefix.length() == 0) {
-			subPrefix = dir.getName();
-		} else {
-			subPrefix = prefix + '.' + dir.getName();
-		}
-		File packageFile = new File(dir, JSIPackage.PACKAGE_FILE_NAME);
-		if (packageFile.exists()) {
-			result.add(subPrefix);
-		}
-		dir.listFiles(new FileFilter() {
+	private static void walkFileTree(File scriptBaseDirectory,final List<String> result) {
+		scriptBaseDirectory.listFiles(new FileFilter(){
+			private StringBuilder buf = new StringBuilder();
+			@Override
 			public boolean accept(File file) {
-				if (file.isDirectory()) {
-					String name = file.getName();
-					if (!name.startsWith(".")) {
-						walkPackageTree(file, subPrefix, result);
+				int len = buf.length();
+				String name = file.getName();
+				if(file.isDirectory()){
+					if(NS_PATTERN.matcher(name).find()){
+						if(len>0){
+							buf.append('.');
+						}
+						buf.append(name);
+						file.listFiles(this);
+					}
+				}else{
+					if(name.equals(JSIPackage.PACKAGE_FILE_NAME)){
+						result.add(buf.toString());
 					}
 				}
+				buf.setLength(len);
 				return false;
 			}
+			
 		});
 	}
 }
