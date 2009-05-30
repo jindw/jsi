@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.xidea.jsi.JSIPackage;
+import org.xidea.jsi.PackageSyntaxException;
 
 public class RegexpPackagePaser extends PackageParser {
 
@@ -33,7 +34,7 @@ public class RegexpPackagePaser extends PackageParser {
 			String other = matcher.group(3);
 			if (method == null) {
 				if (other != null && other.trim().length() > 0) {
-					throw new UnsupportedSyntaxException("正则解析器不支持复杂定义"
+					throw new PackageSyntaxException("正则解析器不支持复杂定义"
 							+ matcher.group(0) + "#" + other);
 				}
 			} else {
@@ -52,7 +53,7 @@ public class RegexpPackagePaser extends PackageParser {
 						throw new RuntimeException("无效参数");
 					}
 					if("*".equals(arguments.get(1))){
-						throw new UnsupportedSyntaxException("正则解析器不支持复杂定义"
+						throw new PackageSyntaxException("正则解析器不支持复杂定义"
 								+ matcher.group(0) + "#" + other);
 					}
 					Object beforeDependences = arguments.get(2);

@@ -17,6 +17,7 @@ import org.mozilla.javascript.ScriptOrFnNode;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.xidea.jsi.JSIPackage;
+import org.xidea.jsi.PackageSyntaxException;
 
 public class RhinoScriptPackagePaser extends PackageParser {
 	private static final Log log = LogFactory.getLog(RhinoScriptPackagePaser.class);
@@ -48,7 +49,7 @@ public class RhinoScriptPackagePaser extends PackageParser {
 			});
 		} catch (Exception e) {
 			log.warn(e);;
-			throw new UnsupportedSyntaxException(packageObject.getName(),e);
+			throw new PackageSyntaxException(packageObject.getName(),e);
 		}
 	}
 

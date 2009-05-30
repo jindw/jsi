@@ -7,6 +7,7 @@ import java.util.Map;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRoot;
+import org.xidea.jsi.ScriptNotFoundException;
 
 public abstract class AbstractRoot implements JSIRoot {
 
@@ -50,7 +51,7 @@ public abstract class AbstractRoot implements JSIRoot {
 	public JSIPackage requirePackage(String name, boolean exact) {
 		JSIPackage pkg = findPackage(name, exact);
 		if(pkg == null){
-			return null;
+			throw new ScriptNotFoundException("package not find :"+name);
 		}else if (pkg.getImplementation() == null) {
 			return pkg;
 		} else {
@@ -77,7 +78,7 @@ public abstract class AbstractRoot implements JSIRoot {
 						return pkg;
 					}
 				}
-				return null;
+				throw new ScriptNotFoundException("package not find :"+path);
 			}
 		}
 

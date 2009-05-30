@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIPackage;
+import org.xidea.jsi.PackageSyntaxException;
 
 public abstract class PackageParser {
 	private static final Log log = LogFactory.getLog(PackageParser.class);
@@ -48,7 +49,7 @@ public abstract class PackageParser {
 	}
 
 	public Collection<String> findGlobals(String scriptName, String pattern) {
-		throw new UnsupportedSyntaxException("不支持包定义格式");
+		throw new PackageSyntaxException("不支持包定义格式");
 	}
 
 	public void addScript(String scriptName, Object objectNames,
@@ -98,7 +99,7 @@ public abstract class PackageParser {
 			}
 			return (String) object;
 		} catch (Exception ex) {
-			throw new UnsupportedSyntaxException("非法参数：" + object);
+			throw new PackageSyntaxException("非法参数：" + object);
 		}
 	}
 
