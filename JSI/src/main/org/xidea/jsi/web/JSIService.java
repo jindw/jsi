@@ -47,26 +47,21 @@ public class JSIService extends JSIResourceLoader{
 	protected boolean writeResource(String path, boolean isPreload, Writer out)
 			throws IOException {
 		if (isPreload) {
-			out.write(JSIText.buildPreloadPerfix(path));
-			this.output(path, out);
-			out.write(JSIText.buildPreloadPostfix("//"));
+			return this.output(path, out,JSIText.buildPreloadPerfix(path),JSIText.buildPreloadPostfix("//"));
 		} else {
-			this.output(path, out);
+			return this.output(path, out,null,null);
 		}
-		return true;
 	}
 
 	protected boolean writeResource(String path, boolean isPreload,
 			OutputStream out) throws IOException {
-		boolean hasResource;
 		if (isPreload) {
-			out.write(JSIText.buildPreloadPerfix(path).getBytes());
-			hasResource = this.output(path, out);
-			out.write(JSIText.buildPreloadPostfix("//").getBytes());
+			byte[] prefix = JSIText.buildPreloadPerfix(path).getBytes();
+			byte[] postfix = JSIText.buildPreloadPostfix("//").getBytes();
+			return this.output(path, out,prefix,postfix);
 		} else {
-			hasResource = this.output(path, out);
+			return this.output(path, out,null,null);
 		}
-		return hasResource;
 	}
 
 

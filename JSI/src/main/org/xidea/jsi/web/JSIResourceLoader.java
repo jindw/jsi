@@ -58,7 +58,7 @@ public class JSIResourceLoader extends AbstractRoot{
 	public byte[] getResourceAsBinary(String path) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
-			if (this.output(path, out)) {
+			if (this.output(path, out,null,null)) {
 				return out.toByteArray();
 			} else {
 				return null;
@@ -78,7 +78,7 @@ public class JSIResourceLoader extends AbstractRoot{
 	public String getResourceAsString(String path) {
 		StringWriter out = new StringWriter();
 		try {
-			if (this.output(path, out)) {
+			if (this.output(path, out,null,null)) {
 				return out.toString();
 			} else {
 				return null;
@@ -95,7 +95,7 @@ public class JSIResourceLoader extends AbstractRoot{
 	 * @return
 	 * @throws IOException
 	 */
-	protected boolean output(String path, Writer out) throws IOException {
+	protected boolean output(String path, Writer out,String prefix,String postfix) throws IOException {
 		char[] buf = new char[1024];
 		InputStream in = this.getResourceStream(path);
 
@@ -106,9 +106,15 @@ public class JSIResourceLoader extends AbstractRoot{
 				InputStreamReader reader = new InputStreamReader(in,
 						this.encoding);
 				int len = reader.read(buf);
+				if(prefix != null){
+					out.write(prefix);
+				}
 				while (len > 0) {
 					out.write(buf, 0, len);
 					len = reader.read(buf);
+				}
+				if(postfix != null){
+					out.write(postfix);
 				}
 				return true;
 			} finally {
@@ -124,7 +130,7 @@ public class JSIResourceLoader extends AbstractRoot{
 	 * @return
 	 * @throws IOException
 	 */
-	protected boolean output(String path, OutputStream out) throws IOException {
+	protected boolean output(String path, OutputStream out,byte[] prefix,byte[] postfix) throws IOException {
 		InputStream in = this.getResourceStream(path);
 		if (in == null) {
 			return false;
@@ -132,9 +138,15 @@ public class JSIResourceLoader extends AbstractRoot{
 			try {
 				byte[] buf = new byte[1024];
 				int len = in.read(buf);
+				if(prefix != null){
+					out.write(prefix);
+				}
 				while (len > 0) {
 					out.write(buf, 0, len);
 					len = in.read(buf);
+				}
+				if(postfix != null){
+					out.write(postfix);
 				}
 				return true;
 			} finally {
