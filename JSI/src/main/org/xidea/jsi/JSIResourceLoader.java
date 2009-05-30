@@ -2,7 +2,6 @@ package org.xidea.jsi;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
@@ -16,8 +15,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -25,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.impl.AbstractRoot;
 import org.xidea.jsi.impl.FileRoot;
-import org.xidea.jsi.impl.JSIText;
 
 
 public class JSIResourceLoader extends AbstractRoot {
@@ -195,7 +193,7 @@ public class JSIResourceLoader extends AbstractRoot {
 		return this.getClass().getClassLoader().getResourceAsStream(path);
 	}
 	
-	public List<String> getPackageList(){
+	public List<JSIPackage> getPackageObjectList(){
 		final List<String> result = FileRoot.findPackageList(this.scriptBaseDirectory);
 		File[] libs = findLibFiles();
 		if(libs != null){
@@ -203,7 +201,14 @@ public class JSIResourceLoader extends AbstractRoot {
 				appendZipPackage(lib, result);
 			}
 		}
-		return result;
+		LinkedHashSet<JSIPackage> ps = new LinkedHashSet<JSIPackage>();
+		for (String path:result) {
+			try{
+				ps.add(requirePackage(path, true));
+			}catch (Exception e) {
+			}
+		}
+		return new ArrayList<JSIPackage>(ps);
 	}
 
 	
@@ -230,9 +235,9 @@ public class JSIResourceLoader extends AbstractRoot {
 				ZipEntry zipEntry = ze.nextElement();
 				String name = zipEntry.getName();
 				if(name.endsWith(JSIPackage.PACKAGE_FILE_NAME)){
-					name = name.substring(name.lastIndexOf('/'));
+					name = name.substring(0,name.lastIndexOf('/'));
 					if(name.startsWith("/")){
-						name = name.substring('/');
+						name = name.substring(1);
 					}
 					result.add(name.replace('/', '.'));
 				}
