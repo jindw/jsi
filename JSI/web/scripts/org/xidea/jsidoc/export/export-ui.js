@@ -109,7 +109,7 @@ var ExportUI = {
         	if(!window.ActiveXObject){//忽略ie8
 	        	var zip = new Zip("JSI Archive\n\n$import paths:\n"+exporter.getImports().join('\n')+"\n\nFile List:\n"+exporter.getResult().join('\n'));
 	        	for(var n in content){
-	        		zip.addTextContent(n,content[n]);
+	        		zip.addText(n,content[n]);
 	        	}
 	        	zip = zip.toDataURL();
 	        	zip && window.open(zip,"about:blank")//resultDialogName

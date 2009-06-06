@@ -168,15 +168,12 @@ public class DefaultPackage implements JSIPackage {
 					int p = targetPath.indexOf(search);
 					if (p > 0) {
 						int begin = targetPath.lastIndexOf('.', p-1);
+						String prefix = targetPath.substring(0, begin);
 						String postfix = targetPath.substring(p + 2);
 						if(!postfix.startsWith(".")){
 							postfix = '.'+postfix;
 						}
-						String prefix = targetPath.substring(0, begin);
-						System.out.println(prefix);
-						System.out.println(postfix);
-						targetPath = prefix
-								+ postfix;
+						targetPath = prefix+ postfix;
 					} else {
 						break;
 					}

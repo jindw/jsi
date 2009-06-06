@@ -99,7 +99,7 @@ Zip.prototype = {
      */
     toDataURL: function() {
     	if(typeof btoa == 'function' && btoa(1) == 'MQ=='){
-    		return ['data:', this.mimeType, ';base64,', btoa(String.formCharCode.apply(0,this.toByteArray()))].join('');
+    		return ['data:', this.mimeType, ';base64,', btoa(String.fromCharCode.apply(0,this.toByteArray()))].join('');
     	}else{
     		return null;
     	}
