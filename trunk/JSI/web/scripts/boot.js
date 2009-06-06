@@ -646,7 +646,7 @@ var $import = function(freeEval,cachedScripts){
             }else{
                 objects = (this.scriptObjectMap[scriptPath] = []);
             }
-            if(":Debug"){
+            if("org.xidea.jsi:PackageOptimize"){
                 if(objectNames == '*'){
                     reportTrace("部署后不应出现的配置，需要压缩处理掉相关问题！！！");
                     objectNames = doObjectImport(
@@ -696,20 +696,41 @@ var $import = function(freeEval,cachedScripts){
                     this.addDependence(thisPath,targetPath[i],afterLoad);
                 }
             }else{
-                //TODO:可编译优化,进优化的脚本可以直接删除此运行时优化
+                //TODO:可编译优化,经过优化的脚本可以直接删除此运行时优化
                 if("org.xidea.jsi:PackageOptimize"){
                     if(!afterLoad ){
                         thisPath = this.objectScriptMap[thisPath] || thisPath;
                     }
-                    /* 还是没有想好怎么搞相对路径
+                    /*
+                     * 绝对路径:
+                     *   example:sayHello
+                     *   example/hello.js
+                     * 上级路径:
+                     *   ..util:JSON,....:Test
+                     *   ../util/json.js,../../test.js
+                     * 下级相对路径
+                     *   .util:JSON
+                     *   ./util/json.js
+                     * 
+                     */
                     if(targetPath.charAt(0) == '.'){
-                        if(/\w\//.test(targetPath)){
-                            
+                        var splitPos2Exp = targetPath.indexOf('/');
+                        var packageName = this.name;
+                        if(splitPos2Exp>0){
+                            packageName = packageName.replace(/[\.$]/g,'/') ;
+                            // thispkg/../util/json.js   
+                            // thispkg/../../test.js
+                            // thispkg/./util/json.js
+                            splitPos2Exp = /(?:\w+\/\.|\/)\./
+                        }else{
+                            // thispkg..util:JSON
+                            // thispkg....:Test
+                            // thispkg.util:JSON
+                            splitPos2Exp = /\w+\.\./
                         }
-                        targetPath = this.name + targetPath;
-                        while(targetPath!=(targetPath = targetPath.replace(/\w+\.\.\//,'')));
+                        targetPath = packageName+targetPath;
+                        while(targetPath!=(targetPath = targetPath.replace(splitPos2Exp,'')));
                     }
-                    */
                 }
                 this.dependenceMap.push([thisPath,targetPath,afterLoad]);
             }

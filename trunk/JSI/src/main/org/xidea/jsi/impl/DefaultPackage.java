@@ -82,7 +82,8 @@ public class DefaultPackage implements JSIPackage {
 			for (Iterator<String> it2 = objects.iterator(); it2.hasNext();) {
 				String item = it2.next();
 				if (objectScriptMap.containsKey(item)) {
-					log.error("重复的脚本元素定义:" + item+"["+scriptName+">"+objectScriptMap.get(item));
+					log.error("重复的脚本元素定义:" + item + "[" + scriptName + ">"
+							+ objectScriptMap.get(item));
 				}
 				objectScriptMap.put(item, scriptName);
 				item = item.replace("\\..*$", "");
@@ -129,10 +130,61 @@ public class DefaultPackage implements JSIPackage {
 		} else {
 			List<Object> args = new ArrayList<Object>();
 			args.add(thisPath);
-			args.add(targetPath);
+			args.add(optimizeTargetPath(this.name,(String)targetPath));
 			args.add(afterLoad);
 			unparsedDependenceList.add(args);
 		}
+	}
+
+	private String optimizeTargetPath(String packageName, String targetPath) {
+		if (targetPath.startsWith(".")) {
+			int splitPos2 = targetPath.indexOf('/');
+			String search = "./";
+			if (splitPos2 > 0) {
+				targetPath = packageName.replace('.', '/') + '/' + targetPath;
+				// thispkg/../util/json.js
+				// thispkg/../../test.js
+				// thispkg/./util/json.js
+				while (true) {
+					int p = targetPath.indexOf(search);
+					if (p > 0) {
+						int begin = targetPath.lastIndexOf('/', p-1);
+						if(p-1!= begin){// /./ /. ./
+							begin = targetPath.lastIndexOf('/', begin-1);
+						}
+						targetPath = targetPath.substring(0, begin)
+								+ targetPath.substring(p + 1);
+					} else {
+						break;
+					}
+				}
+			} else {
+				targetPath = packageName + targetPath;
+				// thispkg..util:JSON
+				// thispkg....:Test
+				// thispkg.util:JSON
+				search = "..";
+				while (true) {
+					int p = targetPath.indexOf(search);
+					if (p > 0) {
+						int begin = targetPath.lastIndexOf('.', p-1);
+						String postfix = targetPath.substring(p + 2);
+						if(!postfix.startsWith(".")){
+							postfix = '.'+postfix;
+						}
+						String prefix = targetPath.substring(0, begin);
+						System.out.println(prefix);
+						System.out.println(postfix);
+						targetPath = prefix
+								+ postfix;
+					} else {
+						break;
+					}
+				}
+			}
+
+		}
+		return targetPath;
 	}
 
 	/*
@@ -169,12 +221,12 @@ public class DefaultPackage implements JSIPackage {
 					.iterator(); iterator.hasNext();) {
 				List<Object> args = iterator.next();
 				final String thisPath = (String) args.get(0);
-				
+
 				String targetPath = (String) args.get(1);
 				JSIPackage targetPackage = this;
 				String thisObjectName = null;
 				String targetObjectName = null;
-				
+
 				final boolean afterLoad = (Boolean) args.get(2);
 				final boolean allSource = "*".equals(thisPath);
 				final boolean allTarget = targetPath.endsWith("*");

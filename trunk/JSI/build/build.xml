@@ -7,14 +7,6 @@
 	<available file="../JSA/build/dest/JSA-CMD.jar" property="JSAPath" value="web/WEB-INF/lib/Template.jar;web/WEB-INF/classes;../JSA/classes;../JSA/build/dest/JSA-CMD.jar;../JSA/classes" />
 
 	<target name="init">
-		<delete>
-			<fileset dir="build/dest/">
-				<include name="JSI-*.jar" />
-				<include name="JSI-*.tar" />
-				<include name="JSI-*.zip" />
-				<include name="JSIDoc-*.zip" />
-			</fileset>
-		</delete>
 		<mkdir dir="build/dest" />
 		<mkdir dir="build/dest/scripts" />
 		<mkdir dir="build/dest/jsidoc" />
@@ -45,7 +37,9 @@
 		</jar>
 		<copy tofile="../CDN/war/WEB-INF/lib/JSI.jar" file="build/dest/JSI.jar" />
 	</target>
-	<target name="jar-compressed-jsidoc" depends="init">
+	<target name="jar-compressed" depends="init">
+		<delete file="build/dest/JSI.*"/>
+		<delete file="build/dest/JSI-*.jar"/>
 		<jar destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
@@ -75,8 +69,40 @@
 			<zipfileset src="${basedir}/build/dest/jsidoc/util/util.jar">
 				<include name="org/xidea/jsidoc/*.js" />
 			</zipfileset>
+			<fileset dir="${basedir}/build/dest/">
+				<include name="boot-min.js" />
+				<include name="boot-col.js" />
+				<include name="boot-rhino.js" />
+			</fileset>
 		</jar>
 		<copy tofile="build/dest/JSI-${version}.jar" file="build/dest/JSI.jar" />
+	</target>
+	<target name="compress-boot" depends="init">
+		<java classname="org.jside.jsi.tools.CompressAction" classpath="${JSAPath}">
+			<arg value="-output" />
+			<arg value="${basedir}/build/dest/boot-min.js" />
+			<arg value="-source" />
+			<arg value="${basedir}/web/scripts/boot.js" />
+			<arg value="-config.features" />
+		</java>
+		<java classname="org.jside.jsi.tools.CompressAction" classpath="${JSAPath}">
+			<arg value="-output" />
+			<arg value="${basedir}/build/dest/boot-col.js" />
+			<arg value="-source" />
+			<arg value="${basedir}/web/scripts/boot.js" />
+			<arg value="-config.features" />
+			<arg value="org.xidea.jsi:COL" />
+		</java>
+		<java classname="org.jside.jsi.tools.CompressAction" classpath="${JSAPath}">
+			<arg value="-output" />
+			<arg value="${basedir}/build/dest/boot-rhino.js" />
+			<arg value="-source" />
+			<arg value="${basedir}/web/scripts/boot.js" />
+			<arg value="-config.features" />
+			<arg value=":Debug" />
+			<arg value="org.xidea.jsi:Server" />
+			<arg value="org.xidea.jsi:PackageOptimize" />
+		</java>
 	</target>
 	<target name="compress-jsidoc" depends="init">
 		<!-- export util -->
@@ -87,7 +113,7 @@
 			<arg value="false" />
 			<arg value="-exports" />
 			<arg value="org.xidea.jsidoc.util.*" />
-			
+
 			<arg value="-outputPackage" />
 			<arg value="${basedir}/build/dest/jsidoc/util/__package__.js" />
 			<arg value="-outputExported" />
@@ -96,7 +122,7 @@
 			<!--
 			util还是挺有用的，分散发布吧，没准有人可以利用一下
 			-->
-			<arg value="-outputJar" />
+			<arg value="-outputJAR" />
 			<arg value="${basedir}/build/dest/jsidoc/util/util.jar" />
 		</java>
 		<!-- export export -->
@@ -237,9 +263,8 @@ $JSI.preload('${packageName}',${fileNameAndPrefix}</echo>
 		</ftp>
 	</target>
 	<target name="JSIDoc" depends="init">
-		<delete file="build/dest/JSIDoc-*.zip">
-		</delete>
-		<java classname="org.xidea.jsi.test.SimpleCacheBuilder" classpath="web/WEB-INF/lib/commons-logging-1.0.4.jar;web/WEB-INF/classes/">
+		<delete file="build/dest/JSIDoc-*.*"/>
+		<java classname="org.xidea.jsi.test.SimpleCacheBuilder" classpath="${JSAPath}">
 			<arg value="${basedir}/web/scripts" />
 			<arg value="${basedir}/build/dest/jsidoc/source.js/" />
 		</java>
@@ -283,10 +308,11 @@ $import("org.xidea.jsidoc:JSIDoc");</echo>
 			</zipfileset>
 		</zip>
 	</target>
-	<target name="build" depends="compress-jsidoc,jar-compressed-jsidoc,JSIDoc,zip-jsidoc">
+	<target name="build" depends="compress-jsidoc,compress-boot,jar-compressed,JSIDoc,zip-jsidoc">
 
 	</target>
 	<target name="zip-jsidoc">
+		<delete file="build/dest/JSI-*.*"/>
 		<tar destfile="build/dest/JSI-${version}.tar" compression="gzip">
 			<tarfileset dir="web">
 				<include name="**/*.*" />

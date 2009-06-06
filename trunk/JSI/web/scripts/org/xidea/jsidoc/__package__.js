@@ -1,6 +1,6 @@
 this.addScript('globals-info.js','RootInfo'
                 ,['createPrototypeStack','FileInfo','PackageInfo']
-                ,['org.xidea.jsidoc.util:$log','SourceEntry','computeURL','ObjectInfo']);
+                ,['.util:$log','SourceEntry','computeURL','ObjectInfo']);
 
 this.addScript('package-info.js','PackageInfo'
                 ,0
@@ -8,7 +8,7 @@ this.addScript('package-info.js','PackageInfo'
 
 this.addScript('file-info.js','FileInfo'
                 ,0
-                ,['org.xidea.jsidoc.util:$log','org.xidea.jsidoc.export:DependenceInfo','SourceEntry','PackageInfo','ObjectInfo']);
+                ,['.util:$log','.export:DependenceInfo','SourceEntry','PackageInfo','ObjectInfo']);
 
 this.addScript('type-info.js',['TypeInfo','ParamInfo']);
 
@@ -21,7 +21,7 @@ this.addScript('source-entry.js','SourceEntry'
 
 this.addScript('jsidoc.js','JSIDoc'
                 ,0
-                ,['MenuUI','SourceEntry','org.xidea.jsidoc.export:findPackages','org.xidea.jsidoc.util:JSON','org.xidea.jsidoc.export:ExportUI','org.xidea.jsidoc.util:loadTextByURL','PackageInfo']);
+                ,['MenuUI','SourceEntry','.export:findPackages','.util:JSON','.export:ExportUI','.util:loadTextByURL','PackageInfo']);
 
 this.addScript('syntax-parser.js',['SyntaxParser','ECMAParser','LineIterator']);
 
@@ -35,7 +35,7 @@ this.addScript('object-info.js',['ObjectInfo','UnknowInfo']
 
 this.addScript('member-info.js','MemberInfo'
                 ,['createPrototypeStack','DocEntry','ObjectInfo']
-                ,['org.xidea.jsidoc.util:$log','accessOrder']);
+                ,['.util:$log','accessOrder']);
 
 this.addScript('menu.js','MenuUI'
                 ,0

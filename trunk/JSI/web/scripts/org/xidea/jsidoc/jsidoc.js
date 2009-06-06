@@ -187,7 +187,7 @@ var JSIDoc = {
         MenuUI.loadPackage(menuDocument,name);
     },
     jump:function(a){
-    	if(h.getAttribute('href').charAt() != '#'){
+    	if(a.getAttribute('href').charAt() != '#'){
 	    	var url = '#'+encodeURIComponent(getPureHref(a.href));
 	    	checkLocation.hash = ">/"+url;
     	}

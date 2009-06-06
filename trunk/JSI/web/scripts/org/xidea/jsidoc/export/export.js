@@ -212,7 +212,7 @@ function defaultTemplateFilter(text,path){
 		do{
 			result.push(text.substring(0,templateBegin));
 			text = text.substring(templateBegin);
-			tryCount = 32;
+			var tryCount = 32;
 			var pathEnd=0;
 			templateCode='';
 			while(tryCount -- && (pathEnd=text.indexOf(')',pathEnd))){
