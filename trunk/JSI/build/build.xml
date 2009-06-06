@@ -230,7 +230,7 @@ $JSI.preload('${packageName}',${fileNameAndPrefix}</echo>
 	<target name="JSIDoc" depends="init">
 		<delete file="build/dest/JSIDoc-*.zip">
 		</delete>
-		<java classname="org.xidea.sandbox.SimpleCacheBuilder" classpath="web/WEB-INF/lib/commons-logging-1.0.4.jar;web/WEB-INF/classes/">
+		<java classname="org.xidea.jsi.test.SimpleCacheBuilder" classpath="web/WEB-INF/lib/commons-logging-1.0.4.jar;web/WEB-INF/classes/">
 			<arg value="${basedir}/web/scripts" />
 			<arg value="${basedir}/build/dest/jsidoc/source.js/" />
 		</java>
