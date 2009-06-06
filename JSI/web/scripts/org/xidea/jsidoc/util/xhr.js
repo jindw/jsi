@@ -1,6 +1,5 @@
-var window = function(){return this}();
-var XMLHttpRequest = window.XMLHttpRequest;
-if(window.ActiveXObject ){
+if(typeof ActiveXObject == 'function'){
+	XMLHttpRequest = window.XMLHttpRequest;
     if(location.protocol == "file:" || !XMLHttpRequest ){
         var xmlHttpRequstActiveIds = [
             //"Msxml2.XMLHTTP.6.0,"  //都IE7了，罢了罢了
@@ -21,7 +20,7 @@ if(window.ActiveXObject ){
          * @id XMLHttpRequest 
          * @constructor
          */
-        XMLHttpRequest = function(){
+        var XMLHttpRequest = function(){
             while(true){
                 try{
                      return new ActiveXObject(xmlHttpRequstActiveIds[0]);

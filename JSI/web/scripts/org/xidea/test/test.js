@@ -10,7 +10,6 @@ function preparePackage(name){
 //			    name.replace(/\.|$/g,'/')+file]);
 //		}
 //	});
-
 	$import("org.xidea.test:assertEquals");
 	$import("org.xidea.test:JSMock");
 	return $import(name+'.test:')
