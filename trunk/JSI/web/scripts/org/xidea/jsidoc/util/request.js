@@ -142,7 +142,7 @@ Request.prototype = {
      * @owner Request.prototype
      * @return 执行结果
      */
-    evalResult : function() {
+    getJSON : function() {
       if(this.xhr.readyState == 4){
         return window.eval('('+this.xhr.responseText+')');
       }else{

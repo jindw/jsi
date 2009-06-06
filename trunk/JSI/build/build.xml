@@ -72,6 +72,9 @@
 				<include name="util/__package__.js" />
 				<include name="util/util.js" />
 			</zipfileset>
+			<zipfileset src="${basedir}/build/dest/jsidoc/util/util.jar">
+				<include name="org/xidea/jsidoc/*.js" />
+			</zipfileset>
 		</jar>
 		<copy tofile="build/dest/JSI-${version}.jar" file="build/dest/JSI.jar" />
 	</target>
@@ -84,11 +87,17 @@
 			<arg value="false" />
 			<arg value="-exports" />
 			<arg value="org.xidea.jsidoc.util.*" />
-
+			
 			<arg value="-outputPackage" />
 			<arg value="${basedir}/build/dest/jsidoc/util/__package__.js" />
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jsidoc/util/util.js" />
+
+			<!--
+			util还是挺有用的，分散发布吧，没准有人可以利用一下
+			-->
+			<arg value="-outputJar" />
+			<arg value="${basedir}/build/dest/jsidoc/util/util.jar" />
 		</java>
 		<!-- export export -->
 		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
