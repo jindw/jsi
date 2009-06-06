@@ -10,16 +10,13 @@
  * @return JSON
  */
  
-var window  = function(){return this}();
 var JSON = {
     /**
      * 解析JSON文本
      * @public 解析
      * @owner JSON
      */
-    decode : function(data){
-        return window.eval("("+data+")")
-    },
+    parse :parse, 
     /**
      * 以JSON格式，系列化javascript对象
      * @public
@@ -27,8 +24,11 @@ var JSON = {
      * @param <Object> value
      * @return <String> json 表达式
      */
-    encode : serialize
+    stringify : serialize
 }
+function parse(data){
+    return window.eval("("+data+")")
+};
 /**
  * IE 好像容易出问题，可能是线程不安全导致。
  * @internal

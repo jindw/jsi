@@ -107,28 +107,80 @@ var $import = function(freeEval,cachedScripts){
         //reportTrace = reportError;
     }
     
-    /*
-     * 加载指定文本，找不到文件(404)返回null,调试时采用
-     * @friend
-     * @param url 文件url
-     * @return <string> 结果文本
-     */
-    function loadTextByURL(url){
-        if("org.xidea.jsi:Block"){
-            var req = new XHR();
-            req.open("GET",url,false);
-            //for ie file 404 will throw exception 
-            //document.title = url;
-            req.send('');
-            if(req.status >= 200 && req.status < 300 || req.status == 304 || !req.status){
-                //return  req.responseText;
-                return req.responseText;
-            }else{
-                //debug("load faild:",url,"status:",req.status);
+    if(this.document){
+        var lazyScript ="<script src='data:text/javascript,$import()'></script>";
+        var XHR = this.XMLHttpRequest;
+        
+        //模拟XMLHttpRequest对象
+        if(this.ActiveXObject ){
+            if(":Debug"){
+                //IE7 XHR 强制ActiveX支持
+                if(XHR && location.protocol=="file:"){
+                    XHR = null;
+                }
+            }
+            if(!XHR ){
+                var xmlHttpRequstActiveIds = [
+                    //"Msxml2.XMLHTTP.6.0,"  //都IE7了，罢了罢了
+                    //"Msxml2.XMLHTTP.5.0,"  //office 的
+                    //"Msxml2.XMLHTTP.4.0,"
+                    //"MSXML2.XMLHTTP.3.0,"  //应该等价于MSXML2.XMLHTTP
+                    "MSXML2.XMLHTTP",
+                    "Microsoft.XMLHTTP"//IE5的，最早的XHR实现
+                    ];
+                /**
+                 * 统一的 XMLHttpRequest 构造器（对于ie，做一个有返回值的构造器（这时new操作返回该返回值），返回他支持的AxtiveX控件）
+                 * 关于 XMLHttpRequest对象的详细信息请参考
+                 * <ul>
+                 *   <li><a href="http://www.w3.org/TR/XMLHttpRequest/">W3C XMLHttpRequest</a></li>
+                 *   <li><a href="http://www.ikown.com/manual/xmlhttp/index.htm">中文参考</a></li>
+                 *   <li><a href="http://msdn2.microsoft.com/en-us/library/ms762757(VS.85).aspx">MSXML</a></li>
+                 * </ul>
+                 * @id XMLHttpRequest 
+                 * @constructor
+                 */
+                XHR = function(){
+                    while(true){
+                        try{
+                             return new ActiveXObject(xmlHttpRequstActiveIds[0]);
+                        }catch (e){
+                            if(!xmlHttpRequstActiveIds.shift()){
+                                throw e;//not suport
+                            }
+                        }
+                    }
+                };
+            }
+            
+            if("org.xidea.jsi:COL"){
+                if(":Debug"){
+                    lazyScript =lazyScript.replace(/'.*'/,scriptBase+"?path=lazy-trigger.js");
+                }else{
+                    lazyScript =lazyScript.replace(/'.*'/,scriptBase+"lazy-trigger.js");
+                }
             }
         }
-    }
-    if(this.document){
+        /*
+         * 加载指定文本，找不到文件(404)返回null,调试时采用
+         * @friend
+         * @param url 文件url
+         * @return <string> 结果文本
+         */
+        function loadTextByURL(url){
+            if("org.xidea.jsi:Block"){
+                var req = new XHR();
+                req.open("GET",url,false);
+                //for ie file 404 will throw exception 
+                //document.title = url;
+                req.send('');
+                if(req.status >= 200 && req.status < 300 || req.status == 304 || !req.status){
+                    //return  req.responseText;
+                    return req.responseText;
+                }else{
+                    //debug("load faild:",url,"status:",req.status);
+                }
+            }
+        }
         if(":Debug"){
     	    /**
     		 * 方便调试的支持
@@ -178,11 +230,6 @@ var $import = function(freeEval,cachedScripts){
                     }
                 }
             }
-    
-            //IE7 XHR 强制ActiveX支持
-            if(this.ActiveXObject && this.XMLHttpRequest && location.protocol=="file:"){
-                this.XMLHttpRequest = null;
-            }
             var script = scripts[scripts.length-1];
     	    if(script){
     	        //mozilla bug
@@ -197,7 +244,8 @@ var $import = function(freeEval,cachedScripts){
     }else{
     	if("org.xidea.jsi:Server"){
     	    $JSI.scriptBase= "classpath:///";
-    	    var RhinoSupport = Packages.org.xidea.jsi.impl.RhinoSupport;
+    	    //Hack reuse XHR
+    	    XHR= Packages.org.xidea.jsi.impl.RhinoSupport;
     	    loadTextByURL=function(url){
     	        /*
     		     	url = url.replace(/^\w+:(\/)+(?:\?.*=)/,'$1');
@@ -210,18 +258,18 @@ var $import = function(freeEval,cachedScripts){
     				}
     		     */
     		     url = url.replace(/^\w+:(\/)+(?:\?.*=)?/,'');
-        		 return RhinoSupport.loadText(url)+'';
+        		 return XHR.loadText(url)+'';
     	    }
     	    
-    	   freeEval = RhinoSupport.buildEvaler(freeEval);
+    	   freeEval = XHR.buildEvaler(freeEval);
     	}
     }
     var packageMap = {};
     var scriptBase = $JSI.scriptBase;
 
+    
     if("org.xidea.jsi:COL"){
         var lazyTaskList = [];
-        var lazyScript ="<script src='data:text/javascript,$import()'></script>";
         //
         /*
          * 缓存清单计算
@@ -337,50 +385,6 @@ var $import = function(freeEval,cachedScripts){
             }
         }
     };
-    //模拟XMLHttpRequest对象
-    if(this.ActiveXObject ){
-        if("org.xidea.jsi:COL"){
-            if(":Debug"){
-                lazyScript =lazyScript.replace(/'.*'/,scriptBase+"?path=lazy-trigger.js");
-            }else{
-                lazyScript =lazyScript.replace(/'.*'/,scriptBase+"lazy-trigger.js");
-            }
-        }
-        //@Hack：申明后置,这里是局部变量
-        XHR = this.XMLHttpRequest;
-        if(!XHR ){
-            var xmlHttpRequstActiveIds = [
-                //"Msxml2.XMLHTTP.6.0,"  //都IE7了，罢了罢了
-                //"Msxml2.XMLHTTP.5.0,"  //office 的
-                //"Msxml2.XMLHTTP.4.0,"
-                //"MSXML2.XMLHTTP.3.0,"  //应该等价于MSXML2.XMLHTTP
-                "MSXML2.XMLHTTP",
-                "Microsoft.XMLHTTP"//IE5的，最早的XHR实现
-                ];
-            /**
-             * 统一的 XMLHttpRequest 构造器（对于ie，做一个有返回值的构造器（这时new操作返回该返回值），返回他支持的AxtiveX控件）
-             * 关于 XMLHttpRequest对象的详细信息请参考
-             * <ul>
-             *   <li><a href="http://www.w3.org/TR/XMLHttpRequest/">W3C XMLHttpRequest</a></li>
-             *   <li><a href="http://www.ikown.com/manual/xmlhttp/index.htm">中文参考</a></li>
-             *   <li><a href="http://msdn2.microsoft.com/en-us/library/ms762757(VS.85).aspx">MSXML</a></li>
-             * </ul>
-             * @id XMLHttpRequest 
-             * @constructor
-             */
-            var XHR = function(){
-                while(true){
-                    try{
-                         return new ActiveXObject(xmlHttpRequstActiveIds[0]);
-                    }catch (e){
-                        if(!xmlHttpRequstActiveIds.shift()){
-                            throw e;//not suport
-                        }
-                    }
-                }
-            };
-        }
-    }
     /**
      * 包信息数据结构类<b> &#160;(JSI 内部对象，普通用户不可见)</b>.
      * <p>在包目录下，有个包定义脚本（__package__.js）；

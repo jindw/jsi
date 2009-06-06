@@ -12,6 +12,6 @@
  */
 function showDetail(object){
 	var buf = ["对象信息如下：\n\n"];
-	buf.push(JSON.encode(object));
+	buf.push(JSON.stringify(object));
 	confirm(buf.join("\n"));
 }
