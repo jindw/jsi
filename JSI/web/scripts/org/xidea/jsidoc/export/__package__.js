@@ -8,20 +8,20 @@ this.addScript('fn.js','findPackages');
 this.addScript('dependence-info.js','DependenceInfo');
 
 this.addScript('export.js','Exporter'
-                ,"org.xidea.jsidoc.util:$log"
+                ,"..util:$log"
                 ,[
                 'DependenceInfo',
-                'org.xidea.jsidoc.util:findGlobals',
+                '..util:findGlobals',
                 'findPackages',
-                'org.xidea.jsidoc.util:JSON',
-                'org.xidea.jsidoc.util:xmlReplacer',
-                'org.xidea.jsidoc.util:loadTextByURL']);
+                '..util:JSON',
+                '..util:xmlReplacer',
+                '..util:loadTextByURL']);
 
 this.addScript('export-ui.js','ExportUI'
-                ,"org.xidea.jsidoc.util:$log"
+                ,"..util:$log"
                 ,['Exporter','DependenceInfo',
                 'findPackages',
-                'org.xidea.jsidoc.util:Zip',
-                'org.xidea.jsidoc.util:xmlReplacer',
-                'org.xidea.jsidoc.util:Request']);
+                '..util:Zip',
+                '..util:xmlReplacer',
+                '..util:Request']);
 
