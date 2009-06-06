@@ -1,5 +1,5 @@
+XMLHttpRequest = window.XMLHttpRequest;
 if(typeof ActiveXObject == 'function'){
-	XMLHttpRequest = window.XMLHttpRequest;
     if(location.protocol == "file:" || !XMLHttpRequest ){
         var xmlHttpRequstActiveIds = [
             //"Msxml2.XMLHTTP.6.0,"  //都IE7了，罢了罢了

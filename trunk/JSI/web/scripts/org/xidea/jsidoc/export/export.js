@@ -169,7 +169,7 @@ Exporter.prototype = {
         }
         return exportDocTemplate.render({
             documentURL:jsiDocURL,
-            data:JSON.encode(packageMap)
+            data:JSON.stringify(packageMap)
         });
     },
     getSource:function(path,compileFilter){
@@ -250,7 +250,7 @@ function getTemplateCode(loader,templateCode){
 		    	if(object instanceof Function){
 		    		object = object.toString();
 		    	}else{
-		    		object = JSON.encode(object);
+		    		object = JSON.stringify(object);
 		    	}
 		    	
 		        return "new Template"+"("+object+")";

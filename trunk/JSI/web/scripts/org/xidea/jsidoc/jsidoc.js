@@ -19,7 +19,7 @@ function initializePackageFromQuery(packageGroupMap){
             var value = decodeURIComponent(match[2]);
             if(value){
             	if(groupName == "group"){
-                    value = JSON.decode(value);
+                    value = JSON.parse(value);
                     for(groupName in value){
 	                    packageGroupMap.push(groupName)
 	                    packageGroupMap[groupName] = value[groupName];
@@ -40,7 +40,7 @@ function initializePackageAndDataDataFromHash(packageGroupMap){
     while(win && win != top){
         data = win.location.hash;
         if(data){
-            var packageMap = JSON.decode(data.substring(1));
+            var packageMap = JSON.parse(data.substring(1));
             var groupName ="未命名分组";
             packageGroupMap.push(groupName);
             var groupPackages = packageGroupMap[groupName] = [];
