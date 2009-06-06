@@ -111,7 +111,8 @@ var ExportUI = {
 	        	for(var n in content){
 	        		zip.addTextContent(n,content[n]);
 	        	}
-	        	window.open(zip.toDataURL(),"about:blank")//resultDialogName
+	        	zip = zip.toDataURL();
+	        	zip && window.open(zip,"about:blank")//resultDialogName
         	}
             break;
         case 1:

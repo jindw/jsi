@@ -115,7 +115,7 @@ var $import = function(freeEval,cachedScripts){
      */
     function loadTextByURL(url){
         if("org.xidea.jsi:Block"){
-            var req = new XMLHttpRequest();
+            var req = new XHR();
             req.open("GET",url,false);
             //for ie file 404 will throw exception 
             //document.title = url;
@@ -346,7 +346,9 @@ var $import = function(freeEval,cachedScripts){
                 lazyScript =lazyScript.replace(/'.*'/,scriptBase+"lazy-trigger.js");
             }
         }
-        if(!this.XMLHttpRequest ){
+        //@Hack：申明后置,这里是局部变量
+        XHR = this.XMLHttpRequest;
+        if(!XHR ){
             var xmlHttpRequstActiveIds = [
                 //"Msxml2.XMLHTTP.6.0,"  //都IE7了，罢了罢了
                 //"Msxml2.XMLHTTP.5.0,"  //office 的
@@ -366,7 +368,7 @@ var $import = function(freeEval,cachedScripts){
              * @id XMLHttpRequest 
              * @constructor
              */
-            this.XMLHttpRequest = function(){
+            var XHR = function(){
                 while(true){
                     try{
                          return new ActiveXObject(xmlHttpRequstActiveIds[0]);

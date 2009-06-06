@@ -58,9 +58,8 @@ $log.setLevel = function(level){
  * @param bindLevel 绑定函数的输出级别，只有该级别大于等于输出级别时，才可输出日志
  */
 function buildLevelLog(bindLevel,bindName){
-	var window = this;
-	if(!window.confirm){
-		window.confirm = print;
+	if(!this.confirm){
+		this.confirm = print;
 	}
     return function(){
         if(bindLevel>=consoleLevel){
@@ -69,11 +68,10 @@ function buildLevelLog(bindLevel,bindName){
             $log.apply($log,msg);
         }
         if(":debug"){
-            if((typeof window && window.console == 'object') && (typeof console.log == 'function')){
+            if((typeof console == 'object') && (typeof console.log == 'function')){
                 var msg = [bindLevel,bindName];
                 msg.push.apply(msg,arguments);
                 console.log(msg.join(';'))
-                
             }
         }
     }
