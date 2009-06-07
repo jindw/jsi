@@ -76,7 +76,7 @@ var $JSI= {
  *                    </ul>
  *                    <p>一般可忽略返回值.因为默认情况下,导入为全局变量;无需再显示申明了.</p>
  */
-var $import = function(freeEval,cachedScripts){
+var $import = function(loaderEval,cachedScripts){
     if(":Debug"){
         
         /*
@@ -244,25 +244,7 @@ var $import = function(freeEval,cachedScripts){
         }
     }else{
     	if("org.xidea.jsi:Server"){
-    	    $JSI.scriptBase= "classpath:///";
-    	    //Hack reuse XHR
-    	    XHR= Packages.org.xidea.jsi.impl.RhinoSupport;
-    	    loadTextByURL=function(url){
-    	        /*
-    		     	url = url.replace(/^\w+:(\/)+(?:\?.*=)/,'$1');
-    				var buf = new java.io.StringWriter();
-    				var ins = buf.getClass().getResourceAsStream(url);
-    				var ins = new java.io.InputStreamReader(ins,"utf-8");
-    				var c;
-    				while((c=ins.read())>=0){
-    					buf.append(c);
-    				}
-    		     */
-    		     url = url.replace(/^\w+:(\/)+(?:\?.*=)?/,'');
-        		 return XHR.loadText(url)+'';
-    	    }
-    	    
-    	   freeEval = XHR.buildEvaler(freeEval);
+    	    loadTextByURL = Packages.org.xidea.jsi.impl.RhinoSupport.initialize(arguments);
     	}
     }
     var packageMap = {};
@@ -472,7 +454,7 @@ var $import = function(freeEval,cachedScripts){
             if(pscript instanceof Function){
                 pscript.call(this);
             }else{
-                freeEval.call(this,pscript);
+                loaderEval.call(this,pscript);
             }
         }catch(e){
             if(":Debug"){
@@ -981,13 +963,13 @@ var $import = function(freeEval,cachedScripts){
 //            	        $log.error(loaderName,loader)
 //                  }
                     //不要清除文本缓存
-                    return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(scriptBase+"?path="+packageName.replace(/\.|$/g,'/')+loaderName)),packageObject.scriptBase+loaderName);
+                    return loaderEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(scriptBase+"?path="+packageName.replace(/\.|$/g,'/')+loaderName)));
 //            	    if(loaderName == 'show-detail.js'){
 //            	        $log.error(loaderName,loader)
 //                  }
                 }else{
                      //不要清除文本缓存
-                    return freeEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(packageObject.scriptBase+loaderName)),loaderName);
+                    return loaderEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(packageObject.scriptBase+loaderName)));
                 }
             }
             //ScriptLoader[loaderName] += 0x10000
