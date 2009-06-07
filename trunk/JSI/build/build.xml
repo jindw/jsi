@@ -63,11 +63,10 @@
 				<include name="jsidoc.js" />
 				<include name="export/__package__.js" />
 				<include name="export/export.js" />
-				<include name="util/__package__.js" />
-				<include name="util/util.js" />
 			</zipfileset>
 			<zipfileset src="${basedir}/build/dest/jsidoc/util/util.jar">
-				<include name="org/xidea/jsidoc/*.js" />
+				<include name="org/xidea/jsidoc/util/*.js" />
+				<exclude name="org/xidea/jsidoc/util/*__preload__.js" />
 			</zipfileset>
 			<fileset dir="${basedir}/build/dest/">
 				<include name="boot-min.js" />
