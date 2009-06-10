@@ -83,6 +83,7 @@
 			<arg value="-source" />
 			<arg value="${basedir}/web/scripts/boot.js" />
 			<arg value="-config.features" />
+			<arg value="#none" />
 		</java>
 		<java classname="org.jside.jsi.tools.CompressAction" classpath="${JSAPath}">
 			<arg value="-output" />
