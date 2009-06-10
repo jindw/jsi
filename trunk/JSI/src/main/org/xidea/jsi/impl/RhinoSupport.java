@@ -1,15 +1,10 @@
 package org.xidea.jsi.impl;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-
-
-
-
 
 public abstract class RhinoSupport {
 
-	static final String EVAL = loadText("org/xidea/jsi/impl/initialize.js");
+	private static final String EVAL = loadText("org/xidea/jsi/impl/initialize.js");
 
 	/**
 	 * 1.初始化 freeEval，加上调试姓习
@@ -23,6 +18,12 @@ public abstract class RhinoSupport {
 		Object initializer = s.eval(EVAL,"<setup>");
 		return s.call(initializer, null, arguments);
 	}
+	/**
+	 * 按类路径装载文本（utf-8）
+	 * 如：org/xidea/jsi/impl/initialize.js
+	 * @param path 类路径
+	 * @return
+	 */
 	public static String loadText(String path) {
 		try {
 			return ClasspathRoot.loadText(path,ClasspathRoot.class.getClassLoader(),"utf-8");
@@ -42,8 +43,8 @@ public abstract class RhinoSupport {
 		Object result =  s.eval("(function(){eval(arguments[0])})",path);
 		return result;
 	}
-	private static RhinoSupport get(Object thiz){
-		String cn = thiz.getClass().getName();
+	private static RhinoSupport get(Object jsobject){
+		String cn = jsobject.getClass().getName();
 		if(cn.startsWith("com.sun.") || cn.startsWith("sun.")){
 			return new Java6Impl();
 		}else{

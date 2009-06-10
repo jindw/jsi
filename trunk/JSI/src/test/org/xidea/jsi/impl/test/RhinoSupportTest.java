@@ -36,12 +36,13 @@ public class RhinoSupportTest {
 			cx
 					.evaluateString(
 							ScriptRuntime.getGlobal(cx),
-							"Packages.org.xidea.jsi.impl.RhinoSupport.createEvaler(this,'dir/file.js').call({scriptBase:'/dir/',name:'file.js'},'...')",
-							"#", 1, null);
+							"Packages.org.xidea.jsi.impl.RhinoSupport.createEvaler(this,'dir/file.js').call({scriptBase:'/dir/',name:'file.js'},'//\\n//\\n>line2...')",
+							"<file>", 1, null);
 
 			Assert.fail("");
 		} catch (Exception e) {
-			checkLogContains(e, "dir/file.js");
+			//e.printStackTrace();
+			checkLogContains(e, "dir/file.js","3");
 		} finally {
 			Context.exit();
 		}
@@ -90,14 +91,16 @@ public class RhinoSupportTest {
 		}
 	}
 
-	public static void checkLogContains(Exception e, String key) {
+	public static void checkLogContains(Exception e, String... keys) {
 		StringWriter buf = new StringWriter();
 		PrintWriter out = new PrintWriter(buf);
 		e.printStackTrace(out);
 		out.flush();
 		buf.flush();
 		//System.out.println(buf);
-		assertTrue(buf.toString().indexOf(key) > 0);
+		for(String key:keys){
+			assertTrue(buf.toString().indexOf(key) > 0);
+		}
 	}
 
 }

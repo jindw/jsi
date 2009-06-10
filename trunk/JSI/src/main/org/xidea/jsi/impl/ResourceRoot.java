@@ -1,4 +1,4 @@
-package org.xidea.jsi;
+package org.xidea.jsi.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -22,13 +22,12 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.jsi.impl.AbstractRoot;
-import org.xidea.jsi.impl.FileRoot;
+import org.xidea.jsi.JSIPackage;
 
+public class ResourceRoot extends AbstractRoot {
+	private static final File[] EMPTY_FILES = {};
+	private static final Log log = LogFactory.getLog(ResourceRoot.class);
 
-public class JSIResourceLoader extends AbstractRoot {
-	private static final Log log = LogFactory.getLog(JSIResourceLoader.class);
-	
 	/**
 	 * 只有默认的encoding没有设置的时候，才会设置
 	 */
@@ -181,72 +180,66 @@ public class JSIResourceLoader extends AbstractRoot {
 				log.debug(e);
 			}
 		}
-		File[] libs = findLibFiles();
-		if (libs != null) {
-			for (File item : libs) {
-				InputStream in = findByZip(item, path);
-				if (in != null) {
-					return in;
-				}
+		File[] libs = findLibFiles(this.scriptBaseDirectory);
+		for (File item : libs) {
+			InputStream in = findByZip(item, path);
+			if (in != null) {
+				return in;
+			}
+		}
+		libs = findLibFiles(this.externalLibraryDirectory);
+		for (File item : libs) {
+			InputStream in = findByZip(item, path);
+			if (in != null) {
+				return in;
 			}
 		}
 		return this.getClass().getClassLoader().getResourceAsStream(path);
 	}
-	
-	public List<JSIPackage> getPackageObjectList(){
-		final List<String> result = FileRoot.findPackageList(this.scriptBaseDirectory);
-		File[] libs = findLibFiles();
-		if(libs != null){
-			for(File lib : libs){
-				appendZipPackage(lib, result);
-			}
+
+	public List<JSIPackage> getPackageObjectList() {
+		final List<String> result = FileRoot
+				.findPackageList(this.scriptBaseDirectory);
+		File[] libs = findLibFiles(this.scriptBaseDirectory);
+		for (File lib : libs) {
+			appendZipPackage(lib, result);
 		}
+		libs = findLibFiles(this.externalLibraryDirectory);
+		for (File lib : libs) {
+			appendZipPackage(lib, result);
+		}
+
 		LinkedHashSet<JSIPackage> ps = new LinkedHashSet<JSIPackage>();
-		for (String path:result) {
-			try{
+		for (String path : result) {
+			try {
 				ps.add(requirePackage(path, true));
-			}catch (Exception e) {
+			} catch (Exception e) {
 			}
 		}
 		return new ArrayList<JSIPackage>(ps);
 	}
 
-	
-
-	private File[] findLibFiles() {
-		if (this.externalLibraryDirectory != null) {
-			return this.externalLibraryDirectory
-					.listFiles(new FilenameFilter() {
-						public boolean accept(File dir, String name) {
-							name = name.toLowerCase();
-							return name.endsWith(".jar")
-									|| name.endsWith(".zip");
-						}
-					});
-		}
-		return null;
-	}
-
-	private void appendZipPackage(File file, Collection<String> result) {
-		try {
-			final ZipFile jarFile = new ZipFile(file);
-			Enumeration<? extends ZipEntry> ze = jarFile.entries();
-			while (ze.hasMoreElements()) {
-				ZipEntry zipEntry = ze.nextElement();
-				String name = zipEntry.getName();
-				if(name.endsWith(JSIPackage.PACKAGE_FILE_NAME)){
-					name = name.substring(0,name.lastIndexOf('/'));
-					if(name.startsWith("/")){
-						name = name.substring(1);
-					}
-					result.add(name.replace('/', '.'));
+	/**
+	 * 放心吧，我们不返回空：）
+	 * @param lib
+	 * @return
+	 */
+	protected File[] findLibFiles(File lib) {
+		if (lib != null) {
+			File[] result = lib.listFiles(new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					name = name.toLowerCase();
+					return name.endsWith(".jar") || name.endsWith(".zip");
 				}
+			});
+			if (result != null) {
+				return result;
 			}
-			
-		} catch (IOException e) {
 		}
+		return EMPTY_FILES;
 	}
-	private InputStream findByZip(File file, String path) {
+
+	protected InputStream findByZip(File file, String path) {
 		try {
 			final ZipFile jarFile = new ZipFile(file);
 			ZipEntry ze = jarFile.getEntry(path);
@@ -259,7 +252,28 @@ public class JSIResourceLoader extends AbstractRoot {
 				};
 			}
 		} catch (IOException e) {
+			log.debug(e);
 		}
 		return null;
+	}
+	
+	private void appendZipPackage(File file, Collection<String> result) {
+		try {
+			final ZipFile jarFile = new ZipFile(file);
+			Enumeration<? extends ZipEntry> ze = jarFile.entries();
+			while (ze.hasMoreElements()) {
+				ZipEntry zipEntry = ze.nextElement();
+				String name = zipEntry.getName();
+				if (name.endsWith(JSIPackage.PACKAGE_FILE_NAME)) {
+					name = name.substring(0, name.lastIndexOf('/'));
+					if (name.startsWith("/")) {
+						name = name.substring(1);
+					}
+					result.add(name.replace('/', '.'));
+				}
+			}
+
+		} catch (IOException e) {
+		}
 	}
 }
