@@ -20,17 +20,13 @@ import org.xidea.jsi.impl.DefaultLoadContext;
 class SDNService {
 	public static final String CDN_DEBUG_TOKEN_NAME = "CDN_DEBUG";
 	protected Map<String, String> cachedMap;// = new WeakHashMap<String,
-											// String>();
 	private JSIRoot root;
-	private JSIExportor releaseExportor;
-
+	Map<String, String[]> exportConfig = new HashMap<String, String[]>();
+	private int ips;
+	
 	public SDNService(JSIRoot root) {
 		this.root = root;
-		Map<String, String[]> exportConfig = new HashMap<String, String[]>();
 		exportConfig.put("level", new String[] { "3" });
-		exportConfig.put("internalPrefix", new String[] { "$_$" });
-		releaseExportor = DefaultExportorFactory.getInstance().createExplorter(
-				exportConfig);
 	}
 
 	public void service(String path, HttpServletRequest request,
@@ -59,6 +55,10 @@ class SDNService {
 	}
 
 	public String doReleaseExport(String[] paths) {
+		exportConfig.put("internalPrefix", new String[] { "$"+Integer.toString(ips++,32) });
+		JSIExportor releaseExportor = DefaultExportorFactory.getInstance().createExplorter(
+				exportConfig);
+		
 		return releaseExportor.export(buildLoadContext(paths));
 	}
 
