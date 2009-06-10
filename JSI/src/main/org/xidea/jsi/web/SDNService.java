@@ -21,7 +21,7 @@ class SDNService {
 	public static final String CDN_DEBUG_TOKEN_NAME = "CDN_DEBUG";
 	protected Map<String, String> cachedMap;// = new WeakHashMap<String,
 	private JSIRoot root;
-	Map<String, String[]> exportConfig = new HashMap<String, String[]>();
+	private Map<String, String[]> exportConfig = new HashMap<String, String[]>();
 	private int ips;
 	
 	public SDNService(JSIRoot root) {
