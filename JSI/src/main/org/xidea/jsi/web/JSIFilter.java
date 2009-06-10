@@ -133,6 +133,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 				throw new ScriptNotFoundException("");
 			}
 			sdn.service(path, request, response);
+			return true;
 		} else if ("export.action".equals(path)) {
 			// type =1,type=2,type=3
 			initializeEncodingIfNotSet(request, response);
