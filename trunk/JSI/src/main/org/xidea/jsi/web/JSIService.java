@@ -1,4 +1,4 @@
-package org.xidea.jsi;
+package org.xidea.jsi.web;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -10,6 +10,9 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xidea.jsi.JSIExportor;
+import org.xidea.jsi.JSILoadContext;
+import org.xidea.jsi.JSIResourceLoader;
 import org.xidea.jsi.impl.DataRoot;
 import org.xidea.jsi.impl.DefaultExportorFactory;
 import org.xidea.jsi.impl.DefaultLoadContext;
@@ -19,7 +22,7 @@ import org.xidea.jsi.impl.JSIText;
 public class JSIService extends JSIResourceLoader{
 	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(JSIService.class);
-
+	
 	
 	public void service(String path, Map<String, String[]> param, Writer out)
 			throws IOException {
