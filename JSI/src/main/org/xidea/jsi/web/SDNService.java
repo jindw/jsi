@@ -31,7 +31,7 @@ class SDNService {
 
 	public void service(String path, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
-		String[] paths = path.split("[^\\w\\/\\.\\-\\:\\*\\$]");
+		String[] paths = path.split("(?:%20|%09|%0d|%0a|[^\\w\\/\\.\\-\\:\\*\\$])+");
 		// TODO:以后应该使用Stream，应该使用成熟的缓存系统
 		PrintWriter out = response.getWriter();
 		response.setContentType("text/plain;charset=utf-8");
