@@ -3,11 +3,9 @@ package org.xidea.jsi.web;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -19,12 +17,10 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.xidea.jsi.web.JSIScriptExportor;
-import org.xidea.jsi.JSIService;
+import org.xidea.jsi.web.SDNService;
 import org.xidea.jsi.ScriptNotFoundException;
 import org.xidea.jsi.impl.JSIText;
 
@@ -33,32 +29,34 @@ import org.xidea.jsi.impl.JSIText;
  * 
  * @author jindw
  */
-public class JSIFilter extends JSIService implements Filter ,Servlet{
-	private static final int VALID_TIME = 1000*60*60;
-	public static final String CDN_DEBUG_TOKEN_NAME = "CDN_DEBUG";
+public class JSIFilter extends JSIService implements Filter, Servlet {
+
 	protected ServletContext context;
 	protected ServletConfig config;
-	private Map<String, String> cachedMap = new WeakHashMap<String, String>();
-	private JSIScriptExportor exportor;
 	protected String scriptBase = "/scripts/";
+	protected SDNService sdn = new SDNService(this);
+
 	@Override
 	public void service(ServletRequest req, ServletResponse resp)
 			throws ServletException, IOException {
-		if(!process(req, resp)){
+		if (!process(req, resp)) {
 			// 走这条分支的情况：1、无法找到资源，2、根本不在脚本目录下
 			HttpServletResponse response = (HttpServletResponse) resp;
-			response.sendError(HttpServletResponse.SC_NOT_FOUND,"找不到指定的资源");
+			response.sendError(HttpServletResponse.SC_NOT_FOUND, "找不到指定的资源");
 		}
 	}
+
 	public void doFilter(ServletRequest req, final ServletResponse resp,
 			FilterChain chain) throws IOException, ServletException {
-		if(!process(req, resp)){
+		if (!process(req, resp)) {
 			// 走这条分支的情况：1、无法找到资源，2、根本不在脚本目录下
 			chain.doFilter(req, resp);
 		}
 	}
+
 	/**
 	 * 处理指定资源，如果该资源存在，返回真
+	 * 
 	 * @param req
 	 * @param resp
 	 * @return
@@ -71,33 +69,9 @@ public class JSIFilter extends JSIService implements Filter ,Servlet{
 		HttpServletResponse response = (HttpServletResponse) resp;
 		String path = request.getRequestURI().substring(
 				request.getContextPath().length());
-		if (path.startsWith("=")) {
-			path = path.substring(1);
-			if(path.length()==0){
-				throw new ScriptNotFoundException("");
-			}
-			String[] paths = path
-					.split("[^\\w\\/\\.\\-\\:\\*\\$]");
-			// TODO:以后应该使用Stream，应该使用成熟的缓存系统
-			PrintWriter out = response.getWriter();
-			response.setContentType("text/plain;charset=utf-8");
-			String result;
-			if (isDebug(request)) {
-				result = exportor.doDebugExport(paths);
-			} else {
-				result = cachedMap.get(path);
-				if(result == null){
-					result = exportor.doReleaseExport(paths);
-					cachedMap.put(path,result);
-				}
-			}
-			// 应该考虑加上字节流缓孄1�7
-			out.append(result);
-			out.flush();
-			return true;
-		}else if (path.startsWith(scriptBase)) {
+		if (path.startsWith(scriptBase)) {
 			path = path.substring(scriptBase.length());
-			if (this.processAttachedAction(request, response, path)) {
+			if (this.processAttachedAction(path, request, response)) {
 				return true;
 			}
 			if (isIndex(path)) {
@@ -106,7 +80,9 @@ public class JSIFilter extends JSIService implements Filter ,Servlet{
 			boolean isPreload = false;
 			if (path.endsWith(JSIText.PRELOAD_FILE_POSTFIX)) {
 				isPreload = true;
-				path = path.substring(0,path.length()-JSIText.PRELOAD_FILE_POSTFIX .length())+".js";
+				path = path.substring(0, path.length()
+						- JSIText.PRELOAD_FILE_POSTFIX.length())
+						+ ".js";
 
 			}
 			// 经测试，metaType是不会自动设置的;
@@ -127,28 +103,6 @@ public class JSIFilter extends JSIService implements Filter ,Servlet{
 		return false;
 	}
 
-	public String getDebugTokenValue(ServletContext context) {
-		String token = (String) context.getAttribute(CDN_DEBUG_TOKEN_NAME);
-		long time = System.currentTimeMillis();
-		String prefix = Long.toString(time / VALID_TIME,32);
-		if(token == null || !token.startsWith(prefix)){
-			token = prefix + (int)(100*Math.random());
-			context.setAttribute(CDN_DEBUG_TOKEN_NAME, token);
-		}
-		return token;
-	}
-
-	private boolean isDebug(HttpServletRequest request) {
-		Cookie[] cookies = request.getCookies();
-		if (cookies != null) {
-			for (Cookie cookie : cookies) {
-				if (CDN_DEBUG_TOKEN_NAME.equals(cookie.getName())) {
-					return getDebugTokenValue(context).equals(cookie.getValue());
-				}
-			}
-		}
-		return false;
-	}
 	/**
 	 * 响应附加行为
 	 * 
@@ -158,8 +112,9 @@ public class JSIFilter extends JSIService implements Filter ,Servlet{
 	 * @return
 	 * @throws IOException
 	 */
-	protected boolean processAttachedAction(HttpServletRequest request,
-			HttpServletResponse response, String path) throws IOException {
+	protected boolean processAttachedAction(String path,
+			HttpServletRequest request, HttpServletResponse response)
+			throws IOException {
 		if (isIndex(path) && request.getParameter("path") == null) {
 			initializeEncodingIfNotSet(request, response);
 			String externalScript = request.getParameter("externalScript");
@@ -172,23 +127,31 @@ public class JSIFilter extends JSIService implements Filter ,Servlet{
 
 			}
 			return true;
+		} else if (path.startsWith("=")) {
+			path = path.substring(1);
+			if (path.length() == 0) {
+				throw new ScriptNotFoundException("");
+			}
+			sdn.service(path, request, response);
 		} else if ("export.action".equals(path)) {
-			//type =1,type=2,type=3
+			// type =1,type=2,type=3
 			initializeEncodingIfNotSet(request, response);
 			@SuppressWarnings("unchecked")
 			Map param = request.getParameterMap();
 			@SuppressWarnings("unchecked")
 			String result = export(param);
-			if(result == null){
+			if (result == null) {
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			}else{
-				response.addHeader("Content-Type", "text/plain;charset="+this.getEncoding());
+			} else {
+				response.addHeader("Content-Type", "text/plain;charset="
+						+ this.getEncoding());
 				response.getWriter().print(result);
 			}
 			return true;
 		}
 		return false;
 	}
+
 	private void initializeEncodingIfNotSet(ServletRequest request,
 			ServletResponse response) throws UnsupportedEncodingException {
 		if (request.getCharacterEncoding() == null) {
@@ -224,6 +187,7 @@ public class JSIFilter extends JSIService implements Filter ,Servlet{
 		String encoding = config.getInitParameter("encoding");
 		init(scriptBase, encoding);
 	}
+
 	private void init(String scriptBase, String encoding) {
 		if (encoding != null) {
 			this.setEncoding(encoding);
@@ -234,8 +198,10 @@ public class JSIFilter extends JSIService implements Filter ,Servlet{
 			}
 			this.scriptBase = scriptBase;
 		}
-		this.setScriptBaseDirectory(new File(context.getRealPath(this.scriptBase)));
-		this.setExternalLibraryDirectory(new File(context.getRealPath(this.scriptBase)));
+		this.setScriptBaseDirectory(new File(context
+				.getRealPath(this.scriptBase)));
+		this.setExternalLibraryDirectory(new File(context
+				.getRealPath(this.scriptBase)));
 	}
 
 	@Override
@@ -247,8 +213,8 @@ public class JSIFilter extends JSIService implements Filter ,Servlet{
 	public String getServletInfo() {
 		return config.getServletName();
 	}
+
 	public void destroy() {
 	}
-
 
 }
