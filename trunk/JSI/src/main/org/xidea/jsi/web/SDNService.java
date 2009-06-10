@@ -88,7 +88,14 @@ class SDNService {
 			for (Cookie cookie : cookies) {
 				if (CDN_DEBUG_TOKEN_NAME.equals(cookie.getName())) {
 					String value = cookie.getValue();
-					return value.length()>0 && !value.equals("0") && !value.equals("false");
+					if(value.length() == 0){
+						return false;
+					}else if(value.equals("0")) {
+						return false;
+					}else if(value.equals("false")) {
+						return false;
+					}
+					return true;
 				}
 			}
 		}
