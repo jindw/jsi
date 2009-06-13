@@ -3,6 +3,7 @@ package org.xidea.jsi.web;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -17,6 +18,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,7 +36,6 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 	protected ServletContext context;
 	protected ServletConfig config;
 	protected String scriptBase = "/scripts/";
-	protected SDNService sdn = new SDNService(this);
 
 	@Override
 	public void service(ServletRequest req, ServletResponse resp)
@@ -132,7 +133,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 			if (path.length() == 0) {
 				throw new ScriptNotFoundException("");
 			}
-			sdn.service(path, request, response);
+			sdnService(path, request, response);
 			return true;
 		} else if ("export.action".equals(path)) {
 			// type =1,type=2,type=3
@@ -153,6 +154,43 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 		return false;
 	}
 
+	public void sdnService(String path, HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		// TODO:以后应该使用Stream，应该使用成熟的缓存系统
+		PrintWriter out = response.getWriter();
+		response.setContentType("text/plain;charset=utf-8");
+		if("POST".equals(request.getMethod())){
+			String value = sdn.queryExportInfo(path);
+			out.write(value);
+		}else if (isDebug(request)) {
+			writeSDNDebug(path,out);
+		} else {
+			writeSDNRelease(path,out);
+		}
+		// 应该考虑加上字节流缓孄1�7
+		out.flush();
+	}
+
+
+	protected boolean isDebug(HttpServletRequest request) {
+		Cookie[] cookies = request.getCookies();
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				if (SDNService.CDN_DEBUG_TOKEN_NAME.equals(cookie.getName())) {
+					String value = cookie.getValue();
+					if (value.length() == 0) {
+						return false;
+					} else if (value.equals("0")) {
+						return false;
+					} else if (value.equals("false")) {
+						return false;
+					}
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 	private void initializeEncodingIfNotSet(ServletRequest request,
 			ServletResponse response) throws UnsupportedEncodingException {
 		if (request.getCharacterEncoding() == null) {
