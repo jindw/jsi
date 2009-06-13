@@ -60,7 +60,9 @@ public class JSIService extends ResourceRoot{
 		}
 		if (result == null) {
 			result = sdn.doReleaseExport(path);
-			cachedMap.put(path, result);
+			if(cachedMap!= null){
+				cachedMap.put(path, result);
+			}
 		}
 		out.append(result);
 	}
