@@ -12,6 +12,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSILoadContext;
+import org.xidea.jsi.ScriptNotFoundException;
 import org.xidea.jsi.impl.DataRoot;
 import org.xidea.jsi.impl.DefaultExportorFactory;
 import org.xidea.jsi.impl.DefaultLoadContext;
@@ -22,7 +23,8 @@ import org.xidea.jsi.impl.JSIText;
 public class JSIService extends ResourceRoot{
 	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(JSIService.class);
-	
+	protected Map<String, String> cachedMap;// = new WeakHashMap<String,
+	protected SDNService sdn = new SDNService(this);
 	
 	public void service(String path, Map<String, String[]> param, Writer out)
 			throws IOException {
@@ -31,6 +33,12 @@ public class JSIService extends ResourceRoot{
 			// "text/html";
 		} else if ("export.action".equals(path)) {
 			out.write(export(param));
+		} else if (path.startsWith("=")) {
+			path = path.substring(1);
+			if (path.length() == 0) {
+				throw new ScriptNotFoundException("");
+			}
+			writeSDNRelease(path, out);
 			// "text/plain";
 		} else {
 			boolean isPreload = false;
@@ -43,6 +51,22 @@ public class JSIService extends ResourceRoot{
 			this.writeResource(path, isPreload, out);
 		}
 		out.flush();
+	}
+
+	public void writeSDNRelease(String path, Writer out) throws IOException {
+		String result = null;
+		if (cachedMap != null) {
+			result = cachedMap.get(path);
+		}
+		if (result == null) {
+			result = sdn.doReleaseExport(path);
+			cachedMap.put(path, result);
+		}
+		out.append(result);
+	}
+
+	public void writeSDNDebug(String path, Writer out) throws IOException {
+		out.write(sdn.doDebugExport(path));
 	}
 
 	protected boolean writeResource(String path, boolean isPreload, Writer out)

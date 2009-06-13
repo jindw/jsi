@@ -1,16 +1,14 @@
 package org.xidea.jsi.web;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.xidea.el.json.JSONEncoder;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRoot;
@@ -19,50 +17,67 @@ import org.xidea.jsi.impl.DefaultLoadContext;
 
 class SDNService {
 	public static final String CDN_DEBUG_TOKEN_NAME = "CDN_DEBUG";
-	protected Map<String, String> cachedMap;// = new WeakHashMap<String,
+	public static final Pattern CDN_PATH_SPLITER = Pattern
+			.compile("(?:%20|%09|%0d|%0a|[^\\w\\/\\.\\-\\:\\*\\$])+");
 	private JSIRoot root;
 	private Map<String, String[]> exportConfig = new HashMap<String, String[]>();
 	private int ips;
-	
+
 	public SDNService(JSIRoot root) {
 		this.root = root;
 		exportConfig.put("level", new String[] { "3" });
 	}
 
-	public void service(String path, HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
-		String[] paths = path.split("(?:%20|%09|%0d|%0a|[^\\w\\/\\.\\-\\:\\*\\$])+");
-		// TODO:以后应该使用Stream，应该使用成熟的缓存系统
-		PrintWriter out = response.getWriter();
-		response.setContentType("text/plain;charset=utf-8");
-		String result;
-		if (isDebug(request)) {
-			result = this.doDebugExport(paths);
-		} else {
-			if (cachedMap == null) {
-				result = this.doReleaseExport(paths);
-			} else {
-				result = cachedMap.get(path);
-				if (result == null) {
-					result = this.doReleaseExport(paths);
-					cachedMap.put(path, result);
+	public String queryExportInfo(String path) {
+		String[] paths = CDN_PATH_SPLITER.split(path);
+		HashMap<String, Object> result = new LinkedHashMap<String, Object>();
+		HashMap<String, Object> packageMap = new LinkedHashMap<String, Object>();
+		LinkedHashSet<String> objectSet = new LinkedHashSet<String>();
+		LinkedHashSet<String> exactList = new LinkedHashSet<String>();
+		LinkedHashSet<String> packageList = new LinkedHashSet<String>();
+		for (String item:paths) {
+			if(item.endsWith("*")){
+				String name = item.substring(0,item.length()-2);
+				name = root.requirePackage(name, true).getName();
+				packageList.add(name);
+			}else{
+				JSIPackage pkg = root.findPackageByPath(item);
+				String name = pkg.getName();
+				String object = item.substring(item.length()+1);
+				name = root.requirePackage(name, true).getName();
+				exactList.add(name + ":"+object);
+				objectSet.add(object);
+			}
+		}
+		for (String packageName: packageList) {
+			JSIPackage pkg = root.requirePackage(packageName,true);
+			ArrayList<String> value = new ArrayList<String>();
+			packageMap.put(pkg.getName(), value);
+			for(String object : pkg.getObjectScriptMap().keySet()){
+				if(!objectSet.contains(object)){
+					objectSet.add(object);
+					value.add(object);
 				}
 			}
 		}
-		// 应该考虑加上字节流缓孄1�7
-		out.append(result);
-		out.flush();
+		result.put("pathList",exactList);
+		result.put("packageMap",packageMap);
+		return JSONEncoder.encode(result);
+
 	}
 
-	public String doReleaseExport(String[] paths) {
-		exportConfig.put("internalPrefix", new String[] { "$"+Integer.toString(ips++,32) });
-		JSIExportor releaseExportor = DefaultExportorFactory.getInstance().createExplorter(
-				exportConfig);
-		
-		return releaseExportor.export(buildLoadContext(paths));
+	public String doReleaseExport(String path) {
+		exportConfig.put("internalPrefix", new String[] { "$"
+				+ Integer.toString(ips++, 32) });
+		JSIExportor releaseExportor = DefaultExportorFactory.getInstance()
+				.createExplorter(exportConfig);
+
+		return releaseExportor.export(buildLoadContext(CDN_PATH_SPLITER
+				.split(path)));
 	}
 
-	public String doDebugExport(String[] paths) {
+	public String doDebugExport(String path) {
+		String[] paths = SDNService.CDN_PATH_SPLITER.split(path);
 		StringBuilder out = new StringBuilder();
 		out.append(root.loadText(null, "boot.js"));
 
@@ -74,32 +89,12 @@ class SDNService {
 			out.append(pkg.loadText(JSIPackage.PACKAGE_FILE_NAME));
 			out.append("});");
 		}
-		for (String path : paths) {
+		for (String ip : paths) {
 			out.append("$import('");
-			out.append(path);
+			out.append(ip);
 			out.append("',true);");
 		}
 		return out.toString();
-	}
-
-	private boolean isDebug(HttpServletRequest request) {
-		Cookie[] cookies = request.getCookies();
-		if (cookies != null) {
-			for (Cookie cookie : cookies) {
-				if (CDN_DEBUG_TOKEN_NAME.equals(cookie.getName())) {
-					String value = cookie.getValue();
-					if(value.length() == 0){
-						return false;
-					}else if(value.equals("0")) {
-						return false;
-					}else if(value.equals("false")) {
-						return false;
-					}
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	public PackageLoadContext buildLoadContext(String[] paths) {
@@ -111,7 +106,7 @@ class SDNService {
 	}
 
 	static class PackageLoadContext extends DefaultLoadContext {
-		private List<JSIPackage> packageList = new ArrayList<JSIPackage>();
+		List<JSIPackage> packageList = new ArrayList<JSIPackage>();
 
 		@Override
 		public void loadScript(JSIPackage pkg, String path, String objectName,
