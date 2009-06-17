@@ -37,7 +37,6 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 	protected ServletConfig config;
 	protected String scriptBase = "/scripts/";
 
-	@Override
 	public void service(ServletRequest req, ServletResponse resp)
 			throws ServletException, IOException {
 		if (!process(req, resp)) {
@@ -218,7 +217,6 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 		init(scriptBase, encoding);
 	}
 
-	@Override
 	public void init(ServletConfig config) throws ServletException {
 		this.config = config;
 		this.context = config.getServletContext();
@@ -243,12 +241,10 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 				.getRealPath(this.scriptBase)));
 	}
 
-	@Override
 	public ServletConfig getServletConfig() {
 		return this.config;
 	}
 
-	@Override
 	public String getServletInfo() {
 		return config.getServletName();
 	}
