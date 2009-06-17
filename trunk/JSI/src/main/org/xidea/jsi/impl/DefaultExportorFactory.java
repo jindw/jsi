@@ -105,7 +105,6 @@ public class DefaultExportorFactory {
 }
 
 class PreloadExporter implements JSIExportor {
-	@Override
 	public String export(JSILoadContext context) {
 		List<ScriptLoader> result = context.getScriptList();
 		StringBuilder out = new StringBuilder();

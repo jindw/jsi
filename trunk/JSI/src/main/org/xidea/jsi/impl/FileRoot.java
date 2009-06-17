@@ -58,7 +58,6 @@ public class FileRoot extends AbstractRoot implements JSIRoot {
 	private static void walkFileTree(File scriptBaseDirectory,final List<String> result) {
 		scriptBaseDirectory.listFiles(new FileFilter(){
 			private StringBuilder buf = new StringBuilder();
-			@Override
 			public boolean accept(File file) {
 				int len = buf.length();
 				String name = file.getName();
