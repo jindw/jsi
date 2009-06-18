@@ -14,7 +14,6 @@ function zip_get_entry($file,$path) {
 	if(!file_exists($file)){
 		return null;//false;
 	}
-
 	// Load the files content
 	$content = @file_get_contents($file);
 
@@ -204,8 +203,5 @@ function zip_get_entry($file,$path) {
 	}
 	return null;//true;
 }
-$count = 10000;
-$result = zip_get_entry("D:/workspace/JSI2/build/dest/JSI.jar","boot.js");
-
-echo $result;
+//$result = zip_get_entry("D:/workspace/JSI2/build/dest/JSI.jar","boot.js");
 ?>
