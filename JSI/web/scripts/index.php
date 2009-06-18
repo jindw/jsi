@@ -1,4 +1,4 @@
-/**<?php
+<?php
 //
 // PHP 版本的JSI 代理程序（开发期间使用）
 // 功能：
@@ -10,8 +10,6 @@ $encoding = "UTF-8";
 $export_service = "http://litecompiler.appspot.com/scripts/export.action";
 ?>
 <?php
-echo("/");
-ob_clean();
 if(array_key_exists('path',$_GET)){
    $path = $_GET['path'];
 }else if(array_key_exists('PATH_INFO',$_SERVER)){
@@ -176,4 +174,4 @@ if($path != null){
     echo("<html><frameset rows='100%'><frame src='index.php/org/xidea/jsidoc/index.html?group.All%20Scripts=$externalScript'></frame></frameset></html>");
 }
 return;
-?>/**/
+?>
