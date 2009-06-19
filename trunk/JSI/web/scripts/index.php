@@ -55,8 +55,11 @@ function print_entry($path){
     header("HTTP/1.0 404 Not Found");
 }
 function print_from_dir($dir,$path){
-    if(file_exists(realpath("$dir/$path")) && is_valid_file($dir,$path)){
-        print_content_type($path);
+    $file = realpath("$dir/$path");
+    if(file_exists($file)){
+        if($path == 'boot.js' && filesize($file)<200){
+	        return false;
+	    }
         readfile(realpath("$dir/$path"));
         return true;
     }
@@ -71,7 +74,6 @@ function print_from_zip($base,$path){
 		    	$result = zip_get_entry("$base/$file",$path);
 			    if($result != null){
 	                $dir->close();
-	                print_content_type($path);
 			        echo $result;
 	                return true;
 	            }
@@ -85,14 +87,7 @@ function print_from_zip($base,$path){
 	require_once("zip_get_entry.php");
 
 //function zip_get_entry(){return null;}
-//我自己也忘了为啥？
-function is_valid_file($dir,$path){
-    if(preg_match('/\\\\|\\//',$path) || $path == "lazy-trigger.js"
-         || filesize(realpath("$dir/$path"))>200){
-        return true;///[\/\\]/
-    }
-    return false;
-}
+
 function print_content_type($path){
     global $encoding;
     $ext = strtolower(preg_replace('/.*\./',"",$path));
@@ -156,6 +151,7 @@ if($path != null){
     $pos = strrpos($path, '/');
     $fileName = substr($filePath, $pos + 1);
     $packageName = preg_replace("/\//", "." ,substr($path, 0, $pos));
+	print_content_type($path);
     if($filePath!=$path){
         echo("\$JSI.preload('$packageName','$fileName',function(){eval(this.varText);");
         print_entry($filePath);
@@ -171,7 +167,9 @@ if($path != null){
         $externalScript = find_package_list(realpath("."));
     }
     header("Content-Type:text/html;charset=$encoding");
-    echo("<html><frameset rows='100%'><frame src='index.php/org/xidea/jsidoc/index.html?group.All%20Scripts=$externalScript'></frame></frameset></html>");
+    echo("<!-- \n");
+    echo('document.write(\'<script src="'.$_SERVER['SCRIPT_NAME'].'/boot.js"></script>\')');
+    echo(" //--><html><frameset rows='100%'><frame src='index.php/org/xidea/jsidoc/index.html?group.All%20Scripts=$externalScript'></frame></frameset></html>");
 }
 return;
 ?>

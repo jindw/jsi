@@ -106,11 +106,8 @@ var $import = function(loaderEval,cachedScripts){
         var reportTrace = Function.prototype;
         //reportTrace = reportError;
     }
-    
+    //初始化loadTextByURL 和 $JSI.scriptBase
     if(this.document){
-        var lazyScript ="<script src='data:text/javascript,$import()'></script>";
-        var XHR = this.XMLHttpRequest;
-        
         if(":Debug"){
     	    /**
     		 * 方便调试的支持
@@ -166,14 +163,15 @@ var $import = function(loaderEval,cachedScripts){
     	        while(script.nextSibling && script.nextSibling.nodeName.toUpperCase() == 'SCRIPT'){
     	            script = script.nextSibling;
     	        }
-    	        scriptBase = (script.getAttribute('src')||"/scripts/boot.js").replace(/[^\/\\]+$/,'');
-    	        $JSI.scriptBase = computeURL(scriptBase);
+    	        $JSI.scriptBase = computeURL(
+    	            (script.getAttribute('src')||"/scripts/").replace(/[^\/\\]+$/,'')
+    	        );
             }
     
         }
         
         /*
-         * 加载指定文本，找不到文件(404)返回null,调试时采用
+         * 加载指定文本，找不到文件(404)返回null,调试时采用（XHR申明在后）
          * @friend
          * @param url 文件url
          * @return <string> 结果文本
@@ -193,65 +191,19 @@ var $import = function(loaderEval,cachedScripts){
                 }
             }
         }
-        //模拟XMLHttpRequest对象
-        if(this.ActiveXObject ){
-            if(":Debug"){
-                //IE7 XHR 强制ActiveX支持
-                if(XHR && location.protocol=="file:"){
-                    XHR = null;
-                }
-            }
-            if(!XHR ){
-                var xmlHttpRequstActiveIds = [
-                    //"Msxml2.XMLHTTP.6.0,"  //都IE7了，罢了罢了
-                    //"Msxml2.XMLHTTP.5.0,"  //office 的
-                    //"Msxml2.XMLHTTP.4.0,"
-                    //"MSXML2.XMLHTTP.3.0,"  //应该等价于MSXML2.XMLHTTP
-                    "MSXML2.XMLHTTP",
-                    "Microsoft.XMLHTTP"//IE5的，最早的XHR实现
-                    ];
-                /**
-                 * 统一的 XMLHttpRequest 构造器（对于ie，做一个有返回值的构造器（这时new操作返回该返回值），返回他支持的AxtiveX控件）
-                 * 关于 XMLHttpRequest对象的详细信息请参考
-                 * <ul>
-                 *   <li><a href="http://www.w3.org/TR/XMLHttpRequest/">W3C XMLHttpRequest</a></li>
-                 *   <li><a href="http://www.ikown.com/manual/xmlhttp/index.htm">中文参考</a></li>
-                 *   <li><a href="http://msdn2.microsoft.com/en-us/library/ms762757(VS.85).aspx">MSXML</a></li>
-                 * </ul>
-                 * @id XMLHttpRequest 
-                 * @constructor
-                 */
-                XHR = function(){
-                    while(true){
-                        try{
-                             return new ActiveXObject(xmlHttpRequstActiveIds[0]);
-                        }catch (e){
-                            if(!xmlHttpRequstActiveIds.shift()){
-                                throw e;//not suport
-                            }
-                        }
-                    }
-                };
-            }
-            
-            if("org.xidea.jsi:COL"){
-                if(":Debug"){
-                    lazyScript =lazyScript.replace(/'.*'/,scriptBase+"?path=lazy-trigger.js");
-                }else{
-                    lazyScript =lazyScript.replace(/'.*'/,scriptBase+"lazy-trigger.js");
-                }
-            }
-        }
     }else{
     	if("org.xidea.jsi:Server"){
     	    loadTextByURL = Packages.org.xidea.jsi.impl.RhinoSupport.initialize(arguments);
     	}
     }
-    var packageMap = {};
+    if(":Debug"){
+        //$JSI.scriptBase += ";path="
+    }
+    var XHR = this.XMLHttpRequest;
     var scriptBase = $JSI.scriptBase;
-
-    
+    var packageMap = {};
     if("org.xidea.jsi:COL"){
+        var lazyScript ="<script src='data:text/javascript,$import()'></script>";
         var lazyTaskList = [];
         //
         /*
@@ -332,6 +284,52 @@ var $import = function(loaderEval,cachedScripts){
                     }
                 }
             }
+        }
+    }
+    
+    //模拟XMLHttpRequest对象(IE),处理IE不支持data协议的问题
+    if(this.ActiveXObject ){
+        if(":Debug"){
+            //IE7 XHR 强制ActiveX支持
+            if(XHR && location.protocol=="file:"){
+                XHR = null;
+            }
+        }
+        if(!XHR ){
+            var xmlHttpRequstActiveIds = [
+                //"Msxml2.XMLHTTP.6.0,"  //都IE7了，罢了罢了
+                //"Msxml2.XMLHTTP.5.0,"  //office 的
+                //"Msxml2.XMLHTTP.4.0,"
+                //"MSXML2.XMLHTTP.3.0,"  //应该等价于MSXML2.XMLHTTP
+                "MSXML2.XMLHTTP",
+                "Microsoft.XMLHTTP"//IE5的，最早的XHR实现
+                ];
+            /**
+             * 统一的 XMLHttpRequest 构造器（对于ie，做一个有返回值的构造器（这时new操作返回该返回值），返回他支持的AxtiveX控件）
+             * 关于 XMLHttpRequest对象的详细信息请参考
+             * <ul>
+             *   <li><a href="http://www.w3.org/TR/XMLHttpRequest/">W3C XMLHttpRequest</a></li>
+             *   <li><a href="http://www.ikown.com/manual/xmlhttp/index.htm">中文参考</a></li>
+             *   <li><a href="http://msdn2.microsoft.com/en-us/library/ms762757(VS.85).aspx">MSXML</a></li>
+             * </ul>
+             * @id XMLHttpRequest 
+             * @constructor
+             */
+            XHR = function(){
+                while(true){
+                    try{
+                         return new ActiveXObject(xmlHttpRequstActiveIds[0]);
+                    }catch (e){
+                        if(!xmlHttpRequstActiveIds.shift()){
+                            throw e;//not suport
+                        }
+                    }
+                }
+            };
+        }
+        
+        if("org.xidea.jsi:COL"){
+            lazyScript =lazyScript.replace(/'.*'/,scriptBase+"lazy-trigger.js");
         }
     }
     /*
@@ -634,8 +632,8 @@ var $import = function(loaderEval,cachedScripts){
                     reportTrace("部署后不应出现的配置，需要压缩处理掉相关问题！！！");
                     objectNames = doObjectImport(
                         realPackage(
-                        	findPackage("org.xidea.jsidoc.util",true)
-                        ),"findGlobals")(getCachedScript(this.name,scriptPath)||loadTextByURL(scriptBase+"?path="+this.name.replace(/\.|$/g,'/')+scriptPath));
+                        	findPackage("org.xidea.jsidoc.util")
+                        ),"findGlobals")(getCachedScript(this.name,scriptPath)||loadTextByURL(scriptBase+this.name.replace(/\.|$/g,'/')+scriptPath));
                     
                 }
             }
@@ -799,7 +797,7 @@ var $import = function(loaderEval,cachedScripts){
             }
         }
         while(packageObject && packageObject.implementation){
-            packageObject = findPackage(packageObject.implementation,true);
+            packageObject = findPackage(packageObject.implementation);
         }
         return packageObject;
     }
@@ -811,31 +809,25 @@ var $import = function(loaderEval,cachedScripts){
      * @param <string>name 包名
      * @param <boolean>exact 准确名，不需可上溯探测父包
      */
-    function findPackage(name,exact){
+    function findPackage(packageName,findParent){
         do{
-            if(packageMap[name]){
-                return packageMap[name];
+            if(packageMap[packageName]){
+                return packageMap[packageName];
             }
             
-            if(packageMap[name] === undefined){
-                if(":Debug"){
-                    var pscript = getCachedScript(name,'') ||
-                        loadTextByURL(scriptBase+"?path="+name.replace(/\.|$/g,'/')+ '__package__.js');
-                }else{
-                    var pscript = getCachedScript(name,'') ||
-                        cachedScripts[name] === undefined && loadTextByURL(scriptBase+name.replace(/\.|$/g,'/')+ '__package__.js');
-                }
+            if(packageMap[packageName] === undefined){
+                var pscript = getCachedScript(packageName,'') ||
+                    //cachedScripts[packageName] === undefined && 当cachedScripts[packageName]不为空时，就不用在探测了（假设一旦cache则__package__.js必cache，有点无理）
+                        loadTextByURL(scriptBase+packageName.replace(/\.|$/g,'/')+ '__package__.js');
                 if(pscript){
-                    return packageMap[name] || new Package(name,pscript);
+                    return packageMap[packageName] || new Package(packageName,pscript);
                 }
                 //注册空包，避免重复探测
                 //hack for null
-                packageMap[name] = 0;
+                packageMap[packageName] = 0;
             }
-            if(exact){
-                break;
-            }
-        }while(name = name.replace(/\.?[^\.]+$/,''));
+        //hack: findParent && (packageName = packageName.replace(/\.?[^\.]+$/,''))
+        }while(packageName = findParent && packageName.replace(/\.?[^\.]+$/,''));
     }
     /*
      * 获取指定对象路径的对应包
@@ -843,11 +835,11 @@ var $import = function(loaderEval,cachedScripts){
     function findPackageByPath(path){
         var p = path.lastIndexOf('/');
         if(p>0){
-            return findPackage(path.substr(0,p).replace(/\//g,'.'),true);
+            return findPackage(path.substr(0,p).replace(/\//g,'.'));
         }else if((p = path.indexOf(':'))>0){
-            return findPackage(path.substr(0,p),true);
+            return findPackage(path.substr(0,p));
         }else{
-            return findPackage(path.replace(/\.?[^\.]+$/,''));
+            return findPackage(path.replace(/\.?[^\.]+$/,''),1);
         }
     }
 
@@ -957,20 +949,8 @@ var $import = function(loaderEval,cachedScripts){
                 cachedScripts[packageName][loaderName]='';//clear cache
                 return cachedScript.call(loader);
             }else{
-                if(":Debug"){
-                    
-//            	    if(loaderName == 'show-detail.js'){
-//            	        $log.error(loaderName,loader)
-//                  }
-                    //不要清除文本缓存
-                    return loaderEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(scriptBase+"?path="+packageName.replace(/\.|$/g,'/')+loaderName)));
-//            	    if(loaderName == 'show-detail.js'){
-//            	        $log.error(loaderName,loader)
-//                  }
-                }else{
-                     //不要清除文本缓存
-                    return loaderEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(packageObject.scriptBase+loaderName)));
-                }
+                //不要清除文本缓存
+                return loaderEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(packageObject.scriptBase+loaderName)));
             }
             //ScriptLoader[loaderName] += 0x10000
             
@@ -1101,11 +1081,7 @@ var $import = function(loaderEval,cachedScripts){
             }
             script.onload = onload;
             script.onreadystatechange = onload;
-            if(":Debug"){
-                script.src=scriptBase +"?path="+ path.replace(/\.js$/,'__preload__.js');
-            }else{
-                script.src=scriptBase + path.replace(/\.js$/,'__preload__.js');
-            }
+            script.src=scriptBase + path.replace(/\.js$/,'__preload__.js');
             script = null;
         }
        
@@ -1189,21 +1165,9 @@ var $import = function(loaderEval,cachedScripts){
 	                    }
 	                }
 	                if(":Debug"){
-	                    if(location.protocol == 'file:'){
-	                        //alert(scriptBase+list[0].replace(/.js$/gm,"__preload__.js"))
-	                        try{
-	                        	//WHY???
-	                            //loadTextByURL(scriptBase+list[0].replace(/.js$/gm,"__preload__.js"))
-	                            document.write(list.join("\n").
+	                     document.write(list.join("\n").
 	                                replace(/.js$/gm,"__preload__.js").
-	                                replace(/.+/g,"<script src='"+scriptBase+"?path=$&' onerror='return alert'></script>"));
-	                        }catch(e){
-	                        }
-	                    }else{
-	                        document.write(list.join("\n").
-	                                replace(/\.js$/gm,'__preload__.js').
-	                                replace(/.+/g,"<script src='"+scriptBase+"?path=$&'></script>"));
-	                    }
+	                                replace(/.+/g,"<script src='"+scriptBase+"$&' onerror='return false'></script>"));
 	                }else{
 	                    document.write(list.join("\n").
 	                                replace(/.js$/gm,"__preload__.js").
