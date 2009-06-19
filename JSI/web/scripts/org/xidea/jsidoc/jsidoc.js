@@ -225,6 +225,7 @@ var JSIDoc = {
 	            }
 	        }
         }
+	    document.close();
     },
 
     /**
@@ -380,7 +381,7 @@ var JSIDoc = {
         if(cache && cache.constructor == String){
             return cache;
         }else{
-            var result = loadTextByURL($JSI.scriptBase +"?path="+ filePath);
+            var result = loadTextByURL($JSI.scriptBase +filePath);
             if(result !=null){
             	preload(filePath.replace(/\/[^\/]+$/,'').replace(/\//g,'.'),
             	    filePath.replace(/.*\//,''),result)

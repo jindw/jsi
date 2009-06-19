@@ -173,7 +173,7 @@ public class ResourceRoot extends AbstractRoot {
 			path = path.substring(1);
 		}
 		File file = new File(this.scriptBaseDirectory, path);
-		if (file.exists()) {
+		if (file.exists() && (!"boot.js".equals(path) || file.length() > 200)) {
 			try {
 				return new FileInputStream(file);
 			} catch (FileNotFoundException e) {
@@ -221,6 +221,7 @@ public class ResourceRoot extends AbstractRoot {
 
 	/**
 	 * 放心吧，我们不返回空：）
+	 * 
 	 * @param lib
 	 * @return
 	 */
@@ -256,7 +257,7 @@ public class ResourceRoot extends AbstractRoot {
 		}
 		return null;
 	}
-	
+
 	private void appendZipPackage(File file, Collection<String> result) {
 		try {
 			final ZipFile jarFile = new ZipFile(file);
