@@ -13,6 +13,23 @@
 		<mkdir dir="build/dest/jsidoc/util/" />
 		<mkdir dir="build/dest/jsidoc/export/" />
 	</target>
+	<target name="cgi" depends="jar">
+		<jar destfile="build/dest/cgi.jar" >
+			<manifest>
+				<attribute name="Main-Class" value="org.xidea.jsi.web.JSICGI" />
+			</manifest>
+			<zipfileset src="build/dest/JSI.jar">
+				<include name="**/*.*" />
+			</zipfileset>
+			<zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
+				<include name="**/*.*" />
+			</zipfileset>
+			<zipfileset src="web/WEB-INF/lib/js.jar">
+				<include name="**/*.*" />
+			</zipfileset>
+		</jar>
+		<copy file="build/dest/cgi.jar" todir="D:\Apache2.2\cgi-bin"/>
+	</target>
 	<target name="jar">
 		<jar destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
@@ -38,8 +55,8 @@
 		<copy tofile="../CDN/war/WEB-INF/lib/JSI.jar" file="build/dest/JSI.jar" />
 	</target>
 	<target name="jar-compressed" depends="init">
-		<delete file="build/dest/JSI.*"/>
-		<delete file="build/dest/JSI-*.jar"/>
+		<delete file="build/dest/JSI.*" />
+		<delete file="build/dest/JSI-*.jar" />
 		<jar destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
@@ -263,7 +280,7 @@ $JSI.preload('${packageName}',${fileNameAndPrefix}</echo>
 		</ftp>
 	</target>
 	<target name="JSIDoc" depends="init">
-		<delete file="build/dest/JSIDoc-*.*"/>
+		<delete file="build/dest/JSIDoc-*.*" />
 		<java classname="org.xidea.jsi.test.SimpleCacheBuilder" classpath="${JSAPath}">
 			<arg value="${basedir}/web/scripts" />
 			<arg value="${basedir}/build/dest/jsidoc/source.js/" />
@@ -308,11 +325,11 @@ $import("org.xidea.jsidoc:JSIDoc");</echo>
 			</zipfileset>
 		</zip>
 	</target>
-	<target name="build" depends="compress-jsidoc,compress-boot,jar-compressed,JSIDoc,zip-jsidoc">
+	<target name="build" depends="compress-jsidoc,compress-boot,jar-compressed,cgi,JSIDoc,zip-jsidoc">
 
 	</target>
 	<target name="zip-jsidoc">
-		<delete file="build/dest/JSI-*.*"/>
+		<delete file="build/dest/JSI-*.*" />
 		<tar destfile="build/dest/JSI-${version}.tar" compression="gzip">
 			<tarfileset dir="web">
 				<include name="**/*.*" />

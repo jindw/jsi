@@ -1,5 +1,10 @@
 package org.xidea.jsi.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -128,4 +133,17 @@ public abstract class AbstractRoot implements JSIRoot {
 		return parser;
 	}
 
+	public static String loadText(InputStream in, String encoding)
+			throws UnsupportedEncodingException, IOException {
+		if(in == null){
+			return null;
+		}
+		Reader reader = new InputStreamReader(in,encoding);
+		StringBuilder buf = new StringBuilder();
+		char[] cbuf = new char[1024];
+		for (int len = reader.read(cbuf); len > 0; len = reader.read(cbuf)) {
+			buf.append(cbuf, 0, len);
+		}
+		return buf.toString();
+	}
 }
