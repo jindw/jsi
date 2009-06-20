@@ -69,8 +69,7 @@ public class JSIService extends ResourceRoot {
 	public void writeBase64(String data, OutputStream out) throws IOException {
 		char[] cs = data.toCharArray();
 		int previousByte = 0;
-		int END = 0x1 << 30;
-		outer: for (int i = 0, k = -1; i < cs.length; i++) {
+		for (int i = 0, k = -1; i < cs.length; i++) {
 			int currentByte = cs[i];
 			switch (currentByte) {
 			case '+':
@@ -80,8 +79,7 @@ public class JSIService extends ResourceRoot {
 				currentByte = 63;
 				break;
 			case '=':
-				currentByte = END;
-				break;
+				return;
 			default:
 				if (Character.isLetterOrDigit(currentByte)) {
 					if (currentByte >= 97) {// a
@@ -95,26 +93,17 @@ public class JSIService extends ResourceRoot {
 					continue;
 				}
 			}
-			k++;
-
-			switch (k & 3) {// 00,01,10,11
+			switch (++k & 3) {// 00,01,10,11
 			case 0:
 				break;
 			case 1:
 				out.write((previousByte << 2) | (currentByte >>> 4));// 6+2
 				break;
 			case 2:// 32,16,8,4,2,1,
-				if (currentByte == END) {// && data.endsWith("==")
-					break outer;
-				}
 				out.write((previousByte & 63) << 4 | (currentByte >>> 2));// 4+4
 				break;
 			case 3:
-				if (currentByte == END) {
-					break outer;
-				}
 				out.write((previousByte & 3) << 6 | (currentByte));// 2+6
-				break;
 			}
 			previousByte = currentByte;
 		}
