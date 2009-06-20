@@ -149,6 +149,13 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 				response.getWriter().print(result);
 			}
 			return true;
+		} else if ("data.action".equals(path)) {
+			initializeEncodingIfNotSet(request, response);
+			String data = request.getParameter("data");
+			int dataContentEnd = data.indexOf(',');
+			response.addHeader("Content-Type" , data.substring(dataContentEnd));
+			this.writeBase64(data.substring(dataContentEnd + 1), response.getOutputStream());
+			return true;
 		}
 		return false;
 	}
@@ -158,18 +165,17 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 		// TODO:以后应该使用Stream，应该使用成熟的缓存系统
 		PrintWriter out = response.getWriter();
 		response.setContentType("text/plain;charset=utf-8");
-		if("POST".equals(request.getMethod())){
+		if ("POST".equals(request.getMethod())) {
 			String value = sdn.queryExportInfo(path);
 			out.write(value);
-		}else if (isDebug(request)) {
-			writeSDNDebug(path,out);
+		} else if (isDebug(request)) {
+			writeSDNDebug(path, out);
 		} else {
-			writeSDNRelease(path,out);
+			writeSDNRelease(path, out);
 		}
 		// 应该考虑加上字节流缓孄1�7
 		out.flush();
 	}
-
 
 	protected boolean isDebug(HttpServletRequest request) {
 		Cookie[] cookies = request.getCookies();
@@ -190,6 +196,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 		}
 		return false;
 	}
+
 	private void initializeEncodingIfNotSet(ServletRequest request,
 			ServletResponse response) throws UnsupportedEncodingException {
 		if (request.getCharacterEncoding() == null) {

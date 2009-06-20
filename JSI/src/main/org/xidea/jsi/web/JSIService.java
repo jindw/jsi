@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,19 +23,21 @@ import org.xidea.jsi.impl.FileRoot;
 import org.xidea.jsi.impl.ResourceRoot;
 import org.xidea.jsi.impl.JSIText;
 
-public class JSIService extends ResourceRoot{
+public class JSIService extends ResourceRoot {
 	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(JSIService.class);
+	protected String exportService = "http://litecompiler.appspot.com/scripts/export.action";
 	protected Map<String, String> cachedMap;// = new WeakHashMap<String,
 	protected SDNService sdn = new SDNService(this);
-	
+
 	public void service(String path, Map<String, String[]> param, Writer out)
 			throws IOException {
 		if (path == null || path.length() == 0) {
 			out.write(document());
 			// "text/html";
 		} else if ("export.action".equals(path)) {
-			out.write(export(param));
+			String result = export(param);
+			out.write(result);
 		} else if (path.startsWith("=")) {
 			path = path.substring(1);
 			if (path.length() == 0) {
@@ -53,6 +58,69 @@ public class JSIService extends ResourceRoot{
 		out.flush();
 	}
 
+	/**
+	 * ABCDEFGHIJKLMNOPQRSTUVWXYZ//65 abcdefghijklmnopqrstuvwxyz//97
+	 * 0123456789+/=
+	 * 
+	 * @param data
+	 * @param out
+	 * @throws IOException
+	 */
+	public void writeBase64(String data, OutputStream out) throws IOException {
+		char[] cs = data.toCharArray();
+		int previousByte = 0;
+		int END = 0x1 << 30;
+		outer: for (int i = 0, k = -1; i < cs.length; i++) {
+			int currentByte = cs[i];
+			switch (currentByte) {
+			case '+':
+				currentByte = 62;
+				break;
+			case '/':
+				currentByte = 63;
+				break;
+			case '=':
+				currentByte = END;
+				break;
+			default:
+				if (Character.isLetterOrDigit(currentByte)) {
+					if (currentByte >= 97) {// a
+						currentByte -= 71;// + 26 - 97;
+					} else if (currentByte >= 65) {// A
+						currentByte -= 65;
+					} else {// if (currentByte >= 48) {// 0
+						currentByte += 4;// + 52 - 48;
+					}
+				} else {
+					continue;
+				}
+			}
+			k++;
+
+			switch (k & 3) {// 00,01,10,11
+			case 0:
+				break;
+			case 1:
+				out.write((previousByte << 2) | (currentByte >>> 4));// 6+2
+				break;
+			case 2:// 32,16,8,4,2,1,
+				if (currentByte == END) {// && data.endsWith("==")
+					break outer;
+				}
+				out.write((previousByte & 63) << 4 | (currentByte >>> 2));// 4+4
+				break;
+			case 3:
+				if (currentByte == END) {
+					break outer;
+				}
+				out.write((previousByte & 3) << 6 | (currentByte));// 2+6
+				break;
+			}
+			previousByte = currentByte;
+		}
+
+	}
+
 	public void writeSDNRelease(String path, Writer out) throws IOException {
 		String result = null;
 		if (cachedMap != null) {
@@ -60,7 +128,7 @@ public class JSIService extends ResourceRoot{
 		}
 		if (result == null) {
 			result = sdn.doReleaseExport(path);
-			if(cachedMap!= null){
+			if (cachedMap != null) {
 				cachedMap.put(path, result);
 			}
 		}
@@ -74,9 +142,10 @@ public class JSIService extends ResourceRoot{
 	protected boolean writeResource(String path, boolean isPreload, Writer out)
 			throws IOException {
 		if (isPreload) {
-			return this.output(path, out,JSIText.buildPreloadPerfix(path),JSIText.buildPreloadPostfix("//"));
+			return this.output(path, out, JSIText.buildPreloadPerfix(path),
+					JSIText.buildPreloadPostfix("//"));
 		} else {
-			return this.output(path, out,null,null);
+			return this.output(path, out, null, null);
 		}
 	}
 
@@ -85,22 +154,20 @@ public class JSIService extends ResourceRoot{
 		if (isPreload) {
 			byte[] prefix = JSIText.buildPreloadPerfix(path).getBytes();
 			byte[] postfix = JSIText.buildPreloadPostfix("//").getBytes();
-			return this.output(path, out,prefix,postfix);
+			return this.output(path, out, prefix, postfix);
 		} else {
-			return this.output(path, out,null,null);
+			return this.output(path, out, null, null);
 		}
 	}
 
-
 	protected String document() {
-		List<String> packageList = FileRoot
-				.findPackageList(this.getScriptBaseDirectory());
+		List<String> packageList = FileRoot.findPackageList(this
+				.getScriptBaseDirectory());
 		StringWriter out = new StringWriter();
 		if (packageList.isEmpty()) {
-			//
-
 			out.append("<html><head>");
-			out.append("<meta http-equiv='Content-Type' content='text/html;utf-8'/>");
+			out
+					.append("<meta http-equiv='Content-Type' content='text/html;utf-8'/>");
 			out.append("</head>");
 			out.append("<body> 未发现任何托管脚本包，无法显示JSIDoc。<br /> ");
 			out.append("请添加脚本包，并在包目录下正确添加相应的包定义文件 。");
@@ -136,7 +203,32 @@ public class JSIService extends ResourceRoot{
 			JSIExportor exportor = DefaultExportorFactory.getInstance()
 					.createExplorter(param);
 			if (exportor == null) {
-				return null;
+				if (!param.containsKey(exportService)) {
+					HttpURLConnection url = (HttpURLConnection) new URL(
+							exportService).openConnection();
+					url.setRequestMethod("POST");
+					url.setDoOutput(true);
+					url.setRequestProperty("Content-Length", "");
+					StringBuilder buf = new StringBuilder();
+					buf
+							.append(URLEncoder.encode(exportService, "UTF-8")
+									+ "=1");
+					for (String key : param.keySet()) {
+						String[] values = param.get(key);
+						for (String value : values) {
+							buf.append('&');
+							buf.append(URLEncoder.encode(key, "UTF-8"));
+							buf.append('=');
+							buf.append(URLEncoder.encode(value, "UTF-8"));
+						}
+					}
+					url.getOutputStream().write(
+							buf.toString().getBytes("UTF-8"));
+					return org.xidea.jsi.impl.AbstractRoot.loadText(url
+							.getInputStream(), "UTF-8");
+				} else {
+					return null;
+				}
 			}
 			JSILoadContext context = new DefaultLoadContext();
 			String[] exports = param.get("exports");
@@ -164,6 +256,5 @@ public class JSIService extends ResourceRoot{
 		return path.length() == 0 || path.equals("index.jsp")
 				|| path.equals("index.php");
 	}
-
 
 }

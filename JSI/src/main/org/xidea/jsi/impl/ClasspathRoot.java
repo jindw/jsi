@@ -2,8 +2,6 @@ package org.xidea.jsi.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.logging.Log;
@@ -45,16 +43,7 @@ public class ClasspathRoot extends AbstractRoot implements JSIRoot {
 	public static String loadText(String path,ClassLoader loader,String encoding) throws UnsupportedEncodingException,
 			IOException {
 		InputStream in = loader.getResourceAsStream(path); 
-		if(in == null){
-			return null;
-		}
-		Reader reader = new InputStreamReader(in,encoding);
-		StringBuilder buf = new StringBuilder();
-		char[] cbuf = new char[1024];
-		for (int len = reader.read(cbuf); len > 0; len = reader.read(cbuf)) {
-			buf.append(cbuf, 0, len);
-		}
-		return buf.toString();
+		return loadText(in, encoding);
 	}
 
 }

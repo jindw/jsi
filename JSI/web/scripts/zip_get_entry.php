@@ -172,33 +172,25 @@ function zip_get_entry($file,$path) {
 			// No compression
 			case 0:
 				// Ne decompression needed
-				$content = $data;
-				break;
-
+				return $data;
 				// Gzip
 			case 8:
-				if(!function_exists('gzinflate')){
-					return null;//false;
+				if(function_exists('gzinflate')){
+					header("Content-Encoding:deflate");
+					return $data;//false;
 				}
 				// Uncompress data
-				$content = gzinflate($data);
-				break;
+				return gzinflate($data);
 				// Bzip2
 			case 12:
 				if(!function_exists('bzdecompress')){
 					return null;//false;
 				}
 				// Decompress data
-				$content = bzdecompress($data);
-				break;
+				return bzdecompress($data);
 				// Compression not supported -> error
 			default:
 				return null;//false;
-		}
-		
-		// Try to add file
-		if($entry['name'] == $path){
-			return $content;
 		}
 	}
 	return null;//true;
