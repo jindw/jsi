@@ -20,7 +20,12 @@ public class JSIServiceTest {
 
 	@Test
 	public void testExecute() throws IOException {
+		char[] cs = new char[100];
+		for(char i = 0;i<100;i++){
+			cs[i] = (char) (i+40);
+		}
 
+		System.out.println(new String(cs));
 		testData("aaaa");
 		testData("13333a");
 		testData("13333ahefieodwaiueiamfnaehry--oiw=");

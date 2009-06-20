@@ -18,7 +18,13 @@ if(array_key_exists('path',$_GET)){
 }else{
    $path = null;
 }
-if($path == 'export.action'){
+if($path == 'data.action'){
+    $data = $_GET['data'];
+    list($content_type,$data) = split(',',$data);
+    header('Content-type:'.$content_type);
+    echo base64_decode($data);
+    return;
+}else if($path == 'export.action'){
     //转发到指定jsa服务器
     if($export_service){
 		$postdata = http_build_query(
