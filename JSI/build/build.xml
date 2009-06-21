@@ -13,25 +13,33 @@
 		<mkdir dir="build/dest/jsidoc/util/" />
 		<mkdir dir="build/dest/jsidoc/export/" />
 	</target>
-	<target name="cgi" depends="jar">
-		<jar destfile="build/dest/cgi.jar" >
+	<target name="cgi" depends="jar-compressed">
+		<jar encoding="GBK"
+			comment="
+1.将文件存储在你的cgi-bin 目录.
+2.创建 jsi.cgi:
+  #!java -jar cgi.jar
+" destfile="build/dest/cgi.jar" >
 			<manifest>
 				<attribute name="Main-Class" value="org.xidea.jsi.web.JSICGI" />
 			</manifest>
 			<zipfileset src="build/dest/JSI.jar">
-				<include name="**/*.*" />
+				<exclude name="**/*.java" />
 			</zipfileset>
 			<zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
 				<include name="**/*.*" />
 			</zipfileset>
-			<zipfileset src="web/WEB-INF/lib/js.jar">
+			<zipfileset src="../JSA/build/dest/JSA.jar">
 				<include name="**/*.*" />
+			</zipfileset>
+			<zipfileset src="web/WEB-INF/lib/js.jar">
+				<exclude name="**/*.java" />
 			</zipfileset>
 		</jar>
 		<copy file="build/dest/cgi.jar" todir="D:\Apache2.2\cgi-bin"/>
 	</target>
 	<target name="jar">
-		<jar destfile="build/dest/JSI.jar">
+		<jar encoding="GBK" comment="不要解压该文件！！" destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
 				<exclude name="**/test/**.*" />
@@ -57,7 +65,7 @@
 	<target name="jar-compressed" depends="init">
 		<delete file="build/dest/JSI.*" />
 		<delete file="build/dest/JSI-*.jar" />
-		<jar destfile="build/dest/JSI.jar">
+		<jar encoding="GBK" comment="不要解压该文件！！" destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
 				<include name="org/xidea/test/**/*.*" />

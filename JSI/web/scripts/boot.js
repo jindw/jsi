@@ -78,7 +78,6 @@ var $JSI= {
  */
 var $import = function(loaderEval,cachedScripts){
     if(":Debug"){
-        
         /*
          * 日志处理逻辑
          */
