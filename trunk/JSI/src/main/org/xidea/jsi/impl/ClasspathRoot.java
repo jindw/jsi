@@ -43,7 +43,7 @@ public class ClasspathRoot extends AbstractRoot implements JSIRoot {
 	public static String loadText(String path,ClassLoader loader,String encoding) throws UnsupportedEncodingException,
 			IOException {
 		InputStream in = loader.getResourceAsStream(path); 
-		return loadText(in, encoding);
+		return JSIText.loadText(in, encoding);
 	}
 
 }

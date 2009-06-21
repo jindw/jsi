@@ -38,19 +38,19 @@ class SDNService {
 		for (String item:paths) {
 			if(item.endsWith("*")){
 				String name = item.substring(0,item.length()-2);
-				name = root.requirePackage(name, true).getName();
+				name = root.requirePackage(name).getName();
 				packageList.add(name);
 			}else{
 				JSIPackage pkg = root.findPackageByPath(item);
 				String name = pkg.getName();
 				String object = item.substring(item.length()+1);
-				name = root.requirePackage(name, true).getName();
+				name = root.requirePackage(name).getName();
 				exactList.add(name + ":"+object);
 				objectSet.add(object);
 			}
 		}
 		for (String packageName: packageList) {
-			JSIPackage pkg = root.requirePackage(packageName,true);
+			JSIPackage pkg = root.requirePackage(packageName);
 			ArrayList<String> value = new ArrayList<String>();
 			packageMap.put(pkg.getName(), value);
 			for(String object : pkg.getObjectScriptMap().keySet()){

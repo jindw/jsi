@@ -58,9 +58,9 @@ $log.setLevel = function(level){
  * @param bindLevel 绑定函数的输出级别，只有该级别大于等于输出级别时，才可输出日志
  */
 function buildLevelLog(bindLevel,bindName){
-	if(!this.confirm){
-		this.confirm = print;
-	}
+    confirm = confirm || this.confirm || this.print||function(arg){
+        java.lang.System.out.print(String(arg))
+    };;
     return function(){
         if(bindLevel>=consoleLevel){
             var msg = [bindLevel,bindName];
@@ -76,6 +76,7 @@ function buildLevelLog(bindLevel,bindName){
         }
     }
 }
+var confirm;
 var logLevelNameMap = "trace,debug,info,warn,error,fatal".split(',');
 var consoleLevel = 1;
 /* 

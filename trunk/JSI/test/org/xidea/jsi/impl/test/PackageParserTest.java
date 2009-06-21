@@ -35,7 +35,7 @@ public class PackageParserTest {
 	}
 
 	private void test(String name, Map<String, String> varMap, boolean isJava6) {
-		JSIPackage pkg = root.requirePackage(name, true);
+		JSIPackage pkg = root.requirePackage(name);
 		PackageParser parser;
 		if (isJava6) {
 			parser = new Java6ScriptPackagePaser(pkg);

@@ -213,7 +213,7 @@ public class JSIService extends ResourceRoot {
 					}
 					url.getOutputStream().write(
 							buf.toString().getBytes("UTF-8"));
-					return org.xidea.jsi.impl.AbstractRoot.loadText(url
+					return org.xidea.jsi.impl.JSIText.loadText(url
 							.getInputStream(), "UTF-8");
 				} else {
 					return null;
