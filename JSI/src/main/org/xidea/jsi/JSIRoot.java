@@ -17,14 +17,14 @@ public interface JSIRoot {
 	public abstract JSILoadContext $import(String path);
 
 	/**
-	 * 查找具体的实现包（只管获取，不做初始化）
+	 * 查找具体的实现包
 	 * 如果找不到指定的包，应该抛出 PackageNotFoundException 异常
 	 * @see org.xidea.jsi.impl.AbstractRoot#requirePackage(String, boolean)
 	 * @param name
 	 * @param exact
 	 * @return
 	 */
-	public abstract JSIPackage requirePackage(String name, boolean exact);
+	public abstract JSIPackage requirePackage(String name);
 
 	/**
 	 * 查找的包位置，可能是抽象包（只管获取，不做初始化）

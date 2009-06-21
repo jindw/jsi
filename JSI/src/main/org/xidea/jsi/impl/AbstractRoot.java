@@ -1,10 +1,5 @@
 package org.xidea.jsi.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,8 +13,6 @@ public abstract class AbstractRoot implements JSIRoot {
 
 	protected Map<String, JSIPackage> packageMap = new HashMap<String, JSIPackage>();
 
-	public abstract String loadText(String pkgName, String scriptName);
-
 	public JSILoadContext $import(String path) {
 		return $import(path, new DefaultLoadContext());
 	}
@@ -27,7 +20,7 @@ public abstract class AbstractRoot implements JSIRoot {
 	public JSILoadContext $import(String  path, JSILoadContext context) {
 		JSIPackage pkg = findPackageByPath( path);
 		String fileNames  =  path.substring(pkg.getName().length() + 1);
-		pkg = requirePackage(pkg.getName(), true);
+		pkg = requirePackage(pkg.getName());
 		if(fileNames.length() == 0){
 			//package import
 			return context;
@@ -57,14 +50,14 @@ public abstract class AbstractRoot implements JSIRoot {
 	 * 不能返回null
 	 * @see org.xidea.jsi.JSIRoot#requirePackage(java.lang.String, boolean)
 	 */
-	public JSIPackage requirePackage(String name, boolean exact) {
-		JSIPackage pkg = findPackage(name, exact);
+	public JSIPackage requirePackage(String name) {
+		JSIPackage pkg = findPackage(name, false);
 		if(pkg == null){
 			throw new ScriptNotFoundException("package not find :"+name);
 		}else if (pkg.getImplementation() == null) {
 			return pkg;
 		} else {
-			return this.requirePackage(pkg.getImplementation(), exact);
+			return this.requirePackage(pkg.getImplementation());
 		}
 	}
 
@@ -76,7 +69,7 @@ public abstract class AbstractRoot implements JSIRoot {
 		int splitPos = path.lastIndexOf('/');
 		if (splitPos > 0) {
 			path = path.substring(0, splitPos).replace('/', '.');
-			JSIPackage pkg = findPackage(path, true);
+			JSIPackage pkg = findPackage(path, false);
 			if (pkg != null) {
 				return pkg;
 			}
@@ -84,7 +77,7 @@ public abstract class AbstractRoot implements JSIRoot {
 			splitPos = path.indexOf(':');
 			if (splitPos >= 0) {
 				path = path.substring(0, splitPos);
-				JSIPackage pkg =  findPackage(path, true);
+				JSIPackage pkg =  findPackage(path, false);
 				if (pkg != null) {
 					return pkg;
 				}
@@ -92,7 +85,7 @@ public abstract class AbstractRoot implements JSIRoot {
 				splitPos = path.length();
 				while ((splitPos = path.lastIndexOf('.', splitPos)) > 0) {
 					JSIPackage pkg = findPackage(path = path.substring(0,
-							splitPos), false);
+							splitPos), true);
 					if (pkg != null) {
 						return pkg;
 					}
@@ -102,7 +95,7 @@ public abstract class AbstractRoot implements JSIRoot {
 		throw new ScriptNotFoundException("package not find :"+path);
 	}
 
-	protected synchronized JSIPackage findPackage(String name, boolean exact) {
+	protected synchronized JSIPackage findPackage(String name, boolean findParent) {
 		do {
 			if (packageMap.containsKey(name)) {
 				return packageMap.get(name);
@@ -115,7 +108,7 @@ public abstract class AbstractRoot implements JSIRoot {
 				return pkg;
 			}
 		//} while ((name = name.replace("\\.?[^\\.]+$", "")).length() > 0);
-		} while (!exact && (name = name.substring(0,Math.max(name.lastIndexOf('.'), 0))).length() > 0);
+		} while (findParent && (name = name.substring(0,Math.max(name.lastIndexOf('.'), 0))).length() > 0);
 		return null;
 	}
 
@@ -133,17 +126,5 @@ public abstract class AbstractRoot implements JSIRoot {
 		return parser;
 	}
 
-	public static String loadText(InputStream in, String encoding)
-			throws UnsupportedEncodingException, IOException {
-		if(in == null){
-			return null;
-		}
-		Reader reader = new InputStreamReader(in,encoding);
-		StringBuilder buf = new StringBuilder();
-		char[] cbuf = new char[1024];
-		for (int len = reader.read(cbuf); len > 0; len = reader.read(cbuf)) {
-			buf.append(cbuf, 0, len);
-		}
-		return buf.toString();
-	}
+	public abstract String loadText(String pkgName, String scriptName);
 }

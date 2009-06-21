@@ -250,7 +250,7 @@ public class DefaultPackage implements JSIPackage {
 								targetPackage = this.root
 										.findPackageByPath(targetPath);
 								targetPackage = root.requirePackage(
-										targetPackage.getName(), true);
+										targetPackage.getName());
 							}
 							targetFileMap = targetPackage.getScriptObjectMap()
 									.keySet();
@@ -268,7 +268,7 @@ public class DefaultPackage implements JSIPackage {
 								targetPath = targetPath.substring(targetPackage
 										.getName().length() + 1);
 								targetPackage = root.requirePackage(
-										targetPackage.getName(), true);
+										targetPackage.getName());
 								file = targetPackage.getObjectScriptMap().get(
 										targetPath);
 								if (file != null) {
@@ -318,7 +318,7 @@ public class DefaultPackage implements JSIPackage {
 							targetPath = targetPath.substring(targetPackage
 									.getName().length() + 1);
 							targetPackage = root.requirePackage(targetPackage
-									.getName(), true);
+									.getName());
 							file = targetPackage.getObjectScriptMap().get(
 									targetPath);
 							if (file != null) {

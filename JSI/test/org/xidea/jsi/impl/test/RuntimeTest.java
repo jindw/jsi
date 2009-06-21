@@ -39,6 +39,7 @@ public class RuntimeTest{
 		Object result = Context.call(new ContextAction() {
 			public Object run(final Context cx) {
 				Scriptable scope = ScriptRuntime.getGlobal(cx);
+				cx.evaluateString(scope,"this.x=1;for(n in this){java.lang.System.out.print(n)}", "1.js", 1, null);
 				cx.evaluateString(scope, RhinoSupport.loadText("boot.js"), "<package-wrapper.js>", 1, null);
 				cx.evaluateString(scope,"$import('example:sayHello')", "1.js", 1, null);
 				cx.evaluateString(scope,"$import('org.xidea.lite:Template')", "1.js", 1, null);

@@ -88,12 +88,12 @@ public class AbstractJSIRootTest {
 
 	@Test
 	public void testRequirePackage() {
-		JSIPackage pkg = root.requirePackage("example.dependence", true);
+		JSIPackage pkg = root.requirePackage("example.dependence");
 		assertEquals("example.dependence", pkg.getName());
-		pkg = root.requirePackage("example.dependence.xxx", false);
+		pkg = root.findPackageByPath("example.dependence.xxx");
 		assertEquals("example.dependence", pkg.getName());
 		try {
-			pkg = root.requirePackage("example.dependence.xxx", true);
+			pkg = root.requirePackage("example.dependence.xxx");
 			fail("无效包路径应该抛出异常");
 		} catch (ScriptNotFoundException e) {
 

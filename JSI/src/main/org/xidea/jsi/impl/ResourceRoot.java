@@ -111,12 +111,12 @@ public class ResourceRoot extends AbstractRoot {
 			return false;
 		} else {
 			try {
-				InputStreamReader reader = new InputStreamReader(in,
-						this.encoding);
-				int len = reader.read(buf);
 				if (prefix != null) {
 					out.write(prefix);
 				}
+				InputStreamReader reader = new InputStreamReader(in,
+						this.encoding);
+				int len = reader.read(buf);
 				while (len > 0) {
 					out.write(buf, 0, len);
 					len = reader.read(buf);
@@ -212,7 +212,7 @@ public class ResourceRoot extends AbstractRoot {
 		LinkedHashSet<JSIPackage> ps = new LinkedHashSet<JSIPackage>();
 		for (String path : result) {
 			try {
-				ps.add(requirePackage(path, true));
+				ps.add(requirePackage(path));
 			} catch (Exception e) {
 			}
 		}

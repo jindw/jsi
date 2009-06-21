@@ -98,10 +98,11 @@ var $import = function(loaderEval,cachedScripts){
             	appendObjectInfo(args,arguments[i]);
             }
             args.push("\n继续弹出该调试信息？");
-            if(!(this.confirm||print)(args.join(''))){
+            if(!confirm(args.join(''))){
                 reportError = Function.prototype;
             }
         }
+        var confirm = this.confirm||this.print;
         var reportTrace = Function.prototype;
         //reportTrace = reportError;
     }
