@@ -2,9 +2,9 @@ package org.xidea.jsi.web;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
 
@@ -209,10 +209,15 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 	/**
 	 * 打开的流使用完成后需要自己关掉
 	 */
-	public InputStream getResourceStream(String path) {
-		InputStream in = context.getResourceAsStream(scriptBase + path);
+	@Override
+	public URL getResource(String path) {
+		URL in = null;
+		try {
+			in = context.getResource(scriptBase + path);
+		} catch (IOException e) {
+		}
 		if (in == null) {
-			in = super.getResourceStream(path);
+			in = super.getResource(path);
 		}
 		return in;
 	}

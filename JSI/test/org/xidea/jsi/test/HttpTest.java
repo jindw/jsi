@@ -14,6 +14,10 @@ import org.junit.Test;
 public class HttpTest {
 	@Test
 	public void testHttpPost() throws Exception {
+		URL object = this.getClass().getResource("/java/lang/String.class");
+		System.out.println(object);
+		System.out.println(object.getClass());
+		System.out.println(this.getClass().getResource("/boot.js"));
 //		new Thread() {
 //			public void run() {
 //				try {

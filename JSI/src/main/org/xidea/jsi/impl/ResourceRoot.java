@@ -2,16 +2,13 @@ package org.xidea.jsi.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -104,30 +101,18 @@ public class ResourceRoot extends AbstractRoot {
 	 */
 	protected boolean output(String path, Writer out, String prefix,
 			String postfix) throws IOException {
-		char[] buf = new char[1024];
-		InputStream in = this.getResourceStream(path);
-
-		if (in == null) {
-			return false;
-		} else {
-			try {
-				if (prefix != null) {
-					out.write(prefix);
-				}
-				InputStreamReader reader = new InputStreamReader(in,
-						this.encoding);
-				int len = reader.read(buf);
-				while (len > 0) {
-					out.write(buf, 0, len);
-					len = reader.read(buf);
-				}
-				if (postfix != null) {
-					out.write(postfix);
-				}
-				return true;
-			} finally {
-				in.close();
+		ByteArrayOutputStream buf = new ByteArrayOutputStream();
+		if(this.output(path, buf, null, null)){
+			if (prefix != null) {
+				out.write(prefix);
 			}
+			out.write(new String(buf.toByteArray(),this.encoding));
+			if (postfix != null) {
+				out.write(postfix);
+			}
+			return true;
+		}else{
+			return false;
 		}
 	}
 
@@ -141,7 +126,7 @@ public class ResourceRoot extends AbstractRoot {
 	 */
 	protected boolean output(String path, OutputStream out, byte[] prefix,
 			byte[] postfix) throws IOException {
-		InputStream in = this.getResourceStream(path);
+		InputStream in = this.getResource(path).openStream();
 		if (in == null) {
 			return false;
 		} else {
@@ -168,33 +153,33 @@ public class ResourceRoot extends AbstractRoot {
 	/**
 	 * 打开的流使用完成后需要自己关掉
 	 */
-	protected InputStream getResourceStream(String path) {
+	protected URL getResource(String path) {
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
 		File file = new File(this.scriptBaseDirectory, path);
 		if (file.exists() && (!"boot.js".equals(path) || file.length() > 200)) {
 			try {
-				return new FileInputStream(file);
-			} catch (FileNotFoundException e) {
+				return file.toURI().toURL();
+			} catch (IOException e) {
 				log.debug(e);
 			}
 		}
 		File[] libs = findLibFiles(this.scriptBaseDirectory);
 		for (File item : libs) {
-			InputStream in = findByZip(item, path);
+			URL in = findByZip(item, path);
 			if (in != null) {
 				return in;
 			}
 		}
 		libs = findLibFiles(this.externalLibraryDirectory);
 		for (File item : libs) {
-			InputStream in = findByZip(item, path);
+			URL in = findByZip(item, path);
 			if (in != null) {
 				return in;
 			}
 		}
-		return this.getClass().getClassLoader().getResourceAsStream(path);
+		return this.getClass().getClassLoader().getResource(path);
 	}
 
 	public List<JSIPackage> getPackageObjectList() {
@@ -240,22 +225,18 @@ public class ResourceRoot extends AbstractRoot {
 		return EMPTY_FILES;
 	}
 
-	protected InputStream findByZip(File file, String path) {
+	protected URL findByZip(File file, String path) {
+		URL resource = null;
 		try {
 			final ZipFile jarFile = new ZipFile(file);
 			ZipEntry ze = jarFile.getEntry(path);
 			if (ze != null) {
-				return new FilterInputStream(jarFile.getInputStream(ze)) {
-					public void close() throws IOException {
-						super.close();
-						jarFile.close();
-					}
-				};
+				resource = new URL("jar","",file.toString()+"!/"+path);
 			}
 		} catch (IOException e) {
 			log.debug(e);
 		}
-		return null;
+		return resource;
 	}
 
 	private void appendZipPackage(File file, Collection<String> result) {
