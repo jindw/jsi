@@ -57,19 +57,6 @@ public class ResourceRoot extends AbstractRoot {
 		this.externalLibraryDirectory = externalLibraryFilr;
 	}
 
-	public byte[] getResourceAsBinary(String path) {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try {
-			if (this.output(path, out, null, null)) {
-				return out.toByteArray();
-			} else {
-				return null;
-			}
-		} catch (IOException e) {
-			throw new RuntimeException();
-		}
-	}
-
 	@Override
 	public String loadText(String pkgName, String scriptName) {
 		if (pkgName != null && pkgName.length() > 0) {
@@ -81,13 +68,13 @@ public class ResourceRoot extends AbstractRoot {
 	public String getResourceAsString(String path) {
 		StringWriter out = new StringWriter();
 		try {
-			if (this.output(path, out, null, null)) {
+			if (this.output(path, out,false)) {
 				return out.toString();
 			} else {
 				return null;
 			}
 		} catch (IOException e) {
-			throw new RuntimeException();
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -99,17 +86,10 @@ public class ResourceRoot extends AbstractRoot {
 	 * @return
 	 * @throws IOException
 	 */
-	protected boolean output(String path, Writer out, String prefix,
-			String postfix) throws IOException {
+	public boolean output(String path, Writer out, boolean isPreload) throws IOException {
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
-		if(this.output(path, buf, null, null)){
-			if (prefix != null) {
-				out.write(prefix);
-			}
+		if(this.output(path, buf,isPreload)){
 			out.write(new String(buf.toByteArray(),this.encoding));
-			if (postfix != null) {
-				out.write(postfix);
-			}
 			return true;
 		}else{
 			return false;
@@ -124,24 +104,23 @@ public class ResourceRoot extends AbstractRoot {
 	 * @return
 	 * @throws IOException
 	 */
-	protected boolean output(String path, OutputStream out, byte[] prefix,
-			byte[] postfix) throws IOException {
+	public boolean output(String path, OutputStream out, boolean isPreload) throws IOException {
 		InputStream in = this.getResource(path).openStream();
 		if (in == null) {
 			return false;
 		} else {
 			try {
+				if (isPreload) {
+					out.write(JSIText.buildPreloadPerfix(path).getBytes(this.getEncoding()));
+				}
 				byte[] buf = new byte[1024];
 				int len = in.read(buf);
-				if (prefix != null) {
-					out.write(prefix);
-				}
 				while (len > 0) {
 					out.write(buf, 0, len);
 					len = in.read(buf);
 				}
-				if (postfix != null) {
-					out.write(postfix);
+				if (isPreload) {
+					out.write(JSIText.buildPreloadPostfix("//").getBytes(this.getEncoding()));
 				}
 				return true;
 			} finally {
@@ -149,11 +128,10 @@ public class ResourceRoot extends AbstractRoot {
 			}
 		}
 	}
-
 	/**
 	 * 打开的流使用完成后需要自己关掉
 	 */
-	protected URL getResource(String path) {
+	public URL getResource(String path) {
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
@@ -231,7 +209,7 @@ public class ResourceRoot extends AbstractRoot {
 			final ZipFile jarFile = new ZipFile(file);
 			ZipEntry ze = jarFile.getEntry(path);
 			if (ze != null) {
-				resource = new URL("jar","",file.toURI().toURL()+"!"+path);
+				resource = new URL("jar","",file.toURI().toURL()+"!/"+path);
 			}
 		} catch (IOException e) {
 			log.debug(e);

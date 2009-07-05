@@ -81,7 +81,7 @@ public class JSICGI extends JSIService {
 			if (imgages.contains(ext)) {
 				System.out.println("Content-Type:image/" + ext);
 				System.out.println();
-				this.output(path, System.out, null, null);
+				this.output(path, System.out, false);
 				return;
 			}
 		}
