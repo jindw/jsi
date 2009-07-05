@@ -231,7 +231,7 @@ public class ResourceRoot extends AbstractRoot {
 			final ZipFile jarFile = new ZipFile(file);
 			ZipEntry ze = jarFile.getEntry(path);
 			if (ze != null) {
-				resource = new URL("jar","",file.toString()+"!/"+path);
+				resource = new URL("jar","",file.toURI().toURL()+"!"+path);
 			}
 		} catch (IOException e) {
 			log.debug(e);
