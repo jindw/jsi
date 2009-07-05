@@ -64,7 +64,7 @@ public interface JSIPackage {
 	public abstract Map<String, ScriptLoader> getLoaderMap();
 
 	/**
-	 * 获取包内脚本资源的源代码，Package可以缓存源代码
+	 * 获取包内脚本资源的源代码，不要在这里缓存源码！！要做缓存的话，请在JSIRoot中做
 	 * @param scriptName
 	 * @return
 	 */

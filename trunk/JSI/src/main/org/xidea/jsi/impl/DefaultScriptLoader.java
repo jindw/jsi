@@ -19,9 +19,8 @@ import org.xidea.jsi.ScriptLoader;
  */
 public class DefaultScriptLoader implements ScriptLoader {
 	private String path;
-	private JSIPackage _package;
+	private JSIPackage packageObject;
 	private String name;
-	private String source;
 	private Map<String, String> dependenceVarMap;
 	private Collection<String> localVars;
 
@@ -29,7 +28,7 @@ public class DefaultScriptLoader implements ScriptLoader {
 	// private Object lock = new Object();
 
 	public DefaultScriptLoader(JSIPackage pkg, String name) {
-		this._package = pkg;
+		this.packageObject = pkg;
 		this.name = name;
 		this.path = pkg.getName().replace('.', '/') + '/' + name;
 	}
@@ -38,7 +37,7 @@ public class DefaultScriptLoader implements ScriptLoader {
 	 * @see org.xidea.jsi.impl.ScriptEntry#getPackage()
 	 */
 	public JSIPackage getPackage() {
-		return _package;
+		return packageObject;
 	}
 
 	/* (non-Javadoc)
@@ -60,7 +59,7 @@ public class DefaultScriptLoader implements ScriptLoader {
 	 */
 	public Map<String, String> getDependenceVarMap() {
 		if (this.dependenceVarMap == null) {
-			List<JSIDependence> list = ((DefaultPackage)_package).getDependenceMap().get(name);
+			List<JSIDependence> list = ((DefaultPackage)packageObject).getDependenceMap().get(name);
 			HashMap<String, String> dependenceVarMap = new HashMap<String, String>();
 			if (list != null) {
 				for (JSIDependence dependence : list) {
@@ -90,9 +89,9 @@ public class DefaultScriptLoader implements ScriptLoader {
 	public Collection<String> getLocalVars() {
 		if (this.localVars == null) {
 			ArrayList<String> localVars = new ArrayList<String>();
-			for (String var : _package.getObjectScriptMap().keySet()) {
+			for (String var : packageObject.getObjectScriptMap().keySet()) {
 
-				if (this.name.equals(_package.getObjectScriptMap().get(var))
+				if (this.name.equals(packageObject.getObjectScriptMap().get(var))
 						&& var.indexOf(".") < 0) {
 					localVars.add(var);
 				}
@@ -106,10 +105,7 @@ public class DefaultScriptLoader implements ScriptLoader {
 	 * @see org.xidea.jsi.impl.ScriptEntry#getSource()
 	 */
 	public String getSource() {
-		if (source == null) {
-			source = _package.loadText(this.name);
-		}
-		return source;
+		return packageObject.loadText(this.name);
 	}
 	public String toString(){
 		return this.path;

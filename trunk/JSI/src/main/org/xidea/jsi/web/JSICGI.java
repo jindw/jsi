@@ -4,12 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,8 +20,6 @@ import java.util.regex.Pattern;
 public class JSICGI extends JSIService {
 	private static final Pattern QUERY_PATTERN = Pattern
 			.compile("([^=&]+)(?:=([^&]+))?");
-	protected static Collection<String> imgages = Arrays.asList("png", "gif",
-			"jpeg", "jpg");
 
 	private Map<String, String[]> configMap;
 	private String path;
@@ -69,50 +63,23 @@ public class JSICGI extends JSIService {
 		try {
 			initialize();
 		} catch (Exception e) {
-			System.out.println("Content-Type:text/html;charset="
+			System.out.println("Content-Type:text/plain;charset="
 					+ this.getEncoding());
 			System.out.println();
 			e.printStackTrace(System.out);
 			return;
 		}
-		int p = path.lastIndexOf('.');
-		if (p > 0) {
-			String ext = path.substring(p + 1).toLowerCase();
-			if (imgages.contains(ext)) {
-				System.out.println("Content-Type:image/" + ext);
-				System.out.println();
-				this.output(path, System.out, false);
-				return;
-			}
-		}
-		if (path.endsWith("data.action")) {
-			String data = params.get("data")[0];
-			int dataContentEnd = data.indexOf(',');
-			System.out
-					.println("Content-Type:" + data.substring(dataContentEnd));
-			System.out.println();
-			this.writeBase64(data.substring(dataContentEnd + 1), System.out);
-
-		} else if (path.endsWith("export.action")) {
-			System.out.println("Content-Type:text/plain;charset="
-					+ this.getEncoding());
-		} else if (path.endsWith(".css")) {
-			System.out.println("Content-Type:text/css;charset="
-					+ this.getEncoding());
-		} else {
-			System.out.println("Content-Type:text/html;charset="
-					+ this.getEncoding());
-		}
+		String contentType = this.getContentType(path, params, "text/html");
+		System.out.println(contentType);
 		System.out.println();
-		Writer out = new OutputStreamWriter(System.out, "UTF-8");
 		try {
-			this.service(path, params, out);
+			this.service(path, params, System.out);
 		} catch (Exception e) {
 			System.out.println("path:" + path);
 			System.out.println("params:" + params);
 			e.printStackTrace(System.out);
 		}
-		out.close();
+		//out.close();
 	}
 
 	protected void initialize() throws IOException {

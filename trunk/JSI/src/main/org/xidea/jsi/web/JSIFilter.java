@@ -2,7 +2,7 @@ package org.xidea.jsi.web;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -71,7 +71,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 				request.getContextPath().length());
 		if (path.startsWith(scriptBase)) {
 			path = path.substring(scriptBase.length());
-			if (this.processAttachedAction(path, request, response)) {
+			if (this.processAction(path, request, response)) {
 				return true;
 			}
 			if (isIndex(path)) {
@@ -112,7 +112,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 	 * @return
 	 * @throws IOException
 	 */
-	protected boolean processAttachedAction(String path,
+	protected boolean processAction(String path,
 			HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
 		if (isIndex(path) && request.getParameter("path") == null) {
@@ -163,11 +163,11 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 	public void sdnService(String path, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		// TODO:以后应该使用Stream，应该使用成熟的缓存系统
-		PrintWriter out = response.getWriter();
+		OutputStream out = response.getOutputStream();
 		response.setContentType("text/plain;charset=utf-8");
 		if ("POST".equals(request.getMethod())) {
 			String value = sdn.queryExportInfo(path);
-			out.write(value);
+			out.write(value.getBytes(this.getEncoding()));
 		} else if (isDebug(request)) {
 			writeSDNDebug(path, out);
 		} else {
