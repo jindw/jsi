@@ -36,6 +36,9 @@ public abstract class JSIText {
 
 	public final static String buildPreloadPerfix(String packageName,
 			String fileName) {
+		if(packageName.startsWith(".")){
+			packageName = packageName.substring(1);
+		}
 		if (JSIPackage.PACKAGE_FILE_NAME.equals(fileName)) {
 			fileName = "";
 		}
