@@ -58,17 +58,18 @@ public class ResourceRoot extends AbstractRoot {
 	}
 
 	@Override
-	public String loadText(String pkgName, String scriptName) {
+	public String loadText(String pkgName, final String scriptName) {
+		String path = scriptName;
 		if (pkgName != null && pkgName.length() > 0) {
-			scriptName = pkgName.replace('.', '/') + '/' + scriptName;
+			path = pkgName.replace('.', '/') + '/' + scriptName;
 		}
-		return getResourceAsString(scriptName);
+		return getResourceAsString(path);
 	}
 
 	public String getResourceAsString(String path) {
 		StringWriter out = new StringWriter();
 		try {
-			if (this.output(path, out,false)) {
+			if (this.output(path, out, false)) {
 				return out.toString();
 			} else {
 				return null;
@@ -86,12 +87,13 @@ public class ResourceRoot extends AbstractRoot {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean output(String path, Writer out, boolean isPreload) throws IOException {
+	public boolean output(String path, Writer out, boolean isPreload)
+			throws IOException {
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
-		if(this.output(path, buf,isPreload)){
-			out.write(new String(buf.toByteArray(),this.encoding));
+		if (this.output(path, buf, isPreload)) {
+			out.write(new String(buf.toByteArray(), this.encoding));
 			return true;
-		}else{
+		} else {
 			return false;
 		}
 	}
@@ -104,14 +106,16 @@ public class ResourceRoot extends AbstractRoot {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean output(String path, OutputStream out, boolean isPreload) throws IOException {
+	public boolean output(String path, OutputStream out, boolean isPreload)
+			throws IOException {
 		InputStream in = this.getResource(path).openStream();
 		if (in == null) {
 			return false;
 		} else {
 			try {
 				if (isPreload) {
-					out.write(JSIText.buildPreloadPerfix(path).getBytes(this.getEncoding()));
+					out.write(JSIText.buildPreloadPerfix(path).getBytes(
+							this.getEncoding()));
 				}
 				byte[] buf = new byte[1024];
 				int len = in.read(buf);
@@ -120,7 +124,8 @@ public class ResourceRoot extends AbstractRoot {
 					len = in.read(buf);
 				}
 				if (isPreload) {
-					out.write(JSIText.buildPreloadPostfix("//").getBytes(this.getEncoding()));
+					out.write(JSIText.buildPreloadPostfix("//").getBytes(
+							this.getEncoding()));
 				}
 				return true;
 			} finally {
@@ -128,6 +133,7 @@ public class ResourceRoot extends AbstractRoot {
 			}
 		}
 	}
+
 	/**
 	 * 打开的流使用完成后需要自己关掉
 	 */
@@ -209,7 +215,8 @@ public class ResourceRoot extends AbstractRoot {
 			final ZipFile jarFile = new ZipFile(file);
 			ZipEntry ze = jarFile.getEntry(path);
 			if (ze != null) {
-				resource = new URL("jar","",file.toURI().toURL()+"!/"+path);
+				resource = new URL("jar", "", file.toURI().toURL() + "!/"
+						+ path);
 			}
 		} catch (IOException e) {
 			log.debug(e);

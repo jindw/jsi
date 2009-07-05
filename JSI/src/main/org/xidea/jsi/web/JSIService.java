@@ -7,6 +7,8 @@ import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,14 +32,45 @@ public class JSIService extends ResourceRoot {
 	protected Map<String, String> cachedMap;// = new WeakHashMap<String,
 	protected SDNService sdn = new SDNService(this);
 
-	public void service(String path, Map<String, String[]> param, Writer out)
-			throws IOException {
+	protected static Collection<String> imgages = Arrays.asList("png", "gif",
+			"jpeg", "jpg");
+
+	public String getContentType(String path, Map<String, String[]> params,
+			String defaultContentType) {
+		String contentType = defaultContentType;
+		int p = path.lastIndexOf('.');
+		if (p > 0) {
+			String ext = path.substring(p + 1).toLowerCase();
+			if (imgages.contains(ext)) {
+				return "Content-Type:image/" + ext;
+			}
+		}
+		if (path.endsWith("/data.action")) {
+			String data = params.get("data")[0];
+			int dataContentEnd = data.indexOf(',');
+			return "Content-Type:" + data.substring(dataContentEnd);
+		}
+		if (path.endsWith("export.action")) {
+			contentType = "text/plain";
+		} else if (path.endsWith(".css")) {
+			contentType = "text/css";
+		} else if (path.endsWith(".js")) {// for debug
+			contentType = "text/plain";
+		}
+		if (contentType != null) {
+			contentType = "Content-Type:" + contentType + ";charset="
+					+ this.getEncoding();
+		}
+		return contentType;
+	}
+
+	public void service(String path, Map<String, String[]> params,
+			OutputStream out) throws IOException {
 		if (path == null || path.length() == 0) {
-			out.write(document());
-			// "text/html";
+			out.write(document().getBytes(this.getEncoding()));
 		} else if ("export.action".equals(path)) {
-			String result = export(param);
-			out.write(result);
+			String result = export(params);
+			out.write(result.getBytes(this.getEncoding()));
 		} else if (path.startsWith("=")) {
 			path = path.substring(1);
 			if (path.length() == 0) {
@@ -45,6 +78,10 @@ public class JSIService extends ResourceRoot {
 			}
 			writeSDNRelease(path, out);
 			// "text/plain";
+		} else if (path.endsWith("data.action")) {
+			String data = params.get("data")[0];
+			int dataContentEnd = data.indexOf(',');
+			this.writeBase64(data.substring(dataContentEnd + 1), out);
 		} else {
 			boolean isPreload = false;
 			if (path.endsWith(JSIText.PRELOAD_FILE_POSTFIX)) {
@@ -110,8 +147,11 @@ public class JSIService extends ResourceRoot {
 
 	}
 
-	public void writeSDNRelease(String path, Writer out) throws IOException {
+	public void writeSDNRelease(String path, OutputStream out)
+			throws IOException {
 		String result = null;
+		//每次都清理一下吧，CPU足够强悍，反正这只是一个调试程序
+		this.packageMap.clear();
 		if (cachedMap != null) {
 			result = cachedMap.get(path);
 		}
@@ -121,11 +161,11 @@ public class JSIService extends ResourceRoot {
 				cachedMap.put(path, result);
 			}
 		}
-		out.append(result);
+		out.write(result.getBytes(this.getEncoding()));
 	}
 
-	public void writeSDNDebug(String path, Writer out) throws IOException {
-		out.write(sdn.doDebugExport(path));
+	public void writeSDNDebug(String path, OutputStream out) throws IOException {
+		out.write(sdn.doDebugExport(path).getBytes(this.getEncoding()));
 	}
 
 	protected boolean writeResource(String path, boolean isPreload, Writer out)

@@ -26,7 +26,7 @@ public interface ScriptLoader {
 	public abstract String getName();
 
 	/**
-	 * 返回当前脚本的源代码数据
+	 * 返回当前脚本的源代码数据，不要缓存！！要缓存的话，放在JSIRoot中处理
 	 * @return
 	 */
 	public abstract String getSource();
