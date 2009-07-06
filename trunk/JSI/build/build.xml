@@ -14,12 +14,15 @@
 		<mkdir dir="build/dest/jsidoc/export/" />
 	</target>
 	<target name="cgi" depends="jar-compressed">
-		<jar encoding="GBK"
+		<!--
+encoding="GBK"
 			comment="
 1.将文件存储在你的cgi-bin 目录.
 2.创建 jsi.cgi:
   #!java -jar cgi.jar
-" destfile="build/dest/cgi.jar" >
+" 
+		-->
+		<jar  destfile="build/dest/cgi.jar">
 			<manifest>
 				<attribute name="Main-Class" value="org.xidea.jsi.web.JSICGI" />
 			</manifest>
