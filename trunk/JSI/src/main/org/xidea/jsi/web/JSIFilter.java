@@ -67,10 +67,8 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 			throws IOException, UnsupportedEncodingException {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;
-		String path = request.getRequestURI().substring(
-				request.getContextPath().length());
-		if (path.startsWith(scriptBase)) {
-			path = path.substring(scriptBase.length());
+		String path = getScriptPath(request);
+		if (path!=null) {
 			if (this.processAction(path, request, response)) {
 				return true;
 			}
@@ -101,6 +99,16 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 
 		}
 		return false;
+	}
+
+	protected String getScriptPath(HttpServletRequest request) {
+		String path = request.getRequestURI().substring(
+				request.getContextPath().length());
+		if(path.startsWith(this.scriptBase)){
+			return path.substring(this.scriptBase.length());
+		}else{
+			return null;
+		}
 	}
 
 	/**
