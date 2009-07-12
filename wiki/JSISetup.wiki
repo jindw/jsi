@@ -1,0 +1,69 @@
+== 如何让你的程序跑起来 ==
+   早期的JSI程序是可以基于文件系统工作的,但是这方面的需求一直很弱,后期对文件系统的支持也没有跟进,推荐用户把JSI管理的脚本放在服务器环境下开发,调试.
+
+== JSA 测试服务器环境下使用JSI ==
+   * 推荐目录结构
+{{{
+     scripts/
+        +example/__package__.js
+        +example/hello-world.js
+        +jside.zip               //第三方类库可以打包候存放在这里
+     WEB-INF/
+     JSA-SERVER.jar              //JSA调试服务器程序
+}}}
+   * 启动调试服务器
+     双击JSA运行
+       如果您的jar打开方式不是jvm,可使用命令:java -jar JSA-SERVER.jar
+       启动时默认以当前目录为网站根目录,用户可以打开操作界面修改改目录,支持托放操作
+   * 编写脚本
+     # 编写脚本
+       基本和原来没什么两样
+       创建文件:scripts/example/hello-world.js
+{{{
+/**
+ * 
+ */
+var message = "Hello World";
+
+/**
+ * 测试Hello World
+ */
+function sayHello(){
+  alert(message);
+}
+}}}
+     # 描述脚本关系
+       可以通过JSA自动生成(有时需要人工干预,当能,我更喜欢直接编写)
+       创建文件:scripts/example/__package__.js
+{{{
+/**
+ * 这里是演示一个简单的托管脚本，其实调试的时候也可以直接使用*模式:
+ * this.addScript('hello-world.js','*');
+ *
+ * 自动注册指定脚本的全部变量（推荐还是严谨一点，手动注册吧）
+ */
+this.addScript('hello-world.js',['sayHello','message']);
+}}}
+   * 页面上引用
+     # 增加引导脚本
+{{{
+     <script src="/scripts/boot.js"></script>
+}}}
+     # 导入脚本
+{{{
+    <script>
+     //延迟导入,实际上在全局变量空间导入了两个对象,message,sayHello
+     $import("example.*",true);
+    </script>
+}}}
+
+== JAVA环境下使用JSI ==
+   把JSI.jar 扔进WEB-INF/lib,配置好JSIFilter。 
+   待续.....
+== PHP环境下使用JSI ==
+   在你的scripts 根目录下加上一个index.php(可以从 JSI.jar中获取)。 
+   待续.....
+
+== JAVA CGI环境下使用JSI ==
+   把cgi.jar 和jsi.cgi 扔进/cgi-bin,把脚本路径指向该目录(可以使用一个跳转script)。 
+   待续.....
