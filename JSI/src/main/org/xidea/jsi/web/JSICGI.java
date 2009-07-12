@@ -70,7 +70,7 @@ public class JSICGI extends JSIService {
 			return;
 		}
 		String contentType = this.getContentType(path, params, "text/html");
-		System.out.println(contentType);
+		System.out.println("Content-Type:"+contentType);
 		System.out.println();
 		try {
 			this.service(path, params, System.out);
