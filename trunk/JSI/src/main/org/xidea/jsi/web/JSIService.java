@@ -42,13 +42,13 @@ public class JSIService extends ResourceRoot {
 		if (p > 0) {
 			String ext = path.substring(p + 1).toLowerCase();
 			if (imgages.contains(ext)) {
-				return "Content-Type:image/" + ext;
+				return "image/" + ext;
 			}
 		}
 		if (path.endsWith("/data.action")) {
 			String data = params.get("data")[0];
 			int dataContentEnd = data.indexOf(',');
-			return "Content-Type:" + data.substring(dataContentEnd);
+			return "" + data.substring(dataContentEnd);
 		}
 		if (path.endsWith("export.action")) {
 			contentType = "text/plain";
@@ -58,7 +58,7 @@ public class JSIService extends ResourceRoot {
 			contentType = "text/plain";
 		}
 		if (contentType != null) {
-			contentType = "Content-Type:" + contentType + ";charset="
+			contentType = contentType + ";charset="
 					+ this.getEncoding();
 		}
 		return contentType;
