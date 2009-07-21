@@ -1,4 +1,4 @@
-#summary One-sentence summary of this page.
+#JSI 集成第三方类库的时候.经常碰到的问题:
 
 == 杜绝变量悬空现象 ==
 
@@ -9,7 +9,7 @@
     }
 }}}
     因为,这等价于:
-}}}
+{{{
     var Element = undefined;
     if (!window.Element){
         Element = new Object();
