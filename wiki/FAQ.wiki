@@ -1,0 +1,29 @@
+#summary One-sentence summary of this page.
+
+== 杜绝变量悬空现象 ==
+
+    不要出现:
+{{{
+    if (!window.Element){
+        var Element = new Object();
+    }
+}}}
+    因为,这等价于:
+}}}
+    var Element = undefined;
+    if (!window.Element){
+        Element = new Object();
+    }
+}}}
+    改成：
+{{{
+    var Element = window.Element || {};
+}}}
+
+    或者：
+{{{
+    var Element = window.Element ;
+    if(!Element){
+      Element = new Object();
+    }
+}}}
