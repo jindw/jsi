@@ -1,7 +1,6 @@
 #JSI 集成第三方类库的时候.经常碰到的问题:
 
-== 杜绝变量悬空现象 ==
-
+== 变量悬空现象 ==
     不要出现:
 {{{
     if (!window.Element){
@@ -27,3 +26,18 @@
       Element = new Object();
     }
 }}}
+
+
+== 域短路现象 ==
+{{{
+   var object1 = 1;
+   var object2 = 2;
+   var fn = new Function("alert(object1+object2)");
+}}}
+   因为 new Function方法创建的函数,上级scope是全局变量. 而JSI的执行域在当前的装在单元,不能确保完全包含这些当前脚本的对象.
+
+   要实现new Function的时候以当前scope作为上级scope,可使用:
+{{{
+var fn = eval("fucntion(){alert(object1,object2)}");
+}}}
+   
