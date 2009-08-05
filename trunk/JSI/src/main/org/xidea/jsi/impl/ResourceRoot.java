@@ -108,7 +108,8 @@ public class ResourceRoot extends AbstractRoot {
 	 */
 	public boolean output(String path, OutputStream out, boolean isPreload)
 			throws IOException {
-		InputStream in = this.getResource(path).openStream();
+		URL url = this.getResource(path);
+		InputStream in =url==null?null:url.openStream();
 		if (in == null) {
 			return false;
 		} else {
