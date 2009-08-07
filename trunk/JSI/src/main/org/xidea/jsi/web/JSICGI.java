@@ -103,8 +103,9 @@ public class JSICGI extends JSIService {
 		String scriptBaseFile = getConfig("scriptBase", "scripts/");
 		String externalLibraryDirectory = getConfig("externalLibrary",
 				"WEB-INF/lib/");
-		this.setScriptBaseDirectory(new File(scriptBaseFile));
-		this.setExternalLibraryDirectory(new File(externalLibraryDirectory));
+		this.clear();
+		this.addScriptBase(new File(scriptBaseFile).toURI().toURL());
+		this.addLib(new File(externalLibraryDirectory));
 	}
 
 	private String getConfig(String key, String def) {

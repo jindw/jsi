@@ -7,8 +7,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -30,19 +33,28 @@ public class ResourceRoot extends AbstractRoot {
 	 */
 	private String encoding = "utf-8";
 
-	private File scriptBaseDirectory;
-	private File externalLibraryDirectory;
+	protected ArrayList<URL> scriptBases = new ArrayList<URL>();
+	protected ArrayList<File> libraries = new ArrayList<File>();
 
-	public void setScriptBaseDirectory(File scriptBaseFile) {
-		this.scriptBaseDirectory = scriptBaseFile;
+	public void addScriptBase(URL base) {
+		scriptBases.add(base);
 	}
 
-	public File getScriptBaseDirectory() {
-		return scriptBaseDirectory;
+	public void clear() {
+		this.scriptBases.clear();
+		this.libraries.clear();
 	}
 
-	public File getExternalLibraryDirectory() {
-		return externalLibraryDirectory;
+	public void addLib(File base) {
+		if (base.isDirectory()) {
+			libraries.add(base);
+		} else {
+			try {
+				scriptBases.add(base.toURI().toURL());
+			} catch (MalformedURLException e) {
+				log.warn(e);
+			}
+		}
 	}
 
 	public void setEncoding(String encoding) {
@@ -51,10 +63,6 @@ public class ResourceRoot extends AbstractRoot {
 
 	public String getEncoding() {
 		return this.encoding;
-	}
-
-	public void setExternalLibraryDirectory(File externalLibraryFilr) {
-		this.externalLibraryDirectory = externalLibraryFilr;
 	}
 
 	@Override
@@ -109,7 +117,7 @@ public class ResourceRoot extends AbstractRoot {
 	public boolean output(String path, OutputStream out, boolean isPreload)
 			throws IOException {
 		URL url = this.getResource(path);
-		InputStream in =url==null?null:url.openStream();
+		InputStream in = url == null ? null : url.openStream();
 		if (in == null) {
 			return false;
 		} else {
@@ -142,43 +150,43 @@ public class ResourceRoot extends AbstractRoot {
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
-		File file = new File(this.scriptBaseDirectory, path);
-		if (file.exists() && (!"boot.js".equals(path) || file.length() > 200)) {
+		for (URL resource : scriptBases) {
 			try {
-				return file.toURI().toURL();
+				resource = new URL(resource, path);
+				File file = toFile(resource);
+				if (file != null && file.exists()
+						&& (!"boot.js".equals(path) || file.length() > 200)) {
+					return resource;
+				} else {
+					// HTTP
+				}
 			} catch (IOException e) {
 				log.debug(e);
 			}
 		}
-		File[] libs = findLibFiles(this.scriptBaseDirectory);
-		for (File item : libs) {
-			URL in = findByZip(item, path);
-			if (in != null) {
-				return in;
+
+		for (File resource : libraries) {
+			File[] libs = findLibFiles(resource);
+			for (File item : libs) {
+				URL in = findByZip(item, path);
+				if (in != null) {
+					return in;
+				}
 			}
 		}
-		libs = findLibFiles(this.externalLibraryDirectory);
-		for (File item : libs) {
-			URL in = findByZip(item, path);
-			if (in != null) {
-				return in;
-			}
-		}
+
 		return this.getClass().getClassLoader().getResource(path);
 	}
 
-	public List<JSIPackage> getPackageObjectList() {
-		final List<String> result = FileRoot
-				.findPackageList(this.scriptBaseDirectory);
-		File[] libs = findLibFiles(this.scriptBaseDirectory);
-		for (File lib : libs) {
-			appendZipPackage(lib, result);
+	private File toFile(URL resource) throws UnsupportedEncodingException {
+		if (resource.getProtocol().equals("file")) {
+			return new File(URLDecoder.decode(resource.getFile(), "UTF-8"));
 		}
-		libs = findLibFiles(this.externalLibraryDirectory);
-		for (File lib : libs) {
-			appendZipPackage(lib, result);
-		}
+		return null;
+	}
 
+	public List<JSIPackage> getPackageObjectList() {
+		List<String> result = getPackageList(true);
 		LinkedHashSet<JSIPackage> ps = new LinkedHashSet<JSIPackage>();
 		for (String path : result) {
 			try {
@@ -187,6 +195,30 @@ public class ResourceRoot extends AbstractRoot {
 			}
 		}
 		return new ArrayList<JSIPackage>(ps);
+	}
+
+	protected List<String> getPackageList(boolean findLib) {
+		List<String> result = new ArrayList<String>();
+		for (URL resource : scriptBases) {
+			try {
+				File file = toFile(resource);
+				if (file != null) {
+					result.addAll(FileRoot.findPackageList(file));
+				}
+			} catch (Exception e) {
+			}
+
+		}
+		;
+		if (findLib) {
+			for (File resource : libraries) {
+				File[] libs = findLibFiles(resource);
+				for (File lib : libs) {
+					appendZipPackage(lib, result);
+				}
+			}
+		}
+		return result;
 	}
 
 	/**

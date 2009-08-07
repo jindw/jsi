@@ -21,7 +21,6 @@ import org.xidea.jsi.ScriptNotFoundException;
 import org.xidea.jsi.impl.DataRoot;
 import org.xidea.jsi.impl.DefaultExportorFactory;
 import org.xidea.jsi.impl.DefaultLoadContext;
-import org.xidea.jsi.impl.FileRoot;
 import org.xidea.jsi.impl.ResourceRoot;
 import org.xidea.jsi.impl.JSIText;
 
@@ -179,8 +178,7 @@ public class JSIService extends ResourceRoot {
 	}
 
 	protected String document() {
-		List<String> packageList = FileRoot.findPackageList(this
-				.getScriptBaseDirectory());
+		List<String> packageList = this.getPackageList(false);
 		StringWriter out = new StringWriter();
 		if (packageList.isEmpty()) {
 			out.append("<html><head>");
