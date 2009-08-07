@@ -520,6 +520,12 @@ var $import = function(loaderEval,cachedScripts){
                     if (allTarget) {
                         if (allTarget>1) {
                             targetPackage = realPackage(findPackageByPath(targetPath));
+                            if(":Debug"){
+                                if(!targetPackage){
+                                    reportError("targetPath:"+targetPath+" 不是有效对象路径",this.name);
+                                }
+                            }
+                            
                             distinctPackage = 1;
                         }
                         targetFileMap = targetPackage.scriptObjectMap;
@@ -793,7 +799,7 @@ var $import = function(loaderEval,cachedScripts){
     function realPackage(packageObject){
         if(":Debug"){
             if(!packageObject){
-                alert('包对象不能为空:'+arguments.callee)
+                reportError('包对象不能为空:',arguments.caller)
             }
         }
         while(packageObject && packageObject.implementation){
