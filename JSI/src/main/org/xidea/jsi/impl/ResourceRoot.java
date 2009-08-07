@@ -40,7 +40,7 @@ public class ResourceRoot extends AbstractRoot {
 		scriptBases.add(base);
 	}
 
-	public void clear() {
+	protected void clear() {
 		this.scriptBases.clear();
 		this.libraries.clear();
 	}
