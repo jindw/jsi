@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Map;
@@ -22,6 +23,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.web.SDNService;
 import org.xidea.jsi.ScriptNotFoundException;
 import org.xidea.jsi.impl.JSIText;
@@ -33,6 +36,7 @@ import org.xidea.jsi.impl.JSIText;
  */
 public class JSIFilter extends JSIService implements Filter, Servlet {
 
+	private Log log = LogFactory.getLog(JSIFilter.class);
 	protected ServletContext context;
 	protected ServletConfig config;
 	protected String scriptBase = "/scripts/";
@@ -255,9 +259,13 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 			}
 			this.scriptBase = scriptBase;
 		}
-		this.setScriptBaseDirectory(new File(context
-				.getRealPath(this.scriptBase)));
-		this.setExternalLibraryDirectory(new File(context
+		this.clear();
+		try {
+			this.addScriptBase(context.getResource(this.scriptBase));
+		} catch (MalformedURLException e) {
+			log.warn(e);
+		}
+		this.addLib(new File(context
 				.getRealPath(this.scriptBase)));
 	}
 

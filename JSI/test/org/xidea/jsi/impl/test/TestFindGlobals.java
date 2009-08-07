@@ -88,10 +88,9 @@ public class TestFindGlobals {
 	private int scriptTime = 0;
 
 	@Test
-	public void testFindFile() {
+	public void testFindFile() throws IOException {
 		testText("tagAlias[info.alias[j]] = n");
-		testFile(new File(
-				"C:/Users/jindw/workspace/JSI2/web/WEB-INF/classes/org/xidea/jsidoc/doc-entry.js"));
+		testFile(new File(this.getClass().getResource("/org/xidea/jsidoc/doc-entry.js").getFile()));
 		// testFile( new
 		// File("C:/Users/jindw/workspace/JSI2/web/WEB-INF/classes/example/internal/guest.js"));
 	}
@@ -108,14 +107,10 @@ public class TestFindGlobals {
 		System.out.println("scriptTime:" + this.scriptTime);
 	}
 
-	private void testFile(File file) {
-		try {
+	private void testFile(File file) throws IOException {
 			String source = loadText(new FileInputStream(file));
 			System.out.println(file);
 			testText(source);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	private void testText(String source) {
@@ -150,7 +145,11 @@ public class TestFindGlobals {
 					file.listFiles(this);
 				} else {
 					if (file.getName().endsWith(".js")) {
-						testFile(file);
+						try {
+							testFile(file);
+						} catch (IOException e) {
+							new RuntimeException(e);
+						}
 					}
 				}
 				return false;
