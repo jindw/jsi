@@ -4,7 +4,8 @@
 		<format property="version" pattern="yyyyMMdd" />
 	</tstamp>
 
-	<available file="../JSA/build/dest/JSA-CMD.jar" property="JSAPath" value="web/WEB-INF/lib/Template.jar;web/WEB-INF/classes;../JSA/classes;../JSA/build/dest/JSA-CMD.jar;../JSA/classes" />
+	<!-- web/WEB-INF/lib/Template.jar;web/WEB-INF/classes;../JSA/classes;../JSA/build/dest/JSA-CMD.jar;../JSA/classes -->
+	<available file="../JSA/build/dest/JSA-CMD.jar" property="JSAPath" value="../JSA/build/dest/JSA-CMD.jar;" />
 
 	<target name="init">
 		<mkdir dir="build/dest" />
@@ -292,7 +293,7 @@ $JSI.preload('${packageName}',${fileNameAndPrefix}</echo>
 	</target>
 	<target name="JSIDoc" depends="init">
 		<delete file="build/dest/JSIDoc-*.*" />
-		<java classname="org.xidea.jsi.test.SimpleCacheBuilder" classpath="${JSAPath}">
+		<java classname="org.xidea.jsi.test.SimpleCacheBuilder" classpath="${JSAPath};web/WEB-INF/classes">
 			<arg value="${basedir}/web/scripts" />
 			<arg value="${basedir}/build/dest/jsidoc/source.js/" />
 		</java>
