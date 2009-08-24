@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIPackage;
@@ -154,11 +155,22 @@ public class ResourceRoot extends AbstractRoot {
 			try {
 				resource = new URL(resource, path);
 				File file = toFile(resource);
-				if (file != null && file.exists()
-						&& (!"boot.js".equals(path) || file.length() > 200)) {
-					return resource;
+				if (file != null) {
+					if (file.exists()
+							&& (!"boot.js".equals(path) || file.length() > 200)) {
+						return resource;
+					}
 				} else {
 					// HTTP
+					if(resource.getProtocol().equals("jar")){
+						String fp = resource.getFile();
+						int p = fp.indexOf('!');
+						File jar = new File(URLDecoder.decode(fp.substring(0,p),"UTF-8"));
+						resource = findByZip(jar, fp.substring(p+1));
+						if(resource!=null){
+							return resource;
+						}
+					}
 				}
 			} catch (IOException e) {
 				log.debug(e);

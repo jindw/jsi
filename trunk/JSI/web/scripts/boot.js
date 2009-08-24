@@ -98,12 +98,11 @@ var $import = function(loaderEval,cachedScripts){
             	appendObjectInfo(args,arguments[i]);
             }
             args.push("\n继续弹出该调试信息？");
-            if(!confirm(args.join(''))){
+            if(!(this.confirm||this.print)(args.join(''))){
                 reportError = Function.prototype;
             }
         }
-        var confirm = this.confirm||this.print;
-        var reportTrace = Function.prototype;
+        function reportTrace(){};
         //reportTrace = reportError;
     }
     //初始化loadTextByURL 和 $JSI.scriptBase
