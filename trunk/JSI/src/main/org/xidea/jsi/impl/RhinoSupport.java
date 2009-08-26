@@ -6,6 +6,7 @@ public abstract class RhinoSupport {
 
 	private static final String EVAL = loadText("org/xidea/jsi/impl/initialize.js");
 
+	Object topScope;
 	/**
 	 * 1.初始化 freeEval，加上调试姓习
 	 * 2.$JSI.scriptBase 设置为 classpath:///
@@ -13,8 +14,8 @@ public abstract class RhinoSupport {
 	 * @param arguments
 	 * @return
 	 */
-	public static Object initialize(Object arguments){
-		RhinoSupport s = get(arguments);
+	public static Object initialize(Object arguments,Object topScope){
+		RhinoSupport s = get(topScope);
 		Object initializer = s.eval(EVAL,"<setup>");
 		return s.call(initializer, null, arguments);
 	}
@@ -43,13 +44,16 @@ public abstract class RhinoSupport {
 		Object result =  s.eval("(function(){eval(arguments[0])})",path);
 		return result;
 	}
-	private static RhinoSupport get(Object jsobject){
-		String cn = jsobject.getClass().getName();
+	private static RhinoSupport get(Object topScope){
+		String cn = topScope.getClass().getName();
+		RhinoSupport sp;
 		if(cn.startsWith("com.sun.") || cn.startsWith("sun.")){
-			return new Java6Impl();
+			sp = new Java6Impl();
 		}else{
-			return new RhinoImpl();
+			sp = new RhinoImpl();
 		}
+		sp.topScope = topScope;
+		return sp;
 	}
 	public abstract Object eval(String code,String path);
 	protected abstract Object call(Object function,Object thisObj,Object... args);
@@ -59,13 +63,13 @@ class Java6Impl extends RhinoSupport{
 	public Object call(Object function,Object thisObj,Object... args){
 		sun.org.mozilla.javascript.internal.Context cx = sun.org.mozilla.javascript.internal.Context.getCurrentContext();
 		return ((sun.org.mozilla.javascript.internal.Function)function).call(cx, 
-				sun.org.mozilla.javascript.internal.ScriptRuntime.getTopCallScope(cx), 
+				(sun.org.mozilla.javascript.internal.Scriptable)topScope, 
 				(sun.org.mozilla.javascript.internal.Scriptable)thisObj, args);
 	}
 	public Object eval(String code,String path){
 		sun.org.mozilla.javascript.internal.Context cx = sun.org.mozilla.javascript.internal.Context.getCurrentContext();
 		return cx.evaluateString(
-				sun.org.mozilla.javascript.internal.ScriptRuntime.getTopCallScope(cx), code, path, 1, null);
+				(sun.org.mozilla.javascript.internal.Scriptable)topScope, code, path, 1, null);
 
 	}
 }
@@ -74,12 +78,12 @@ class RhinoImpl extends RhinoSupport{
 	public Object call(Object function,Object thisObj,Object... args){
 		org.mozilla.javascript.Context cx = org.mozilla.javascript.Context.getCurrentContext();
 		return ((org.mozilla.javascript.Function)function).call(cx, 
-				org.mozilla.javascript.ScriptRuntime.getTopCallScope(cx), 
+				(org.mozilla.javascript.Scriptable)topScope, 
 				(org.mozilla.javascript.Scriptable)thisObj, args);
 	}
 	public Object eval(String code,String path){
 		org.mozilla.javascript.Context cx = org.mozilla.javascript.Context.getCurrentContext();
 		return cx.evaluateString(
-				org.mozilla.javascript.ScriptRuntime.getTopCallScope(cx), code, path, 1, null);
+				(org.mozilla.javascript.Scriptable)topScope, code, path, 1, null);
 	}
 }

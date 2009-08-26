@@ -192,7 +192,7 @@ var $import = function(loaderEval,cachedScripts){
         }
     }else{
     	if("org.xidea.jsi:Server"){
-    	    loadTextByURL = Packages.org.xidea.jsi.impl.RhinoSupport.initialize(arguments);
+    	    loadTextByURL = Packages.org.xidea.jsi.impl.RhinoSupport.initialize(arguments,this);
     	}
     }
     if(":Debug"){
@@ -1051,6 +1051,11 @@ var $import = function(loaderEval,cachedScripts){
     }
     function doObjectImport(packageObject,objectName,target){
         //do load
+        if(":Debug"){
+        	if(!packageObject.objectScriptMap[objectName]){
+        		reportError("对象："+packageObject.name + ":"+objectName +"沒有找到");
+        	}
+        }
         loadScript(packageObject,packageObject.objectScriptMap[objectName],objectName,true);
         var pos2obj = objectName.indexOf('.');
         if(pos2obj>0){
