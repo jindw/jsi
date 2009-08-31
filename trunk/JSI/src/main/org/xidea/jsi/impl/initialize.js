@@ -5,6 +5,7 @@
  * 3.返回loadTextByURL
  */
 var window =this;
+var JSI = this.$JSI;
 this.print = this.print || function(arg){
     java.lang.System.out.print(String(arg))
 };
@@ -19,6 +20,10 @@ this.print = this.print || function(arg){
         return evaler.call(this,code);
     }
     return function loadTextByURL(url){
+    	var value =JSI.loadTextByURL&&JSI.loadTextByURL(url)
+    	if(value){
+    		return value;
+    	}
         url = url.replace(/^\w+:(\/)+(?:\?.*=)?/,'');
         return Packages.org.xidea.jsi.impl.RhinoSupport.loadText(url)+'';
     }
