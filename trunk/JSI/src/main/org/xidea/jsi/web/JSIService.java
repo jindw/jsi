@@ -34,7 +34,7 @@ public class JSIService extends ResourceRoot {
 	protected static Collection<String> imgages = Arrays.asList("png", "gif",
 			"jpeg", "jpg");
 
-	public String getContentType(String path, Map<String, String[]> params,
+	protected String getContentType(String path, Map<String, String[]> params,
 			String defaultContentType) {
 		String contentType = defaultContentType;
 		int p = path.lastIndexOf('.');
@@ -102,7 +102,7 @@ public class JSIService extends ResourceRoot {
 	 * @param out
 	 * @throws IOException
 	 */
-	public void writeBase64(String data, OutputStream out) throws IOException {
+	protected void writeBase64(String data, OutputStream out) throws IOException {
 		char[] cs = data.toCharArray();
 		int previousByte = 0;
 		for (int i = 0, k = -1; i < cs.length; i++) {
@@ -146,7 +146,7 @@ public class JSIService extends ResourceRoot {
 
 	}
 
-	public void writeSDNRelease(String path, OutputStream out)
+	protected void writeSDNRelease(String path, OutputStream out)
 			throws IOException {
 		String result = null;
 		//每次都清理一下吧，CPU足够强悍，反正这只是一个调试程序
@@ -163,7 +163,7 @@ public class JSIService extends ResourceRoot {
 		out.write(result.getBytes(this.getEncoding()));
 	}
 
-	public void writeSDNDebug(String path, OutputStream out) throws IOException {
+	protected void writeSDNDebug(String path, OutputStream out) throws IOException {
 		out.write(sdn.doDebugExport(path).getBytes(this.getEncoding()));
 	}
 

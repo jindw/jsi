@@ -2,7 +2,6 @@ package org.xidea.jsi.web.test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,10 +11,10 @@ import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
 
 
-public class JSIServiceTest {
+public class JSIServiceTest  extends JSIService{
 	private BASE64Encoder encoder = new BASE64Encoder();
 	private BASE64Decoder decoder = new BASE64Decoder();
-	private JSIService service = new JSIService();
+	private JSIServiceTest service = new JSIServiceTest();
 	
 
 	@Test
