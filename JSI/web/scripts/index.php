@@ -10,21 +10,24 @@ $encoding = "UTF-8";
 $export_service = "http://litecompiler.appspot.com/scripts/export.action";
 ?>
 <?php
-if(array_key_exists('path',$_GET)){
-   $path = $_GET['path'];
+
+if(array_key_exists('service',$_GET)){
+    $path = "service=".$_GET['service'];
+}else if(array_key_exists('path',$_GET)){
+    $path = $_GET['path'];
 }else if(array_key_exists('PATH_INFO',$_SERVER)){
-   $path = $_SERVER['PATH_INFO'] ;
-   $path = substr($path, 1);
+    $path = $_SERVER['PATH_INFO'] ;
+    $path = substr($path, 1);
 }else{
-   $path = null;
+    $path = null;
 }
-if($path == 'data.action'){
+if($path == 'service=data'){
     $data = $_GET['data'];
     list($content_type,$data) = split(',',$data);
     header('Content-type:'.$content_type);
     echo base64_decode($data);
     return;
-}else if($path == 'export.action'){
+}else if($path == 'service=export'){
     //转发到指定jsa服务器
     if($export_service){
 		$postdata = http_build_query(

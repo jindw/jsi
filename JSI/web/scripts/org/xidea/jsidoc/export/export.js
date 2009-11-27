@@ -89,17 +89,6 @@ Exporter.prototype = {
     	return this.imports
     },
     /**
-     * 将getContent 获取的数据转化为xml文件
-     */
-    getXMLContent : function(){
-    	var content = this.getContent();
-    	var result = [];
-    	for(var n in content){
-            result.push({path:n,content:content[n]});
-    	}
-        return exportDataTemplate.render({data:result});
-    },
-    /**
      * 按需导出部分URL，转化模板等
      */
     getContent : function(){
@@ -322,5 +311,4 @@ Template.prototype.render = function(context){
     return this.data(context)
 }
 //alert(this.scriptBase.replace(/\w+\/$/,"html/export-data.xml"))
-var exportDataTemplate = new Template(this.scriptBase+"../html/export-data.xml#//*[@id='properties']/*");
 var exportDocTemplate = new Template(this.scriptBase+"../html/export-data.xml#//*[@id='document']/*");

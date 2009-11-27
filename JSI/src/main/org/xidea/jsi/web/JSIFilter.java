@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.Map;
 
 import javax.servlet.Filter;
@@ -72,11 +71,12 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;
 		String path = getScriptPath(request);
-		if (path!=null) {
-			if (this.processAction(path, request, response)) {
-				return true;
-			}
-			if (isIndex(path)) {
+		if (path != null) {
+			if (path.length() == 0) {
+				String service = request.getParameter("service");
+				if (this.processAction(service, request, response)) {
+					return true;
+				}
 				path = req.getParameter("path");
 			}
 			boolean isPreload = false;
@@ -87,13 +87,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 						+ ".js";
 
 			}
-			// 经测试，metaType是不会自动设置的;
-			// 对于静态文件的设置，我估计是提供静态文件服务的servlet内做的事情。
-
-			// setContentType 和 setCharacterEncoding.在encoding上相互影响
-			// response.getCharacterEncoding 默认是ISO-8895-1
-			// request.getCharacterEncoding 默认是null
-			initializeEncodingIfNotSet(request, resp);
+			initializeEncodingIfNotSet(request, resp, null);
 			String metatype = context.getMimeType(path);
 			if (metatype != null) {
 				resp.setContentType(metatype);
@@ -101,6 +95,13 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 			ServletOutputStream out = resp.getOutputStream();
 			return writeResource(path, isPreload, out);
 
+		} else if (path.startsWith("export/")) {
+			path = path.substring(7);
+			if (path.length() == 0) {
+				throw new ScriptNotFoundException("");
+			}
+			sdnService(path, request, response);
+			return true;
 		}
 		return false;
 	}
@@ -108,9 +109,9 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 	protected String getScriptPath(HttpServletRequest request) {
 		String path = request.getRequestURI().substring(
 				request.getContextPath().length());
-		if(path.startsWith(this.scriptBase)){
+		if (path.startsWith(this.scriptBase)) {
 			return path.substring(this.scriptBase.length());
-		}else{
+		} else {
 			return null;
 		}
 	}
@@ -124,31 +125,12 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 	 * @return
 	 * @throws IOException
 	 */
-	protected boolean processAction(String path,
-			HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
-		if (isIndex(path) && request.getParameter("path") == null) {
-			initializeEncodingIfNotSet(request, response);
-			String externalScript = request.getParameter("externalScript");
-			if (externalScript == null) {
-				response.getWriter().print(document());
-			} else {
-				response
-						.sendRedirect("org/xidea/jsidoc/index.html?externalScript="
-								+ URLEncoder.encode(externalScript, "utf-8"));
-
-			}
-			return true;
-		} else if (path.startsWith("=")) {
-			path = path.substring(1);
-			if (path.length() == 0) {
-				throw new ScriptNotFoundException("");
-			}
-			sdnService(path, request, response);
-			return true;
-		} else if ("export.action".equals(path)) {
+	protected boolean processAction(String name, HttpServletRequest request,
+			HttpServletResponse response) throws IOException {
+		if ("export".equals(name)) {
 			// type =1,type=2,type=3
-			initializeEncodingIfNotSet(request, response);
+			String encoding = this.getEncoding();
+			initializeEncodingIfNotSet(request, response,encoding);
 			@SuppressWarnings("unchecked")
 			Map param = request.getParameterMap();
 			@SuppressWarnings("unchecked")
@@ -157,22 +139,23 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			} else {
 				response.addHeader("Content-Type", "text/plain;charset="
-						+ this.getEncoding());
+						+ encoding);
 				response.getWriter().print(result);
 			}
 			return true;
-		} else if ("data.action".equals(path)) {
-			initializeEncodingIfNotSet(request, response);
+		} else if ("data".equals(name)) {
 			String data = request.getParameter("data");
 			int dataContentEnd = data.indexOf(',');
-			response.addHeader("Content-Type" , data.substring(dataContentEnd));
-			this.writeBase64(data.substring(dataContentEnd + 1), response.getOutputStream());
+			initializeEncodingIfNotSet(request, response,null);
+			response.addHeader("Content-Type", data.substring(dataContentEnd));
+			this.writeBase64(data.substring(dataContentEnd + 1), response
+					.getOutputStream());
 			return true;
 		}
 		return false;
 	}
 
-	public void sdnService(String path, HttpServletRequest request,
+	protected void sdnService(String path, HttpServletRequest request,
 			HttpServletResponse response) throws IOException {
 		// TODO:以后应该使用Stream，应该使用成熟的缓存系统
 		OutputStream out = response.getOutputStream();
@@ -209,12 +192,20 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 		return false;
 	}
 
-	private void initializeEncodingIfNotSet(ServletRequest request,
-			ServletResponse response) throws UnsupportedEncodingException {
-		if (request.getCharacterEncoding() == null) {
+	/*
+	 * 经测试，metaType是不会自动设置的; 对于静态文件的设置，我估计是提供静态文件服务的servlet内做的事情。 setContentType
+	 * 和 setCharacterEncoding.在encoding上相互影响 response.getCharacterEncoding
+	 * 默认是ISO-8895-1 request.getCharacterEncoding 默认是null
+	 */
+	protected void initializeEncodingIfNotSet(ServletRequest request,
+			ServletResponse response,String encoding) throws UnsupportedEncodingException {
+		if (encoding != null || request.getCharacterEncoding() == null) {
 			// request 默认情况下是null
-			request.setCharacterEncoding(this.getEncoding());
-			response.setCharacterEncoding(this.getEncoding());
+			if(encoding == null){
+				encoding = this.getEncoding();
+			}
+			request.setCharacterEncoding(encoding);
+			response.setCharacterEncoding(encoding);
 		}
 	}
 
@@ -249,7 +240,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 		init(scriptBase, encoding);
 	}
 
-	private void init(String scriptBase, String encoding) {
+	protected void init(String scriptBase, String encoding) {
 		if (encoding != null) {
 			this.setEncoding(encoding);
 		}
@@ -265,8 +256,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 		} catch (MalformedURLException e) {
 			log.warn(e);
 		}
-		this.addLib(new File(context
-				.getRealPath(this.scriptBase)));
+		this.addLib(new File(context.getRealPath(this.scriptBase)));
 	}
 
 	public ServletConfig getServletConfig() {
