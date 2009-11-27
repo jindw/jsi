@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:d="http://www.xidea.org/taglib/decorator" xml:lang="zh_CN"
+  lang="zh_CN">
+<head>
+<!-- Animal脚本必须放在Person、Cat、Mouse 之前 -->
+<script src="../scripts/example/cat/Animal.js"></script>
+<script src="../scripts/example/cat/Person.js"></script>
+<script src="../scripts/example/cat/Cat.js"></script>
+<script src="../scripts/example/cat/Mouse.js"></script>
+<title>灭鼠记-Script</title>
+</head>
+<body>
+<script>
+//创建人对象
+var person = new Person();
+//养猫
+person.feedCat();
+//有只老鼠
+var mouse = new Mouse();
+
+//打印猫抓到老鼠的结果
+document.write("<h1>猫抓老鼠的结果： "+person.cat.lookForFood(mouse)+"<h1>");
+</script>
+</body>
+</html>

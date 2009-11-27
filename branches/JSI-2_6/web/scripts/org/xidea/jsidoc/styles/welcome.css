@@ -1,0 +1,51 @@
+@IMPORT url("default.css");
+body{
+    padding-top: 30px;
+}
+h2{
+    font-size: 24px;
+    text-align: center;
+    color: #00008B;
+    font-family: serif;
+    font-weight: bolder;
+}
+h3{
+    font:bold 16px/160% Verdana, Arial, Helvetica, sans-serif;
+    background: #EEE;
+    color: #3f2ba2;
+    margin:0;
+    padding:0 5px;
+}
+h4{
+    font-size:12px;
+}
+.block{
+    border-left:4px solid #888;
+}
+
+p{
+    font-size: 14px;
+    text-indent: 2em;
+}
+li{
+    font-size: 14px;
+}
+.block{
+    border-left:2px solid #888;
+    background:#eee;
+}
+.item-title{
+    color: #00008B;
+    font-weight: bolder;
+}
+.more-,.less-{
+    font-size: 12px;
+    text-align: left;
+    color: #00008B;
+    font-style: italic;
+}
+.more- .less-,.less- .more-{
+    display:none;
+}
+
+

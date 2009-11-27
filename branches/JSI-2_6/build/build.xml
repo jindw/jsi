@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="GBK"?>
+<project name="JSI" default="build" basedir="../">
+	<tstamp>
+		<format property="version" pattern="yyyyMMdd" />
+	</tstamp>
+
+	<!-- web/WEB-INF/lib/Template.jar;web/WEB-INF/classes;../JSA/classes;../JSA/build/dest/JSA-CMD.jar;../JSA/classes -->
+	<available file="../JSA/build/dest/JSA-CMD.jar" property="JSAPath" value="../JSA/build/dest/JSA-CMD.jar;" />
+
+	<target name="init">
+		<mkdir dir="build/dest" />
+		<mkdir dir="build/dest/scripts" />
+		<mkdir dir="build/dest/jsidoc" />
+		<mkdir dir="build/dest/jsidoc/util/" />
+		<mkdir dir="build/dest/jsidoc/export/" />
+	</target>
+	<target name="cgi" depends="jar-compressed">
+		<!--
+encoding="GBK"
+			comment="
+1.将文件存储在你的cgi-bin 目录.
+2.创建 jsi.cgi:
+  #!java -jar cgi.jar
+" 
+		-->
+		<jar  destfile="build/dest/cgi.jar">
+			<manifest>
+				<attribute name="Main-Class" value="org.xidea.jsi.web.JSICGI" />
+			</manifest>
+			<zipfileset src="build/dest/JSI.jar">
+				<exclude name="**/*.java" />
+			</zipfileset>
+			<zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
+				<include name="**/*.*" />
+			</zipfileset>
+			<zipfileset src="../JSA/build/dest/JSA.jar">
+				<include name="**/*.*" />
+			</zipfileset>
+			<zipfileset src="web/WEB-INF/lib/js.jar">
+				<exclude name="**/*.java" />
+			</zipfileset>
+		</jar>
+		<copy file="build/dest/cgi.jar" todir="D:\Apache2.2\cgi-bin"/>
+	</target>
+	<target name="jar">
+		<jar encoding="GBK" comment="不要解压该文件！！" destfile="build/dest/JSI.jar">
+			<fileset dir="web/WEB-INF/classes">
+				<include name="**/*.*" />
+				<exclude name="**/test/**.*" />
+				<exclude name="**/sandbox/**.*" />
+			</fileset>
+			<zipfileset src="web/WEB-INF/lib/Template.jar" defaultexcludes="true">
+				<include name="org/xidea/lite/*.js" />
+			</zipfileset>
+			<fileset dir="src/main">
+				<include name="**/*.java" />
+				<exclude name="**/test/**.*" />
+				<exclude name="**/sandbox/**.*" />
+			</fileset>
+			<fileset dir="build/dest/">
+				<include name="exported.xml" />
+			</fileset>
+			<zipfileset dir="src/main" prefix="META-INF">
+				<include name="*.tld" />
+			</zipfileset>
+		</jar>
+		<copy tofile="../CDN/war/WEB-INF/lib/JSI.jar" file="build/dest/JSI.jar" />
+	</target>
+	<target name="jar-compressed" depends="init">
+		<delete file="build/dest/JSI.*" />
+		<delete file="build/dest/JSI-*.jar" />
+		<jar encoding="GBK" comment="不要解压该文件！！" destfile="build/dest/JSI.jar">
+			<fileset dir="web/WEB-INF/classes">
+				<include name="**/*.*" />
+				<include name="org/xidea/test/**/*.*" />
+				<include name="org/xidea/jsi/impl/**/*.*" />
+				<exclude name="**/jsidoc/styles/*.png" />
+				<exclude name="**/jsidoc/html/*.xhtml" />
+				<exclude name="**/jsidoc/*.js" />
+				<exclude name="**/jsidoc/export/*.*" />
+				<exclude name="**/jsidoc/util/*.*" />
+				<exclude name="**/test/**/*.*" />
+				<exclude name="org/xidea/sandbox/**/*.*" />
+			</fileset>
+			<fileset dir="src/main">
+				<include name="**/*.java" />
+				<exclude name="**/test/**.*" />
+				<exclude name="**/sandbox/**.*" />
+			</fileset>
+			<zipfileset dir="build/dest/jsidoc/" prefix="org/xidea/jsidoc">
+				<include name="__package__.js" />
+				<include name="jsidoc.js" />
+				<include name="export/__package__.js" />
+				<include name="export/export.js" />
+			</zipfileset>
+			<zipfileset src="${basedir}/build/dest/jsidoc/util/util.jar">
+				<include name="org/xidea/jsidoc/util/*.js" />
+				<exclude name="org/xidea/jsidoc/util/*__preload__.js" />
+			</zipfileset>
+			<fileset dir="${basedir}/build/dest/">
+				<include name="boot-min.js" />
+				<include name="boot-col.js" />
+				<include name="boot-rhino.js" />
+			</fileset>
+		</jar>
+		<copy tofile="build/dest/JSI-${version}.jar" file="build/dest/JSI.jar" />
+	</target>
+	<target name="compress-boot" depends="init">
+		<java classname="org.jside.jsi.tools.CompressAction" classpath="${JSAPath}">
+			<arg value="-output" />
+			<arg value="${basedir}/build/dest/boot-min.js" />
+			<arg value="-source" />
+			<arg value="${basedir}/web/scripts/boot.js" />
+			<arg value="-config.features" />
+			<arg value="#none" />
+		</java>
+		<java classname="org.jside.jsi.tools.CompressAction" classpath="${JSAPath}">
+			<arg value="-output" />
+			<arg value="${basedir}/build/dest/boot-col.js" />
+			<arg value="-source" />
+			<arg value="${basedir}/web/scripts/boot.js" />
+			<arg value="-config.features" />
+			<arg value="org.xidea.jsi:COL" />
+		</java>
+		<java classname="org.jside.jsi.tools.CompressAction" classpath="${JSAPath}">
+			<arg value="-output" />
+			<arg value="${basedir}/build/dest/boot-rhino.js" />
+			<arg value="-source" />
+			<arg value="${basedir}/web/scripts/boot.js" />
+			<arg value="-config.features" />
+			<arg value=":Debug" />
+			<arg value="org.xidea.jsi:Server" />
+			<arg value="org.xidea.jsi:PackageOptimize" />
+		</java>
+	</target>
+	<target name="compress-jsidoc" depends="init">
+		<!-- export util -->
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-config.ascii" />
+			<arg value="false" />
+			<arg value="-exports" />
+			<arg value="org.xidea.jsidoc.util.*" />
+
+			<arg value="-outputPackage" />
+			<arg value="${basedir}/build/dest/jsidoc/util/__package__.js" />
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/jsidoc/util/util.js" />
+
+			<!--
+			util还是挺有用的，分散发布吧，没准有人可以利用一下
+			-->
+			<arg value="-outputJAR" />
+			<arg value="${basedir}/build/dest/jsidoc/util/util.jar" />
+		</java>
+		<!-- export export -->
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+
+			<arg value="-bootCached" />
+			<arg value="org.xidea.jsidoc.util.*" />
+
+			<arg value="-exports" />
+			<arg value="org.xidea.jsidoc.export.*" />
+
+			<arg value="-outputPackage" />
+			<arg value="${basedir}/build/dest/jsidoc/export/__package__.js" />
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/jsidoc/export/export.js" />
+		</java>
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+
+
+			<arg value="-bootCached" />
+			<arg value="org.xidea.jsidoc.util.*" />
+			<arg value="org.xidea.jsidoc.export.*" />
+
+			<arg value="-exports" />
+			<arg value="org.xidea.jsidoc:JSIDoc" />
+
+			<arg value="-outputPackage" />
+			<arg value="${basedir}/build/dest/jsidoc/__package__.js" />
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/jsidoc/jsidoc.js" />
+		</java>
+
+		<antcall target="_buildPreload">
+			<param name="dest" value="build/dest/jsidoc/preload.js" />
+		</antcall>
+	</target>
+	<target name="_buildPreload">
+		<echo>${dest}</echo>
+		<echo file="${dest}" />
+		<property name="packageName" value="org.xidea.jsidoc.export" />
+		<antcall target="_appendPreload">
+			<param name="source" value="build/dest/jsidoc/__package__.js" />
+			<param name="packageName" value="org.xidea.jsidoc" />
+		</antcall>
+		<antcall target="_appendPreload">
+			<param name="source" value="build/dest/jsidoc/jsidoc.js" />
+			<param name="packageName" value="org.xidea.jsidoc" />
+		</antcall>
+		<antcall target="_appendPreload">
+			<param name="source" value="build/dest/jsidoc/util/__package__.js" />
+			<param name="packageName" value="org.xidea.jsidoc.util" />
+		</antcall>
+		<antcall target="_appendPreload">
+			<param name="source" value="build/dest/jsidoc/util/util.js" />
+			<param name="packageName" value="org.xidea.jsidoc.util" />
+		</antcall>
+		<antcall target="_appendPreload">
+			<param name="source" value="build/dest/jsidoc/export/__package__.js" />
+			<param name="packageName" value="org.xidea.jsidoc.export" />
+		</antcall>
+		<antcall target="_appendPreload">
+			<param name="source" value="build/dest/jsidoc/export/export.js" />
+			<param name="packageName" value="org.xidea.jsidoc.export" />
+		</antcall>
+
+	</target>
+
+
+
+	<target name="_appendPreload">
+		<basename property="fileName" file="${source}" />
+		<condition property="fileNameAndPrefix" value="'',function(){" else="'${fileName}',function(){eval(this.varText);">
+			<equals arg1="${fileName}" arg2="__package__.js" />
+		</condition>
+		<echo file="${source}.prefix">
+$JSI.preload('${packageName}',${fileNameAndPrefix}</echo>
+		<echo file="${source}.postfix">})</echo>
+		<copy tofile="${dest}.temp" file="${dest}" />
+		<concat encoding="utf-8" destfile="${dest}">
+			<path path="${dest}.temp" />
+			<path path="${source}.prefix" />
+			<path path="${source}" />
+			<path path="${source}.postfix" />
+		</concat>
+		<delete file="${dest}.temp" />
+		<delete file="${source}.prefix" />
+		<delete file="${source}.postfix" />
+	</target>
+	<target name="compress-all">
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-config.ascii" />
+			<arg value="false" />
+			<!--
+			<arg value="-bootCached" />
+			<arg value="example.*" />
+			-->
+			<arg value="-exports" />
+			<arg value="example.*" />
+			<arg value="example.alias:" />
+			<arg value="example.dependence.*" />
+			<arg value="example.internal.*" />
+			<arg value="org.xidea.jsidoc.*" />
+			<arg value="org.xidea.jsidoc.export.*" />
+			<arg value="org.xidea.jsidoc.util.*" />
+			<arg value="org.xidea.test.*" />
+			<arg value="org.xidea.test.loader.*" />
+
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/exported-all.js" />
+			<arg value="-outputXML" />
+			<arg value="${basedir}/build/dest/exported-all.xml" />
+			<arg value="-outputJAR" />
+			<arg value="${basedir}/build/dest/exported-all.jar" />
+		</java>
+	</target>
+
+	<target name="buildExample" depends="jar">
+		<war destfile="build/dest/JSI-example-${version}.war" webxml="web/WEB-INF/web.xml" description="http://localhost/JSI-example-${version}/scripts/jsidoc">
+			<zipfileset dir="build/dest" file="JSI.jar" prefix="WEB-INF/lib/" />
+			<zipfileset dir="web">
+				<include name="scripts/example/**/*.*" />
+				<include name="WEB-INF/lib/**/*.*" />
+			</zipfileset>
+		</war>
+	</target>
+	<target name="ftp">
+		<ftp password="jindw@163.com" server="upload.sourceforge.net" userid="anonymous" action="put" remotedir="/incoming">
+			<fileset file="build/dest/">
+				<include name="*${version}.war" />
+				<include name="JSI.jar" />
+			</fileset>
+		</ftp>
+	</target>
+	<target name="JSIDoc" depends="init">
+		<delete file="build/dest/JSIDoc-*.*" />
+		<java classname="org.xidea.jsi.test.SimpleCacheBuilder" classpath="${JSAPath};web/WEB-INF/classes">
+			<arg value="${basedir}/web/scripts" />
+			<arg value="${basedir}/build/dest/jsidoc/source.js/" />
+		</java>
+		<java classname="org.jside.jsi.tools.CompressAction" classpath="${JSAPath}">
+			<arg value="-output" />
+			<arg value="${basedir}/build/dest/jsidoc/boot-all-featrues.js" />
+			<arg value="-source" />
+			<arg value="${basedir}/web/scripts/boot.js" />
+			<arg value="-config.features" />
+			<arg value=":Debug" />
+			<arg value="org.xidea.jsi:Block" />
+			<arg value="org.xidea.jsi:Server" />
+			<arg value="org.xidea.jsi:COL" />
+			<arg value="org.xidea.jsi:PackageOptimize" />
+		</java>
+
+		<echo file="build/dest/jsidoc/temp.js">
+$import("org.xidea.jsidoc:JSIDoc");</echo>
+		<concat encoding="utf-8" destfile="${basedir}/build/dest/jsidoc/boot.js">
+			<path path="build/dest/jsidoc/boot-all-featrues.js" />
+			<path path="build/dest/jsidoc/preload.js" />
+			<path path="build/dest/jsidoc/temp.js" />
+			<path path="build/dest/jsidoc/source.js" />
+		</concat>
+		<zip destfile="build/dest/JSIDoc-${version}.zip" compress="true">
+			<zipfileset dir="web/scripts">
+				<include name="**/*.*" />
+				<exclude name="boot.js" />
+				<exclude name="**/*.db" />
+				<exclude name="*/**/*.js" />
+				<exclude name="*/**/*.png" />
+				<exclude name="*/**/*.xhtml" />
+				<exclude name="*/**/*test*.html" />
+				<exclude name="*/**/root-frame.html" />
+			</zipfileset>
+			<zipfileset dir="web/scripts/org/xidea/jsidoc/">
+				<include name="index.html" />
+			</zipfileset>
+			<zipfileset dir="build/dest/jsidoc/">
+				<include name="boot.js" />
+			</zipfileset>
+		</zip>
+	</target>
+	<target name="build" depends="compress-jsidoc,compress-boot,jar-compressed,cgi,JSIDoc,zip-jsidoc">
+
+	</target>
+	<target name="zip-jsidoc">
+		<delete file="build/dest/JSI-*.*" />
+		<tar destfile="build/dest/JSI-${version}.tar" compression="gzip">
+			<tarfileset dir="web">
+				<include name="**/*.*" />
+				<include name="scripts/**/*.*" />
+				<exclude name="WEB-INF/classes/**/*.*" />
+				<exclude name="**/*.db" />
+			</tarfileset>
+		</tar>
+		<zip destfile="build/dest/JSI-${version}.zip" compress="true">
+			<zipfileset dir="web">
+				<include name="**/*.*" />
+				<include name="scripts/**/*.*" />
+				<exclude name="WEB-INF/classes/**/*.*" />
+				<exclude name="**/*.db" />
+			</zipfileset>
+		</zip>
+	</target>
+	<target name="min">
+		<java classname="org.jside.jsi.tools.CompressAction" classpath="${JSAPath}">
+			<arg value="-output" />
+			<arg value="${basedir}/build/dest/boot-min.js" />
+			<arg value="-source" />
+			<arg value="${basedir}/web/scripts/boot.js" />
+		</java>
+	</target>
+	<target name="packageOptimize">
+		<java classname="org.jside.jsi.tools.web.PackageAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-output" />
+			<arg value="${basedir}/build/dest/package-gen.js" />
+
+			<arg value="-packageName" />
+			<arg value="org.xidea.jsidoc" />
+
+			<arg value="-dependences" />
+			<arg value="org.xidea.jsidoc.export" />
+			<arg value="org.xidea.jsidoc.util" />
+		</java>
+	</target>
+	<target name="send">
+		<copy tofile="../JSA/lib/JSI.jar" file="build/dest/JSI.jar" />
+		<copy tofile="../Lite/web/WEB-INF/lib/JSI.jar" file="build/dest/JSI.jar" />
+		<copy tofile="../LiteCompiler/war/WEB-INF/lib/JSI.jar" file="build/dest/JSI.jar" />
+	</target>
+</project>

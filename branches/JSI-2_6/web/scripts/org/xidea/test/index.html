@@ -1,0 +1,38 @@
+<html>
+  <head>
+      <title>自动装载工具</title>
+      <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+      <script src="../../../boot.js"></script>
+      <style>
+          .error{
+               color:red;
+               font-weight:bold;
+          }
+          .warn{
+               color:#990;
+               font-weight:bold;
+          }
+          .loading{
+               color:#000;
+          }
+      </style>
+  </head>
+  <body topmargin="0" bottommargin="0">
+    <div id="console" style="border:1px solid black;width:100%;padding-bottom:40px"></div>
+    <script>
+      $import("org.xidea.test.TestSuite",true);
+    </script>
+    
+    
+    <script>
+         var testPackage = ["org.xidea.jsidoc.util"];
+         TestSuite.initialize(testPackage,"console");
+         for(var i = 0;i<testPackage.length;i++){
+             $import(testPackage[i]+".test.*",true)
+         }
+    </script>
+    <script>
+         TestSuite.test();
+    </script>
+  </body>
+</html>

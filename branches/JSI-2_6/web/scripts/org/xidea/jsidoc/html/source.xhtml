@@ -1,0 +1,137 @@
+<html xmlns="http://www.xidea.org/ns/xhtml" xmlns:c="http://www.xidea.org/ns/lite/core">
+<head>
+<link rel="stylesheet" type="text/css" href="../styles/source.css" />
+<title>JSIntegeration Doc Menu</title>
+</head>
+<body style="margin: 0px;padding: 0px;">
+<table width="100%" cellpadding="0" border="0" cellspacing="0"
+	class="xidea--syntax-source">
+	<thead>
+		<tr>
+			<td style="width:18px;"></td>
+			<td colspan="2" class="xidea-syntax-content-top"><a href="#">view plain</a>|
+			<a href="#">print</a> | ?</td>
+		</tr>
+	</thead>
+	<tbody>
+		<c:for var="line" items="${lines.lines}">
+		    <c:var name="line" value="${lines.next()}"/>
+			<tr depth="${lines.depth}" class="xidea-syntax-open ${for.index%2?'xidea-syntax-row1':'xidea-syntax-row0'}">
+				<td class="xidea-syntax-vrule0"><input type="button" value="${for.index+1}" /></td>
+				<c:if test="${lines.nextDepth&gt;lines.depth}">
+					<td onclick="collapse(this)"
+						onmouseover="showBound(this,${lines.lineIndex})"
+						onmouseout="hiddenBound(this,${lines.lineIndex})" class="xidea-syntax-vrule1">
+					<input class="xidea-syntax-closehandle" type="button" value="-" /> <input
+						class="xidea-syntax-openhandle" type="button" value="+" /></td>
+				</c:if>
+				<c:else>
+					<td onmouseover="showBound(this,${lines.depthStart})"
+						onmouseout="hiddenBound(this,${lines.depthStart})"
+						ondblclick="collapse(this,${lines.depthStart})" class="xidea-syntax-vrule1">&#160;</td>
+				</c:else>
+				<td nowrap="true">
+				<pre><c:out value="${lines.anchor+line}"/>
+				<c:if test="${(lines.nextDepth>lines.depth)}">
+				   <b class="xidea-syntax-more">...</b>
+				</c:if>
+				</pre></td>
+			</tr>
+		</c:for>
+	</tbody>
+	<tfoot>
+		<tr>
+			<td></td>
+			<td colspan="2" class="xidea-syntax-content-bottom">&#32;</td>
+		</tr>
+	</tfoot>
+</table>
+<script>//<![CDATA[
+  var collapseCssReg = /\bxidea-syntax-open\b|\bxidea-syntax-closed\b/;
+  function collapse(td,start){
+    var tr = td.parentNode;
+    if(start>0){
+      tr = tr.parentNode.rows[start-1]
+    }
+    var cn = tr.className.replace(collapseCssReg,'');
+    if(tr.getAttribute('closed')){
+      tr.className = cn+" xidea-syntax-open";
+      doOpen(tr);
+    }else{
+      tr.className = cn+" xidea-syntax-closed"
+      doClose(tr);
+    }
+    
+  }
+  function doClose(ele){
+    var d = ele.getAttribute("depth");
+    ele.setAttribute('closed',"true");
+    while(ele = ele.nextSibling){
+      if(ele.nodeType == 1){
+        if(ele.getAttribute("depth")>d){
+          ele.style.display='none';
+        }else{
+          break;
+        }
+      }
+    }
+  }
+  function doOpen(ele){
+    var d = ele.getAttribute("depth");
+    ele.removeAttribute('closed');
+    var pre = ele;
+    var nc = -1;
+    while(ele = ele.nextSibling){
+      if(ele.nodeType == 1){
+        var nd = ele.getAttribute("depth");
+        if(nc>0){
+          if(nd > nc){
+            continue;
+          }else{
+            ele.style.display='';
+            nc =-1;
+          }
+        }else if(nd>d){
+          ele.style.display='';
+          if(ele.getAttribute('closed')){
+            nc = nd;
+          }
+        }else{
+          break;
+        }
+        pre = ele;
+      }
+    }
+  }
+  var boundReg = /\bxidea-syntax-bound\b/;
+  function showBound(td,index){
+    if(index<1){return;}
+    var rows = td.parentNode.parentNode.rows;
+    var ele = rows[index-1];
+    ele.className = ele.className.replace(boundReg,' ') + " xidea-syntax-bound";
+    var d = ele.getAttribute("depth");
+    while(ele = rows[index++]){
+      ele.className = ele.className.replace(boundReg,' ') + " xidea-syntax-bound";
+      if(ele.getAttribute("depth")>d){
+      }else{
+        break;
+      }
+    }
+  }
+  function hiddenBound(td,index){
+    if(index<1){return;}
+    var rows = td.parentNode.parentNode.rows;
+    var ele = rows[index-1];
+    ele.className = ele.className.replace(boundReg,' ');
+    var d = ele.getAttribute("depth");
+    while(ele = rows[index++]){
+      ele.className = ele.className.replace(boundReg,' ');
+      if(ele.getAttribute("depth")>d){
+      }else{
+        break;
+      }
+    }
+  }
+  //]]></script>
+</body>
+</html>

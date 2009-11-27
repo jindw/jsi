@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<root xmlns:c="http://www.xidea.org/ns/lite/core">
+	<template id="properties">
+		<c:out value='&lt;!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd"&gt;'/>
+		<properties>
+			<c:for var="item" items="${data}">
+				<entry key='${item.path}'>${item.content}</entry>
+			</c:for>
+		</properties>
+	</template>
+	<template id="document">
+		<html xmlns:hta="urn:htmlapplication">
+			<meta http-equiv='X-JSIDoc-Version' content='1.0' />
+			<hta:application id='jdidoc' windowstate='maximize' />
+			<frameset rows='100%'>
+				<frame
+					src='${documentURL}?version=2.6#${encodeURIComponent(data)}'>
+				</frame>
+			</frameset>
+		</html>
+	</template>
+</root>
