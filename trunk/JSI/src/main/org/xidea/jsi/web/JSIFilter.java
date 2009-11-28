@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
@@ -34,7 +33,7 @@ import org.xidea.jsi.impl.JSIText;
  * @author jindw
  */
 public class JSIFilter extends JSIService implements Filter, Servlet {
-
+	@SuppressWarnings("unused")
 	private Log log = LogFactory.getLog(JSIFilter.class);
 	protected ServletContext context;
 	protected ServletConfig config;
@@ -251,11 +250,8 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 			this.scriptBase = scriptBase;
 		}
 		this.clear();
-		try {
-			this.addScriptBase(context.getResource(this.scriptBase));
-		} catch (MalformedURLException e) {
-			log.warn(e);
-		}
+		String file = context.getRealPath(this.scriptBase);
+		this.addScriptBase(new File(file));
 		this.addLib(new File(context.getRealPath(this.scriptBase)));
 	}
 
