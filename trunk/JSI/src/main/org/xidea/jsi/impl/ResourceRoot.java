@@ -36,6 +36,7 @@ public class ResourceRoot extends AbstractRoot {
 	protected void clear() {
 		this.scriptBases.clear();
 		this.libraries.clear();
+		super.packageMap.clear();
 	}
 
 	public void addScriptBase(File base) {
