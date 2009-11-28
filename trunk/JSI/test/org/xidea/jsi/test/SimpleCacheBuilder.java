@@ -52,10 +52,8 @@ public class SimpleCacheBuilder {
 					}
 					out.print("'");
 					out.print(fileName.equals("__package__.js")?"":fileName);
-					out.print("':\"");
+					out.print("':");
 					out.print(JSONEncoder.encode(getFileContent(file)));
-
-					out.print("\"");
 				}
 				out.println("});\n");
 			}
