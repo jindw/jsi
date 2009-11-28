@@ -7,11 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -19,7 +16,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,27 +30,23 @@ public class ResourceRoot extends AbstractRoot {
 	 */
 	private String encoding = "utf-8";
 
-	protected ArrayList<URL> scriptBases = new ArrayList<URL>();
+	protected ArrayList<File> scriptBases = new ArrayList<File>();
 	protected ArrayList<File> libraries = new ArrayList<File>();
-
-	public void addScriptBase(URL base) {
-		scriptBases.add(base);
-	}
 
 	protected void clear() {
 		this.scriptBases.clear();
 		this.libraries.clear();
 	}
 
+	public void addScriptBase(File base) {
+		scriptBases.add(base);
+	}
+
 	public void addLib(File base) {
 		if (base.isDirectory()) {
 			libraries.add(base);
 		} else {
-			try {
-				scriptBases.add(base.toURI().toURL());
-			} catch (MalformedURLException e) {
-				log.warn(e);
-			}
+			scriptBases.add(base);
 		}
 	}
 
@@ -70,9 +62,13 @@ public class ResourceRoot extends AbstractRoot {
 	public String loadText(String pkgName, final String scriptName) {
 		String path = scriptName;
 		if (pkgName != null && pkgName.length() > 0) {
-			path = pkgName.replace('.', '/') + '/' + scriptName;
+			path = toPath(pkgName, scriptName);
 		}
 		return getResourceAsString(path);
+	}
+
+	private String toPath(String pkgName, final String scriptName) {
+		return pkgName.replace('.', '/') + '/' + scriptName;
 	}
 
 	public String getResourceAsString(String path) {
@@ -151,25 +147,18 @@ public class ResourceRoot extends AbstractRoot {
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
-		for (URL resource : scriptBases) {
+		for (File base : scriptBases) {
 			try {
-				resource = new URL(resource, path);
-				File file = toFile(resource);
-				if (file != null) {
+				if (base.isDirectory()) {
+					File file = new File(base, path);
 					if (file.exists()
 							&& (!"boot.js".equals(path) || file.length() > 200)) {
-						return resource;
+						return file.toURI().toURL();
 					}
 				} else {
-					// HTTP
-					if(resource.getProtocol().equals("jar")){
-						String fp = resource.getFile();
-						int p = fp.indexOf('!');
-						File jar = new File(URLDecoder.decode(fp.substring(0,p),"UTF-8"));
-						resource = findByZip(jar, fp.substring(p+1));
-						if(resource!=null){
-							return resource;
-						}
+					URL in = findByZip(base, path);
+					if (in != null) {
+						return in;
 					}
 				}
 			} catch (IOException e) {
@@ -190,13 +179,6 @@ public class ResourceRoot extends AbstractRoot {
 		return this.getClass().getClassLoader().getResource(path);
 	}
 
-	private File toFile(URL resource) throws UnsupportedEncodingException {
-		if (resource.getProtocol().equals("file")) {
-			return new File(URLDecoder.decode(resource.getFile(), "UTF-8"));
-		}
-		return null;
-	}
-
 	public List<JSIPackage> getPackageObjectList() {
 		List<String> result = getPackageList(true);
 		LinkedHashSet<JSIPackage> ps = new LinkedHashSet<JSIPackage>();
@@ -211,17 +193,17 @@ public class ResourceRoot extends AbstractRoot {
 
 	protected List<String> getPackageList(boolean findLib) {
 		List<String> result = new ArrayList<String>();
-		for (URL resource : scriptBases) {
+		for (File file : scriptBases) {
 			try {
-				File file = toFile(resource);
-				if (file != null) {
+				if (file.isFile()) {
+					appendZipPackage(file, result);
+				} else {
 					result.addAll(FileRoot.findPackageList(file));
 				}
 			} catch (Exception e) {
 			}
 
 		}
-		;
 		if (findLib) {
 			for (File resource : libraries) {
 				File[] libs = findLibFiles(resource);
