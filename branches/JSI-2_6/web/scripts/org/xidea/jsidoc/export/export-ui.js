@@ -105,14 +105,16 @@ var ExportUI = {
             break;
         case -1:
         	var content = exporter.getContent();
-            showResult(exporter.getXMLContent(),true);
-        	if(!window.ActiveXObject){//忽略ie8
-	        	var zip = new Zip("JSI Archive\n\n$import paths:\n"+exporter.getImports().join('\n')+"\n\nFile List:\n"+exporter.getResult().join('\n'));
-	        	for(var n in content){
-	        		zip.addText(n,content[n]);
-	        	}
-	        	zip = zip.toDataURL();
-	        	zip && window.open(zip,"about:blank")//resultDialogName
+            //showResult(exporter.getXMLContent(),true);
+        	var zip = new Zip("JSI Archive\n\n$import paths:\n"+exporter.getImports().join('\n')+"\n\nFile List:\n"+exporter.getResult().join('\n'));
+        	for(var n in content){
+        		zip.addText(n,content[n]);
+        	}
+        	zip = zip.toDataURL();
+        	if(window.ActiveXObject){//忽略ie8
+	        	window.open($JSI.scriptBase+'data.action?data='+zip,"_blank")//resultDialogName
+        	}else{
+        		window.open(zip,"_blank")//resultDialogName
         	}
             break;
         case 1:

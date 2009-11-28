@@ -99,13 +99,39 @@ Zip.prototype = {
      */
     toDataURL: function() {
     	if(typeof btoa == 'function' && btoa(1) == 'MQ=='){
-    		return ['data:', this.mimeType, ';base64,', btoa(String.fromCharCode.apply(0,this.toByteArray()))].join('');
+    		var data = btoa(String.fromCharCode.apply(0,this.toByteArray()));
     	}else{
-    		return null;
+    		data = byteArrayToBase64(this.toByteArray());
     	}
+    	return ['data:', this.mimeType, ';base64,',data].join('');
     },
     constructor: Zip
 };
+
+var b64codes = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='.split('');
+
+/**
+ * 字节数组（小整数数组）转化成Base64字符串
+ * @pulic
+ */
+function byteArrayToBase64(bs) {
+    var b64 = [];
+    var bi = 0;
+    while (bi < bs.length) {
+        var b0 = bs[bi++];
+        var b1 = bs[bi++];
+        var b2 = bs[bi++];
+        var data = (b0 << 16) + (b1 << 8) + (b2||0);
+        b64.push(
+        	b64codes[(data >> 18) & 0x3F ],
+        	b64codes[(data >> 12) & 0x3F],
+        	b64codes[isNaN(b1) ? 64 : (data >> 6) & 0x3F],
+        	b64codes[isNaN(b2) ? 64 : data & 0x3F]) ;
+    }
+    return b64.join('');
+}
+
+
 /**
  * 将字符串转化成UTF8字节数组
  * @private
