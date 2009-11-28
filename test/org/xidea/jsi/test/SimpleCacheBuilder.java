@@ -31,7 +31,6 @@ public class SimpleCacheBuilder {
 	}
 
 	private static void genPackageCache(PrintStream out,List<String> packages) throws IOException {
-		boolean firstPackage = true;
 		for (String pkg : packages) {
 			File dir = new File(packageBase, pkg.replace('.', '/'));
 			//System.out.println(dir);
@@ -53,10 +52,10 @@ public class SimpleCacheBuilder {
 					}
 					out.print("'");
 					out.print(fileName.equals("__package__.js")?"":fileName);
-					out.print("':'");
+					out.print("':\"");
 					out.print(JSONEncoder.encode(getFileContent(file)));
 
-					out.print("'");
+					out.print("\"");
 				}
 				out.println("});\n");
 			}
