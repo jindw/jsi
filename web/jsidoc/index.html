@@ -5,7 +5,7 @@ var search = location.search;
 if(location.host == 'www.xidea.org'){
 	var version = search.match(/[&?]version=([^&#]+)/);
 	if(!search && !location.hash){
-	    var jsidoc = "2.5"
+	    var jsidoc = "2.6"
 	}else if(version && version.length ==2){
 		var jsidoc = decodeURIComponent(version[1]);
 	}else{
