@@ -44,7 +44,7 @@ public class JSIService extends ResourceRoot {
 				return "image/" + ext;
 			}
 		}
-		if (path.endsWith("/data.action")) {
+		if (path.endsWith("data.action")) {
 			String data = params.get("data")[0];
 			int dataContentEnd = data.indexOf(',');
 			return "" + data.substring(dataContentEnd);
