@@ -251,7 +251,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 		}
 		this.clear();
 		String file = context.getRealPath(this.scriptBase);
-		this.addScriptBase(new File(file));
+		this.addBase(new File(file));
 		this.addLib(new File(context.getRealPath(this.scriptBase)));
 	}
 
