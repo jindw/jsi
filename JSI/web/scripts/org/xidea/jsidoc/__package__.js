@@ -19,9 +19,11 @@ this.addScript('source-entry.js','SourceEntry'
                 ,['JSIDoc','DocEntry']);
 
 
+this.addScript('template.js','templateMap');
+
 this.addScript('jsidoc.js','JSIDoc'
                 ,0
-                ,['MenuUI','SourceEntry','.export:findPackages','.util:JSON','.export:ExportUI','.util:loadText','PackageInfo']);
+                ,['templateMap','MenuUI','SourceEntry','.export:findPackages','.util:JSON','.export:ExportUI','.util:loadText','PackageInfo']);
 
 this.addScript('syntax-parser.js',['SyntaxParser','ECMAParser','LineIterator']);
 

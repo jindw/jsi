@@ -162,7 +162,7 @@ Exporter.prototype = {
         });
     },
     getSource:function(path,compileFilter){
-        if(parent.JSIDoc && parent.JSIDoc.getSource){
+        if(window.parent && parent.JSIDoc && parent.JSIDoc.getSource){
            var parentJSIDoc = parent.JSIDoc;
         }else if(window.JSIDoc &&window.JSIDoc.getSource){
            var parentJSIDoc = window.JSIDoc;
