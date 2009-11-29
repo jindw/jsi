@@ -16,7 +16,7 @@ var EXPORT_BUTTON = "exportButton";
 var PREFIX_CONTAINER_ID = "prefixContainer";
 var JSIDOC_URL_CONTAINER_ID = "jsidocURLContainer";
 var MIX_TEMPLATE_CONTAINER_ID = "mixTemplateContainer";
-var compressServiceURL = parent.exportService || $JSI.scriptBase + "export.action";
+var compressServiceURL = window.parent && parent.exportService || $JSI.scriptBase + "export.action";
 var resultDialogName = "result";
 
 var inc = 0;
