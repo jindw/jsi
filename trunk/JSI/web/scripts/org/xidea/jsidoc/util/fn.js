@@ -21,7 +21,7 @@ function xmlReplacer(c){
     }
 }
 
-function loadTextByURL(url){
+function loadText(url){
     //$log.info(url);
     var req = new XMLHttpRequest();
     req.open("GET",url,false);

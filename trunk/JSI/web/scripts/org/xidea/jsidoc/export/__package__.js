@@ -15,7 +15,7 @@ this.addScript('export.js','Exporter'
                 'findPackages',
                 '..util:JSON',
                 '..util:xmlReplacer',
-                '..util:loadTextByURL']);
+                '..util:loadText']);
 
 this.addScript('export-ui.js','ExportUI'
                 ,"..util:$log"
