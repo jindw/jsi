@@ -1,5 +1,7 @@
 package org.xidea.jsi.web;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -11,22 +13,63 @@ import java.util.regex.Pattern;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.impl.DefaultExportorFactory;
 import org.xidea.jsi.impl.DefaultLoadContext;
+import org.xidea.jsi.impl.ResourceRoot;
 
 class SDNService {
-	public static final String CDN_DEBUG_TOKEN_NAME = "CDN_DEBUG";
+	public static final String SDN_DEBUG_TOKEN_NAME = "SDN_DEBUG";
 	public static final Pattern CDN_PATH_SPLITER = Pattern
 			.compile("(?:%20|%09|%0d|%0a|[^\\w\\/\\.\\-\\:\\*\\$])+");
-	private JSIRoot root;
+	public static final Pattern SDN_DEBUG_PATTERN = Pattern
+			.compile("\\b"+SDN_DEBUG_TOKEN_NAME + "=(1|true|TRUE)\\b");
+
+	private ResourceRoot root;
+	private Map<String, String> cachedMap;// = new WeakHashMap<String,
 	private Map<String, String[]> exportConfig = new HashMap<String, String[]>();
 	private int ips;
+	private long lastModified = -1;
 
-	public SDNService(JSIRoot root) {
+	public SDNService(ResourceRoot root) {
 		this.root = root;
 		exportConfig.put("level", new String[] { "3" });
 	}
+
+	public void process(String service, String cookie, OutputStream out)
+			throws IOException {
+		if (cookie != null && SDN_DEBUG_PATTERN.matcher(cookie).find()){
+			writeSDNDebug(service, out);
+		} else {
+			writeSDNRelease(service, out);
+		}
+	}
+
+	protected void writeSDNRelease(String path, OutputStream out)
+			throws IOException {
+		String result = null;
+		// 每次都清理一下吧，CPU足够强悍，反正这只是一个调试程序
+		long t = root.getLastModified();
+		if(lastModified != t){
+			lastModified = t;
+			cachedMap.clear();
+		}
+		
+		if (cachedMap != null) {
+			result = cachedMap.get(path);
+		}
+		if (result == null) {
+			result = this.doReleaseExport(path);
+			if (cachedMap != null) {
+				cachedMap.put(path, result);
+			}
+		}
+		out.write(result.getBytes(root.getEncoding()));
+	}
+	protected void writeSDNDebug(String path, OutputStream out)
+			throws IOException {
+		out.write(this.doDebugExport(path).getBytes(root.getEncoding()));
+	}
+
 
 	public String queryExportInfo(String path) {
 		String[] paths = CDN_PATH_SPLITER.split(path);
@@ -35,33 +78,33 @@ class SDNService {
 		LinkedHashSet<String> objectSet = new LinkedHashSet<String>();
 		LinkedHashSet<String> exactList = new LinkedHashSet<String>();
 		LinkedHashSet<String> packageList = new LinkedHashSet<String>();
-		for (String item:paths) {
-			if(item.endsWith("*")){
-				String name = item.substring(0,item.length()-2);
+		for (String item : paths) {
+			if (item.endsWith("*")) {
+				String name = item.substring(0, item.length() - 2);
 				name = root.requirePackage(name).getName();
 				packageList.add(name);
-			}else{
+			} else {
 				JSIPackage pkg = root.findPackageByPath(item);
 				String name = pkg.getName();
-				String object = item.substring(item.length()+1);
+				String object = item.substring(item.length() + 1);
 				name = root.requirePackage(name).getName();
-				exactList.add(name + ":"+object);
+				exactList.add(name + ":" + object);
 				objectSet.add(object);
 			}
 		}
-		for (String packageName: packageList) {
+		for (String packageName : packageList) {
 			JSIPackage pkg = root.requirePackage(packageName);
 			ArrayList<String> value = new ArrayList<String>();
 			packageMap.put(pkg.getName(), value);
-			for(String object : pkg.getObjectScriptMap().keySet()){
-				if(!objectSet.contains(object)){
+			for (String object : pkg.getObjectScriptMap().keySet()) {
+				if (!objectSet.contains(object)) {
 					objectSet.add(object);
 					value.add(object);
 				}
 			}
 		}
-		result.put("pathList",exactList);
-		result.put("packageMap",packageMap);
+		result.put("pathList", exactList);
+		result.put("packageMap", packageMap);
 		return JSONEncoder.encode(result);
 
 	}

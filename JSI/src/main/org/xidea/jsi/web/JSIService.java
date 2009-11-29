@@ -1,8 +1,10 @@
 package org.xidea.jsi.web;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -28,7 +30,6 @@ public class JSIService extends ResourceRoot {
 	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(JSIService.class);
 	protected String exportService = "http://litecompiler.appspot.com/scripts/export.action";
-	protected Map<String, String> cachedMap;// = new WeakHashMap<String,
 	protected SDNService sdn = new SDNService(this);
 
 	protected static Collection<String> imgages = Arrays.asList("png", "gif",
@@ -44,55 +45,60 @@ public class JSIService extends ResourceRoot {
 				return "image/" + ext;
 			}
 		}
-		if (path.endsWith("data.action")) {
-			String data = params.get("data")[0];
-			int dataContentEnd = data.indexOf(',');
-			return "" + data.substring(dataContentEnd);
-		}
-		if (path.endsWith("export.action")) {
-			contentType = "text/plain";
-		} else if (path.endsWith(".css")) {
+		if (path.endsWith(".css")) {
 			contentType = "text/css";
 		} else if (path.endsWith(".js")) {// for debug
 			contentType = "text/plain";
 		}
 		if (contentType != null) {
-			contentType = contentType + ";charset="
-					+ this.getEncoding();
+			contentType = contentType + ";charset=" + this.getEncoding();
 		}
 		return contentType;
 	}
 
 	public void service(String path, Map<String, String[]> params,
-			OutputStream out) throws IOException {
+			String cookie,OutputStream out) throws IOException {
 		if (path == null || path.length() == 0) {
-			out.write(document().getBytes(this.getEncoding()));
-		} else if ("export.action".equals(path)) {
-			String result = export(params);
-			out.write(result.getBytes(this.getEncoding()));
-		} else if (path.startsWith("=")) {
-			path = path.substring(1);
-			if (path.length() == 0) {
-				throw new ScriptNotFoundException("");
-			}
-			writeSDNRelease(path, out);
-			// "text/plain";
-		} else if (path.endsWith("data.action")) {
-			String data = params.get("data")[0];
-			int dataContentEnd = data.indexOf(',');
-			this.writeBase64(data.substring(dataContentEnd + 1), out);
+			String[] services = params.get("service");
+			//ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+			processAction(services.length > 0 ? services[0] : "", params,cookie, out);
+			//out2.writeTo(out);
+		} else if (path.startsWith("export/")) {
+			processAction(path, params, cookie,out);
 		} else {
-			boolean isPreload = false;
-			if (path.endsWith(JSIText.PRELOAD_FILE_POSTFIX)) {
-				isPreload = true;
-				path = path.substring(0, path.length()
-						- JSIText.PRELOAD_FILE_POSTFIX.length())
-						+ ".js";
-			}
-			this.writeResource(path, isPreload, out);
+			this.writeResource(path, out);
 		}
 		out.flush();
 	}
+
+	protected String processAction(String service, Map<String, String[]> params,
+			String cookie, OutputStream out) throws IOException, UnsupportedEncodingException {
+		String encoding = this.getEncoding();
+		if ("data".equals(service)) {
+			String data = params.get("data")[0];
+			int dataContentEnd = data.indexOf(',');
+			this.writeBase64(data.substring(dataContentEnd + 1), out);
+			return data.substring(dataContentEnd);
+		} else if ("export".equals(service)) {
+			String result = export(params);
+			if(result == null){
+				throw new FileNotFoundException();
+			}
+			out.write(result.getBytes(encoding));
+			return "text/plain;charset=" + encoding;
+		} else if (service.startsWith("export/")) {
+			service = service.substring(7);
+			if (service.length() == 0) {
+				throw new ScriptNotFoundException("");
+			}
+			sdn.process(service, cookie, out);
+			return "text/plain;charset=" + encoding;
+		} else {
+			out.write(document().getBytes(encoding));
+			return "text/html;" + encoding;
+		}
+	}
+
 
 	/**
 	 * ABCDEFGHIJKLMNOPQRSTUVWXYZ//65 abcdefghijklmnopqrstuvwxyz//97
@@ -102,7 +108,8 @@ public class JSIService extends ResourceRoot {
 	 * @param out
 	 * @throws IOException
 	 */
-	protected void writeBase64(String data, OutputStream out) throws IOException {
+	protected void writeBase64(String data, OutputStream out)
+			throws IOException {
 		char[] cs = data.toCharArray();
 		int previousByte = 0;
 		for (int i = 0, k = -1; i < cs.length; i++) {
@@ -145,36 +152,23 @@ public class JSIService extends ResourceRoot {
 		}
 
 	}
-
-	protected void writeSDNRelease(String path, OutputStream out)
+	protected boolean writeResource(String path, Writer out)
 			throws IOException {
-		String result = null;
-		//每次都清理一下吧，CPU足够强悍，反正这只是一个调试程序
-		this.packageMap.clear();
-		if (cachedMap != null) {
-			result = cachedMap.get(path);
+		String purePath = toSourcePath(path);
+		return this.output(path, out, path!=purePath);
+	}
+	protected boolean writeResource(String path, OutputStream out) throws IOException {
+		String purePath = toSourcePath(path);
+		return this.output(purePath, out, path!=purePath);
+	}
+
+	private String toSourcePath(String path) {
+		if (path.endsWith(JSIText.PRELOAD_FILE_POSTFIX)) {
+			return path.substring(0, path.length()
+					- JSIText.PRELOAD_FILE_POSTFIX.length())
+					+ ".js";
 		}
-		if (result == null) {
-			result = sdn.doReleaseExport(path);
-			if (cachedMap != null) {
-				cachedMap.put(path, result);
-			}
-		}
-		out.write(result.getBytes(this.getEncoding()));
-	}
-
-	protected void writeSDNDebug(String path, OutputStream out) throws IOException {
-		out.write(sdn.doDebugExport(path).getBytes(this.getEncoding()));
-	}
-
-	protected boolean writeResource(String path, boolean isPreload, Writer out)
-			throws IOException {
-		return this.output(path, out, isPreload);
-	}
-
-	protected boolean writeResource(String path, boolean isPreload,
-			OutputStream out) throws IOException {
-		return this.output(path, out, isPreload);
+		return path;
 	}
 
 	protected String document() {
