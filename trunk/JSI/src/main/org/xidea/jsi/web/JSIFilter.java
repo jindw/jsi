@@ -1,8 +1,9 @@
 package org.xidea.jsi.web;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.Map;
@@ -14,18 +15,13 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.jsi.web.SDNService;
-import org.xidea.jsi.ScriptNotFoundException;
-import org.xidea.jsi.impl.JSIText;
 
 /**
  * 该类为方便调试开发，发布时可编译脚本，能后去掉此类。 Servlet 2.4 +
@@ -41,7 +37,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 
 	public void service(ServletRequest req, ServletResponse resp)
 			throws ServletException, IOException {
-		if (!process(req, resp)) {
+		if (!service((HttpServletRequest)req, (HttpServletResponse)resp)) {
 			// 走这条分支的情况：1、无法找到资源，2、根本不在脚本目录下
 			HttpServletResponse response = (HttpServletResponse) resp;
 			response.sendError(HttpServletResponse.SC_NOT_FOUND, "找不到指定的资源");
@@ -50,7 +46,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 
 	public void doFilter(ServletRequest req, final ServletResponse resp,
 			FilterChain chain) throws IOException, ServletException {
-		if (!process(req, resp)) {
+		if (!service((HttpServletRequest)req, (HttpServletResponse)resp)) {
 			// 走这条分支的情况：1、无法找到资源，2、根本不在脚本目录下
 			chain.doFilter(req, resp);
 		}
@@ -65,44 +61,38 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 	 * @throws IOException
 	 * @throws UnsupportedEncodingException
 	 */
-	protected boolean process(ServletRequest req, final ServletResponse resp)
-			throws IOException, UnsupportedEncodingException {
-		HttpServletRequest request = (HttpServletRequest) req;
-		HttpServletResponse response = (HttpServletResponse) resp;
-		String path = getScriptPath(request);
-		if (path != null) {
-			if (path.length() == 0) {
-				String service = request.getParameter("service");
-				if (this.processAction(service, request, response)) {
-					return true;
-				}
-				path = req.getParameter("path");
+	public boolean service(HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+		@SuppressWarnings("unchecked")
+		Map<String,String[]> params = req.getParameterMap();
+		String path = getScriptPath(req);
+		String service = null;
+		if (path == null || path.length() == 0) {
+			String[] services = params.get("service");
+			if(services.length>0){
+				service = services[0];
+			}else{
+				service = "";
 			}
-			boolean isPreload = false;
-			if (path.endsWith(JSIText.PRELOAD_FILE_POSTFIX)) {
-				isPreload = true;
-				path = path.substring(0, path.length()
-						- JSIText.PRELOAD_FILE_POSTFIX.length())
-						+ ".js";
-
+		}else if (path.startsWith("export/")) {
+			service = path;
+		}
+		if(service != null ){
+			ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+			try{
+				processAction(service, params,req.getHeader("Cookie"), out2);
+			}catch (FileNotFoundException e) {
+				resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			}
-			initializeEncodingIfNotSet(request, resp, null);
+			out2.writeTo(resp.getOutputStream());
+		} else {
+			initializeEncodingIfNotSet(req, resp, null);
 			String metatype = context.getMimeType(path);
 			if (metatype != null) {
 				resp.setContentType(metatype);
 			}
-			ServletOutputStream out = resp.getOutputStream();
-			return writeResource(path, isPreload, out);
-
-		} else if (path.startsWith("export/")) {
-			path = path.substring(7);
-			if (path.length() == 0) {
-				throw new ScriptNotFoundException("");
-			}
-			sdnService(path, request, response);
-			return true;
+			return this.writeResource(path, resp.getOutputStream());
 		}
-		return false;
+		return true;
 	}
 
 	protected String getScriptPath(HttpServletRequest request) {
@@ -114,83 +104,6 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 			return null;
 		}
 	}
-
-	/**
-	 * 响应附加行为
-	 * 
-	 * @param request
-	 * @param
-	 * @param path
-	 * @return
-	 * @throws IOException
-	 */
-	protected boolean processAction(String name, HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
-		if ("export".equals(name)) {
-			// type =1,type=2,type=3
-			String encoding = this.getEncoding();
-			initializeEncodingIfNotSet(request, response,encoding);
-			@SuppressWarnings("unchecked")
-			Map param = request.getParameterMap();
-			@SuppressWarnings("unchecked")
-			String result = export(param);
-			if (result == null) {
-				response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			} else {
-				response.addHeader("Content-Type", "text/plain;charset="
-						+ encoding);
-				response.getWriter().print(result);
-			}
-			return true;
-		} else if ("data".equals(name)) {
-			String data = request.getParameter("data");
-			int dataContentEnd = data.indexOf(',');
-			initializeEncodingIfNotSet(request, response,null);
-			response.addHeader("Content-Type", data.substring(dataContentEnd));
-			this.writeBase64(data.substring(dataContentEnd + 1), response
-					.getOutputStream());
-			return true;
-		}
-		return false;
-	}
-
-	protected void sdnService(String path, HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
-		// TODO:以后应该使用Stream，应该使用成熟的缓存系统
-		OutputStream out = response.getOutputStream();
-		response.setContentType("text/plain;charset=utf-8");
-		if ("POST".equals(request.getMethod())) {
-			String value = sdn.queryExportInfo(path);
-			out.write(value.getBytes(this.getEncoding()));
-		} else if (isDebug(request)) {
-			writeSDNDebug(path, out);
-		} else {
-			writeSDNRelease(path, out);
-		}
-		// 应该考虑加上字节流缓孄1�7
-		out.flush();
-	}
-
-	protected boolean isDebug(HttpServletRequest request) {
-		Cookie[] cookies = request.getCookies();
-		if (cookies != null) {
-			for (Cookie cookie : cookies) {
-				if (SDNService.CDN_DEBUG_TOKEN_NAME.equals(cookie.getName())) {
-					String value = cookie.getValue();
-					if (value.length() == 0) {
-						return false;
-					} else if (value.equals("0")) {
-						return false;
-					} else if (value.equals("false")) {
-						return false;
-					}
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	/*
 	 * 经测试，metaType是不会自动设置的; 对于静态文件的设置，我估计是提供静态文件服务的servlet内做的事情。 setContentType
 	 * 和 setCharacterEncoding.在encoding上相互影响 response.getCharacterEncoding
