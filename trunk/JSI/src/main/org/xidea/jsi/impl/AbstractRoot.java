@@ -13,6 +13,9 @@ public abstract class AbstractRoot implements JSIRoot {
 
 	protected Map<String, JSIPackage> packageMap = new HashMap<String, JSIPackage>();
 
+	protected void reset(){
+		packageMap.clear();
+	}
 	public JSILoadContext $import(String path) {
 		return $import(path, new DefaultLoadContext());
 	}

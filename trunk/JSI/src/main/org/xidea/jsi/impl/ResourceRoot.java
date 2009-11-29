@@ -19,6 +19,7 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIPackage;
 
 public class ResourceRoot extends AbstractRoot {
@@ -30,27 +31,46 @@ public class ResourceRoot extends AbstractRoot {
 	 */
 	private String encoding = "utf-8";
 
-	protected ArrayList<File> scriptBases = new ArrayList<File>();
+	protected ArrayList<File> bases = new ArrayList<File>();
 	protected ArrayList<File> libraries = new ArrayList<File>();
+	protected long token;
 
 	protected void clear() {
-		this.scriptBases.clear();
+		this.bases.clear();
 		this.libraries.clear();
 		super.packageMap.clear();
 	}
 
-	public void addScriptBase(File base) {
-		scriptBases.add(base);
+	public void addBase(File base) {
+		bases.add(base);
 	}
 
 	public void addLib(File base) {
 		if (base.isDirectory()) {
 			libraries.add(base);
 		} else {
-			scriptBases.add(base);
+			bases.add(base);
 		}
 	}
 
+	public long getLastModified() {
+		long t =0;
+		for (File base : bases) {
+			t = Math.max(t, base.lastModified());
+		}
+		for (File base : libraries) {
+			t = Math.max(t, base.lastModified());
+		}
+		return t;
+	}
+	public JSILoadContext $import(String  path, JSILoadContext context) {
+		long t = getLastModified();
+		if(token<t){
+			this.reset();
+			token = t;
+		}
+		return super.$import(path, context);
+	}
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
 	}
@@ -148,7 +168,36 @@ public class ResourceRoot extends AbstractRoot {
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
-		for (File base : scriptBases) {
+		URL res = getResourceFromBase(path);
+
+		if(res == null){
+			res = getResourceFromLib(path);
+			if(res == null){
+				res = getDefaultResource(path);
+			}
+		}
+		return res;
+	}
+
+	protected URL getDefaultResource(String path) {
+		return this.getClass().getClassLoader().getResource(path);
+	}
+
+	protected URL getResourceFromLib(String path) {
+		for (File resource : libraries) {
+			File[] libs = findLibFiles(resource);
+			for (File item : libs) {
+				URL in = findByZip(item, path);
+				if (in != null) {
+					return in;
+				}
+			}
+		}
+		return null;
+	}
+
+	protected URL getResourceFromBase(String path) {
+		for (File base : bases) {
 			try {
 				if (base.isDirectory()) {
 					File file = new File(base, path);
@@ -166,18 +215,7 @@ public class ResourceRoot extends AbstractRoot {
 				log.debug(e);
 			}
 		}
-
-		for (File resource : libraries) {
-			File[] libs = findLibFiles(resource);
-			for (File item : libs) {
-				URL in = findByZip(item, path);
-				if (in != null) {
-					return in;
-				}
-			}
-		}
-
-		return this.getClass().getClassLoader().getResource(path);
+		return null;
 	}
 
 	public List<JSIPackage> getPackageObjectList() {
@@ -194,7 +232,7 @@ public class ResourceRoot extends AbstractRoot {
 
 	protected List<String> getPackageList(boolean findLib) {
 		List<String> result = new ArrayList<String>();
-		for (File file : scriptBases) {
+		for (File file : bases) {
 			try {
 				if (file.isFile()) {
 					appendZipPackage(file, result);
