@@ -3,7 +3,7 @@ this.addScript("request.js",["Request"]
 this.addScript("xhr.js","XMLHttpRequest");
 this.addScript("json.js",['JSON']);
 
-this.addScript("fn.js",['xmlReplacer','loadTextByURL']
+this.addScript("fn.js",['xmlReplacer','loadText']
                 ,["$log",'XMLHttpRequest']);
 this.addScript("log.js","$log")
 

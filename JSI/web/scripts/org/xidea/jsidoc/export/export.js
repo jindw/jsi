@@ -171,14 +171,13 @@ Exporter.prototype = {
             //$log.info(packageName,path.substr(packageName.length+1));
             var rtv = parentJSIDoc.getSource(path);
         }else{
-            var rtv = loadTextByURL($JSI.scriptBase+path);
+            var rtv = ($JSI.loadText || loadText)($JSI.scriptBase+path);
         }
         if(rtv == null){
             $log.error("装载源代码失败:",path);
         }
         if(compileFilter){
             rtv = compileFilter(rtv,path);
-            
         }
         return rtv;
     }

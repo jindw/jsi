@@ -19,8 +19,8 @@ this.print = this.print || function(arg){
         )
         return evaler.call(this,code);
     }
-    return function loadTextByURL(url){
-    	var value =JSI.loadTextByURL&&JSI.loadTextByURL(url)
+    return function loadText(url){
+    	var value =JSI.loadText&&JSI.loadText(url)
     	if(value){
     		return value;
     	}

@@ -21,7 +21,7 @@ this.addScript('source-entry.js','SourceEntry'
 
 this.addScript('jsidoc.js','JSIDoc'
                 ,0
-                ,['MenuUI','SourceEntry','.export:findPackages','.util:JSON','.export:ExportUI','.util:loadTextByURL','PackageInfo']);
+                ,['MenuUI','SourceEntry','.export:findPackages','.util:JSON','.export:ExportUI','.util:loadText','PackageInfo']);
 
 this.addScript('syntax-parser.js',['SyntaxParser','ECMAParser','LineIterator']);
 

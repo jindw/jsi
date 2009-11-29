@@ -105,7 +105,7 @@ var $import = function(loaderEval,cachedScripts){
         function reportTrace(){};
         //reportTrace = reportError;
     }
-    //初始化loadTextByURL 和 $JSI.scriptBase
+    //初始化loadText 和 $JSI.scriptBase
     if(this.document){
         if(":Debug"){
     	    /**
@@ -175,7 +175,7 @@ var $import = function(loaderEval,cachedScripts){
          * @param url 文件url
          * @return <string> 结果文本
          */
-        function loadTextByURL(url){
+        function loadText(url){
             if("org.xidea.jsi:Block"){
                 var req = new XHR();
                 req.open("GET",url,false);
@@ -192,7 +192,7 @@ var $import = function(loaderEval,cachedScripts){
         }
     }else{
     	if("org.xidea.jsi:Server"){
-    	    loadTextByURL = Packages.org.xidea.jsi.impl.RhinoSupport.initialize(arguments,this);
+    	    loadText = Packages.org.xidea.jsi.impl.RhinoSupport.initialize(arguments,this);
     	}
     }
     if(":Debug"){
@@ -638,7 +638,7 @@ var $import = function(loaderEval,cachedScripts){
                     objectNames = doObjectImport(
                         realPackage(
                         	findPackage("org.xidea.jsidoc.util")
-                        ),"findGlobals")(getCachedScript(this.name,scriptPath)||loadTextByURL(scriptBase+this.name.replace(/\.|$/g,'/')+scriptPath));
+                        ),"findGlobals")(getCachedScript(this.name,scriptPath)||loadText(scriptBase+this.name.replace(/\.|$/g,'/')+scriptPath));
                     
                 }
             }
@@ -823,7 +823,7 @@ var $import = function(loaderEval,cachedScripts){
             if(packageMap[packageName] === undefined){
                 var pscript = getCachedScript(packageName,'') ||
                     //cachedScripts[packageName] === undefined && 当cachedScripts[packageName]不为空时，就不用在探测了（假设一旦cache则__package__.js必cache，有点无理）
-                        loadTextByURL(scriptBase+packageName.replace(/\.|$/g,'/')+ '__package__.js');
+                        loadText(scriptBase+packageName.replace(/\.|$/g,'/')+ '__package__.js');
                 if(pscript){
                     return packageMap[packageName] || new Package(packageName,pscript);
                 }
@@ -955,7 +955,7 @@ var $import = function(loaderEval,cachedScripts){
                 return cachedScript.call(loader);
             }else{
                 //不要清除文本缓存
-                return loaderEval.call(loader,'eval(this.varText);'+(cachedScript || loadTextByURL(packageObject.scriptBase+loaderName)));
+                return loaderEval.call(loader,'eval(this.varText);'+(cachedScript || loadText(packageObject.scriptBase+loaderName)));
             }
             //ScriptLoader[loaderName] += 0x10000
             
