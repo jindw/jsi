@@ -219,7 +219,7 @@ public class ResourceRoot extends AbstractRoot {
 	}
 
 	public List<JSIPackage> getPackageObjectList() {
-		List<String> result = getPackageList(true);
+		List<String> result = findPackageList(true);
 		LinkedHashSet<JSIPackage> ps = new LinkedHashSet<JSIPackage>();
 		for (String path : result) {
 			try {
@@ -230,7 +230,7 @@ public class ResourceRoot extends AbstractRoot {
 		return new ArrayList<JSIPackage>(ps);
 	}
 
-	protected List<String> getPackageList(boolean findLib) {
+	public List<String> findPackageList(boolean findLib) {
 		List<String> result = new ArrayList<String>();
 		for (File file : bases) {
 			try {

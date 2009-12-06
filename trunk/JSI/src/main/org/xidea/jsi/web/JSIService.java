@@ -115,7 +115,7 @@ public class JSIService extends ResourceRoot {
 	}
 
 	protected String document() {
-		List<String> allList = this.getPackageList(true);
+		List<String> allList = this.findPackageList(true);
 		if (allList.isEmpty()) {
 			return "<html><head>"
 					+ "<meta http-equiv='Content-Type' content='text/html;utf-8'/>"
@@ -127,7 +127,7 @@ public class JSIService extends ResourceRoot {
 					+ "察看示例</a>" + "</body><html>";
 		} else {
 			StringWriter out = new StringWriter();
-			List<String> scriptList = this.getPackageList(false);
+			List<String> scriptList = this.findPackageList(false);
 			out.append("<html><frameset rows='100%'>"
 					+ "<frame src='org/xidea/jsidoc/index.html?" + "group={");
 			if (!scriptList.isEmpty()) {
@@ -161,7 +161,7 @@ public class JSIService extends ResourceRoot {
 
 	private String exportHome(Map<String, String[]> param) throws UnsupportedEncodingException {
 		StringWriter out = new StringWriter();
-		List<String> allList = this.getPackageList(true);
+		List<String> allList = this.findPackageList(true);
 		out.append("<html><frameset rows='100%'>"
 				+ "<frame src='org/xidea/jsidoc/export.html");
 		if (!allList.isEmpty()) {
