@@ -31,11 +31,11 @@ var Template=function (path){
 Template.prototype.render = function(context){
     return this.data(context)
 }
-$import("org.xidea.jsidoc.util.$log")
-$log.error = function(msg){
-	prompt("@@@",msg);
-	return true;
-}
+//$import("org.xidea.jsidoc.util.$log")
+//$log.error = function(msg){
+//	prompt("@@@",msg);
+//	return true;
+//}
 var scriptBase = this.scriptBase
 var templateMap = {
      "package": new Template(scriptBase+"html/package.xhtml"),

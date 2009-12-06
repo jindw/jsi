@@ -3,6 +3,7 @@ package org.xidea.jsi.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.Reader;
 
 import org.xidea.jsi.JSIPackage;
@@ -59,5 +60,58 @@ public abstract class JSIText {
 		} else {
 			return "})";
 		}
+	}
+
+	/**
+	 * ABCDEFGHIJKLMNOPQRSTUVWXYZ//65 abcdefghijklmnopqrstuvwxyz//97
+	 * 0123456789+/=
+	 * 
+	 * @param data
+	 * @param out
+	 * @throws IOException
+	 */
+	public static void writeBase64(String data, OutputStream out)
+			throws IOException {
+		char[] cs = data.toCharArray();
+		int previousByte = 0;
+		for (int i = 0, k = -1; i < cs.length; i++) {
+			int currentByte = cs[i];
+			switch (currentByte) {
+			case '+':
+				currentByte = 62;
+				break;
+			case '/':
+				currentByte = 63;
+				break;
+			case '=':
+				return;
+			default:
+				if (Character.isLetterOrDigit(currentByte)) {
+					if (currentByte >= 97) {// a
+						currentByte -= 71;// + 26 - 97;
+					} else if (currentByte >= 65) {// A
+						currentByte -= 65;
+					} else {// if (currentByte >= 48) {// 0
+						currentByte += 4;// + 52 - 48;
+					}
+				} else {
+					continue;
+				}
+			}
+			switch (++k & 3) {// 00,01,10,11
+			case 0:
+				break;
+			case 1:
+				out.write((previousByte << 2) | (currentByte >>> 4));// 6+2
+				break;
+			case 2:// 32,16,8,4,2,1,
+				out.write((previousByte & 63) << 4 | (currentByte >>> 2));// 4+4
+				break;
+			case 3:
+				out.write((previousByte & 3) << 6 | (currentByte));// 2+6
+			}
+			previousByte = currentByte;
+		}
+	
 	}
 }
