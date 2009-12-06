@@ -79,6 +79,8 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 		if(service != null ){
 			ByteArrayOutputStream out2 = new ByteArrayOutputStream();
 			try{
+				//header(': ');
+				resp.setHeader("Content-Disposition", "attachment; filename='data.zip'");
 				processAction(service, params,req.getHeader("Cookie"), out2);
 			}catch (FileNotFoundException e) {
 				resp.setStatus(HttpServletResponse.SC_NOT_FOUND);

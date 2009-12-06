@@ -74,15 +74,19 @@
 				</c:for>
 			</div>
 			<div id="output">
-				<fieldset>
-					<legend>相关文件地址</legend>
-					<div id="fileOutput"></div>
+				<fieldset class="path-container">
+					<legend>导出路径</legend>
+					<div id="pathOutput"></div>
 				</fieldset>
-				<fieldset>
+				<fieldset class="object-container">
 					<legend>导出变量集</legend>
 					<div id="objectOutput"></div>
 				</fieldset>
-				<fieldset>
+				<fieldset class="file-container">
+					<legend>相关文件地址</legend>
+					<div id="fileOutput"></div>
+				</fieldset>
+				<fieldset class="export-container">
 					<legend>导出操作</legend>
 					<form onsubmit="return false"
 						ation="/servlet/JSA">
@@ -115,7 +119,7 @@
 									<input name="level" id="level-1"
 										onclick="ExportUI.checkLevel(this)" value="-1" type="radio"
 										title="导出后需要使用JSA处理成单个压缩文件,实现隔离冲突" />
-									导出Zip和XML
+									导出成Zip包
 								</label>
 								<label>
 									<input name="level" id="level-2"
