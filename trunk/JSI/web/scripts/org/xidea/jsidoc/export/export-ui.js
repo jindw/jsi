@@ -12,11 +12,12 @@ var checkMap = {};
 var TREE_CONTAINER_ID = "treeContainer";
 var FILE_OUTPUT_ID = "fileOutput";
 var OBJECT_OUTPUT_ID = "objectOutput";
+var PATH_OUTPUT_ID = "pathOutput";
 var EXPORT_BUTTON = "exportButton";
 var PREFIX_CONTAINER_ID = "prefixContainer";
 var JSIDOC_URL_CONTAINER_ID = "jsidocURLContainer";
 var MIX_TEMPLATE_CONTAINER_ID = "mixTemplateContainer";
-var compressServiceURL = window.parent && parent.exportService || $JSI.scriptBase + "export.action";
+var exportService = window.parent && parent.exportService || $JSI.scriptBase + "?service=export";
 var resultDialogName = "result";
 
 var inc = 0;
@@ -80,7 +81,7 @@ var ExportUI = {
         
     },
     doExport : function(form){
-        showResult("数据装在中.....");
+        var dialog = showResult("数据装在中.....");
         var level = form.level;
         var i=level.length||6;
         var mixTemplate = form.mixTemplate.checked;
@@ -105,14 +106,17 @@ var ExportUI = {
             break;
         case -1:
         	var content = exporter.getContent();
-            showResult(exporter.getXMLContent(),true);
-        	if(!window.ActiveXObject){//忽略ie8
-	        	var zip = new Zip("JSI Archive\n\n$import paths:\n"+exporter.getImports().join('\n')+"\n\nFile List:\n"+exporter.getResult().join('\n'));
-	        	for(var n in content){
-	        		zip.addText(n,content[n]);
-	        	}
-	        	zip = zip.toDataURL();
-	        	zip && window.open(zip,"about:blank")//resultDialogName
+        	var zip = new Zip("JSI Archive\n\n$import paths:\n"+exporter.getImports().join('\n')+"\n\nFile List:\n"+exporter.getResult().join('\n'));
+        	for(var n in content){
+        		zip.addText(n,content[n]);
+        	}
+        	zip = zip.toDataURL();
+        	zip = encodeURIComponent(zip);
+        	dialog && dialog.close();
+	        if(window.ActiveXObject){//忽略ie8
+	        	window.open($JSI.scriptBase+'?service=data&data='+zip,resultDialogName)//resultDialogName
+        	}else{
+        		window.open(zip,resultDialogName)//resultDialogName
         	}
             break;
         case 1:
@@ -135,10 +139,10 @@ var ExportUI = {
             	"lineSeparator":"\r\n"
             }
             if(location.protocol == "file:"){
-            	submitResult(result,"http://litecompiler.appspot.com")
+            	exportResult(result,"http://litecompiler.appspot.com")
             }else{
 	            //submit to JSA
-	            submitResult(result,compressServiceURL);
+	            exportResult(result,exportService);
             }
             break;
         default:
@@ -166,8 +170,9 @@ function showResult(content,reuse){
     doc.write(content.replace(/[<>&]/g,xmlReplacer));
     doc.write("</textarea></body></html>");
     doc.close();
+    return dialog;
 }
-function submitResult(content,compressServiceURL){
+function exportResult(content,exportService){
     if(dialog){
         try{
             dialog.close();
@@ -176,20 +181,22 @@ function submitResult(content,compressServiceURL){
         	dialog = null;
         }
     }
-    dialog = dialog || window.open('about:blank',resultDialogName,'modal=yes,left=200,top=100,width=600px,height=600px');
-    var form = document.createElement("form");
-    document.body.appendChild(form)
+    dialog = window.open('about:blank',resultDialogName,'modal=yes,left=200,top=100,width=600px,height=600px');
+    var doc = dialog.document;
+    var form = doc.createElement("form");
+    doc.body.appendChild(form)
     form.method = "POST";
     form.target = resultDialogName
-    form.action=compressServiceURL
+    form.action=exportService
+    context.service = "export";
     for(var n in content){
-    	var input = document.createElement("input");
+    	var input = doc.createElement("input");
     	input.name = n;
     	input.value = content[n];
         form.appendChild(input)
     }
     form.submit();
-    document.body.removeChild(form);
+    //document.body.removeChild(form);
 }
 function updateDisabledForm(value){
     var levels = exportDocument.forms[0].level;
@@ -266,20 +273,26 @@ function updateNode(node,state){
 function updateOutput(){
     var fileListOutput = exportDocument.getElementById(FILE_OUTPUT_ID);
     var objectListOutput = exportDocument.getElementById(OBJECT_OUTPUT_ID);
+    var pathOutput = exportDocument.getElementById(PATH_OUTPUT_ID);
     var objectNames = [];
+    var paths = [];
     var exporter = new Exporter();
     for(var path in checkMap){
         exporter.addImport(path);
+        paths.push(path);
         var objectName = path.split(':')[1];
         if(objectName){
             objectNames.push("<div title='",path,"'>",objectName,"</div>");
         }
     }
+    paths.sort();
     var result = exporter.getResult();
     var resultMap = {};
     for(var i=0; i<result.length; i++) {
     	resultMap[result[i]] = true;
     }
+    paths = $JSI.scriptBase+"="+paths.join("+");
+    pathOutput.innerHTML = "<a href="+paths+">"+paths+"</a>";
     fileListOutput.innerHTML = result.join('<br />');
     objectListOutput.innerHTML = objectNames.join('');
     return resultMap;

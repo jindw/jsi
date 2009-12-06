@@ -23,9 +23,16 @@ if(array_key_exists('service',$_GET)){
 }
 if($path == 'service=data'){
     $data = $_GET['data'];
-    list($content_type,$data) = split(',',$data);
-    header('Content-type:'.$content_type);
-    echo base64_decode($data);
+    list($content_type,$data) = split(';',$data);
+    //header('Content-Type:text/html');
+    header('Content-type: '.substr($content_type,5));
+    header('Content-Disposition: attachment; filename="data.zip"');
+    if(strncmp($data,'base64,',7) == 0){
+        $data = substr($data,7);
+        $data = base64_decode($data);
+    }
+    //echo substr($content_type,5);
+    echo $data;
     return;
 }else if($path == 'service=export'){
     //转发到指定jsa服务器

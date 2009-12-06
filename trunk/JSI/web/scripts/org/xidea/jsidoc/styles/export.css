@@ -63,11 +63,14 @@ td{
 #treeContainer,#output{
     position:absolute;
     top:35px;
-    width:47%;
+    width:42%;
     height:85%;
     padding:1%;
     border:1px solid #DDD;
     overflow:auto;
+}
+#output{
+    width:52%;
 }
 #treeContainer{
     left:5px;
@@ -78,10 +81,18 @@ td{
 }
 fieldset{
     font-size:12px;
-    height:32%;
+    height:20%;
     padding:0px;
     padding-top:5px;
     padding-left:8px;
+}
+fieldset.path-container{
+    height:15%;
+    padding-top:1px;
+    padding-bottom:3px;
+}
+fieldset.export-container{
+    height:42%;
 }
 legend{
     font-size: 110%;
@@ -91,10 +102,16 @@ fieldset label{
     padding-left:4px;
     font-weight:bold;
 }
-#fileOutput,#objectOutput{
+#fileOutput,#objectOutput,#pathOutput{
     height:85%;
     overflow:auto;
     cursor:pointer;
+}
+#pathOutput{
+    height:80%;
+    border:1px solid #333;
+    background:#EEE;
+    margin-left:-4px;
 }
 #jsidocURL{
     font-size:11px;

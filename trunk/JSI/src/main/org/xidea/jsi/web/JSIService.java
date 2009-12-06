@@ -11,7 +11,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +18,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSILoadContext;
+import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.ScriptNotFoundException;
 import org.xidea.jsi.impl.DataRoot;
 import org.xidea.jsi.impl.DefaultExportorFactory;
@@ -208,58 +208,54 @@ public class JSIService extends ResourceRoot {
 
 	protected String export(Map<String, String[]> param) throws IOException {
 		String[] contents = param.get("content");
+		final JSIRoot root;
 		if (contents != null) {
-			final DataRoot root = new DataRoot(contents[0]);
-			JSIExportor exportor = DefaultExportorFactory.getInstance()
-					.createExplorter(param);
-			if (exportor == null) {
-				if (!param.containsKey(exportService)) {
-					HttpURLConnection url = (HttpURLConnection) new URL(
-							exportService).openConnection();
-					url.setRequestMethod("POST");
-					url.setDoOutput(true);
-					url.setRequestProperty("Content-Length", "");
-					StringBuilder buf = new StringBuilder();
-					buf
-							.append(URLEncoder.encode(exportService, "UTF-8")
-									+ "=1");
-					for (String key : param.keySet()) {
-						String[] values = param.get(key);
-						for (String value : values) {
-							buf.append('&');
-							buf.append(URLEncoder.encode(key, "UTF-8"));
-							buf.append('=');
-							buf.append(URLEncoder.encode(value, "UTF-8"));
-						}
-					}
-					url.getOutputStream().write(
-							buf.toString().getBytes("UTF-8"));
-					return org.xidea.jsi.impl.JSIText.loadText(url
-							.getInputStream(), "UTF-8");
-				} else {
-					return null;
-				}
-			}
-			JSILoadContext context = new DefaultLoadContext();
-			String[] exports = param.get("exports");
-			if (exports != null) {
-				// 只有Data Root 才能支持这种方式
-				for (String item : exports) {
-					// PHP 不支持同名参数
-					for (String subitem : item.split("[^\\w\\$\\:\\.\\-\\*]+")) {
-						root.$import(subitem, context);
-					}
-				}
-			}
-			return exportor.export(context);
-		} else {
-			Map<String, String[]> testParams = new HashMap<String, String[]>();
-			testParams.put("level", new String[] { String
-					.valueOf(DefaultExportorFactory.TYPE_EXPORT_CONFUSE) });
-			return DefaultExportorFactory.getInstance().createExplorter(
-					testParams) == null ? null : "";
+			root = new DataRoot(contents[0]);
+		}else{
+			root = this;
 		}
-
+		JSIExportor exportor = DefaultExportorFactory.getInstance()
+				.createExplorter(param);
+		if (exportor == null) {
+			if (!param.containsKey(exportService)) {
+				HttpURLConnection url = (HttpURLConnection) new URL(
+						exportService).openConnection();
+				url.setRequestMethod("POST");
+				url.setDoOutput(true);
+				url.setRequestProperty("Content-Length", "");
+				StringBuilder buf = new StringBuilder();
+				buf
+						.append(URLEncoder.encode(exportService, "UTF-8")
+								+ "=1");
+				for (String key : param.keySet()) {
+					String[] values = param.get(key);
+					for (String value : values) {
+						buf.append('&');
+						buf.append(URLEncoder.encode(key, "UTF-8"));
+						buf.append('=');
+						buf.append(URLEncoder.encode(value, "UTF-8"));
+					}
+				}
+				url.getOutputStream().write(
+						buf.toString().getBytes("UTF-8"));
+				return org.xidea.jsi.impl.JSIText.loadText(url
+						.getInputStream(), "UTF-8");
+			} else {
+				return null;
+			}
+		}
+		JSILoadContext context = new DefaultLoadContext();
+		String[] exports = param.get("exports");
+		if (exports != null) {
+			// 只有Data Root 才能支持这种方式
+			for (String item : exports) {
+				// PHP 不支持同名参数
+				for (String subitem : item.split("[^\\w\\$\\:\\.\\-\\*]+")) {
+					root.$import(subitem, context);
+				}
+			}
+		}
+		return exportor.export(context);
 	}
 
 }

@@ -130,6 +130,28 @@ Exporter.prototype = {
         this.content = content;
         return content;
     },
+    getXMLContent : function(){
+        var xml = ['<?xml version="1.0" encoding="UTF-8"?>\n',
+			'<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">\n',
+			"<properties>\n"];
+        var content = this.getContent();
+    	for(var n in content){
+    		var text = content[n];
+    		if(/[<>&]/.test(text)){
+    			if(text.indexOf(']]>')<0){
+    				text = text.replace(/[<>&]/g,xmlReplacer)
+    			}else{
+    				text = "<![CDATA["+text + ']]>';
+    			}
+    		}
+			xml.push("<entry key='",n,"'>") ;
+		    xml.push(text);
+		    xml.push("</entry>\n");
+    	}
+        xml.push("</properties>\n");
+        return xml.join('')
+    },
+
     /**
      * 需要抓取全部相关包的全部源代码（也包括未导出的部分）
      */
@@ -156,7 +178,7 @@ Exporter.prototype = {
                 packageMap[packageName][file] = text;
             }
         }
-        return exportDocTemplate.render({
+        return documentTemplate.render({
             documentURL:jsiDocURL,
             data:JSON.stringify(packageMap)
         });
@@ -183,8 +205,12 @@ Exporter.prototype = {
     }
 }
 
+function encodeReplacer(c){
+    return encodeMap[c];
+}
 
 var templateRegexp = /\bnew\s+Template\s*\(/;
+
 function defaultTemplateFilter(text,path){
 	var templateBegin = text.search(templateRegexp);
 	var packageName = path.replace(/\/[^\/]+$/,':').replace(/\//g,'.');
@@ -310,4 +336,4 @@ Template.prototype.render = function(context){
     return this.data(context)
 }
 //alert(this.scriptBase.replace(/\w+\/$/,"html/export-data.xml"))
-var exportDocTemplate = new Template(this.scriptBase+"../html/export-data.xml#//*[@id='document']/*");
+var documentTemplate = new Template(this.scriptBase+"../html/document.xhtml#//*[@id='document']/*");
