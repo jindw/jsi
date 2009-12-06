@@ -5,11 +5,13 @@
 $import("org.xidea.jsidoc:JSIDoc",true);
 </script>
 <script>
-var data = window.hash.substring(1);
+var ps = ["org.xidea.jsidoc"];
 if(data){
-	var ps = window.eval('('+data+')');
-}elseP
-	var ps = ["org.xidea.jsidoc"];
+	try{
+		var data = window.hash.substring(1);
+		ps = window.eval('('+data+')');
+	}catch(e){
+	}
 }
 var pm = {};
 for(var i = 0;i<ps.length;i++){
