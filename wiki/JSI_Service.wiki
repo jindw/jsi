@@ -1,0 +1,16 @@
+#summary One-sentence summary of this page.
+#labels Phase-Design
+
+JSI 脚本目录下（默认为/scripts/），一些用于自动化处理的服务
+
+== 文档地址 ==
+    当指向JSI脚本目录，且无参数的时候，显示JSIDoc（scripts目录下的全部包）。
+== preload脚本自动生成 ==
+    到url匹配为 **/*__preload__.js的时候，输出 **/*.js内容 + preload 信息。
+== data 协议模拟支持 ==
+    ?service=data&data=<base64>
+== 导出服务 ==
+    ?service=export&content=<xml>&exports=<exports>
+== 模板集成导出 ==
+    yyMMdd<inc>.xp.js？export/yyMMdd<inc>.xp.js
+    从JSI脚本库中导出的压缩文件，这些脚本可以通过Lite模板插件自动生成，JSI 程序要拦截这种请求，如果发现Cookie中有调试模式的信息。通过JSI 分散载入零散的preload源码文件，方便Firebug单步调试。
