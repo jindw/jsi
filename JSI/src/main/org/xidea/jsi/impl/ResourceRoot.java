@@ -35,10 +35,10 @@ public class ResourceRoot extends AbstractRoot {
 	protected ArrayList<File> libraries = new ArrayList<File>();
 	protected long token;
 
-	protected void clear() {
+	protected void reset() {
 		this.bases.clear();
 		this.libraries.clear();
-		super.packageMap.clear();
+		super.reset();
 	}
 
 	public void addBase(File base) {

@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.xidea.jsi.impl.JSIText;
 import org.xidea.jsi.web.JSIService;
 
 import sun.misc.BASE64Decoder;
@@ -60,7 +61,7 @@ public class JSIServiceTest  extends JSIService{
 		//System.out.println(input);
 		//System.out.println(base64);
 		ByteArrayOutputStream out1 = new ByteArrayOutputStream();
-		service.writeBase64(base64, out1);
+		JSIText.writeBase64(base64, out1);
 		byte[] outbyte2 = decoder.decodeBuffer(base64);
 		//System.out.println(new String(outbyte2));
 		//System.out.println(new String(out1.toByteArray()));

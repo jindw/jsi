@@ -208,6 +208,12 @@ Exporter.prototype = {
 function encodeReplacer(c){
     return encodeMap[c];
 }
+var encodeMap = {
+    '--':'\\u002d-',
+    '<':'\\u003c',
+    '&':'\\u0026',
+    '>':'\\u003e'
+}
 
 var templateRegexp = /\bnew\s+Template\s*\(/;
 

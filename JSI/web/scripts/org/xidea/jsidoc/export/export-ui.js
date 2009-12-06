@@ -111,9 +111,9 @@ var ExportUI = {
         		zip.addText(n,content[n]);
         	}
         	zip = zip.toDataURL();
-        	zip = encodeURIComponent(zip);
         	dialog && dialog.close();
 	        if(window.ActiveXObject){//忽略ie8
+	        	zip = encodeURIComponent(zip);
 	        	window.open($JSI.scriptBase+'?service=data&data='+zip,resultDialogName)//resultDialogName
         	}else{
         		window.open(zip,resultDialogName)//resultDialogName
@@ -188,7 +188,7 @@ function exportResult(content,exportService){
     form.method = "POST";
     form.target = resultDialogName
     form.action=exportService
-    context.service = "export";
+    content.service = "export";
     for(var n in content){
     	var input = doc.createElement("input");
     	input.name = n;
