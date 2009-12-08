@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 
 import org.xidea.el.json.JSONEncoder;
@@ -25,7 +26,7 @@ class SDNService {
 			.compile("\\b"+SDN_DEBUG_TOKEN_NAME + "=(1|true|TRUE)\\b");
 
 	private ResourceRoot root;
-	private Map<String, String> cachedMap;// = new WeakHashMap<String,
+	private Map<String, String> cachedMap = new WeakHashMap<String,String>();
 	private Map<String, String[]> exportConfig = new HashMap<String, String[]>();
 	private int ips;
 	private long lastModified = -1;

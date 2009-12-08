@@ -73,7 +73,7 @@ public class JSICGI extends JSIService {
 		System.out.println("Content-Type:"+contentType);
 		System.out.println();
 		try {
-			this.service(path, params,"", System.out);
+			this.service(path, params, System.out,"");
 		} catch (Exception e) {
 			System.out.println("path:" + path);
 			System.out.println("params:" + params);
@@ -104,7 +104,7 @@ public class JSICGI extends JSIService {
 		String externalLibraryDirectory = getConfig("externalLibrary",
 				"WEB-INF/lib/");
 		this.reset();
-		this.addBase(new File(scriptBaseFile));
+		this.addSource(new File(scriptBaseFile));
 		this.addLib(new File(externalLibraryDirectory));
 	}
 
