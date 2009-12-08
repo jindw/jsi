@@ -14,7 +14,7 @@
 		<mkdir dir="build/dest/jsidoc/util/" />
 		<mkdir dir="build/dest/jsidoc/export/" />
 	</target>
-	<target name="cgi" depends="jar-compressed">
+	<target name="cgi" depends="jar">
 		<!--
 encoding="GBK"
 			comment="
@@ -33,7 +33,7 @@ encoding="GBK"
 			<zipfileset src="web/WEB-INF/lib/commons-logging-1.0.4.jar">
 				<include name="**/*.*" />
 			</zipfileset>
-			<zipfileset src="../JSA/build/dest/JSA.jar">
+			<zipfileset src="../JSA/build/dest/JSide.jar">
 				<include name="**/*.*" />
 			</zipfileset>
 			<zipfileset src="web/WEB-INF/lib/js.jar">
@@ -42,7 +42,7 @@ encoding="GBK"
 		</jar>
 		<copy file="build/dest/cgi.jar" todir="D:\Apache2.2\cgi-bin"/>
 	</target>
-	<target name="jar">
+	<target name="jar-uncompressed">
 		<jar encoding="GBK" comment="不要解压该文件！！" destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
@@ -66,7 +66,7 @@ encoding="GBK"
 		</jar>
 		<copy tofile="../CDN/war/WEB-INF/lib/JSI.jar" file="build/dest/JSI.jar" />
 	</target>
-	<target name="jar-compressed" depends="init">
+	<target name="jar" depends="init">
 		<delete file="build/dest/JSI.*" />
 		<delete file="build/dest/JSI-*.jar" />
 		<jar encoding="GBK" comment="不要解压该文件！！" destfile="build/dest/JSI.jar">
@@ -274,7 +274,7 @@ $JSI.preload('${packageName}',${fileNameAndPrefix}</echo>
 		</java>
 	</target>
 
-	<target name="buildExample" depends="jar">
+	<target name="buildExample" depends="jar-uncompressed">
 		<war destfile="build/dest/JSI-example-${version}.war" webxml="web/WEB-INF/web.xml" description="http://localhost/JSI-example-${version}/scripts/jsidoc">
 			<zipfileset dir="build/dest" file="JSI.jar" prefix="WEB-INF/lib/" />
 			<zipfileset dir="web">
@@ -337,7 +337,7 @@ $import("org.xidea.jsidoc:JSIDoc");</echo>
 			</zipfileset>
 		</zip>
 	</target>
-	<target name="build" depends="compress-jsidoc,compress-boot,jar-compressed,cgi,JSIDoc,zip-jsidoc">
+	<target name="build" depends="compress-jsidoc,compress-boot,jar,cgi,JSIDoc,zip-jsidoc">
 
 	</target>
 	<target name="zip-jsidoc">

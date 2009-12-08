@@ -81,7 +81,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 			try{
 				//header(': ');
 				resp.setHeader("Content-Disposition", "attachment; filename='data.zip'");
-				processAction(service, params,req.getHeader("Cookie"), out2);
+				processAction(service, params, out2,req.getHeader("Cookie"));
 			}catch (FileNotFoundException e) {
 				resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			}
@@ -166,7 +166,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 		}
 		this.reset();
 		String file = context.getRealPath(this.scriptBase);
-		this.addBase(new File(file));
+		this.addSource(new File(file));
 		this.addLib(new File(context.getRealPath(this.scriptBase)));
 	}
 

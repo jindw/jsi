@@ -47,10 +47,13 @@ public class JSIService extends ResourceRoot {
 				return "image/" + ext;
 			}
 		}
+		
 		if (path.endsWith(".css")) {
 			contentType = "text/css";
 		} else if (path.endsWith(".js")) {// for debug
 			contentType = "text/plain";
+		}else if(path.startsWith("export/")){
+			contentType = "text/paint;charset=UTF-8";
 		}
 		if (contentType != null) {
 			contentType = contentType + ";charset=" + this.getEncoding();
@@ -58,16 +61,23 @@ public class JSIService extends ResourceRoot {
 		return contentType;
 	}
 
+	/**
+	 * @param path
+	 * @param params
+	 * @param context
+	 * @param out
+	 * @throws IOException
+	 */
 	public void service(String path, Map<String, String[]> params,
-			String cookie, OutputStream out) throws IOException {
+			OutputStream out,Object context) throws IOException {
 		if (path == null || path.length() == 0) {
 			String[] services = params.get("service");
 			// ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-			processAction(services.length > 0 ? services[0] : "", params,
-					cookie, out);
+			processAction(services == null ? "":services[0], params,
+					out, context);
 			// out2.writeTo(out);
 		} else if (path.startsWith("export/")) {
-			processAction(path, params, cookie, out);
+			processAction(path, params, out, context);
 		} else {
 			this.writeResource(path, out);
 		}
@@ -75,7 +85,7 @@ public class JSIService extends ResourceRoot {
 	}
 
 	protected String processAction(String service,
-			Map<String, String[]> params, String cookie, OutputStream out)
+			Map<String, String[]> params, OutputStream out, Object context)
 			throws IOException, UnsupportedEncodingException {
 		String encoding = this.getEncoding();
 		if ("data".equals(service)) {
@@ -95,7 +105,7 @@ public class JSIService extends ResourceRoot {
 			if (service.length() == 0) {
 				throw new ScriptNotFoundException("");
 			}
-			sdn.process(service, cookie, out);
+			sdn.process(service, String.valueOf(context), out);
 			return "text/plain;charset=" + encoding;
 		} else {
 			out.write(document().getBytes(encoding));
@@ -115,37 +125,26 @@ public class JSIService extends ResourceRoot {
 	}
 
 	protected String document() {
-		List<String> allList = this.findPackageList(true);
-		if (allList.isEmpty()) {
-			return "<html><head>"
-					+ "<meta http-equiv='Content-Type' content='text/html;utf-8'/>"
-					+ "</head>"
-					+ "<body> "
-					+ "未发现任何托管脚本包，无法显示JSIDoc。<br /> "
-					+ "请添加脚本包，并在包目录下正确添加相应的包定义文件 。<br /> "
-					+ "<a href='org/xidea/jsidoc/index.html?group={\"example\":[\"example\",\"example.internal\",\"example.dependence\",\"org.xidea.jsidoc.util\"]}'>"
-					+ "察看示例</a>" + "</body><html>";
-		} else {
-			StringWriter out = new StringWriter();
-			List<String> scriptList = this.findPackageList(false);
-			out.append("<html><frameset rows='100%'>"
-					+ "<frame src='org/xidea/jsidoc/index.html?" + "group={");
-			if (!scriptList.isEmpty()) {
-				out.append("\"Scripts Packages\":");
-				out.append(buildJSArray(scriptList));
-			}
-			allList.removeAll(scriptList);
-			if (!allList.isEmpty()) {
-				if (!scriptList.isEmpty()) {
-					out.append(",");
-				}
-
-				out.append("\"Library Packages\":");
-				out.append(buildJSArray(allList));
-			}
-			out.append("}'> </frameset></html>");
-			return out.toString();
+		StringWriter out = new StringWriter();
+		List<String> scriptList = this.findPackageList(false);
+		out.append("<html><frameset rows='100%'>"
+				+ "<frame src='org/xidea/jsidoc/index.html?" + "group={");
+		if (!scriptList.isEmpty()) {
+			out.append("\"Source Packages\":");
+			out.append(buildJSArray(scriptList));
 		}
+		List<String> libList = this.findPackageList(true);
+		libList.removeAll(scriptList);
+		if (!libList.isEmpty()) {
+			if (!scriptList.isEmpty()) {
+				out.append(",");
+			}
+
+			out.append("\"Library Packages\":");
+			out.append(buildJSArray(libList));
+		}
+		out.append("}'> </frameset></html>");
+		return out.toString();
 
 	}
 

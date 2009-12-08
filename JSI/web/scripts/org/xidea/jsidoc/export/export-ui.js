@@ -291,7 +291,7 @@ function updateOutput(){
     for(var i=0; i<result.length; i++) {
     	resultMap[result[i]] = true;
     }
-    paths = $JSI.scriptBase+"="+paths.join("+");
+    paths = $JSI.scriptBase+"export/"+paths.join("+");
     pathOutput.innerHTML = "<a href="+paths+">"+paths+"</a>";
     fileListOutput.innerHTML = result.join('<br />');
     objectListOutput.innerHTML = objectNames.join('');

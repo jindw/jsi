@@ -31,31 +31,31 @@ public class ResourceRoot extends AbstractRoot {
 	 */
 	private String encoding = "utf-8";
 
-	protected ArrayList<File> bases = new ArrayList<File>();
+	protected ArrayList<File> sources = new ArrayList<File>();
 	protected ArrayList<File> libraries = new ArrayList<File>();
-	protected long token;
+	protected long token = 0;
 
 	protected void reset() {
-		this.bases.clear();
+		this.sources.clear();
 		this.libraries.clear();
 		super.reset();
 	}
 
-	public void addBase(File base) {
-		bases.add(base);
+	public void addSource(File base) {
+		if(base.isDirectory()){
+			sources.add(base);
+		}else{
+			throw new IllegalArgumentException("jsi source must be a directory");
+		}
 	}
 
-	public void addLib(File base) {
-		if (base.isDirectory()) {
-			libraries.add(base);
-		} else {
-			bases.add(base);
-		}
+	public void addLib(File lib) {
+		libraries.add(lib);
 	}
 
 	public long getLastModified() {
 		long t =0;
-		for (File base : bases) {
+		for (File base : sources) {
 			t = Math.max(t, base.lastModified());
 		}
 		for (File base : libraries) {
@@ -66,7 +66,7 @@ public class ResourceRoot extends AbstractRoot {
 	public JSILoadContext $import(String  path, JSILoadContext context) {
 		long t = getLastModified();
 		if(token<t){
-			this.reset();
+			super.reset();
 			token = t;
 		}
 		return super.$import(path, context);
@@ -161,62 +161,6 @@ public class ResourceRoot extends AbstractRoot {
 		}
 	}
 
-	/**
-	 * 打开的流使用完成后需要自己关掉
-	 */
-	public URL getResource(String path) {
-		if (path.startsWith("/")) {
-			path = path.substring(1);
-		}
-		URL res = getResourceFromBase(path);
-
-		if(res == null){
-			res = getResourceFromLib(path);
-			if(res == null){
-				res = getDefaultResource(path);
-			}
-		}
-		return res;
-	}
-
-	protected URL getDefaultResource(String path) {
-		return this.getClass().getClassLoader().getResource(path);
-	}
-
-	protected URL getResourceFromLib(String path) {
-		for (File resource : libraries) {
-			File[] libs = findLibFiles(resource);
-			for (File item : libs) {
-				URL in = findByZip(item, path);
-				if (in != null) {
-					return in;
-				}
-			}
-		}
-		return null;
-	}
-
-	protected URL getResourceFromBase(String path) {
-		for (File base : bases) {
-			try {
-				if (base.isDirectory()) {
-					File file = new File(base, path);
-					if (file.exists()
-							&& (!"boot.js".equals(path) || file.length() > 200)) {
-						return file.toURI().toURL();
-					}
-				} else {
-					URL in = findByZip(base, path);
-					if (in != null) {
-						return in;
-					}
-				}
-			} catch (IOException e) {
-				log.debug(e);
-			}
-		}
-		return null;
-	}
 
 	public List<JSIPackage> getPackageObjectList() {
 		List<String> result = findPackageList(true);
@@ -232,7 +176,7 @@ public class ResourceRoot extends AbstractRoot {
 
 	public List<String> findPackageList(boolean findLib) {
 		List<String> result = new ArrayList<String>();
-		for (File file : bases) {
+		for (File file : sources) {
 			try {
 				if (file.isFile()) {
 					appendZipPackage(file, result);
@@ -253,6 +197,42 @@ public class ResourceRoot extends AbstractRoot {
 		}
 		return result;
 	}
+	/**
+	 * 打开的流使用完成后需要自己关掉
+	 */
+	public URL getResource(String path) {
+		if (path.startsWith("/")) {
+			path = path.substring(1);
+		}
+		URL res = findResource(path);
+
+		if(res == null){
+			res = getDefaultResource(path);
+		}
+		return res;
+	}
+	protected URL getDefaultResource(String path) {
+		return this.getClass().getClassLoader().getResource(path);
+	}
+
+	protected URL findResource(String path) {
+		for (File base : sources) {
+			URL in = findResource(base, path);
+			if (in != null) {
+				return in;
+			}
+		}
+		for (File resource : libraries) {
+			File[] libs = findLibFiles(resource);
+			for (File item : libs) {
+				URL in = findResource(item, path);
+				if (in != null) {
+					return in;
+				}
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * 放心吧，我们不返回空：）
@@ -260,8 +240,11 @@ public class ResourceRoot extends AbstractRoot {
 	 * @param lib
 	 * @return
 	 */
-	protected File[] findLibFiles(File lib) {
+	private static File[] findLibFiles(File lib) {
 		if (lib != null) {
+			if(lib.isFile()){
+				return new File[]{lib};
+			}
 			File[] result = lib.listFiles(new FilenameFilter() {
 				public boolean accept(File dir, String name) {
 					name = name.toLowerCase();
@@ -275,22 +258,36 @@ public class ResourceRoot extends AbstractRoot {
 		return EMPTY_FILES;
 	}
 
-	protected URL findByZip(File file, String path) {
-		URL resource = null;
-		try {
-			final ZipFile jarFile = new ZipFile(file);
-			ZipEntry ze = jarFile.getEntry(path);
-			if (ze != null) {
-				resource = new URL("jar", "", file.toURI().toURL() + "!/"
-						+ path);
+	private static URL findResource(File file, String path) {
+		try{
+			if(file.isDirectory()){
+				file = new File(file, path);
+				if (file.exists()
+						&& (!"boot.js".equals(path) || file.length() > 200)) {
+					return file.toURI().toURL();
+				}else{
+					return null;
+				}
+			}else{
+				return findByZip(file, path);
 			}
 		} catch (IOException e) {
 			log.debug(e);
+			return null;
 		}
-		return resource;
+	}
+	private static URL findByZip(File file, String path) throws IOException{
+		final ZipFile jarFile = new ZipFile(file);
+		ZipEntry ze = jarFile.getEntry(path);
+		if (ze != null) {
+			return new URL("jar", "", file.toURI().toURL() + "!/"
+					+ path);
+		}else{
+			return null;
+		}
 	}
 
-	private void appendZipPackage(File file, Collection<String> result) {
+	private static void appendZipPackage(File file, Collection<String> result) {
 		try {
 			final ZipFile jarFile = new ZipFile(file);
 			Enumeration<? extends ZipEntry> ze = jarFile.entries();
