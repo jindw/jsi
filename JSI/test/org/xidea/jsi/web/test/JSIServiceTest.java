@@ -2,11 +2,13 @@ package org.xidea.jsi.web.test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.jsi.impl.JSIText;
 import org.xidea.jsi.web.JSIService;
+import org.xidea.lite.parser.impl.JSProxy;
 
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
@@ -15,7 +17,6 @@ import sun.misc.BASE64Encoder;
 public class JSIServiceTest  extends JSIService{
 	private BASE64Encoder encoder = new BASE64Encoder();
 	private BASE64Decoder decoder = new BASE64Decoder();
-	private JSIServiceTest service = new JSIServiceTest();
 	
 
 	@Test
@@ -66,6 +67,14 @@ public class JSIServiceTest  extends JSIService{
 		//System.out.println(new String(outbyte2));
 		//System.out.println(new String(out1.toByteArray()));
 		Assert.assertArrayEquals(outbyte2,out1.toByteArray());
+	}
+	@Test
+	public void testSDN() throws IOException{
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		new JSIService().service("export/org.xidea.jsidoc.util:Zip", new HashMap<String, String[]>(), out, "SDN_DEBUG=1");
+		String text = out.toString("utf-8");
+		JSProxy.newProxy().eval("function(){"+text+"\n}");
+		System.out.println(text);
 	}
 
 }

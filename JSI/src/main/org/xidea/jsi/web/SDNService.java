@@ -123,7 +123,12 @@ class SDNService {
 	public String doDebugExport(String path) {
 		String[] paths = SDNService.CDN_PATH_SPLITER.split(path);
 		StringBuilder out = new StringBuilder();
-		out.append(root.loadText(null, "boot.js"));
+		String boot = root.loadText(null, "boot.js");
+		//hack
+		boot = boot.replaceFirst("=\\s*(\\$JSI\\.scriptBase)\\b", "=($1=$1.replace(/\\\\/export\\\\/\\$/,'/'))");
+		out.append("if(!window.$JSI || !$JSI.scriptBase){");
+		out.append(boot);
+		out.append("\n}");
 
 		PackageLoadContext context = buildLoadContext(paths);
 		for (JSIPackage pkg : context.packageList) {
