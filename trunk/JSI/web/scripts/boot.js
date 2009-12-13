@@ -107,64 +107,67 @@ var $import = function(loaderEval,cachedScripts){
     }
     //初始化loadText 和 $JSI.scriptBase
     if(this.document){
+        //$JSI.scriptBase
         if(":Debug"){
-    	    /**
-    		 * 方便调试的支持
-    		 */
-            //compute scriptBase
-            var rootMatcher = /(^\w+:((\/\/\/\w\:)|(\/\/[^\/]*))?)/;
-            //var rootMatcher = /^\w+:(?:(?:\/\/\/\w\:)|(?:\/\/[^\/]*))?/;
-            var homeFormater = /(^\w+:\/\/[^\/#\?]*$)/;
-            //var homeFormater = /^\w+:\/\/[^\/#\?]*$/;
-            var urlTrimer = /[#\?].*$/;
-            var dirTrimer = /[^\/\\]*([#\?].*)?$/;
-            var forwardTrimer = /[^\/]+\/\.\.\//;
-            var base = document.location.href.
-                    replace(homeFormater,"$1/").
-                    replace(dirTrimer,"");
-            var baseTags = document.getElementsByTagName("base");
-            var scripts = document.getElementsByTagName("script");
-            /*
-             * 计算绝对地址
-             * @public
-             * @param <string>url 原url
-             * @return <string> 绝对URL
-             * @static
-             */
-            function computeURL(url){
-                var purl = url.replace(urlTrimer,'').replace(/\\/g,'/');
-                var surl = url.substr(purl.length);
-                //prompt(rootMatcher.test(purl),[purl , surl])
-                if(rootMatcher.test(purl)){
+            if(!$JSI.scriptBase){
+        	    /**
+        		 * 方便调试的支持
+        		 */
+                //compute scriptBase
+                var rootMatcher = /(^\w+:((\/\/\/\w\:)|(\/\/[^\/]*))?)/;
+                //var rootMatcher = /^\w+:(?:(?:\/\/\/\w\:)|(?:\/\/[^\/]*))?/;
+                var homeFormater = /(^\w+:\/\/[^\/#\?]*$)/;
+                //var homeFormater = /^\w+:\/\/[^\/#\?]*$/;
+                var urlTrimer = /[#\?].*$/;
+                var dirTrimer = /[^\/\\]*([#\?].*)?$/;
+                var forwardTrimer = /[^\/]+\/\.\.\//;
+                var base = document.location.href.
+                        replace(homeFormater,"$1/").
+                        replace(dirTrimer,"");
+                var baseTags = document.getElementsByTagName("base");
+                var scripts = document.getElementsByTagName("script");
+                /*
+                 * 计算绝对地址
+                 * @public
+                 * @param <string>url 原url
+                 * @return <string> 绝对URL
+                 * @static
+                 */
+                function computeURL(url){
+                    var purl = url.replace(urlTrimer,'').replace(/\\/g,'/');
+                    var surl = url.substr(purl.length);
+                    //prompt(rootMatcher.test(purl),[purl , surl])
+                    if(rootMatcher.test(purl)){
+                        return purl + surl;
+                    }else if(purl.charAt(0) == '/'){
+                        return rootMatcher.exec(base)[0]+purl + surl;
+                    }
+                    purl = base + purl;
+                    while(purl.length >(purl = purl.replace(forwardTrimer,'')).length){
+                        //alert(purl)
+                    }
                     return purl + surl;
-                }else if(purl.charAt(0) == '/'){
-                    return rootMatcher.exec(base)[0]+purl + surl;
                 }
-                purl = base + purl;
-                while(purl.length >(purl = purl.replace(forwardTrimer,'')).length){
-                    //alert(purl)
-                }
-                return purl + surl;
-            }
-            //处理HTML BASE 标记
-            if(baseTags){
-                for(var i=baseTags.length-1;i>=0;i--){
-                    var href = baseTags[i].href;
-                    if(href){
-                        base = computeURL(href.replace(homeFormater,"$1/").replace(dirTrimer,""));
-                        break;
+                //处理HTML BASE 标记
+                if(baseTags){
+                    for(var i=baseTags.length-1;i>=0;i--){
+                        var href = baseTags[i].href;
+                        if(href){
+                            base = computeURL(href.replace(homeFormater,"$1/").replace(dirTrimer,""));
+                            break;
+                        }
                     }
                 }
-            }
-            var script = scripts[scripts.length-1];
-    	    if(script){
-    	        //mozilla bug
-    	        while(script.nextSibling && script.nextSibling.nodeName.toUpperCase() == 'SCRIPT'){
-    	            script = script.nextSibling;
-    	        }
-    	        $JSI.scriptBase = computeURL(
-    	            (script.getAttribute('src')||"/scripts/").replace(/[^\/\\]+$/,'')
-    	        );
+                var script = scripts[scripts.length-1];
+        	    if(script){
+        	        //mozilla bug
+        	        while(script.nextSibling && script.nextSibling.nodeName.toUpperCase() == 'SCRIPT'){
+        	            script = script.nextSibling;
+        	        }
+        	        $JSI.scriptBase = computeURL(
+        	            (script.getAttribute('src')||"/scripts/").replace(/[^\/\\]+$/,'')
+        	        );
+                }
             }
     
         }
