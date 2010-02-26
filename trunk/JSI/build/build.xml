@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="GBK"?>
+<?xml version="1.0" encoding="utf-8"?>
 <project name="JSI" default="build" basedir="../">
 	<tstamp>
 		<format property="version" pattern="yyyyMMdd" />
@@ -18,8 +18,8 @@
 		<!--
 encoding="GBK"
 			comment="
-1.½«ÎÄ¼þ´æ´¢ÔÚÄãµÄcgi-bin Ä¿Â¼.
-2.´´½¨ jsi.cgi:
+1.å°†æ–‡ä»¶å­˜å‚¨åœ¨ä½ çš„cgi-bin ç›®å½•.
+2.åˆ›å»º jsi.cgi:
   #!java -jar cgi.jar
 " 
 		-->
@@ -43,7 +43,7 @@ encoding="GBK"
 		<copy file="build/dest/cgi.jar" todir="D:\Apache2.2\cgi-bin"/>
 	</target>
 	<target name="jar-uncompressed">
-		<jar encoding="GBK" comment="²»Òª½âÑ¹¸ÃÎÄ¼þ£¡£¡" destfile="build/dest/JSI.jar">
+		<jar encoding="GBK" comment="ä¸è¦è§£åŽ‹è¯¥æ–‡ä»¶ï¼ï¼" destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
 				<exclude name="**/test/**.*" />
@@ -69,7 +69,7 @@ encoding="GBK"
 	<target name="jar" depends="init">
 		<delete file="build/dest/JSI.*" />
 		<delete file="build/dest/JSI-*.jar" />
-		<jar encoding="GBK" comment="²»Òª½âÑ¹¸ÃÎÄ¼þ£¡£¡" destfile="build/dest/JSI.jar">
+		<jar encoding="GBK" comment="ä¸è¦è§£åŽ‹è¯¥æ–‡ä»¶ï¼ï¼" destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
 				<include name="org/xidea/test/**/*.*" />
@@ -149,7 +149,7 @@ encoding="GBK"
 			<arg value="${basedir}/build/dest/jsidoc/util/util.js" />
 
 			<!--
-			util»¹ÊÇÍ¦ÓÐÓÃµÄ£¬·ÖÉ¢·¢²¼°É£¬Ã»×¼ÓÐÈË¿ÉÒÔÀûÓÃÒ»ÏÂ
+			utilè¿˜æ˜¯æŒºæœ‰ç”¨çš„ï¼Œåˆ†æ•£å‘å¸ƒå§ï¼Œæ²¡å‡†æœ‰äººå¯ä»¥åˆ©ç”¨ä¸€ä¸‹
 			-->
 			<arg value="-outputJAR" />
 			<arg value="${basedir}/build/dest/jsidoc/util/util.jar" />
