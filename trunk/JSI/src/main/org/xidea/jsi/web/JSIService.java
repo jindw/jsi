@@ -75,11 +75,11 @@ public class JSIService extends ResourceRoot {
 			// ByteArrayOutputStream out2 = new ByteArrayOutputStream();
 			processAction(services == null ? "":services[0], params,
 					out, context);
-			// out2.writeTo(out);
-		} else if (path.startsWith("export/")) {
-			processAction(path, params, out, context);
 		} else {
-			this.writeResource(path, out);
+			if(!this.writeResource(path, out)){
+				processAction(path, params,
+						out, context);
+			}
 		}
 		out.flush();
 	}
@@ -100,11 +100,7 @@ public class JSIService extends ResourceRoot {
 			}
 			out.write(result.getBytes(encoding));
 			return "text/plain;charset=" + encoding;
-		} else if (service.startsWith("export/")) {
-			service = service.substring(7);
-			if (service.length() == 0) {
-				throw new ScriptNotFoundException("");
-			}
+		} else if (service!=null && service.length()>0) {
 			sdn.process(service, String.valueOf(context), out);
 			return "text/plain;charset=" + encoding;
 		} else {
