@@ -199,7 +199,11 @@ Exporter.prototype = {
             $log.error("装载源代码失败:",path);
         }
         if(compileFilter){
-            rtv = compileFilter(rtv,path);
+        	try{
+            	rtv = compileFilter(rtv,path);
+        	}catch(e){
+        		$log.warn("源代码装载模拟失败(可能由浏览器依赖导致)",e);
+        	}
         }
         return rtv;
     }
