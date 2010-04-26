@@ -20,7 +20,7 @@ public abstract class PackageParser {
 	public static final String SET_IMPLEMENTATION = "setImplementation";
 	public static final String ADD_SCRIPT = "addScript";
 	public static final String ADD_DEPENDENCE = "addDependence";
-	final static String BIND_SCRIPT ;
+	final static String BIND_SCRIPT;
 	static {
 		InputStream in1 = PackageParser.class
 				.getResourceAsStream("package-parser.js");
@@ -36,7 +36,8 @@ public abstract class PackageParser {
 			out.flush();
 			script = out.toString();
 		} catch (IOException e) {
-			script = "print('Error:"+e.getMessage().replaceAll("['\r\n]", "")+"')";
+			script = "print('Error:" + e.getMessage().replaceAll("['\r\n]", "")
+					+ "')";
 			throw new RuntimeException(e);
 		}
 		BIND_SCRIPT = script;
@@ -52,22 +53,40 @@ public abstract class PackageParser {
 		throw new PackageSyntaxException("不支持包定义格式");
 	}
 
+	@SuppressWarnings("unchecked")
 	public void addScript(String scriptName, Object objectNames,
 			Object beforeLoadDependences, Object afterLoadDependences) {
-		if (objectNames instanceof String) {
-			String pattern = (String) objectNames;
-			if (pattern.indexOf('*') >= 0) {
-				objectNames = findGlobals(scriptName, pattern);
+		objectNames = filterStrings(objectNames);
+		if (objectNames != null) {
+			if (objectNames instanceof String) {
+				String pattern = (String) objectNames;
+				if (pattern.indexOf('*') >= 0) {
+					objectNames = findGlobals(scriptName, pattern);
+				}
+			} else {
+				Collection<String> objectNames2 = null;
+				for (String pattern : (Collection<String>) objectNames) {
+					if (pattern.indexOf('*') >= 0) {
+						objectNames2 = (Collection<String>) objectNames;
+						break;
+					}
+				}
+				if (objectNames2 != null) {
+					for (String pattern : objectNames2) {
+						this.addScript(scriptName, pattern,
+								beforeLoadDependences, afterLoadDependences);
+					}
+				}
 			}
 		}
-		objectNames = filterStrings(objectNames);
 		try {
 			beforeLoadDependences = filterStrings(beforeLoadDependences);
 			afterLoadDependences = filterStrings(afterLoadDependences);
 		} catch (RuntimeException e) {
-			//log.error(beforeLoadDependences);
-			//log.error(afterLoadDependences);
-			log.warn(e);;
+			// log.error(beforeLoadDependences);
+			// log.error(afterLoadDependences);
+			log.warn(e);
+			;
 			throw e;
 		}
 		addScriptCall.add(Arrays.asList(scriptName, objectNames,
@@ -85,15 +104,15 @@ public abstract class PackageParser {
 	private Object filterStrings(Object object) {// check type...
 		try {
 			if (object instanceof Collection) {
-				for (Object o : (Collection) object){
-					o=(String)o;
+				for (Object o : (Collection) object) {
+					o = (String) o;
 				}
 				return object;
 			}
 			if (Boolean.FALSE.equals(object)) {
 				return null;
-			} else if(object instanceof Number){
-				if(((Number)object).floatValue() == 0){//js double number
+			} else if (object instanceof Number) {
+				if (((Number) object).floatValue() == 0) {// js double number
 					return null;
 				}
 			}
