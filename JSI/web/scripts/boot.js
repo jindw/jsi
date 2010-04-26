@@ -638,14 +638,14 @@ var $import = function(loaderEval,cachedScripts){
             if(objectNames){
             	
 	            if("org.xidea.jsi:PackageOptimize"){
-	            	if(/\*/.test(objectName)){
-	            		if(objectName instanceof Array){
+	            	if(/\*/.test(objectNames)){
+	            		if(objectNames instanceof Array){
 	            			var i = objectNames.length;
 		                    while(i--){
 		                    	this.addScript.call(this,scriptPath, objectNames[i], beforeLoadDependences, afterLoadDependences)
 		                    }
 	            		}else{
-		            		var pattern = objectName.replace(/\*/,'.*');
+		            		var pattern = objectNames.replace(/\*/,'.*');
 		                    reportTrace("部署后不应出现的配置，需要压缩处理掉相关问题！！！");
 		                    objectNames = doObjectImport(
 		                        realPackage(
