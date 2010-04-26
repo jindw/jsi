@@ -635,17 +635,32 @@ var $import = function(loaderEval,cachedScripts){
             }else{
                 objects = (this.scriptObjectMap[scriptPath] = []);
             }
-            if("org.xidea.jsi:PackageOptimize"){
-                if(objectNames == '*'){
-                    reportTrace("部署后不应出现的配置，需要压缩处理掉相关问题！！！");
-                    objectNames = doObjectImport(
-                        realPackage(
-                        	findPackage("org.xidea.jsidoc.util")
-                        ),"findGlobals")(getCachedScript(this.name,scriptPath)||loadText(scriptBase+this.name.replace(/\.|$/g,'/')+scriptPath));
-                    
-                }
-            }
             if(objectNames){
+            	
+	            if("org.xidea.jsi:PackageOptimize"){
+	            	if(/\*/.test(objectName)){
+	            		if(objectName instanceof Array){
+	            			var i = objectNames.length;
+		                    while(i--){
+		                    	this.addScript.call(this,scriptPath, objectNames[i], beforeLoadDependences, afterLoadDependences)
+		                    }
+	            		}else{
+		            		var pattern = objectName.replace(/\*/,'.*');
+		                    reportTrace("部署后不应出现的配置，需要压缩处理掉相关问题！！！");
+		                    objectNames = doObjectImport(
+		                        realPackage(
+		                        	findPackage("org.xidea.jsidoc.util")
+		                        ),"findGlobals")(getCachedScript(this.name,scriptPath)||loadText(scriptBase+this.name.replace(/\.|$/g,'/')+scriptPath));
+		                    pattern = new RexExp('^'+pattern+'$');
+		                    var i = objectNames.length;
+		                    while(i--){
+		                    	if(!pattern.test(objectNames[i])){
+		                    		objectNames.splice(i,1);
+		                    	}
+		                    }
+		                }
+	            	}
+	            }
                 if(objectNames instanceof Array){
                     for(var i = 0,len = objectNames.length;i<len;i++){
                         var object = objectNames[i];
