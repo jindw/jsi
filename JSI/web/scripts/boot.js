@@ -651,7 +651,7 @@ var $import = function(loaderEval,cachedScripts){
 		                        realPackage(
 		                        	findPackage("org.xidea.jsidoc.util")
 		                        ),"findGlobals")(getCachedScript(this.name,scriptPath)||loadText(scriptBase+this.name.replace(/\.|$/g,'/')+scriptPath));
-		                    pattern = new RexExp('^'+pattern+'$');
+		                    pattern = new RegExp('^'+pattern+'$');
 		                    var i = objectNames.length;
 		                    while(i--){
 		                    	if(!pattern.test(objectNames[i])){
