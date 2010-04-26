@@ -644,6 +644,7 @@ var $import = function(loaderEval,cachedScripts){
 		                    while(i--){
 		                    	this.addScript.call(this,scriptPath, objectNames[i], beforeLoadDependences, afterLoadDependences)
 		                    }
+		                    return;
 	            		}else{
 		            		var pattern = objectNames.replace(/\*/,'.*');
 		                    reportTrace("部署后不应出现的配置，需要压缩处理掉相关问题！！！");

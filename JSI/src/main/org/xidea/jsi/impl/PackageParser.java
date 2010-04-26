@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,7 +62,15 @@ public abstract class PackageParser {
 			if (objectNames instanceof String) {
 				String pattern = (String) objectNames;
 				if (pattern.indexOf('*') >= 0) {
-					objectNames = findGlobals(scriptName, pattern);
+					Pattern regexp = Pattern.compile("^"+pattern.replaceAll("[\\*]", ".*")+'$');
+					Collection<String> objectNames2 = findGlobals(scriptName, pattern);
+					ArrayList<String> objectNames3 = new ArrayList<String>();
+					for(String on : objectNames2){
+						if(regexp.matcher(on).find()){
+							objectNames3.add(on);
+						}
+					}
+					objectNames = objectNames3;
 				}
 			} else {
 				Collection<String> objectNames2 = null;
@@ -76,6 +85,7 @@ public abstract class PackageParser {
 						this.addScript(scriptName, pattern,
 								beforeLoadDependences, afterLoadDependences);
 					}
+					return;
 				}
 			}
 		}
