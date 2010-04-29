@@ -11,7 +11,8 @@ function $log(){
     var temp = [];
     if(this == $log){
         var bindLevel = arguments[i++];
-        temp.push(arguments[i++],":\n\n");
+        var bindName = logLevelNameMap[bindLevel];
+        temp.push(bindName,":\n\n");
     }
     while(i<arguments.length){
         var msg = arguments[i++]
@@ -25,14 +26,15 @@ function $log(){
             temp.push(msg,"\n");
         }
     }
-    if(bindLevel >= 0){
-        temp.push("\n\n继续弹出 ",temp[0]," 日志?\r\n");
-        if(!confirm(temp.join(''))){
+    var temp = temp.join('');
+    if(bindName){
+        if(!confirm(temp+"\n\n继续弹出 "+bindName+" 日志?\r\n")){
             consoleLevel = bindLevel+1;
         }
     }else{
-        confirm(temp.join(''));
+        confirm(temp);
     }
+    return temp;
 }
 /**
  * 设置日志级别
@@ -57,23 +59,29 @@ $log.setLevel = function(level){
 /*
  * @param bindLevel 绑定函数的输出级别，只有该级别大于等于输出级别时，才可输出日志
  */
-function buildLevelLog(bindLevel,bindName){
-    confirm = confirm || this.confirm || this.print||function(arg){
-        java.lang.System.out.print(String(arg))
+function buildLevelLog(bindLevel){
+    confirm = confirm || this.confirm || function(arg){
+    	(this.print||java.lang.System.out.print)(String(arg))
+    	return true;
     };;
     return function(){
-        if(bindLevel>=consoleLevel){
-            var msg = [bindLevel,bindName];
-            msg.push.apply(msg,arguments);
-            $log.apply($log,msg);
-        }
         if(":debug"){
+	        if(bindLevel>=consoleLevel){
+	            var msg = [bindLevel];
+	            msg.push.apply(msg,arguments);
+	            msg = $log.apply($log,msg);
+	        }
             if((typeof console == 'object') && (typeof console.log == 'function')){
-                var msg = [bindLevel,bindName];
-                msg.push.apply(msg,arguments);
-                console.log(msg.join(';'))
+                console.log(msg)
             }
+        }else{
+	        if(bindLevel>=consoleLevel){
+	            var msg = [bindLevel];
+	            msg.push.apply(msg,arguments);
+	            msg = $log.apply($log,msg);
+	        }
         }
+        return msg;
     }
 }
 var confirm;
@@ -87,5 +95,5 @@ var logLevelIndex = logLevelNameMap.length;
 
 while(logLevelIndex--){
     var logName = logLevelNameMap[logLevelIndex];
-    $log[logName] = buildLevelLog(logLevelIndex,logName);
+    $log[logName] = buildLevelLog(logLevelIndex);
 };
