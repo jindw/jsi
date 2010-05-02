@@ -629,6 +629,14 @@ var $import = function(loaderEval,cachedScripts){
          * @param <string|Array>afterLoadDependences [opt] 装在后依赖
          */
         addScript :  function(scriptPath, objectNames, beforeLoadDependences, afterLoadDependences){
+            
+            if("org.xidea.jsi:PackageOptimize"){
+            	if(beforeAddScript.apply(this,arguments)){
+            		return;
+            	}
+            }
+            
+            
             var objects = this.scriptObjectMap[scriptPath];
             if(objects){
                 var previousObject = objects[objects.length-1];
@@ -636,34 +644,6 @@ var $import = function(loaderEval,cachedScripts){
                 objects = (this.scriptObjectMap[scriptPath] = []);
             }
             
-            if("org.xidea.jsi:PackageOptimize"){
-            	if(/\*/.test(objectNames)){
-            		if(objectNames instanceof Array){
-            			var i = objectNames.length;
-	                    while(i--){
-	                    	this.addScript.call(this,scriptPath, objectNames[i], beforeLoadDependences, afterLoadDependences)
-	                    }
-            		}else{
-	            		var pattern = objectNames.replace(/\*/,'.*');
-	                    reportTrace("部署后不应出现的配置，需要压缩处理掉相关问题！！！");
-	                    objectNames = doObjectImport(
-	                        realPackage(
-	                        	findPackage("org.xidea.jsidoc.util")
-	                        ),"findGlobals")(getCachedScript(this.name,scriptPath)||loadText(scriptBase+this.name.replace(/\.|$/g,'/')+scriptPath));
-	                    pattern = new RegExp('^'+pattern+'$');
-	                    var i = objectNames.length;
-	                    while(i--){
-	                    	if(!pattern.test(objectNames[i])){
-	                    		objectNames.splice(i,1);
-	                    	}
-	                    }
-	                    this.addScript.call(this,scriptPath, objectNames, beforeLoadDependences, afterLoadDependences)
-	                }
-	                return;
-            	}else if(arguments.length == 1){
-	            	//TODO:从源码分析依赖关系
-	            }
-            }
             if(objectNames){
                 if(objectNames instanceof Array){
                     for(var i = 0,len = objectNames.length;i<len;i++){
@@ -706,38 +686,8 @@ var $import = function(loaderEval,cachedScripts){
             }else{
                 //TODO:可编译优化,经过优化的脚本可以直接删除此运行时优化
                 if("org.xidea.jsi:PackageOptimize"){
-                    if(!afterLoad ){
-                        thisPath = this.objectScriptMap[thisPath] || thisPath;
-                    }
-                    /*
-                     * 绝对路径:
-                     *   example:sayHello
-                     *   example/hello.js
-                     * 上级路径:
-                     *   ..util:JSON,....:Test
-                     *   ../util/json.js,../../test.js
-                     * 下级相对路径
-                     *   .util:JSON
-                     *   ./util/json.js
-                     * 
-                     */
-                    if(targetPath.charAt(0) == '.'){
-                        var splitPos2Exp = targetPath.indexOf('/');
-                        var packageName = this.name;
-                        if(splitPos2Exp>0){
-                            packageName = packageName.replace(/[\.$]/g,'/') ;
-                            // thispkg/../util/json.js   
-                            // thispkg/../../test.js
-                            // thispkg/./util/json.js
-                            splitPos2Exp = /(?:\w+\/\.|\/)\./
-                        }else{
-                            // thispkg..util:JSON
-                            // thispkg....:Test
-                            // thispkg.util:JSON
-                            splitPos2Exp = /\w+\.\./
-                        }
-                        targetPath = packageName+targetPath;
-                        while(targetPath!=(targetPath = targetPath.replace(splitPos2Exp,'')));
+                    if(beforeAddDependence.apply(this,arguments)){
+                    	return;
                     }
                 }
                 this.dependenceMap.push([thisPath,targetPath,afterLoad]);
@@ -1225,6 +1175,18 @@ var $import = function(loaderEval,cachedScripts){
             }
         }
     }
+    
+    if("org.xidea.jsi:PackageOptimize"){
+          var beforeAddScript = doObjectImport(
+                realPackage(
+                	findPackage("org.xidea.jsi")
+                ),"beforeAddScript");
+          var beforeAddDependence = doObjectImport(
+                realPackage(
+                	findPackage("org.xidea.jsi")
+                ),"beforeAddDependence");
+    }
+    
     /*
      * 即JSI 的$import函数
      */
