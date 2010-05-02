@@ -10,6 +10,7 @@
 	<target name="init">
 		<mkdir dir="build/dest" />
 		<mkdir dir="build/dest/scripts" />
+		<mkdir dir="build/dest/jsi" />
 		<mkdir dir="build/dest/jsidoc" />
 		<mkdir dir="build/dest/jsidoc/util/" />
 		<mkdir dir="build/dest/jsidoc/export/" />
@@ -23,7 +24,7 @@ encoding="GBK"
   #!java -jar cgi.jar
 " 
 		-->
-		<jar  destfile="build/dest/cgi.jar">
+		<jar destfile="build/dest/cgi.jar">
 			<manifest>
 				<attribute name="Main-Class" value="org.xidea.jsi.web.JSICGI" />
 			</manifest>
@@ -40,7 +41,7 @@ encoding="GBK"
 				<exclude name="**/*.java" />
 			</zipfileset>
 		</jar>
-		<copy file="build/dest/cgi.jar" todir="D:\Apache2.2\cgi-bin"/>
+		<copy file="build/dest/cgi.jar" todir="D:\Apache2.2\cgi-bin" />
 	</target>
 	<target name="jar-uncompressed">
 		<jar encoding="GBK" comment="不要解压该文件！！" destfile="build/dest/JSI.jar">
@@ -76,6 +77,7 @@ encoding="GBK"
 				<include name="org/xidea/jsi/impl/**/*.*" />
 				<exclude name="**/jsidoc/styles/*.png" />
 				<exclude name="**/jsidoc/html/*.xhtml" />
+				<exclude name="**/jsi/*.js" />
 				<exclude name="**/jsidoc/*.js" />
 				<exclude name="**/jsidoc/export/*.*" />
 				<exclude name="**/jsidoc/util/*.*" />
@@ -92,6 +94,10 @@ encoding="GBK"
 				<include name="jsidoc.js" />
 				<include name="export/__package__.js" />
 				<include name="export/export.js" />
+			</zipfileset>
+			<zipfileset dir="build/dest/jsi/" prefix="org/xidea/jsi">
+				<include name="__package__.js" />
+				<include name="impl.js" />
 			</zipfileset>
 			<zipfileset src="${basedir}/build/dest/jsidoc/util/util.jar">
 				<include name="org/xidea/jsidoc/util/*.js" />
@@ -133,7 +139,7 @@ encoding="GBK"
 			<arg value="org.xidea.jsi:PackageOptimize" />
 		</java>
 	</target>
-	<target name="compress-jsidoc" depends="init">
+	<target name="compress-jsi" depends="init">
 		<!-- export util -->
 		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
@@ -149,8 +155,8 @@ encoding="GBK"
 			<arg value="${basedir}/build/dest/jsidoc/util/util.js" />
 
 			<!--
-			util还是挺有用的，分散发布吧，没准有人可以利用一下
-			-->
+				util还是挺有用的，分散发布吧，没准有人可以利用一下
+				-->
 			<arg value="-outputJAR" />
 			<arg value="${basedir}/build/dest/jsidoc/util/util.jar" />
 		</java>
@@ -187,38 +193,52 @@ encoding="GBK"
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jsidoc/jsidoc.js" />
 		</java>
+		<!-- export jsi -->
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-config.ascii" />
+			<arg value="false" />
+			<arg value="-exports" />
+			<arg value="org.xidea.jsi.*" />
 
-		<antcall target="_buildPreload">
-			<param name="dest" value="build/dest/jsidoc/preload.js" />
-		</antcall>
+			<arg value="-outputPackage" />
+			<arg value="${basedir}/build/dest/jsi/__package__.js" />
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/jsi/impl.js" />
+
+		</java>
 	</target>
-	<target name="_buildPreload">
-		<echo>${dest}</echo>
-		<echo file="${dest}" />
-		<property name="packageName" value="org.xidea.jsidoc.export" />
+	<target name="buildJSIPreload">
+		<property name="preload_dest" value="build/dest/jsidoc/preload.js" />
+		<property name="packageName" value="org.xidea.jsi" />
+		<echo file="${preload_dest}" />
+		<antcall target="_appendPreload">
+			<param name="source" value="build/dest/jsi/__package__.js" />
+		</antcall>
+		<antcall target="_appendPreload">
+			<param name="source" value="build/dest/jsi/impl.js" />
+		</antcall>
+		<property name="packageName" value="org.xidea.jsidoc" />
 		<antcall target="_appendPreload">
 			<param name="source" value="build/dest/jsidoc/__package__.js" />
-			<param name="packageName" value="org.xidea.jsidoc" />
 		</antcall>
 		<antcall target="_appendPreload">
 			<param name="source" value="build/dest/jsidoc/jsidoc.js" />
-			<param name="packageName" value="org.xidea.jsidoc" />
 		</antcall>
+		<property name="packageName" value="org.xidea.jsidoc.util" />
 		<antcall target="_appendPreload">
 			<param name="source" value="build/dest/jsidoc/util/__package__.js" />
-			<param name="packageName" value="org.xidea.jsidoc.util" />
 		</antcall>
 		<antcall target="_appendPreload">
 			<param name="source" value="build/dest/jsidoc/util/util.js" />
-			<param name="packageName" value="org.xidea.jsidoc.util" />
 		</antcall>
+		<property name="packageName" value="org.xidea.jsidoc.export" />
 		<antcall target="_appendPreload">
 			<param name="source" value="build/dest/jsidoc/export/__package__.js" />
-			<param name="packageName" value="org.xidea.jsidoc.export" />
 		</antcall>
 		<antcall target="_appendPreload">
 			<param name="source" value="build/dest/jsidoc/export/export.js" />
-			<param name="packageName" value="org.xidea.jsidoc.export" />
 		</antcall>
 
 	</target>
@@ -233,14 +253,14 @@ encoding="GBK"
 		<echo file="${source}.prefix">
 $JSI.preload('${packageName}',${fileNameAndPrefix}</echo>
 		<echo file="${source}.postfix">})</echo>
-		<copy tofile="${dest}.temp" file="${dest}" />
-		<concat encoding="utf-8" destfile="${dest}">
-			<path path="${dest}.temp" />
+		<copy tofile="${preload_dest}.temp" file="${preload_dest}" />
+		<concat encoding="utf-8" destfile="${preload_dest}">
+			<path path="${preload_dest}.temp" />
 			<path path="${source}.prefix" />
 			<path path="${source}" />
 			<path path="${source}.postfix" />
 		</concat>
-		<delete file="${dest}.temp" />
+		<delete file="${preload_dest}.temp" />
 		<delete file="${source}.prefix" />
 		<delete file="${source}.postfix" />
 	</target>
@@ -259,6 +279,7 @@ $JSI.preload('${packageName}',${fileNameAndPrefix}</echo>
 			<arg value="example.alias:" />
 			<arg value="example.dependence.*" />
 			<arg value="example.internal.*" />
+			<arg value="org.xidea.jsi.*" />
 			<arg value="org.xidea.jsidoc.*" />
 			<arg value="org.xidea.jsidoc.export.*" />
 			<arg value="org.xidea.jsidoc.util.*" />
@@ -291,7 +312,7 @@ $JSI.preload('${packageName}',${fileNameAndPrefix}</echo>
 			</fileset>
 		</ftp>
 	</target>
-	<target name="JSIDoc" depends="init">
+	<target name="JSIDoc" depends="init,buildJSIPreload">
 		<delete file="build/dest/JSIDoc-*.*" />
 		<java classname="org.xidea.jsi.test.SimpleCacheBuilder" classpath="${JSAPath};web/WEB-INF/classes">
 			<arg value="${basedir}/web/scripts" />
@@ -312,6 +333,7 @@ $JSI.preload('${packageName}',${fileNameAndPrefix}</echo>
 
 		<echo file="build/dest/jsidoc/temp.js">
 $import("org.xidea.jsidoc:JSIDoc");</echo>
+
 		<concat encoding="utf-8" destfile="${basedir}/build/dest/jsidoc/boot.js">
 			<path path="build/dest/jsidoc/boot-all-featrues.js" />
 			<path path="build/dest/jsidoc/preload.js" />
@@ -337,7 +359,7 @@ $import("org.xidea.jsidoc:JSIDoc");</echo>
 			</zipfileset>
 		</zip>
 	</target>
-	<target name="build" depends="compress-jsidoc,compress-boot,jar,cgi,JSIDoc,zip-jsidoc">
+	<target name="build" depends="compress-jsi,compress-boot,jar,cgi,JSIDoc,zip-jsidoc">
 
 	</target>
 	<target name="zip-jsidoc">
