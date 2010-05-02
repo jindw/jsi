@@ -13,6 +13,8 @@ $export_service = "http://litecompiler.appspot.com/scripts/export.action";
 
 if(array_key_exists('service',$_GET)){
     $path = "service=".$_GET['service'];
+}else if(array_key_exists('package',$_GET)){
+    $path = "service=list:".$_GET['package'];
 }else if(array_key_exists('path',$_GET)){
     $path = $_GET['path'];
 }else if(array_key_exists('PATH_INFO',$_SERVER)){
@@ -52,6 +54,29 @@ if($path == 'service=data'){
 		echo file_get_contents($export_service, false, $context);
     }else{
         header("HTTP/1.0 404 Not Found");
+    }
+    return;
+}else if(strncmp($path,'service=list:',13)===0){
+	$path = substr($path,13);
+	$path = str_replace('.','/',$path);
+	$base = realpath('./'.$path);
+	$result = array();
+    if($base){
+        $dir = dir($base); 
+        $first = true;
+	    echo '[';
+        while (false !== ($file = $dir->read())) {
+		    if(preg_match('/.*\.(?:js|JS)$/i',$file)){
+		    	if($first){
+		    		$first = false;
+		    	}else{
+		    		echo ',';
+		    	}
+		    	echo '"'.$file.'"';
+	        }
+        }
+	    echo ']';
+        $dir->close();
     }
     return;
 }

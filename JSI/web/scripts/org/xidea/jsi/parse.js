@@ -5,18 +5,20 @@
  * 
  * @return [[objectNames, beforeLoadDependences, afterLoadDependences]]
  */
- 
+var loadText;
 function parse(pkg,scriptPath){
+	loadText = loadText || $import("org.xidea.jsidoc.util.loadText");
 	var source = loadText($JSI.scriptBase+pkg.replace(/\.|$/g,'/')+scriptPath);
 	var exp = /^\s*\/\*[\s\S]+?\*\//gm;
 	var match;
 	var result = [];
 	while(match = exp.exec(source)){
-		var result1 = parseEntry(source,exp.lastIndex,exp.lastIndex+match[0].length);
+		var result1 = parseEntry(source,match.index ,exp.lastIndex);
 		if(result1){
 			result.push(result1);
 		}
 	}
+	return result;
 }
 
 
@@ -31,6 +33,7 @@ function parseEntry(source,start,end){
 		var list = doclets[key] || (doclets[key] = []);
 		list.push(value);
 	}
+	
 	var jsiparser = doclets.jsiparser && doclets.jsiparser[0];
 	if(jsiparser === '' || jsiparser  == 'org.xidea.jsi.parse' || jsiparser == 'org.xidea.jsi:parse'){
 		var exports = doclets['export'];
@@ -42,7 +45,7 @@ function parseEntry(source,start,end){
 				var item = exports[i];
 				if(!item ){
 					var id = source.substring(end);
-					id = /^\s*(?:var\s|function\s)?([\w\.\$\s]+)/.match(id)[1];
+					id = id.match(/^\s*(?:var\s|function\s)?([\w\.\$\s]+)/)[1];
 					exports[i] = id.replace(/^\s+|\s+$/g,'');
 				}
 			}

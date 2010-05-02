@@ -456,6 +456,20 @@ var $import = function(loaderEval,cachedScripts){
             }else{
                 loaderEval.call(this,pscript);
             }
+            if("org.xidea.jsi:PackageOptimize"){
+            	for(var temp in this.scriptObjectMap){
+            		return;
+            	}
+            	var temp = loadText(scriptBase + "index.php?package="+name);
+            	var list = loaderEval(temp);
+            	var i = list.length;
+            	while(i--){
+            		var temp = list[i];
+            		if('__package__.js'!=temp){
+            			this.addScript(temp);
+            		}
+            	}
+            }
         }catch(e){
             if(":Debug"){
                 //packageMap[name] = null;
@@ -636,7 +650,6 @@ var $import = function(loaderEval,cachedScripts){
             	}
             }
             
-            
             var objects = this.scriptObjectMap[scriptPath];
             if(objects){
                 var previousObject = objects[objects.length-1];
@@ -796,7 +809,7 @@ var $import = function(loaderEval,cachedScripts){
                 var pscript = getCachedScript(packageName,'') ||
                     //cachedScripts[packageName] === undefined && 当cachedScripts[packageName]不为空时，就不用在探测了（假设一旦cache则__package__.js必cache，有点无理）
                         loadText(scriptBase+packageName.replace(/\.|$/g,'/')+ '__package__.js');
-                if(pscript){
+                if(pscript!=null){
                     return packageMap[packageName] || new Package(packageName,pscript);
                 }
                 //注册空包，避免重复探测
@@ -1177,14 +1190,17 @@ var $import = function(loaderEval,cachedScripts){
     }
     
     if("org.xidea.jsi:PackageOptimize"){
-          var beforeAddScript = doObjectImport(
-                realPackage(
-                	findPackage("org.xidea.jsi")
-                ),"beforeAddScript");
-          var beforeAddDependence = doObjectImport(
-                realPackage(
-                	findPackage("org.xidea.jsi")
-                ),"beforeAddDependence");
+    	var optimizeTarget = {};
+        function beforeAddScript (){
+            var fn = optimizeTarget['beforeAddScript'];
+            return fn && fn.apply(this,arguments);
+        }
+        function beforeAddDependence(){
+            var fn = optimizeTarget['beforeAddDependence'];
+            return fn && fn.apply(this,arguments);
+        }
+        lazyImport("org.xidea.jsi:beforeAddScript",optimizeTarget,true)
+        lazyImport("org.xidea.jsi:beforeAddDependence",optimizeTarget,true)
     }
     
     /*
