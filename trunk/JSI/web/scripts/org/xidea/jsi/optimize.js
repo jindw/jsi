@@ -2,12 +2,13 @@
  * @jsiparser org.xidea.jsi.parse
  * @import org.xidea.jsidoc.util.findGlobals
  * @import org.xidea.jsidoc.util.loadText
+ * @import org.xidea.jsi.parse
  * @export beforeAddScript
  * @export beforeAddDependence
  * 
  * @return [[objectNames, beforeLoadDependences, afterLoadDependences]]
  */
- 
+var findGlobals,parse,loadText;
 function beforeAddScript(scriptPath, objectNames, beforeLoadDependences, afterLoadDependences){
 	if(/\*/.test(objectNames)){
 		if(objectNames instanceof Array){
@@ -17,6 +18,8 @@ function beforeAddScript(scriptPath, objectNames, beforeLoadDependences, afterLo
             }
 		}else{
     		var pattern = objectNames.replace(/\*/,'.*');
+    		loadText = loadText || $import("org.xidea.jsidoc.util.loadText");
+    		findGlobals = findGlobals || $import("org.xidea.jsidoc.util.findGlobals");
 			var source = loadText($JSI.scriptBase+this.name.replace(/\.|$/g,'/')+scriptPath);
             objectNames = findGlobals(source);
             pattern = new RegExp('^'+pattern+'$');
@@ -31,11 +34,12 @@ function beforeAddScript(scriptPath, objectNames, beforeLoadDependences, afterLo
     	return true;
 	}else if(arguments.length == 1){
     	//TODO:从源码分析依赖关系
+    	parse = parse || $import("org.xidea.jsi.parse");
     	var result = parse(this.name,scriptPath);
     	var i = result.length;
     	while(i--){
     		var item = result[i];// objectNames, beforeLoadDependences, afterLoadDependences
-    		this.addScript.call(this,scriptPath,item[0],item[1],item[2])
+    		this.addScript.call(this,scriptPath,item[0],item[1],item[2],true)
     	}
     	return true;
     }
