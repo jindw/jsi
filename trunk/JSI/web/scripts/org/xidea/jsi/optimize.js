@@ -1,26 +1,47 @@
 /**
  * @jsiparser org.xidea.jsi.parse
- * @import org.xidea.jsidoc.util.findGlobals
- * @import org.xidea.jsidoc.util.loadText
- * @import org.xidea.jsi.parse
- * @export beforeAddScript
- * @export beforeAddDependence
- * 
- * @return [[objectNames, beforeLoadDependences, afterLoadDependences]]
+ * #@import org.xidea.jsidoc.util.findGlobals
+ * #@import org.xidea.jsi.parse
+ * @export optmizePackage
  */
 var findGlobals,parse,loadText;
-function beforeAddScript(scriptPath, objectNames, beforeLoadDependences, afterLoadDependences){
+function optimizePackage(PackageClass,loadTextArg){
+	loadText = loadTextArg;
+	var pp = PackageClass.prototype;
+	function OptmizePackage(){
+		PackageClass.apply(this,arguments);
+		for(var temp in this.scriptObjectMap){
+			return;
+		}
+		if(!this.implementation){
+			this.addScript("*");
+		}
+	}
+	OptmizePackage.prototype = pp;
+	addCallFilter(pp,'addScript',addScriptFilter);
+	addCallFilter(pp,'addDependence',addDependenceFilter);
+	return OptmizePackage;
+}
+function addCallFilter(pp,key,filter){
+	var chain = pp[key];
+	pp[key] = function(){
+		return filter.apply([this,chain],arguments) 
+	}
+}
+            	
+function addScriptFilter(scriptPath, objectNames, beforeLoadDependences, afterLoadDependences){
+	var thiz = this[0];
+	var chain = this[1]
 	if(/\*/.test(objectNames)){
 		if(objectNames instanceof Array){
 			var i = objectNames.length;
             while(i--){
-            	this.addScript.call(this,scriptPath, objectNames[i], beforeLoadDependences, afterLoadDependences)
+            	thiz.addScript.call(thiz,scriptPath, objectNames[i], beforeLoadDependences, afterLoadDependences)
             }
 		}else{
     		var pattern = objectNames.replace(/\*/,'.*');
-    		loadText = loadText || $import("org.xidea.jsidoc.util.loadText");
     		findGlobals = findGlobals || $import("org.xidea.jsidoc.util.findGlobals");
-			var source = loadText($JSI.scriptBase+this.name.replace(/\.|$/g,'/')+scriptPath);
+			var source = loadText($JSI.scriptBase+thiz.name.replace(/\.|$/g,'/')+scriptPath);
             objectNames = findGlobals(source);
             pattern = new RegExp('^'+pattern+'$');
             var i = objectNames.length;
@@ -29,56 +50,61 @@ function beforeAddScript(scriptPath, objectNames, beforeLoadDependences, afterLo
             		objectNames.splice(i,1);
             	}
             }
-            this.addScript.call(this,scriptPath, objectNames, beforeLoadDependences, afterLoadDependences)
+            thiz.addScript.call(thiz,scriptPath, objectNames, beforeLoadDependences, afterLoadDependences)
         }
-    	return true;
 	}else if(arguments.length == 1){
     	//TODO:从源码分析依赖关系
     	parse = parse || $import("org.xidea.jsi.parse");
-    	var result = parse(this.name,scriptPath);
+    	var result = parse(thiz.name,scriptPath,loadText);
     	var i = result.length;
     	while(i--){
-    		var item = result[i];// objectNames, beforeLoadDependences, afterLoadDependences
-    		this.addScript.call(this,scriptPath,item[0],item[1],item[2],true)
+    		var item = result[i];// scriptPath,objectNames, beforeLoadDependences, afterLoadDependences
+    		thiz.addScript.apply(thiz,item)
     	}
-    	return true;
+    }else{
+    	chain.apply(thiz,arguments)
     }
 }
-function beforeAddDependence(thisPath,targetPath,afterLoad){
-	if(!afterLoad ){
-    	//TODO:我未必想吧全部的依赖文件的全部对象名暴露出来
-        thisPath = this.objectScriptMap[thisPath] || thisPath;
-    }
-    /*
-     * 绝对路径:
-     *   example:sayHello
-     *   example/hello.js
-     * 上级路径:
-     *   ..util:JSON,....:Test
-     *   ../util/json.js,../../test.js
-     * 下级相对路径
-     *   .util:JSON
-     *   ./util/json.js
-     * 
-     */
-    if(targetPath.charAt(0) == '.'){
-        var splitPos2Exp = targetPath.indexOf('/');
-        var packageName = this.name;
-        if(splitPos2Exp>0){
-            packageName = packageName.replace(/[\.$]/g,'/') ;
-            // thispkg/../util/json.js   
-            // thispkg/../../test.js
-            // thispkg/./util/json.js
-            splitPos2Exp = /(?:\w+\/\.|\/)\./
-        }else{
-            // thispkg..util:JSON
-            // thispkg....:Test
-            // thispkg.util:JSON
-            splitPos2Exp = /\w+\.\./
-        }
-        targetPath = packageName+targetPath;
-        while(targetPath!=(targetPath = targetPath.replace(splitPos2Exp,'')));
-    }
-    this.dependenceMap.push([thisPath,targetPath,afterLoad]);
-    return true;
+function addDependenceFilter(thisPath,targetPath,afterLoad){
+	var thiz = this[0];
+	var chain = this[1]
+	if(typeof targetPath == 'string'){
+		if(!afterLoad ){
+	    	//TODO:我未必想吧全部的依赖文件的全部对象名暴露出来
+	        thisPath = thiz.objectScriptMap[thisPath] || thisPath;
+	    }
+	    /*
+	     * 绝对路径:
+	     *   example:sayHello
+	     *   example/hello.js
+	     * 上级路径:
+	     *   ..util:JSON,....:Test
+	     *   ../util/json.js,../../test.js
+	     * 下级相对路径
+	     *   .util:JSON
+	     *   ./util/json.js
+	     * 
+	     */
+	    if(targetPath.charAt(0) == '.'){
+	        var splitPos2Exp = targetPath.indexOf('/');
+	        var packageName = thiz.name;
+	        if(splitPos2Exp>0){
+	            packageName = packageName.replace(/[\.$]/g,'/') ;
+	            // thispkg/../util/json.js   
+	            // thispkg/../../test.js
+	            // thispkg/./util/json.js
+	            splitPos2Exp = /(?:\w+\/\.|\/)\./
+	        }else{
+	            // thispkg..util:JSON
+	            // thispkg....:Test
+	            // thispkg.util:JSON
+	            splitPos2Exp = /\w+\.\./
+	        }
+	        targetPath = packageName+targetPath;
+	        while(targetPath!=(targetPath = targetPath.replace(splitPos2Exp,'')));
+	    }
+	    thiz.dependenceMap.push([thisPath,targetPath,afterLoad]);
+	}else{
+		chain.apply(thiz,arguments)
+	}
 }
