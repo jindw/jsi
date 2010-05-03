@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 
-import org.xidea.el.json.JSONEncoder;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.impl.DefaultExportorFactory;
@@ -72,7 +71,7 @@ class SDNService {
 	}
 
 
-	public String queryExportInfo(String path) {
+	public Map<String,Object> queryExportInfo(String path) {
 		String[] paths = CDN_PATH_SPLITER.split(path);
 		HashMap<String, Object> result = new LinkedHashMap<String, Object>();
 		HashMap<String, Object> packageMap = new LinkedHashMap<String, Object>();
@@ -106,7 +105,7 @@ class SDNService {
 		}
 		result.put("pathList", exactList);
 		result.put("packageMap", packageMap);
-		return JSONEncoder.encode(result);
+		return result;
 
 	}
 
