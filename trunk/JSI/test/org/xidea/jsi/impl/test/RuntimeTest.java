@@ -13,16 +13,18 @@ import org.mozilla.javascript.ContextAction;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.xidea.jsi.impl.ClasspathRoot;
+import org.xidea.jsi.impl.JSIText;
 import org.xidea.jsi.impl.RhinoScriptPackagePaser;
 import org.xidea.jsi.impl.RhinoSupport;
 
 public class RuntimeTest{
+	
 	@Test
 	public void testJava6() throws UnsupportedEncodingException,
 			ScriptException, IOException {
 		ScriptEngine engine = new ScriptEngineManager()
 				.getEngineByExtension("js");
-		engine.eval(RhinoSupport.loadText("boot.js"));
+		engine.eval(JSIText.loadText(this.getClass().getResource("/boot.js"),"utf-8"));
 		System.out.println(engine.eval("$import('example:sayHello')"));
 		System.out.println(engine.eval("$import('org.xidea.lite:Template')"));
 		// System.out.println(engine.eval("$import('example:sayHello')"));
@@ -37,10 +39,12 @@ public class RuntimeTest{
 	public void testRhino() throws UnsupportedEncodingException, ScriptException, IOException{
 		final ClasspathRoot cp = new ClasspathRoot();
 		Object result = Context.call(new ContextAction() {
+			final String boot = JSIText.loadText(this.getClass().getResource("/boot.js"),"utf-8");
 			public Object run(final Context cx) {
 				Scriptable scope = ScriptRuntime.getGlobal(cx);
 				cx.evaluateString(scope,"this.x=1;for(n in this){java.lang.System.out.print(n)}", "1.js", 1, null);
-				cx.evaluateString(scope, RhinoSupport.loadText("boot.js"), "<package-wrapper.js>", 1, null);
+
+				cx.evaluateString(scope, boot, "<package-wrapper.js>", 1, null);
 				cx.evaluateString(scope,"$import('example:sayHello')", "1.js", 1, null);
 				cx.evaluateString(scope,"$import('org.xidea.lite:Template')", "1.js", 1, null);
 				try{

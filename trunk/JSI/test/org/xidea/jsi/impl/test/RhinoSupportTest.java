@@ -15,6 +15,7 @@ import org.junit.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.ScriptableObject;
+import org.xidea.jsi.impl.JSIText;
 import org.xidea.jsi.impl.RhinoSupport;
 
 public class RhinoSupportTest {
@@ -25,8 +26,8 @@ public class RhinoSupportTest {
 
 	@Test
 	public void testLoadText() throws IOException {
-		assertEquals("测试utf8", RhinoSupport
-				.loadText("org/xidea/jsi/impl/test/utf8.js"));
+		assertEquals("测试utf8",  JSIText.loadText(this.getClass().getResource("/org/xidea/jsi/impl/test/utf8.js"),"utf-8")
+				);
 	}
 
 	@Test
@@ -69,7 +70,7 @@ public class RhinoSupportTest {
 		try {
 			Context cx = Context.enter();
 			ScriptableObject globals = ScriptRuntime.getGlobal(cx);
-			cx.evaluateString(globals, RhinoSupport.loadText("boot.js"), "#",
+			cx.evaluateString(globals, JSIText.loadText(this.getClass().getResource("/boot.js"),"utf-8"), "#",
 					1, null);
 			cx
 					.evaluateString(

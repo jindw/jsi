@@ -21,7 +21,6 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIRoot;
-import org.xidea.jsi.ScriptNotFoundException;
 import org.xidea.jsi.impl.DataRoot;
 import org.xidea.jsi.impl.DefaultExportorFactory;
 import org.xidea.jsi.impl.DefaultLoadContext;
@@ -47,7 +46,6 @@ public class JSIService extends ResourceRoot {
 				return "image/" + ext;
 			}
 		}
-		
 		if (path.endsWith(".css")) {
 			contentType = "text/css";
 		} else if (path.endsWith(".js")) {// for debug
@@ -69,44 +67,71 @@ public class JSIService extends ResourceRoot {
 	 * @throws IOException
 	 */
 	public void service(String path, Map<String, String[]> params,
-			OutputStream out,Object context) throws IOException {
-		if (path == null || path.length() == 0) {
-			String[] services = params.get("service");
+			OutputStream out,Object... context) throws IOException {
+		String service = getParam(params,"service");
+		if( path == null || path.length() == 0) {
+			path = getParam(params,"path");
+		}
+		if(service != null){
+			processAction(service, path,params,
+					out, context);
+		}else if( path == null) {
+			path = getParam(params,"path");
 			// ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-			processAction(services == null ? "":services[0], params,
+			processAction(service, path,params,
 					out, context);
 		} else {
 			if(!this.writeResource(path, out)){
-				processAction(path, params,
+				processAction(null,path, params,
 						out, context);
 			}
 		}
 		out.flush();
 	}
+	private String getParam(Map<String, String[]> params,String key){
+		String[] values = params.get(key);
+		if(values == null || values.length==0){
+			return null;
+		}else{
+			return values[0];
+		}
+	}
 
-	protected String processAction(String service,
-			Map<String, String[]> params, OutputStream out, Object context)
+	protected void processAction(String service,String path,
+			Map<String, String[]> params, OutputStream out, Object... context)
 			throws IOException, UnsupportedEncodingException {
 		String encoding = this.getEncoding();
-		if ("data".equals(service)) {
+		if ("list".equals(service)) {
+			addHeader(context,"Content-Type","text/plain;charset=" + encoding);
+		}else if ("data".equals(service)) {
 			String data = params.get("data")[0];
 			int dataContentEnd = data.indexOf(',');
+			//appendHeader(context,"Content-Disposition", "attachment; filename='data.zip'");
+			addHeader(context,"Content-Type",data.substring(dataContentEnd));
 			JSIText.writeBase64(data.substring(dataContentEnd + 1), out);
-			return data.substring(dataContentEnd);
 		} else if ("export".equals(service)) {
 			String result = export(params);
 			if (result == null) {
 				throw new FileNotFoundException();
 			}
+			addHeader(context,"Content-Type","text/plain;charset=" + encoding);
 			out.write(result.getBytes(encoding));
-			return "text/plain;charset=" + encoding;
 		} else if (service!=null && service.length()>0) {
-			sdn.process(service, String.valueOf(context), out);
-			return "text/plain;charset=" + encoding;
+			addHeader(context,"Content-Type","text/plain;charset=" + encoding);
+			sdn.process(service, getHeader(context,"Cookie"), out);
 		} else {
+			addHeader(context,"Content-Type","text/html;charset=" + encoding);
 			out.write(document().getBytes(encoding));
-			return "text/html;" + encoding;
 		}
+	}
+
+	protected void addHeader(Object[] context, String key ,String value) {
+		//TODO:....
+	}
+
+	protected String getHeader(Object[] context, String key) {
+		//TODO:....
+		return null;
 	}
 
 	protected boolean writeResource(String path, Writer out) throws IOException {

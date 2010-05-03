@@ -1,6 +1,5 @@
 package org.xidea.jsi.web;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -22,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xidea.jsi.ScriptNotFoundException;
 
 /**
  * 该类为方便调试开发，发布时可编译脚本，能后去掉此类。 Servlet 2.4 +
@@ -37,7 +37,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 
 	public void service(ServletRequest req, ServletResponse resp)
 			throws ServletException, IOException {
-		if (!service((HttpServletRequest)req, (HttpServletResponse)resp)) {
+		if (!service((HttpServletRequest) req, (HttpServletResponse) resp)) {
 			// 走这条分支的情况：1、无法找到资源，2、根本不在脚本目录下
 			HttpServletResponse response = (HttpServletResponse) resp;
 			response.sendError(HttpServletResponse.SC_NOT_FOUND, "找不到指定的资源");
@@ -46,7 +46,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 
 	public void doFilter(ServletRequest req, final ServletResponse resp,
 			FilterChain chain) throws IOException, ServletException {
-		if (!service((HttpServletRequest)req, (HttpServletResponse)resp)) {
+		if (!service((HttpServletRequest) req, (HttpServletResponse) resp)) {
 			// 走这条分支的情况：1、无法找到资源，2、根本不在脚本目录下
 			chain.doFilter(req, resp);
 		}
@@ -61,40 +61,29 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 	 * @throws IOException
 	 * @throws UnsupportedEncodingException
 	 */
-	public boolean service(HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+	public boolean service(HttpServletRequest req,
+			final HttpServletResponse resp) throws IOException {
 		@SuppressWarnings("unchecked")
-		Map<String,String[]> params = req.getParameterMap();
+		Map<String, String[]> params = req.getParameterMap();
 		String path = getScriptPath(req);
-		String service = null;
-		if (path == null || path.length() == 0) {
-			String[] services = params.get("service");
-			if(services.length>0){
-				service = services[0];
-			}else{
-				service = "";
-			}
-		}else if (path.startsWith("export/")) {
-			service = path;
-		}
-		if(service != null ){
-			ByteArrayOutputStream out2 = new ByteArrayOutputStream();
-			try{
-				//header(': ');
-				resp.setHeader("Content-Disposition", "attachment; filename='data.zip'");
-				processAction(service, params, out2,req.getHeader("Cookie"));
-			}catch (FileNotFoundException e) {
-				resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			}
-			out2.writeTo(resp.getOutputStream());
-		} else {
+		try {
+			// req.getHeader("Cookie")
 			initializeEncodingIfNotSet(req, resp, null);
-			String metatype = context.getMimeType(path);
-			if (metatype != null) {
-				resp.setContentType(metatype);
-			}
-			return this.writeResource(path, resp.getOutputStream());
+			super.service(path, params, resp.getOutputStream(), resp);
+		} catch (FileNotFoundException e) {
+			resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		} catch (ScriptNotFoundException e) {
+			resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
 		}
 		return true;
+	}
+
+	protected void addHeader(Object[] context, String key,String contentType) {
+		((HttpServletResponse) context[0]).setHeader(key,
+				contentType);
+	}
+	protected String getHeader(Object[] context, String key) {
+		return ((HttpServletRequest) context[0]).getHeader(key);
 	}
 
 	protected String getScriptPath(HttpServletRequest request) {
@@ -106,16 +95,18 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 			return null;
 		}
 	}
+
 	/*
 	 * 经测试，metaType是不会自动设置的; 对于静态文件的设置，我估计是提供静态文件服务的servlet内做的事情。 setContentType
 	 * 和 setCharacterEncoding.在encoding上相互影响 response.getCharacterEncoding
 	 * 默认是ISO-8895-1 request.getCharacterEncoding 默认是null
 	 */
 	protected void initializeEncodingIfNotSet(ServletRequest request,
-			ServletResponse response,String encoding) throws UnsupportedEncodingException {
+			ServletResponse response, String encoding)
+			throws UnsupportedEncodingException {
 		if (encoding != null || request.getCharacterEncoding() == null) {
 			// request 默认情况下是null
-			if(encoding == null){
+			if (encoding == null) {
 				encoding = this.getEncoding();
 			}
 			request.setCharacterEncoding(encoding);
