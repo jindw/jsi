@@ -1168,7 +1168,7 @@ var $import = function(loaderEval,cachedScripts){
     	Package = doObjectImport(
     		findPackage('org.xidea.jsi'),
     		'optimizePackage',null)(Package,loadText);
-    	lazyImport('org.xidea.jsi:parse',null,true)
+    	//lazyImport('org.xidea.jsi:parse',null,true)
     }
     
     /*

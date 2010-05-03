@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.net.URL;
 
 import org.xidea.jsi.JSIPackage;
 
@@ -28,6 +29,19 @@ public abstract class JSIText {
 		return buf.toString();
 	}
 
+	public static String loadText(URL resource, String encoding)
+			throws IOException {
+		if (resource == null) {
+			return null;
+		}
+		InputStream in = resource.openStream();
+		try {
+			return JSIText.loadText(in, "UTF-8");
+		} finally {
+			in.close();
+		}
+	}
+
 	public final static String buildPreloadPerfix(String path) {
 		String packageName = path.substring(0, path.lastIndexOf('/')).replace(
 				'/', '.');
@@ -37,7 +51,7 @@ public abstract class JSIText {
 
 	public final static String buildPreloadPerfix(String packageName,
 			String fileName) {
-		if(packageName.startsWith(".")){
+		if (packageName.startsWith(".")) {
 			packageName = packageName.substring(1);
 		}
 		if (JSIPackage.PACKAGE_FILE_NAME.equals(fileName)) {
@@ -112,6 +126,6 @@ public abstract class JSIText {
 			}
 			previousByte = currentByte;
 		}
-	
+
 	}
 }
