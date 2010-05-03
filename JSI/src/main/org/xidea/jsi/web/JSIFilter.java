@@ -78,12 +78,12 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 		return true;
 	}
 
+	protected String getHeader(Object[] context, String key) {
+		return ((HttpServletRequest) context[0]).getHeader(key);
+	}
 	protected void addHeader(Object[] context, String key,String contentType) {
 		((HttpServletResponse) context[1]).setHeader(key,
 				contentType);
-	}
-	protected String getHeader(Object[] context, String key) {
-		return ((HttpServletRequest) context[0]).getHeader(key);
 	}
 
 	protected String getScriptPath(HttpServletRequest request) {
