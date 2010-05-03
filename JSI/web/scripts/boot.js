@@ -456,20 +456,6 @@ var $import = function(loaderEval,cachedScripts){
             }else{
                 loaderEval.call(this,pscript);
             }
-            if("org.xidea.jsi:PackageOptimize"){
-            	for(var temp in this.scriptObjectMap){
-            		return;
-            	}
-            	var temp = loadText(scriptBase + "index.php?package="+name);
-            	var list = loaderEval(temp);
-            	var i = list.length;
-            	while(i--){
-            		var temp = list[i];
-            		if('__package__.js'!=temp){
-            			this.addScript(temp);
-            		}
-            	}
-            }
         }catch(e){
             if(":Debug"){
                 //packageMap[name] = null;
@@ -643,12 +629,7 @@ var $import = function(loaderEval,cachedScripts){
          * @param <string|Array>afterLoadDependences [opt] 装在后依赖
          */
         addScript :  function(scriptPath, objectNames, beforeLoadDependences, afterLoadDependences){
-            
-            if("org.xidea.jsi:PackageOptimize"){
-            	if(beforeAddScript.apply(this,arguments)){
-            		return;
-            	}
-            }
+
             
             var objects = this.scriptObjectMap[scriptPath];
             if(objects){
@@ -697,12 +678,6 @@ var $import = function(loaderEval,cachedScripts){
                     this.addDependence(thisPath,targetPath[i],afterLoad);
                 }
             }else{
-                //TODO:可编译优化,经过优化的脚本可以直接删除此运行时优化
-                if("org.xidea.jsi:PackageOptimize"){
-                    if(beforeAddDependence.apply(this,arguments)){
-                    	return;
-                    }
-                }
                 this.dependenceMap.push([thisPath,targetPath,afterLoad]);
             }
             
@@ -1190,17 +1165,10 @@ var $import = function(loaderEval,cachedScripts){
     }
     
     if("org.xidea.jsi:PackageOptimize"){
-    	var optimizeTarget = {};
-        function beforeAddScript (){
-            var fn = optimizeTarget['beforeAddScript'];
-            return fn && fn.apply(this,arguments);
-        }
-        function beforeAddDependence(){
-            var fn = optimizeTarget['beforeAddDependence'];
-            return fn && fn.apply(this,arguments);
-        }
-        lazyImport("org.xidea.jsi:beforeAddScript",optimizeTarget,true)
-        lazyImport("org.xidea.jsi:beforeAddDependence",optimizeTarget,true)
+    	Package = doObjectImport(
+    		findPackage('org.xidea.jsi'),
+    		'optimizePackage',null)(Package,loadText);
+    	lazyImport('org.xidea.jsi:parse',null,true)
     }
     
     /*
