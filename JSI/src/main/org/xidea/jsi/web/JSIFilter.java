@@ -69,7 +69,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 		try {
 			// req.getHeader("Cookie")
 			initializeEncodingIfNotSet(req, resp, null);
-			super.service(path, params, resp.getOutputStream(), resp);
+			super.service(path, params, resp.getOutputStream(), req, resp);
 		} catch (FileNotFoundException e) {
 			resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
 		} catch (ScriptNotFoundException e) {
@@ -79,7 +79,7 @@ public class JSIFilter extends JSIService implements Filter, Servlet {
 	}
 
 	protected void addHeader(Object[] context, String key,String contentType) {
-		((HttpServletResponse) context[0]).setHeader(key,
+		((HttpServletResponse) context[1]).setHeader(key,
 				contentType);
 	}
 	protected String getHeader(Object[] context, String key) {
