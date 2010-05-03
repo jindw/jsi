@@ -63,65 +63,20 @@ public abstract class RhinoSupport {
 		}
 	}
 	public String list(String path) {
-		try {
-			if(path.startsWith("/")){
-				path = path.substring(1);
+		List<String> result = new ResourceRoot().getPackageFileList(path);
+		StringBuilder buf = new StringBuilder("[");
+		for (String name:result) {
+			if(buf.length()>1){
+				buf.append(",");
 			}
-			Enumeration<URL> res = loader.getResources(path);
-			ArrayList<String> result = new ArrayList<String>();
-			while(res.hasMoreElements()){
-				URL item = res.nextElement();
-				try {
-					this.append(item,result);
-				} catch (Exception e) {
-					log.debug(e);
-				}
-			}
-			StringBuilder buf = new StringBuilder("[");
-			for (String name:result) {
-				if(buf.length()>1){
-					buf.append(",");
-				}
-				buf.append("\"");
-				buf.append(name);
-				buf.append("\"");
-			}
-			buf.append("]");
-			return buf.toString();
-		} catch (IOException e) {
-			return "]";
+			buf.append("\"");
+			buf.append(name);
+			buf.append("\"");
 		}
+		buf.append("]");
+		return buf.toString();
 	}
 	
-	private void append(URL item, final List<String> result) throws URISyntaxException,IOException {
-		if(item.getProtocol().equals("file")){
-			new File(item.toURI()).listFiles(new FileFilter() {
-				public boolean accept(File file) {
-					String name = file.getName();
-					if(file.isFile() && name.endsWith(".js") && !result.contains(name)){
-						result.add(name);
-					}
-					return false;
-				}
-			});
-		}else if(item.getProtocol().equals("jar")){
-			JarURLConnection jarCon = (JarURLConnection) item.openConnection();
-			JarFile jarFile = jarCon.getJarFile();
-			Enumeration<JarEntry> en = jarFile.entries();
-			String name = jarCon.getJarEntry().getName();
-			while (en.hasMoreElements()) {
-				JarEntry jarEntry = (JarEntry) en.nextElement();
-				String name2 = jarEntry.getName();
-				if(name2.startsWith(name)){
-					name2 = name2.substring(name.length());
-					if(name2.indexOf('/')<0 && name2.endsWith(".js") && !result.contains(name2)){
-						result.add(name2);
-					}
-				}
-			}
-			jarFile.close();
-		}
-	}
 
 	public static RhinoSupport create(Object topScope) {
 		String cn = topScope.getClass().getName();

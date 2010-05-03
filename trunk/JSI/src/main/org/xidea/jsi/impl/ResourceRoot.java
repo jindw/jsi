@@ -2,18 +2,24 @@ package org.xidea.jsi.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.net.JarURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -25,6 +31,7 @@ import org.xidea.jsi.JSIPackage;
 public class ResourceRoot extends AbstractRoot {
 	private static final File[] EMPTY_FILES = {};
 	private static final Log log = LogFactory.getLog(ResourceRoot.class);
+	private ClassLoader loader =  ResourceRoot.class.getClassLoader();
 
 	/**
 	 * 只有默认的encoding没有设置的时候，才会设置
@@ -42,9 +49,9 @@ public class ResourceRoot extends AbstractRoot {
 	}
 
 	public void addSource(File base) {
-		if(base.isDirectory()){
+		if (base.isDirectory()) {
 			sources.add(base);
-		}else{
+		} else {
 			throw new IllegalArgumentException("jsi source must be a directory");
 		}
 	}
@@ -54,7 +61,7 @@ public class ResourceRoot extends AbstractRoot {
 	}
 
 	public long getLastModified() {
-		long t =0;
+		long t = 0;
 		for (File base : sources) {
 			t = Math.max(t, base.lastModified());
 		}
@@ -63,14 +70,16 @@ public class ResourceRoot extends AbstractRoot {
 		}
 		return t;
 	}
-	public JSILoadContext $import(String  path, JSILoadContext context) {
+
+	public JSILoadContext $import(String path, JSILoadContext context) {
 		long t = getLastModified();
-		if(token<t){
+		if (token < t) {
 			super.reset();
 			token = t;
 		}
 		return super.$import(path, context);
 	}
+
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
 	}
@@ -161,7 +170,6 @@ public class ResourceRoot extends AbstractRoot {
 		}
 	}
 
-
 	public List<JSIPackage> getPackageObjectList() {
 		List<String> result = findPackageList(true);
 		LinkedHashSet<JSIPackage> ps = new LinkedHashSet<JSIPackage>();
@@ -172,6 +180,64 @@ public class ResourceRoot extends AbstractRoot {
 			}
 		}
 		return new ArrayList<JSIPackage>(ps);
+	}
+
+	public List<String> getPackageFileList(String path) {
+		if (path.startsWith("/")) {
+			path = path.substring(1);
+		}
+
+		List<URL> res = findResources(path);
+		try {
+			List<URL> res2 =Collections.list(loader.getResources(path)) ;
+			res.addAll(res2);
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+		ArrayList<String> result = new ArrayList<String>();
+		for (URL item : res) {
+			try {
+				this.append(item, result);
+			} catch (Exception e) {
+				log.debug(e);
+			}
+		}
+		
+		return result;
+	}
+
+	private void append(URL item, final List<String> result)
+			throws URISyntaxException, IOException {
+		if (item.getProtocol().equals("file")) {
+			new File(item.toURI()).listFiles(new FileFilter() {
+				public boolean accept(File file) {
+					String name = file.getName();
+					if (file.isFile() && name.endsWith(".js")
+							&& !result.contains(name)) {
+						result.add(name);
+					}
+					return false;
+				}
+			});
+		} else if (item.getProtocol().equals("jar")) {
+			JarURLConnection jarCon = (JarURLConnection) item.openConnection();
+			JarFile jarFile = jarCon.getJarFile();
+			Enumeration<JarEntry> en = jarFile.entries();
+			String name = jarCon.getJarEntry().getName();
+			while (en.hasMoreElements()) {
+				JarEntry jarEntry = (JarEntry) en.nextElement();
+				String name2 = jarEntry.getName();
+				if (name2.startsWith(name)) {
+					name2 = name2.substring(name.length());
+					if (name2.indexOf('/') < 0 && name2.endsWith(".js")
+							&& !result.contains(name2)) {
+						result.add(name2);
+					}
+				}
+			}
+			jarFile.close();
+		}
 	}
 
 	public List<String> findPackageList(boolean findLib) {
@@ -197,6 +263,7 @@ public class ResourceRoot extends AbstractRoot {
 		}
 		return result;
 	}
+
 	/**
 	 * 打开的流使用完成后需要自己关掉
 	 */
@@ -204,30 +271,48 @@ public class ResourceRoot extends AbstractRoot {
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
-		URL res = findResource(path);
+		URL res = findResource(path, null);
 
-		if(res == null){
+		if (res == null) {
 			res = getDefaultResource(path);
 		}
 		return res;
 	}
-	protected URL getDefaultResource(String path) {
-		return this.getClass().getClassLoader().getResource(path);
+
+	private List<URL> findResources(String path) {
+		if (path.startsWith("/")) {
+			path = path.substring(1);
+		}
+		ArrayList<URL> result = new ArrayList<URL>();
+		findResource(path, result);
+
+		return result;
 	}
 
-	protected URL findResource(String path) {
+	// URL item = findResource(path);
+	protected URL getDefaultResource(String path) {
+		return loader.getResource(path);
+	}
+
+	protected URL findResource(String path, Collection<URL> result) {
 		for (File base : sources) {
 			URL in = findResource(base, path);
 			if (in != null) {
-				return in;
+				if (result == null) {
+					return in;
+				} else {
+					result.add(in);
+				}
 			}
 		}
 		for (File resource : libraries) {
 			File[] libs = findLibFiles(resource);
 			for (File item : libs) {
 				URL in = findResource(item, path);
-				if (in != null) {
+				if (result == null) {
 					return in;
+				} else {
+					result.add(in);
 				}
 			}
 		}
@@ -242,8 +327,8 @@ public class ResourceRoot extends AbstractRoot {
 	 */
 	private static File[] findLibFiles(File lib) {
 		if (lib != null) {
-			if(lib.isFile()){
-				return new File[]{lib};
+			if (lib.isFile()) {
+				return new File[] { lib };
 			}
 			File[] result = lib.listFiles(new FilenameFilter() {
 				public boolean accept(File dir, String name) {
@@ -259,16 +344,16 @@ public class ResourceRoot extends AbstractRoot {
 	}
 
 	private static URL findResource(File file, String path) {
-		try{
-			if(file.isDirectory()){
+		try {
+			if (file.isDirectory()) {
 				file = new File(file, path);
 				if (file.exists()
 						&& (!"boot.js".equals(path) || file.length() > 200)) {
 					return file.toURI().toURL();
-				}else{
+				} else {
 					return null;
 				}
-			}else{
+			} else {
 				return findByZip(file, path);
 			}
 		} catch (IOException e) {
@@ -276,13 +361,13 @@ public class ResourceRoot extends AbstractRoot {
 			return null;
 		}
 	}
-	private static URL findByZip(File file, String path) throws IOException{
+
+	private static URL findByZip(File file, String path) throws IOException {
 		final ZipFile jarFile = new ZipFile(file);
 		ZipEntry ze = jarFile.getEntry(path);
 		if (ze != null) {
-			return new URL("jar", "", file.toURI().toURL() + "!/"
-					+ path);
-		}else{
+			return new URL("jar", "", file.toURI().toURL() + "!/" + path);
+		} else {
 			return null;
 		}
 	}
