@@ -102,6 +102,18 @@ public class JSIService extends ResourceRoot {
 			throws IOException, UnsupportedEncodingException {
 		String encoding = this.getEncoding();
 		if ("list".equals(service)) {
+			List<String> list = this.getPackageFileList(path);
+			StringBuilder buf = new StringBuilder("[");
+			for (String name : list) {
+				if (buf.length() > 1) {
+					buf.append(",");
+				}
+				buf.append("\"");
+				buf.append(name);
+				buf.append("\"");
+			}
+			buf.append("]");
+			out.write(buf.toString().getBytes(encoding));
 			addHeader(context,"Content-Type","text/plain;charset=" + encoding);
 		}else if ("data".equals(service)) {
 			String data = params.get("data")[0];

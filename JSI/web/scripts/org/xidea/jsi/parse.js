@@ -6,7 +6,7 @@
 function parse(pkgName,scriptPath,resourceLoader){
 	if(scriptPath.indexOf('*') >=0 ){
 		var result = [];
-		var temp = resourceLoader($JSI.scriptBase + "?service=list&path="+pkgName);
+		var temp = resourceLoader($JSI.scriptBase + "?service=list&path="+pkgName.replace(/\./g,'/'));
 		var list = parseJSON(temp);
 		var i = list.length;
 		while(i--){
