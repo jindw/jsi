@@ -113,8 +113,8 @@ public class JSIService extends ResourceRoot {
 				buf.append("\"");
 			}
 			buf.append("]");
-			out.write(buf.toString().getBytes(encoding));
 			addHeader(context,"Content-Type","text/plain;charset=" + encoding);
+			out.write(buf.toString().getBytes(encoding));
 		}else if ("data".equals(service)) {
 			String data = params.get("data")[0];
 			int dataContentEnd = data.indexOf(',');
