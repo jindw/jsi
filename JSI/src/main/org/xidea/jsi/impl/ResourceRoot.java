@@ -31,7 +31,7 @@ import org.xidea.jsi.JSIPackage;
 public class ResourceRoot extends AbstractRoot {
 	private static final File[] EMPTY_FILES = {};
 	private static final Log log = LogFactory.getLog(ResourceRoot.class);
-	private ClassLoader loader =  ResourceRoot.class.getClassLoader();
+	private ClassLoader loader = ResourceRoot.class.getClassLoader();
 
 	/**
 	 * 只有默认的encoding没有设置的时候，才会设置
@@ -49,7 +49,7 @@ public class ResourceRoot extends AbstractRoot {
 	}
 
 	public void addSource(File base) {
-		if (base.isDirectory()) {
+		if (!base.isFile()) {//isDir or not exist
 			sources.add(base);
 		} else {
 			throw new IllegalArgumentException("jsi source must be a directory");
@@ -189,12 +189,12 @@ public class ResourceRoot extends AbstractRoot {
 
 		List<URL> res = findResources(path);
 		try {
-			List<URL> res2 =Collections.list(loader.getResources(path)) ;
+			List<URL> res2 = Collections.list(loader.getResources(path));
 			res.addAll(res2);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		
+
 		ArrayList<String> result = new ArrayList<String>();
 		for (URL item : res) {
 			try {
@@ -203,7 +203,7 @@ public class ResourceRoot extends AbstractRoot {
 				log.debug(e);
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -244,10 +244,12 @@ public class ResourceRoot extends AbstractRoot {
 		List<String> result = new ArrayList<String>();
 		for (File file : sources) {
 			try {
-				if (file.isFile()) {
-					appendZipPackage(file, result);
-				} else {
-					result.addAll(FileRoot.findPackageList(file));
+				if (file.exists()) {
+					if (file.isFile()) {
+						appendZipPackage(file, result);
+					} else {
+						result.addAll(FileRoot.findPackageList(file));
+					}
 				}
 			} catch (Exception e) {
 			}
@@ -255,9 +257,13 @@ public class ResourceRoot extends AbstractRoot {
 		}
 		if (findLib) {
 			for (File resource : libraries) {
-				File[] libs = findLibFiles(resource);
-				for (File lib : libs) {
-					appendZipPackage(lib, result);
+				if (resource.exists()) {
+					File[] libs = findLibFiles(resource);
+					for (File lib : libs) {
+						if(lib.exists()){
+							appendZipPackage(lib, result);
+						}
+					}
 				}
 			}
 		}
