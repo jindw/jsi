@@ -33,6 +33,10 @@ var $JSI= {
      */
      //scriptBase : "http://localhost:8080/script2/"
 };
+
+if("org.xidea.jsi:Require"){
+   var $require
+}
 /**
  * 导入指定元素（脚本、函数、类、变量）至指定目标,默认方式为同步导入，默认目标为全局对象（Global == window(html)）。
  * <pre class="code"><code>  //Example:
@@ -201,6 +205,7 @@ var $import = function(loaderEval,cachedScripts){
     if(":Debug"){
         //$JSI.scriptBase += ";path="
     }
+    
     var XHR = this.XMLHttpRequest;
     var scriptBase = $JSI.scriptBase;
     var packageMap = {};
@@ -1036,6 +1041,8 @@ var $import = function(loaderEval,cachedScripts){
             }
         }
     }
+    
+    
     if("org.xidea.jsi:COL"){
     	var lazyScriptParentNode;//defined later
         var lazyCacheFileMap = {};
@@ -1168,9 +1175,16 @@ var $import = function(loaderEval,cachedScripts){
     	Package = doObjectImport(
     		findPackage('org.xidea.jsi'),
     		'optimizePackage',null)(Package,loadText);
-    	//lazyImport('org.xidea.jsi:parse',null,true)
     }
     
+    if("org.xidea.jsi:Require"){
+    	$require = function(){
+    		$require = doObjectImport(
+    			findPackage('org.xidea.jsi'),
+    			'buildRequire',null)(findPackageByPath,realPackage);
+    		return $require.apply(this,arguments);
+    	}
+    }
     /*
      * 即JSI 的$import函数
      */
@@ -1203,25 +1217,24 @@ var $import = function(loaderEval,cachedScripts){
                 return lazyImport(path,target,col); 
         	}
         }
-        var pkg2obj = findPackageByPath(path);
-        var objectName = path.substr(pkg2obj.name.length+1);
+        //col as packageObject
+        col = findPackageByPath(path);
+        objectName = path.substr(col.name.length+1);
+        col = realPackage(col);
         if(path.indexOf('/')+1){//path.indexOf('/') == -1
-            doScriptImport(realPackage(pkg2obj),objectName,pkg2obj = target);
+            doScriptImport(col,objectName,target);
         }else{
-            pkg2obj = realPackage(pkg2obj);
             if(objectName){
                 if(objectName == '*'){
-                    for(var fileName in pkg2obj.scriptObjectMap){
-                        doScriptImport(pkg2obj,fileName,target);
+                	//objectName as fileName
+                    for(var objectName in col.scriptObjectMap){
+                        doScriptImport(col,objectName,target);
                     }
-                    //reuse pkg2obj variable
-                    pkg2obj =  target;
                 }else{
-                    //reuse pkg2obj variable
-                    pkg2obj =  doObjectImport(pkg2obj,objectName,target);
+                    target =  doObjectImport(col,objectName,target);
                 }
             }
         }
-        return pkg2obj;
+        return target;
     }
 }(function(){return eval(arguments[0]);},{});
