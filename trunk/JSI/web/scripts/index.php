@@ -10,12 +10,7 @@ $encoding = "UTF-8";
 $export_service = "http://litecompiler.appspot.com/scripts/export.action";
 ?>
 <?php
-
-if(array_key_exists('service',$_GET)){
-    $path = "service=".$_GET['service'];
-}else if(array_key_exists('package',$_GET)){
-    $path = "service=list:".$_GET['package'];
-}else if(array_key_exists('path',$_GET)){
+if(array_key_exists('path',$_GET)){
     $path = $_GET['path'];
 }else if(array_key_exists('PATH_INFO',$_SERVER)){
     $path = $_SERVER['PATH_INFO'] ;
@@ -23,63 +18,71 @@ if(array_key_exists('service',$_GET)){
 }else{
     $path = null;
 }
-if($path == 'service=data'){
-    $data = $_GET['data'];
-    list($content_type,$data) = split(';',$data);
-    //header('Content-Type:text/html');
-    header('Content-type: '.substr($content_type,5));
-    header('Content-Disposition: attachment; filename="data.zip"');
-    if(strncmp($data,'base64,',7) == 0){
-        $data = substr($data,7);
-        $data = base64_decode($data);
-    }
-    //echo substr($content_type,5);
-    echo $data;
-    return;
-}else if($path == 'service=export'){
-    //转发到指定jsa服务器
-    if($export_service){
-		$postdata = http_build_query(
-		    $_POST
-		);
-		$opts = array('http' =>
-		    array(
-		        'method'  => 'POST',
-		        'header'  => 'Content-type: application/x-www-form-urlencoded',
-		        'content' => $postdata
-		    )
-		);
-		$context  = stream_context_create($opts);
-		header('Content-type: text/plain');
-		echo file_get_contents($export_service, false, $context);
-    }else{
-        header("HTTP/1.0 404 Not Found");
-    }
-    return;
-}else if(strncmp($path,'service=list:',13)===0){
-	$path = substr($path,13);
-	$path = str_replace('.','/',$path);
-	$base = realpath('./'.$path);
-	$result = array();
-    if($base){
-        $dir = dir($base); 
-        $first = true;
-	    echo '[';
-        while (false !== ($file = $dir->read())) {
-		    if(preg_match('/.*\.(?:js|JS)$/i',$file)){
-		    	if($first){
-		    		$first = false;
-		    	}else{
-		    		echo ',';
-		    	}
-		    	echo '"'.$file.'"';
+
+if(array_key_exists('service',$_GET)){
+	$service = $_GET['service'];
+	switch($service){
+	case 'data':
+	    $data = $_GET['data'];
+	    list($content_type,$data) = split(';',$data);
+	    //header('Content-Type:text/html');
+	    header('Content-type: '.substr($content_type,5));
+	    header('Content-Disposition: attachment; filename="data.zip"');
+	    if(strncmp($data,'base64,',7) == 0){
+	        $data = substr($data,7);
+	        $data = base64_decode($data);
+	    }
+	    //echo substr($content_type,5);
+	    echo $data;
+	    return;
+	case 'export':
+	    //转发到指定jsa服务器
+	    if($export_service){
+			$postdata = http_build_query(
+			    $_POST
+			);
+			$opts = array('http' =>
+			    array(
+			        'method'  => 'POST',
+			        'header'  => 'Content-type: application/x-www-form-urlencoded',
+			        'content' => $postdata
+			    )
+			);
+			$context  = stream_context_create($opts);
+			header('Content-type: text/plain');
+			echo file_get_contents($export_service, false, $context);
+	    }else{
+	        header("HTTP/1.0 404 Not Found");
+	    }
+	    return;
+	case  'list':
+		$path = str_replace('.','/',$path);
+		$base = realpath('./'.$path);
+		$result = array();
+	    if($base){
+	        $dir = dir($base); 
+	        $first = true;
+		    echo '[';
+	        while (false !== ($file = $dir->read())) {
+			    if(preg_match('/.*\.(?:js|JS)$/i',$file)){
+			    	if($first){
+			    		$first = false;
+			    	}else{
+			    		echo ',';
+			    	}
+			    	echo '"'.$file.'"';
+		        }
 	        }
-        }
-	    echo ']';
-        $dir->close();
-    }
-    return;
+		    echo ']';
+	        $dir->close();
+	    }
+	    return;
+	default:
+		echo 'unknow service:'.$service;
+		exit();
+	}
 }
+
 function print_entry($path){
     if(print_from_dir('.',$path)){
         return;
