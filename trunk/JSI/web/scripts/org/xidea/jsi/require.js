@@ -6,15 +6,14 @@ function buildRequire(findPackageByPath,realPackage){
         var objectName = path.substr(packageObject.name.length+1);
         packageObject = realPackage(packageObject);
         if(path.indexOf('/')+1){//path.indexOf('/') == -1
-            writeRequire(packageObject,fileName,object);
+            writeRequire(packageObject,object,null);
         }else{
             if(objectName == '*'){
                 for(var fileName in packageObject.scriptObjectMap){
                     writeRequire(packageObject,fileName,null);
                 }
             }else{
-                //reuse pkg2obj variable
-                writeRequire(packageObject,fileName,objectName);
+                writeRequire(packageObject,packageObject.objectScriptMap[objectName],objectName);
             }
         }
 	}
