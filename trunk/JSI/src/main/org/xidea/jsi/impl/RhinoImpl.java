@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
+import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 
 /**
@@ -21,14 +22,14 @@ class RhinoImpl extends RhinoSupport {
 	
 	public Object invoke(Object thisObj, Object function, Object... args) {
 		Context cx = Context.getCurrentContext();
-		Scriptable thiz = Context.toObject(thisObj, (Scriptable) topScope);
+		Scriptable thiz = Context.toObject(thisObj, (Scriptable) globals);
 		return ((Function) function)
-				.call(cx, (Scriptable) topScope, thiz, args);
+				.call(cx, (Scriptable) globals, thiz, args);
 	}
 
 	public Object eval(String code, String path, Map<String, Object> varMap) {
 		Context cx = Context.getCurrentContext();
-		Scriptable localScope = (Scriptable) topScope;
+		Scriptable localScope = (Scriptable) globals;
 		if (varMap != null) {
 			Scriptable globals = localScope;
 			localScope = cx.newObject(globals);
@@ -48,6 +49,15 @@ class RhinoImpl extends RhinoSupport {
 	}
 }
 class NewRhinoImpl extends RhinoImpl {
+	{
+
+		try {
+			Context context = Context.enter();
+			globals = ScriptRuntime.getGlobal(context);
+		} finally {
+			Context.exit();
+		}
+	}
 	public Object invoke(Object thisObj, Object function, Object... args) {
 
 		try {

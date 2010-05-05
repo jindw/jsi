@@ -2,6 +2,7 @@ package org.xidea.jsi.impl;
 
 import java.util.Map;
 
+import sun.org.mozilla.javascript.internal.ScriptRuntime;
 
 import sun.org.mozilla.javascript.internal.Context;
 import sun.org.mozilla.javascript.internal.Function;
@@ -18,15 +19,15 @@ class Java6Impl extends RhinoSupport {
 		Context cx = Context.getCurrentContext();
 		cx.getWrapFactory().setJavaPrimitiveWrap(false);
 
-		Scriptable thiz = Context.toObject(thisObj, (Scriptable) topScope);
+		Scriptable thiz = Context.toObject(thisObj, (Scriptable) globals);
 		return ((Function) function)
-				.call(cx, (Scriptable) topScope, thiz, args);
+				.call(cx, (Scriptable) globals, thiz, args);
 	}
 
 	@Override
 	public Object eval(String code, String path, Map<String, Object> vars) {
 		Context cx = Context.getCurrentContext();
-		Scriptable localScope = (Scriptable) topScope;
+		Scriptable localScope = (Scriptable) globals;
 		if (vars != null) {
 			Scriptable globals = localScope;
 			localScope = cx.newObject(globals);
@@ -48,6 +49,16 @@ class Java6Impl extends RhinoSupport {
 }
 
 class NewJava6Impl extends Java6Impl {
+
+	{
+
+		try {
+			Context context = Context.enter();
+			globals = ScriptRuntime.getGlobal(context);
+		} finally {
+			Context.exit();
+		}
+	}
 	@Override
 	public Object invoke(Object thisObj, Object function, Object... args) {
 		try {
