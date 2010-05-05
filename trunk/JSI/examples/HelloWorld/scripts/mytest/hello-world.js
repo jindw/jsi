@@ -1,7 +1,7 @@
 /**
  * 测试Hello World
  * @jsiparser
- * @import sayHello
+ * @import say-hello.js
  * @export
  */
 function HelloWorld(name,msg){

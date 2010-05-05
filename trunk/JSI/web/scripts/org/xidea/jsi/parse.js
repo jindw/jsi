@@ -25,6 +25,10 @@ function parse(pkgName,scriptPath,resourceLoader){
 		var result = [];
 		while(match = exp.exec(source)){
 			var result1 = parseEntry(source,match.index ,exp.lastIndex);
+			var i = result1.length;
+			while(i-->1){
+				result1[i] = trimPathArray(pkgName,result1[i])
+			}
 			if(result1){
 				result.push([scriptPath].concat(result1));
 			}
@@ -33,7 +37,14 @@ function parse(pkgName,scriptPath,resourceLoader){
 	}
 }
 
-
+function trimPathArray(pkgName,paths){
+	if(paths){
+		var i = paths.length;
+		while(i--){
+			paths[i] = trimPath(pkgName,paths[i]);
+		}
+	}
+}
 function parseJSON(){
 	return window.eval('('+arguments[0]+')');
 }

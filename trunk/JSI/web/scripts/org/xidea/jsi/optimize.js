@@ -73,38 +73,41 @@ function addDependenceFilter(thisPath,targetPath,afterLoad){
 	    	//TODO:我未必想吧全部的依赖文件的全部对象名暴露出来
 	        thisPath = thiz.objectScriptMap[thisPath] || thisPath;
 	    }
-	    /*
-	     * 绝对路径:
-	     *   example:sayHello
-	     *   example/hello.js
-	     * 上级路径:
-	     *   ..util:JSON,....:Test
-	     *   ../util/json.js,../../test.js
-	     * 下级相对路径
-	     *   .util:JSON
-	     *   ./util/json.js
-	     * 
-	     */
-	    if(targetPath.charAt(0) == '.'){
-	        var splitPos2Exp = targetPath.indexOf('/');
-	        var packageName = thiz.name;
-	        if(splitPos2Exp>0){
-	            packageName = packageName.replace(/[\.$]/g,'/') ;
-	            // thispkg/../util/json.js   
-	            // thispkg/../../test.js
-	            // thispkg/./util/json.js
-	            splitPos2Exp = /(?:\w+\/\.|\/)\./
-	        }else{
-	            // thispkg..util:JSON
-	            // thispkg....:Test
-	            // thispkg.util:JSON
-	            splitPos2Exp = /\w+\.\./
-	        }
-	        targetPath = packageName+targetPath;
-	        while(targetPath!=(targetPath = targetPath.replace(splitPos2Exp,'')));
-	    }
+	    targetPath = trimPath(thiz.name,targetPath);
 	    thiz.dependenceMap.push([thisPath,targetPath,afterLoad]);
 	}else{
 		chain.apply(thiz,arguments)
 	}
+}
+/*
+ * 绝对路径:
+ *   example:sayHello
+ *   example/hello.js
+ * 上级路径:
+ *   ..util:JSON,....:Test
+ *   ../util/json.js,../../test.js
+ * 下级相对路径
+ *   .util:JSON
+ *   ./util/json.js
+ * 
+ */
+function trimPath(packageName,targetPath){
+	if(targetPath.charAt(0) == '.'){
+	    var splitPos2Exp = targetPath.indexOf('/');
+	    if(splitPos2Exp>0){
+	        packageName = packageName.replace(/[\.$]/g,'/') ;
+	        // thispkg/../util/json.js   
+	        // thispkg/../../test.js
+	        // thispkg/./util/json.js
+	        splitPos2Exp = /(?:\w+\/\.|\/)\./
+	    }else{
+	        // thispkg..util:JSON
+	        // thispkg....:Test
+	        // thispkg.util:JSON
+	        splitPos2Exp = /\w+\.\./
+	    }
+	    targetPath = packageName+targetPath;
+	    while(targetPath!=(targetPath = targetPath.replace(splitPos2Exp,'')));
+	}
+    return targetPath;
 }
