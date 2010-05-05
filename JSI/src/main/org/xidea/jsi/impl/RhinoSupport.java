@@ -12,7 +12,7 @@ import org.apache.commons.logging.LogFactory;
 
 public abstract class RhinoSupport {
 	private static final Log log = LogFactory.getLog(RhinoSupport.class);
-	protected Object topScope;
+	protected Object globals;
 	protected ResourceRoot root = new ResourceRoot();
 	
 	public void setRoot(ResourceRoot root) {
@@ -88,11 +88,11 @@ public abstract class RhinoSupport {
 		} catch (Exception e) {
 			sp = Java6Impl.create(true);
 		}
-		sp.topScope = sp.eval("this");
 		try {
 			sp.eval(sp.loadText("boot.js"));
 		} catch (Exception e) {
-			log.debug("尝试JSI启动编译脚本失败", e);
+			log.error("尝试JSI启动编译脚本失败", e);
+			throw new RuntimeException(e);
 		}
 		return sp;
 	}
@@ -105,7 +105,7 @@ public abstract class RhinoSupport {
 		} else {
 			sp = RhinoImpl.create(false);
 		}
-		sp.topScope = topScope;
+		sp.globals = topScope;
 		return sp;
 	}
 

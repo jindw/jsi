@@ -1181,7 +1181,7 @@ var $import = function(loaderEval,cachedScripts){
     	$require = function(){
     		$require = doObjectImport(
     			findPackage('org.xidea.jsi'),
-    			'buildRequire',null)(findPackageByPath,realPackage);
+    			'buildRequire',null)(null,findPackageByPath,realPackage);
     		return $require.apply(this,arguments);
     	}
     }

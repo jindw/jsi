@@ -25,6 +25,10 @@ public class RhinoSupportTest {
 	}
 
 	@Test
+	public void testRhinoSupport() throws IOException {
+		RhinoSupport.create();
+	}
+	@Test
 	public void testLoadText() throws IOException {
 		assertEquals("测试utf8",  JSIText.loadText(this.getClass().getResource("/org/xidea/jsi/impl/test/utf8.js"),"utf-8")
 				);

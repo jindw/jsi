@@ -23,6 +23,6 @@ this.print = this.print || function(arg){
     			return value;
     		}
     	}catch(e){};
-        return impl.loadText(path)+'';
+        return impl.loadText(String(url).replace(/\w+\:\/*/,''))+'';
     }
 });
