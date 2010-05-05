@@ -17,17 +17,12 @@ this.print = this.print || function(arg){
         return evaler.call(this,code);
     }
     return function loadText(url){
-    	var value =$JSI.loadText&&$JSI.loadText(url)
-    	if(value){
-    		return value;
-    	}
-    	var service = url.match(/^.*[?&]service=([\w\-_]+).*$/);
-    	service = service && service[1];
-    	var path = url.match(/^.*[?&]path=([\w\-_]+).*$/);
-    	path = path && path[1] || url.replace(/^\w+:(\/)+/,'');
-    	if(service == 'list'){
-    		return impl.list(path);
-    	}
+    	try{
+    		var value =$JSI.loadText&&$JSI.loadText(url)
+    		if(value){
+    			return value;
+    		}
+    	}catch(e){};
         return impl.loadText(path)+'';
     }
 });

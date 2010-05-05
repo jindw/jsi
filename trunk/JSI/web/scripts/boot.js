@@ -199,7 +199,7 @@ var $import = function(loaderEval,cachedScripts){
         }
     }else{
     	if("org.xidea.jsi:Server"){
-    	    loadText = Packages.org.xidea.jsi.impl.RhinoSupport.initialize(arguments,this);
+    	    loadText = Packages.org.xidea.jsi.impl.RhinoSupport.create(this).setup(arguments);
     	}
     }
     if(":Debug"){

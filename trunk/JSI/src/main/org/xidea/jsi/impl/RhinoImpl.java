@@ -11,31 +11,14 @@ import org.mozilla.javascript.Scriptable;
  * @author test
  * 
  */
-class RhinoImpl extends RhinoInternalImpl {
-	public Object invoke(Object thisObj, Object function, Object... args) {
 
-		try {
-			Context cx = Context.enter();
-			cx.getWrapFactory().setJavaPrimitiveWrap(false);
-			return super.invoke(thisObj, function, args);
-		} finally {
-			Context.exit();
-		}
+
+class RhinoImpl extends RhinoSupport {
+	
+	public static RhinoSupport create(boolean newEngine) {
+		return newEngine?new NewRhinoImpl():new RhinoImpl();
 	}
-
-	public Object eval(String code, String path, Map<String, Object> varMap) {
-		try {
-			Context cx = Context.enter();
-			cx.getWrapFactory().setJavaPrimitiveWrap(false);
-			return super.eval(code, path, varMap);
-		} finally {
-			Context.exit();
-		}
-	}
-}
-
-class RhinoInternalImpl extends RhinoSupport {
-	// function(code){return evaler(this,code);}
+	
 	public Object invoke(Object thisObj, Object function, Object... args) {
 		Context cx = Context.getCurrentContext();
 		Scriptable thiz = Context.toObject(thisObj, (Scriptable) topScope);
@@ -62,5 +45,27 @@ class RhinoInternalImpl extends RhinoSupport {
 		}
 		return cx.evaluateString(localScope, code, path, 1, null);
 
+	}
+}
+class NewRhinoImpl extends RhinoImpl {
+	public Object invoke(Object thisObj, Object function, Object... args) {
+
+		try {
+			Context cx = Context.enter();
+			cx.getWrapFactory().setJavaPrimitiveWrap(false);
+			return super.invoke(thisObj, function, args);
+		} finally {
+			Context.exit();
+		}
+	}
+
+	public Object eval(String code, String path, Map<String, Object> varMap) {
+		try {
+			Context cx = Context.enter();
+			cx.getWrapFactory().setJavaPrimitiveWrap(false);
+			return super.eval(code, path, varMap);
+		} finally {
+			Context.exit();
+		}
 	}
 }
