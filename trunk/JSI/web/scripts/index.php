@@ -27,7 +27,7 @@ if(array_key_exists('service',$_GET)){
 	    list($content_type,$data) = split(';',$data);
 	    //header('Content-Type:text/html');
 	    header('Content-type: '.substr($content_type,5));
-	    header('Content-Disposition: attachment; filename="data.zip"');
+	    //header('Content-Disposition: attachment; filename="data.zip"');
 	    if(strncmp($data,'base64,',7) == 0){
 	        $data = substr($data,7);
 	        $data = base64_decode($data);
