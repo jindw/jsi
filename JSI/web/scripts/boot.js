@@ -35,7 +35,7 @@ var $JSI= {
 };
 
 if("org.xidea.jsi:Require"){
-   var $require
+   var $require;
 }
 /**
  * 导入指定元素（脚本、函数、类、变量）至指定目标,默认方式为同步导入，默认目标为全局对象（Global == window(html)）。
@@ -80,7 +80,7 @@ if("org.xidea.jsi:Require"){
  *                    </ul>
  *                    <p>一般可忽略返回值.因为默认情况下,导入为全局变量;无需再显示申明了.</p>
  */
-var $import = function(loaderEval,cachedScripts){
+var $import;function(loaderEval,cachedScripts){
     if(":Debug"){
         /*
          * 日志处理逻辑
@@ -1188,7 +1188,7 @@ var $import = function(loaderEval,cachedScripts){
     /*
      * 即JSI 的$import函数
      */
-    return function(path,target,col){
+    $import=function(path,target,col){
         if(/\:$/.test(path)){
             return realPackage(findPackageByPath(path));
         }
@@ -1222,6 +1222,7 @@ var $import = function(loaderEval,cachedScripts){
         objectName = path.substr(col.name.length+1);
         col = realPackage(col);
         if(path.indexOf('/')+1){//path.indexOf('/') == -1
+        	//objectName as fileName
             doScriptImport(col,objectName,target);
         }else{
             if(objectName){
