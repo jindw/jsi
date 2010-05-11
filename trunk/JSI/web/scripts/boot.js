@@ -1175,8 +1175,16 @@ var $import;function(loaderEval,cachedScripts){
     	Package = doObjectImport(
     		findPackage('org.xidea.jsi'),
     		'optimizePackage',null)(Package,loadText);
+    	if("org.xidea.jsi:HostCondition"){
+    		doScriptImport = doObjectImport(
+    			findPackage('org.xidea.jsi'),
+    			'optimizePackage',null)(doScriptImport);
+    	}
+    }else if("org.xidea.jsi:HostCondition"){
+    	doScriptImport = doObjectImport(
+    		findPackage('org.xidea.jsi'),
+    		'optimizePackage',null)(doScriptImport);
     }
-    
     if("org.xidea.jsi:Require"){
     	$require = function(){
     		$require = doObjectImport(
