@@ -49,7 +49,7 @@ public class ResourceRoot extends AbstractRoot {
 	}
 
 	public void addSource(File base) {
-		if (!base.isFile()) {//isDir or not exist
+		if (!base.isFile()) {// isDir or not exist
 			sources.add(base);
 		} else {
 			throw new IllegalArgumentException("jsi source must be a directory");
@@ -260,7 +260,7 @@ public class ResourceRoot extends AbstractRoot {
 				if (resource.exists()) {
 					File[] libs = findLibFiles(resource);
 					for (File lib : libs) {
-						if(lib.exists()){
+						if (lib.exists()) {
 							appendZipPackage(lib, result);
 						}
 					}
@@ -315,10 +315,12 @@ public class ResourceRoot extends AbstractRoot {
 			File[] libs = findLibFiles(resource);
 			for (File item : libs) {
 				URL in = findResource(item, path);
-				if (result == null) {
-					return in;
-				} else {
-					result.add(in);
+				if (in != null) {
+					if (result == null) {
+						return in;
+					} else {
+						result.add(in);
+					}
 				}
 			}
 		}
