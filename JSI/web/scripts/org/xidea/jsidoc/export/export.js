@@ -229,37 +229,42 @@ function defaultTemplateFilter(text,path){
     	return text;
     }
     if(templateBegin >=0){
+    	try{
         $import(path,{});
+    	}catch(e){
+    	}
         var result = [];
 		var packageObject = $import(packageName);
         var loader = packageObject.loaderMap[fileName];
-		do{
-			result.push(text.substring(0,templateBegin));
-			text = text.substring(templateBegin);
-			var tryCount = 32;
-			var pathEnd=0;
-			templateCode='';
-			while(tryCount -- && (pathEnd=text.indexOf(')',pathEnd))){
-				try{
-					var templateCode = text.substring(0,pathEnd+1);
-					new Function(templateCode);
-					break;
-				}catch(e){
-					templateCode = '';
+        if(loader){
+			do{
+				result.push(text.substring(0,templateBegin));
+				text = text.substring(templateBegin);
+				var tryCount = 32;
+				var pathEnd=0;
+				templateCode='';
+				while(tryCount -- && (pathEnd=text.indexOf(')',pathEnd))){
+					try{
+						var templateCode = text.substring(0,pathEnd+1);
+						new Function(templateCode);
+						break;
+					}catch(e){
+						templateCode = '';
+					}
 				}
-			}
-			if(templateCode){
-				text = text.substring(templateCode.length);
-				templateCode = getTemplateCode(loader,templateCode);
-				result.push(templateCode);
-			}else{
-				templateCode = text.substring(0,Math.max(text.indexOf('('),1));
-				result.push(templateCode)
-				text = text.substring(templateCode.length);
-			}
-		}while((templateBegin = text.search(templateRegexp))>=0);
-		result.push(text);
-		text = result.join('')
+				if(templateCode){
+					text = text.substring(templateCode.length);
+					templateCode = getTemplateCode(loader,templateCode);
+					result.push(templateCode);
+				}else{
+					templateCode = text.substring(0,Math.max(text.indexOf('('),1));
+					result.push(templateCode)
+					text = text.substring(templateCode.length);
+				}
+			}while((templateBegin = text.search(templateRegexp))>=0);
+			result.push(text);
+			text = result.join('')
+        }
     }
     return text;
 }
