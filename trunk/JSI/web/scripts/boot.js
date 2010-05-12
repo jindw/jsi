@@ -80,7 +80,7 @@ if("org.xidea.jsi:Require"){
  *                    </ul>
  *                    <p>一般可忽略返回值.因为默认情况下,导入为全局变量;无需再显示申明了.</p>
  */
-var $import;function(loaderEval,cachedScripts){
+function $import(loaderEval,cachedScripts){
     if(":Debug"){
         /*
          * 日志处理逻辑
@@ -1246,4 +1246,5 @@ var $import;function(loaderEval,cachedScripts){
         }
         return target;
     }
-}(function(){return eval(arguments[0]);},{});
+}
+$import(function(){return eval(arguments[0]);},{});
