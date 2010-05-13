@@ -26,7 +26,7 @@ public class RhinoSupportTest {
 
 	@Test
 	public void testRhinoSupport() throws IOException {
-		RhinoSupport.create();
+		RhinoSupport.create().eval("$import('org.xidea.jsidoc.util.$log')(String(123))");
 	}
 	@Test
 	public void testLoadText() throws IOException {

@@ -28,7 +28,6 @@ import org.xidea.jsi.impl.ResourceRoot;
 import org.xidea.jsi.impl.JSIText;
 
 public class JSIService extends ResourceRoot {
-	@SuppressWarnings("unused")
 	private static final Log log = LogFactory.getLog(JSIService.class);
 	protected String exportService = "http://litecompiler.appspot.com/scripts/export.action";
 	protected SDNService sdn = new SDNService(this);
@@ -247,7 +246,11 @@ public class JSIService extends ResourceRoot {
 			for (String item : exports) {
 				// PHP 不支持同名参数
 				for (String subitem : item.split("[^\\w\\$\\:\\.\\-\\*]+")) {
-					root.$import(subitem, context);
+					if(subitem.trim().length()>0){
+						root.$import(subitem, context);
+					}else{
+						log.debug("无效脚本对象："+subitem +","+item);
+					}
 				}
 			}
 		}
