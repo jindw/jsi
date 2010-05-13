@@ -9,7 +9,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Assert;
 
 public abstract class RhinoSupport {
 	private static final Log log = LogFactory.getLog(RhinoSupport.class);
@@ -91,7 +90,9 @@ public abstract class RhinoSupport {
 		}
 		try {
 			sp.eval(sp.loadText("boot.js"));
-			Assert.assertTrue("JSI 加载失败",(Boolean)sp.eval("!!($JSI && $import)"));
+			if((Boolean)sp.eval("!($JSI && $import)")){
+				log.error("JSI 加载失败");
+			}
 		} catch (Exception e) {
 			log.error("尝试JSI启动编译脚本失败", e);
 			throw new RuntimeException(e);
