@@ -62,7 +62,7 @@ function buildBrowserChecker(version){
         }
     }
 }
-var ua = window.navigator.userAgent;
+var ua = window && window.navigator && window.navigator.userAgent || '';
 if(ua.indexOf("Opera") > 0){//Opera
     var version = ua.replace(/.*Opera\s+([^; ]+).*/,'$1');
     isOpera = buildBrowserChecker(version);
