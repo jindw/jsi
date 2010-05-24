@@ -18,6 +18,7 @@ function optimizePackage(PackageClass,loadTextArg){
 		}
 	}
 	OptmizePackage.prototype = pp;
+	pp.isBrowser = isBrowser;
 	addCallFilter(pp,'addScript',addScriptFilter);
 	addCallFilter(pp,'addDependence',addDependenceFilter);
 	return OptmizePackage;
