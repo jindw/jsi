@@ -97,15 +97,18 @@ function trimPath(packageName,targetPath){
 	    var splitPos2Exp = targetPath.indexOf('/');
 	    if(splitPos2Exp>0){
 	        packageName = packageName.replace(/[\.$]/g,'/') ;
-	        // thispkg/../util/json.js   
-	        // thispkg/../../test.js
-	        // thispkg/./util/json.js
-	        splitPos2Exp = /(?:\w+\/\.|\/)\./
+	        // a/b/c/../util/json.js   => a/b/util/json.js
+	        // a/b/c/../../test.js     => a/util/json.js
+	        // a/b/c/./util/json.js    => a/b/c/util/json.js
+	        splitPos2Exp = /\w+\/\.\.\/|\.\//
 	    }else{
-	        // thispkg..util:JSON
-	        // thispkg....:Test
-	        // thispkg.util:JSON
-	        splitPos2Exp = /\w+\.\./
+	        // a.b.c..util:JSON  => a.b.util:JSON
+	        // a.b.c.:Test       => a.b:Test
+	        // a.b.c.:.:Test     => a.b.:Test => a.:Test
+	        // a.b.c.util:JSON
+	        splitPos2Exp = /\.\w+\.(?:[\:\.](?=\.))?/;
+	        ///\w+\.[\:\.]\.|\.\w+\.(?=[\.\:])|\w+\.\.\:\./;
+	        ///\w+\.\:\.|\.\w+\.(:![\.\:])/
 	    }
 	    targetPath = packageName+targetPath;
 	    while(targetPath!=(targetPath = targetPath.replace(splitPos2Exp,'')));
