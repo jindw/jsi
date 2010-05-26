@@ -1,18 +1,16 @@
-var findPackageByPath0;
-var realPackage0;
-function buildRequire(scriptWriter,findPackageByPath,realPackage){
+var findPackageByPath;
+var realPackage;
+function buildRequire(scriptWriter,findPackageByPath0,realPackage0){
 	var requireList = [];
 	var loaderMap = {}
-	if(findPackageByPath0){
-		findPackageByPath = findPackageByPath0;
-		realPackage = realPackage0;
-	}else{
-		if(findPackageByPath){
-			findPackageByPath0 = findPackageByPath;
-			realPackage0 = realPackage;
+	if(!findPackageByPath){
+		if(findPackageByPath0){
+			findPackageByPath = findPackageByPath0;
+			realPackage = realPackage0;
 		}else{
 			$require();
 		}
+	}else{
 	}
 	function writeRequire(packageObject,fileName,object){
 		var result = require(packageObject,fileName,object);
