@@ -104,9 +104,9 @@ function trimPath(packageName,targetPath){
 	    }else{
 	        // a.b.c..util:JSON  => a.b.util:JSON
 	        // a.b.c.:Test       => a.b:Test
-	        // a.b.c.:.:Test     => a.b.:Test => a.:Test
+	        // a.b.c.:.:Test     => a.b.:Test => a:Test
 	        // a.b.c.util:JSON
-	        splitPos2Exp = /\.\w+\.(?:[\:\.](?=\.))?/;
+	        splitPos2Exp = /\w+\.[\.\:]\.|\.\w+\.(?=[\.:])/;
 	        ///\w+\.[\:\.]\.|\.\w+\.(?=[\.\:])|\w+\.\.\:\./;
 	        ///\w+\.\:\.|\.\w+\.(:![\.\:])/
 	    }

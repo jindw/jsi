@@ -68,8 +68,7 @@ encoding="GBK"
 		<copy tofile="../CDN/war/WEB-INF/lib/JSI.jar" file="build/dest/JSI.jar" />
 	</target>
 	<target name="jar" depends="init">
-		<delete file="build/dest/JSI.*" />
-		<delete file="build/dest/JSI-*.jar" />
+		<delete dir="build/dest/" includes="JSI-*.jar,JSI-*.zip,JSI-*.tar,JSIDoc-*.zip" />
 		<jar encoding="GBK" comment="不要解压该文件！！" destfile="build/dest/JSI.jar">
 			<fileset dir="web/WEB-INF/classes">
 				<include name="**/*.*" />
@@ -313,7 +312,7 @@ $JSI.preload('${packageName}',${fileNameAndPrefix}</echo>
 		</ftp>
 	</target>
 	<target name="JSIDoc" depends="init,buildJSIPreload">
-		<delete file="build/dest/JSIDoc-*.*" />
+		<delete dir="build/dest/" includes="JSIDoc-*.zip" />
 		<java classname="org.xidea.jsi.test.SimpleCacheBuilder" classpath="${JSAPath};web/WEB-INF/classes">
 			<arg value="${basedir}/web/scripts" />
 			<arg value="${basedir}/build/dest/jsidoc/source.js/" />
@@ -362,8 +361,9 @@ $import("org.xidea.jsidoc:JSIDoc");</echo>
 	<target name="build" depends="compress-jsi,compress-boot,jar,cgi,JSIDoc,zip-jsidoc">
 
 	</target>
+
 	<target name="zip-jsidoc">
-		<delete file="build/dest/JSI-*.*" />
+		<delete dir="build/dest/" includes="JSI-*.zip" />
 		<tar destfile="build/dest/JSI-${version}.tar" compression="gzip">
 			<tarfileset dir="web">
 				<include name="**/*.*" />
