@@ -1,6 +1,9 @@
 package org.xidea.jsi.impl;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
@@ -10,15 +13,19 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+/**
+ * @see org.xidea.jsi.impl.Java6Impl
+ * @author test
+ * 
+ */
 public abstract class RhinoSupport {
 	private static final Log log = LogFactory.getLog(RhinoSupport.class);
 	protected Object globals;
 	protected ResourceRoot root = new ResourceRoot();
-	
+
 	public void setRoot(ResourceRoot root) {
 		this.root = root;
 	}
-
 
 	public Object eval(URL resource) {
 		if (resource == null) {
@@ -39,37 +46,58 @@ public abstract class RhinoSupport {
 	public abstract Object eval(String code, String path,
 			Map<String, Object> vars);
 
-	protected abstract Object invoke(Object thisObj, Object function,
+	@SuppressWarnings("unchecked")
+	public <T> T wrapToJava(final Object thiz, Class<T> clasz) {
+		return (T) Proxy.newProxyInstance(RhinoSupport.class.getClassLoader(),
+				new Class[] { clasz }, new InvocationHandler() {
+					public Object invoke(Object proxy, Method method,
+							Object[] args) throws Throwable {
+						return invokeJavaMethod(thiz, method.getName(), method
+								.getReturnType(), args);
+					}
+
+				});
+	}
+
+	protected abstract Object invokeJavaMethod(Object thiz, String name,
+			Class<? extends Object> type, Object[] args);
+
+	public abstract Object invoke(Object thisObj, Object function,
 			Object... args);
-	private static final Pattern PARAM = Pattern.compile("[?&]([^=&#]+)=([^&#]+)");
+
+	private static final Pattern PARAM = Pattern
+			.compile("[?&]([^=&#]+)=([^&#]+)");
 
 	/**
 	 * 按类路径装载文本（utf-8） 如：org/xidea/jsi/impl/initialize.js
-	 * @param path 类路径
+	 * 
+	 * @param path
+	 *            类路径
 	 * @return
 	 */
 	public String loadText(String path) {
 		Matcher m = PARAM.matcher(path);
 		String service = null;
-		while(m.find()){
+		while (m.find()) {
 			String key = m.group(1);
-			if("path".equals(key)){
+			if ("path".equals(key)) {
 				path = m.group(2);
-			}else if("service".equals(key)){
+			} else if ("service".equals(key)) {
 				service = m.group(2);
 			}
 		}
-		if("list".equals(service)){
+		if ("list".equals(service)) {
 			return this.list(path);
-		}else{
+		} else {
 			return root.getResourceAsString(path);
 		}
 	}
+
 	private String list(String path) {
 		List<String> result = root.getPackageFileList(path);
 		StringBuilder buf = new StringBuilder("[");
-		for (String name:result) {
-			if(buf.length()>1){
+		for (String name : result) {
+			if (buf.length() > 1) {
 				buf.append(",");
 			}
 			buf.append("\"");
@@ -79,8 +107,7 @@ public abstract class RhinoSupport {
 		buf.append("]");
 		return buf.toString();
 	}
-	
-
+	private static ThreadLocal<RhinoSupport> IMPL = new ThreadLocal<RhinoSupport>();
 	public static RhinoSupport create() {
 		RhinoSupport sp;
 		try {
@@ -89,8 +116,13 @@ public abstract class RhinoSupport {
 			sp = Java6Impl.create(true);
 		}
 		try {
-			sp.eval(sp.loadText("boot.js"));
-			if((Boolean)sp.eval("!($JSI && $import)")){
+			try{
+				IMPL.set(sp);
+				sp.eval(sp.loadText("boot.js"));
+			}finally{
+				IMPL.remove();
+			}
+			if ((Boolean) sp.eval("!($JSI && $import)")) {
 				log.error("JSI 加载失败");
 			}
 		} catch (Exception e) {
@@ -101,8 +133,11 @@ public abstract class RhinoSupport {
 	}
 
 	public static RhinoSupport create(Object topScope) {
+		RhinoSupport sp = IMPL.get();
+		if(sp != null){
+			return sp;
+		}
 		String cn = topScope.getClass().getName();
-		RhinoSupport sp;
 		if (cn.startsWith("com.sun.") || cn.startsWith("sun.")) {
 			sp = Java6Impl.create(false);
 		} else {
@@ -113,9 +148,9 @@ public abstract class RhinoSupport {
 	}
 
 	/**
-	 * 1.初始化 freeEval，加上调试信息
-	 * 2.$JSI.scriptBase 设置为 classpath:/// 
-	 * 3.返回 loadTextByURL
+	 * 1.初始化 freeEval，加上调试信息 2.$JSI.scriptBase 设置为 classpath:/// 3.返回
+	 * loadTextByURL
+	 * 
 	 * @param arguments
 	 * @return
 	 */

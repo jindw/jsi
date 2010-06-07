@@ -24,7 +24,10 @@ var JSON = {
      * @param <Object> value
      * @return <String> json 表达式
      */
-    stringify : serialize
+    stringify : serialize,
+    format : function(obj){
+    	return serialize(parse(obj),'','  ',32)
+    }
 }
 function parse(data){
     return window.eval("("+data+")")
@@ -63,7 +66,7 @@ function charReplacer(item) {
  * JSON 串行化实现
  * @internal
  */
-function serialize(value) {
+function serialize(value,prefix,indent,maxLength) {
     switch (typeof value) {
         case 'string':
             stringRegexp.lastIndex = 0;
@@ -77,21 +80,35 @@ function serialize(value) {
             if (!value) {
                 return 'null';
             }
+            if(indent){
+            	prefix+=indent;
+            }
             var buf = [];
             if (value instanceof Array) {
                 var i = value.length;
                 while (i--) {
-                    buf[i] = serialize(value[i]) || 'null';
+                	var v = serialize(value[i],prefix,indent,maxLength) || 'null';
+                    buf[i] = v;
                 }
-                return '[' + buf.join(',') + ']';
+                v = buf.join(',');
+                if(indent && v.length>maxLength){
+                	var k = prefix+indent
+                	v = '\n'+ k+ buf.join(",\n"+k)+"\n"+prefix;
+                }
+                return '[' + v + ']';
             }
             for (var k in value) {
-                var v = serialize(value[k]);
+                var v = serialize(value[k],prefix,indent,maxLength);
                 if (v) {
                     buf.push(serialize(k) + ':' + v);
                 }
             }
-            return '{' + buf.join(',') + '}';
+            v = buf.join(',');
+            if(indent && v.length>maxLength){
+            	var k = prefix+indent
+            	v = '\n'+ k+ buf.join(",\n"+k)+"\n"+prefix;
+            }
+            return '{' + v + '}';
         case 'number':
             if(!isFinite(value)){
                 value = 'null';

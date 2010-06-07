@@ -31,7 +31,7 @@ import org.xidea.jsi.JSIPackage;
 public class ResourceRoot extends AbstractRoot {
 	private static final File[] EMPTY_FILES = {};
 	private static final Log log = LogFactory.getLog(ResourceRoot.class);
-	private ClassLoader loader = ResourceRoot.class.getClassLoader();
+	protected ClassLoader loader = ResourceRoot.class.getClassLoader();
 
 	/**
 	 * 只有默认的encoding没有设置的时候，才会设置
