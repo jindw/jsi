@@ -21,6 +21,7 @@ function parse(pkgName,scriptPath,resourceLoader){
 	}else{
 		var source = resourceLoader($JSI.scriptBase+pkgName.replace(/\.|$/g,'/')+scriptPath);
 		var exp = /^\s*\/\*[\s\S]+?\*\//gm;
+		exp.lastIndex=0;
 		var match;
 		var result = [];
 		while(match = exp.exec(source)){
