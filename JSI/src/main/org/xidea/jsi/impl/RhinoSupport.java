@@ -39,8 +39,9 @@ public abstract class RhinoSupport {
 		}
 	}
 
-	public Object eval(String code) {
-		return this.eval(code, "<code>", null);
+	public Object eval(String source) {
+		String path = (source.length()>256?source.substring(0,256)+"...":source);
+		return this.eval(source,"source:" +  path, null);
 	}
 
 	public abstract Object eval(String code, String path,
