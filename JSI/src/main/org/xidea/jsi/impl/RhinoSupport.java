@@ -40,7 +40,13 @@ public abstract class RhinoSupport {
 	}
 
 	public Object eval(String source) {
-		String path = (source.length()>256?source.substring(0,256)+"...":source);
+		String path = source;
+		if(path.length()>256){
+			path = path.replaceFirst("^/\\*[\\s\\S]*?\\*/", "");
+			if(path.length()>256){
+				path = path.substring(0,256)+"...";
+			}
+		}
 		return this.eval(source,"source:" +  path, null);
 	}
 
@@ -119,7 +125,7 @@ public abstract class RhinoSupport {
 		try {
 			try{
 				IMPL.set(sp);
-				sp.eval(sp.loadText("boot.js"));
+				sp.eval(sp.root.getResource("boot.js"));
 			}finally{
 				IMPL.remove();
 			}
