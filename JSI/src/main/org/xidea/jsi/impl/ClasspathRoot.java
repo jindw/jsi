@@ -11,7 +11,7 @@ import org.xidea.jsi.JSIRoot;
 public class ClasspathRoot extends AbstractRoot implements JSIRoot {
 	private static final Log log = LogFactory.getLog(ClasspathRoot.class);
 	private String encoding = "utf-8";
-	private ClassLoader loader;
+	protected ClassLoader loader;
 
 	public ClasspathRoot() {
 		this(null);
