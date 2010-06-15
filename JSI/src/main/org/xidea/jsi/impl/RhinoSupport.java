@@ -12,13 +12,14 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xidea.jsi.JSIRuntime;
 
 /**
  * @see org.xidea.jsi.impl.Java6Impl
  * @author test
  * 
  */
-public abstract class RhinoSupport {
+public abstract class RhinoSupport implements JSIRuntime {
 	private static final Log log = LogFactory.getLog(RhinoSupport.class);
 	protected Object globals;
 	protected ResourceRoot root = new ResourceRoot();
@@ -27,6 +28,11 @@ public abstract class RhinoSupport {
 		this.root = root;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xidea.jsi.impl.JSIRuntime#eval(java.net.URL)
+	 */
 	public Object eval(URL resource) {
 		if (resource == null) {
 			return null;
@@ -39,36 +45,56 @@ public abstract class RhinoSupport {
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xidea.jsi.impl.JSIRuntime#eval(java.lang.String)
+	 */
 	public Object eval(String source) {
 		String path = source;
-		if(path.length()>256){
+		if (path.length() > 256) {
 			path = path.replaceFirst("^/\\*[\\s\\S]*?\\*/", "");
-			if(path.length()>256){
-				path = path.substring(0,256)+"...";
+			if (path.length() > 256) {
+				path = path.substring(0, 256) + "...";
 			}
 		}
-		return this.eval(source,"source:" +  path, null);
+		return this.eval(source, "source:" + path, null);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xidea.jsi.impl.JSIRuntime#eval(java.lang.String,
+	 * java.lang.String, java.util.Map)
+	 */
 	public abstract Object eval(String code, String path,
 			Map<String, Object> vars);
 
 	@SuppressWarnings("unchecked")
 	public <T> T wrapToJava(final Object thiz, Class<T> clasz) {
-		return (T) Proxy.newProxyInstance(RhinoSupport.class.getClassLoader(),
-				new Class[] { clasz }, new InvocationHandler() {
-					public Object invoke(Object proxy, Method method,
-							Object[] args) throws Throwable {
-						return invokeJavaMethod(thiz, method.getName(), method
-								.getReturnType(), args);
-					}
 
-				});
+		return (T) Proxy.newProxyInstance(RhinoSupport.class.getClassLoader(),
+
+		new Class[] { clasz }, new InvocationHandler() {
+
+			public Object invoke(Object proxy, Method method, Object[] args)
+					throws Throwable {
+				return invokeJavaMethod(thiz, method.getName(), method
+						.getReturnType(), args);
+			}
+
+		});
 	}
 
 	protected abstract Object invokeJavaMethod(Object thiz, String name,
 			Class<? extends Object> type, Object[] args);
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.xidea.jsi.impl.JSIRuntime#invoke(java.lang.Object,
+	 * java.lang.Object, java.lang.Object)
+	 */
 	public abstract Object invoke(Object thisObj, Object function,
 			Object... args);
 
@@ -114,8 +140,10 @@ public abstract class RhinoSupport {
 		buf.append("]");
 		return buf.toString();
 	}
+
 	private static ThreadLocal<RhinoSupport> IMPL = new ThreadLocal<RhinoSupport>();
-	public static RhinoSupport create() {
+
+	public static JSIRuntime create() {
 		RhinoSupport sp;
 		try {
 			sp = RhinoImpl.create(true);
@@ -123,10 +151,10 @@ public abstract class RhinoSupport {
 			sp = Java6Impl.create(true);
 		}
 		try {
-			try{
+			try {
 				IMPL.set(sp);
 				sp.eval(sp.root.getResource("boot.js"));
-			}finally{
+			} finally {
 				IMPL.remove();
 			}
 			if ((Boolean) sp.eval("!($JSI && $import)")) {
@@ -139,9 +167,16 @@ public abstract class RhinoSupport {
 		return sp;
 	}
 
-	public static RhinoSupport create(Object topScope) {
+	/**
+	 * 在当前执行上下文中创建执行环境
+	 * JSI 内部预留方法。
+	 * @param topScope
+	 * @private
+	 * @return
+	 */
+	public static JSIRuntime create(Object topScope) {
 		RhinoSupport sp = IMPL.get();
-		if(sp != null){
+		if (sp != null) {
 			return sp;
 		}
 		String cn = topScope.getClass().getName();
