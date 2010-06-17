@@ -177,6 +177,7 @@ public class ResourceRoot extends AbstractRoot {
 			try {
 				ps.add(requirePackage(path));
 			} catch (Exception e) {
+				log.warn(e);
 			}
 		}
 		return new ArrayList<JSIPackage>(ps);
@@ -192,7 +193,7 @@ public class ResourceRoot extends AbstractRoot {
 			List<URL> res2 = Collections.list(loader.getResources(path));
 			res.addAll(res2);
 		} catch (IOException e1) {
-			e1.printStackTrace();
+			log.warn(e1);
 		}
 
 		ArrayList<String> result = new ArrayList<String>();
@@ -252,6 +253,7 @@ public class ResourceRoot extends AbstractRoot {
 					}
 				}
 			} catch (Exception e) {
+				log.warn(e);
 			}
 
 		}
@@ -280,7 +282,7 @@ public class ResourceRoot extends AbstractRoot {
 		URL res = findResource(path, null);
 
 		if (res == null) {
-			res = getDefaultResource(path);
+			res = loader.getResource(path);
 		}
 		return res;
 	}
@@ -291,14 +293,19 @@ public class ResourceRoot extends AbstractRoot {
 		}
 		ArrayList<URL> result = new ArrayList<URL>();
 		findResource(path, result);
+		try {
+			result.addAll(Collections.list(loader.getResources(path)));
+		} catch (IOException e) {
+			log.warn(e);
+		}
 
 		return result;
 	}
-
-	// URL item = findResource(path);
-	protected URL getDefaultResource(String path) {
-		return loader.getResource(path);
-	}
+//
+//	// URL item = findResource(path);
+//	protected URL getDefaultResource(String path) {
+//		return loader.getResource(path);
+//	}
 
 	protected URL findResource(String path, Collection<URL> result) {
 		for (File base : sources) {
@@ -397,6 +404,7 @@ public class ResourceRoot extends AbstractRoot {
 			}
 
 		} catch (IOException e) {
+			log.warn(e);
 		}
 	}
 }
