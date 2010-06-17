@@ -16,32 +16,33 @@ import sun.org.mozilla.javascript.internal.Scriptable;
 
 class Java6Impl extends RuntimeSupport {
 
+	private static final WrapFactory wrap = new WrapFactory() {
+		@SuppressWarnings("unchecked")
+		@Override
+		public Scriptable wrapAsJavaObject(Context cx, Scriptable scope,
+				final Object javaObject, Class staticType) {
+			if (NodeList.class == staticType) {
+				return super.wrapAsJavaObject(cx, scope, new NodeList() {
+					public Node item(int index) {
+						return ((NodeList) javaObject).item(index);
+					}
+
+					public int getLength() {
+						return ((NodeList) javaObject).getLength();
+					}
+				}, staticType);
+			}
+			return super
+					.wrapAsJavaObject(cx, scope, javaObject, staticType);
+		}
+	};
 	public static RuntimeSupport create(boolean newEngine) {
 		return newEngine ? new NewJava6Impl() : new Java6Impl();
 	}
 
 	static Context getContext() {
 		Context context = Context.getCurrentContext();
-		WrapFactory wrap = new WrapFactory() {
-			@SuppressWarnings("unchecked")
-			@Override
-			public Scriptable wrapAsJavaObject(Context cx, Scriptable scope,
-					final Object javaObject, Class staticType) {
-				if (NodeList.class == staticType) {
-					return super.wrapAsJavaObject(cx, scope, new NodeList() {
-						public Node item(int index) {
-							return ((NodeList) javaObject).item(index);
-						}
-
-						public int getLength() {
-							return ((NodeList) javaObject).getLength();
-						}
-					}, staticType);
-				}
-				return super
-						.wrapAsJavaObject(cx, scope, javaObject, staticType);
-			}
-		};
+		
 		context.setWrapFactory(wrap);
 		wrap.setJavaPrimitiveWrap(false);
 		return context;
@@ -76,13 +77,13 @@ class Java6Impl extends RuntimeSupport {
 		if (vars != null) {
 			Scriptable globals = localScope;
 			localScope = cx.newObject(globals);
-			for (Object key : globals.getIds()) {
-				if (key instanceof String) {
-					String index = (String) key;
-					Object value = globals.get(index, globals);
-					localScope.put(index, localScope, value);
-				}
-			}
+//			for (Object key : globals.getIds()) {
+//				if (key instanceof String) {
+//					String index = (String) key;
+//					Object value = globals.get(index, globals);
+//					localScope.put(index, localScope, value);
+//				}
+//			}
 			for (String key : vars.keySet()) {
 				localScope.put(key, localScope, vars.get(key));
 			}

@@ -10,7 +10,7 @@ public interface JSIRuntime {
 	public abstract Object eval(String source);
 
 	public abstract Object eval(String code, String path,
-			Map<String, Object> vars);
+			Map<String, Object> newScope);
 
 	public abstract Object invoke(Object thisObj, Object function,
 			Object... args);
