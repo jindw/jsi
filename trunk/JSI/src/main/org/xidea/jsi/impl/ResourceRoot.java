@@ -151,7 +151,7 @@ public class ResourceRoot extends AbstractRoot {
 			try {
 				if (isPreload) {
 					out.write(JSIText.buildPreloadPerfix(path).getBytes(
-							this.getEncoding()));
+							this.encoding));
 				}
 				byte[] buf = new byte[1024];
 				int len = in.read(buf);
@@ -161,7 +161,7 @@ public class ResourceRoot extends AbstractRoot {
 				}
 				if (isPreload) {
 					out.write(JSIText.buildPreloadPostfix("//").getBytes(
-							this.getEncoding()));
+							this.encoding));
 				}
 				return true;
 			} finally {
@@ -187,7 +187,7 @@ public class ResourceRoot extends AbstractRoot {
 			path = path.substring(1);
 		}
 
-		List<URL> res = findResources(path);
+		List<URL> res = getResources(path);
 		try {
 			List<URL> res2 = Collections.list(loader.getResources(path));
 			res.addAll(res2);
@@ -285,7 +285,7 @@ public class ResourceRoot extends AbstractRoot {
 		return res;
 	}
 
-	private List<URL> findResources(String path) {
+	public List<URL> getResources(String path) {
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}

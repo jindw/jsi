@@ -21,7 +21,7 @@ import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.xidea.jsi.impl.ClasspathRoot;
 import org.xidea.jsi.impl.RhinoScriptPackagePaser;
-import org.xidea.jsi.impl.RhinoSupport;
+import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.lite.parser.impl.JSProxy;
 
 public class CommentTest {

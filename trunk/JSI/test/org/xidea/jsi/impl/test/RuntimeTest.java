@@ -15,7 +15,7 @@ import org.mozilla.javascript.Scriptable;
 import org.xidea.jsi.impl.ClasspathRoot;
 import org.xidea.jsi.impl.JSIText;
 import org.xidea.jsi.impl.RhinoScriptPackagePaser;
-import org.xidea.jsi.impl.RhinoSupport;
+import org.xidea.jsi.impl.RuntimeSupport;
 
 public class RuntimeTest{
 	
