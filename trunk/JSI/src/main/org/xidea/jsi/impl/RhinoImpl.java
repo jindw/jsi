@@ -20,33 +20,32 @@ import org.mozilla.javascript.WrapFactory;
 
 
 class RhinoImpl extends RuntimeSupport {
-	
+	private static final WrapFactory wrap = new WrapFactory() {
+		@SuppressWarnings("unchecked")
+		@Override
+		public Scriptable wrapAsJavaObject(Context cx, Scriptable scope,
+				final Object javaObject, Class staticType) {
+			if (NodeList.class == staticType) {
+				return super.wrapAsJavaObject(cx, scope, new NodeList() {
+					public Node item(int index) {
+						return ((NodeList) javaObject).item(index);
+					}
+
+					public int getLength() {
+						return ((NodeList) javaObject).getLength();
+					}
+				}, staticType);
+			}
+			return super
+					.wrapAsJavaObject(cx, scope, javaObject, staticType);
+		}
+	};
 	public static RuntimeSupport create(boolean newEngine) {
 		return newEngine?new NewRhinoImpl():new RhinoImpl();
 	}
 
 	static Context getContext() {
 		Context context = Context.getCurrentContext();
-		WrapFactory wrap = new WrapFactory() {
-			@SuppressWarnings("unchecked")
-			@Override
-			public Scriptable wrapAsJavaObject(Context cx, Scriptable scope,
-					final Object javaObject, Class staticType) {
-				if (NodeList.class == staticType) {
-					return super.wrapAsJavaObject(cx, scope, new NodeList() {
-						public Node item(int index) {
-							return ((NodeList) javaObject).item(index);
-						}
-
-						public int getLength() {
-							return ((NodeList) javaObject).getLength();
-						}
-					}, staticType);
-				}
-				return super
-						.wrapAsJavaObject(cx, scope, javaObject, staticType);
-			}
-		};
 		context.setWrapFactory(wrap);
 		wrap.setJavaPrimitiveWrap(false);
 		return context;
@@ -78,13 +77,13 @@ class RhinoImpl extends RuntimeSupport {
 		if (varMap != null) {
 			Scriptable globals = localScope;
 			localScope = cx.newObject(globals);
-			for (Object key : globals.getIds()) {
-				if (key instanceof String) {
-					String index = (String) key;
-					Object value = globals.get(index, globals);
-					localScope.put(index, localScope, value);
-				}
-			}
+//			for (Object key : globals.getIds()) {
+//				if (key instanceof String) {
+//					String index = (String) key;
+//					Object value = globals.get(index, globals);
+//					localScope.put(index, localScope, value);
+//				}
+//			}
 			for (String key : varMap.keySet()) {
 				localScope.put(key, localScope, varMap.get(key));
 			}

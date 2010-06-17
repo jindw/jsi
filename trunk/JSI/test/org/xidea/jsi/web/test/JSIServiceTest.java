@@ -71,7 +71,7 @@ public class JSIServiceTest  extends JSIService{
 	@Test
 	public void testSDN() throws IOException{
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		new JSIService().service("export/org.xidea.jsidoc.util:Zip", new HashMap<String, String[]>(), out, "SDN_DEBUG=1");
+		new JSIService().service("/scripts/=org.xidea.jsidoc.util:Zip", new HashMap<String, String[]>(), out, "SDN_DEBUG=1");
 		String text = out.toString("utf-8");
 		JSProxy.newProxy().eval("function(){"+text+"\n}");
 		System.out.println(text);

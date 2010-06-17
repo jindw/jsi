@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -15,18 +16,33 @@ import org.junit.Test;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.ScriptableObject;
+import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.JSIText;
 import org.xidea.jsi.impl.RuntimeSupport;
 
 public class RhinoSupportTest {
 
+	private JSIRuntime rs;
+
 	@Before
 	public void setUp() throws Exception {
+		rs = RuntimeSupport.create();
+	}
+
+	@Test
+	public void testScope() throws IOException {
+		rs.eval("var a = 1");
+		System.out.println(rs.eval("a"));
+		rs.eval("var a = 2;b=2");
+		System.out.println(rs.eval("a"));
+		rs.eval("a ++","a",new HashMap<String, Object>());
+		System.out.println(rs.eval("a+b"));
+		Assert.assertEquals("变量可以改变，传入的新变量不影响父域，新域可以修改父域数据",5.0d,((Number)rs.eval("a+b")).doubleValue(),0);
 	}
 
 	@Test
 	public void testRhinoSupport() throws IOException {
-		RuntimeSupport.create().eval("$import('org.xidea.jsidoc.util.$log')(String(123))");
+		rs.eval("$import('org.xidea.jsidoc.util.$log')(String(123))");
 	}
 	@Test
 	public void testLoadText() throws IOException {
@@ -41,7 +57,7 @@ public class RhinoSupportTest {
 			cx
 					.evaluateString(
 							ScriptRuntime.getGlobal(cx),
-							"Packages.org.xidea.jsi.impl.RhinoSupport.createEvaler(this,'dir/file.js').call({scriptBase:'/dir/',name:'file.js'},'//\\n//\\n>line2...')",
+							"Packages.org.xidea.jsi.impl.RuntimeSupport.createEvaler(this,'dir/file.js').call({scriptBase:'/dir/',name:'file.js'},'//\\n//\\n>line2...')",
 							"<file>", 1, null);
 
 			Assert.fail("");
@@ -60,7 +76,7 @@ public class RhinoSupportTest {
 					.getEngineByExtension("js");
 			System.out.println(engine);
 			engine.eval(
-							"Packages.org.xidea.jsi.impl.RhinoSupport.createEvaler(this,'dir/file.js').call({scriptBase:'/dir/',name:'file.js'},'...')");
+							"Packages.org.xidea.jsi.impl.RuntimeSupport.createEvaler(this,'dir/file.js').call({scriptBase:'/dir/',name:'file.js'},'...')");
 
 			Assert.fail("");
 		} catch (Exception e) {
