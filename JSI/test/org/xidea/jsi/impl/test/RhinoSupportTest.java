@@ -16,7 +16,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.ScriptableObject;
 import org.xidea.jsi.impl.JSIText;
-import org.xidea.jsi.impl.RhinoSupport;
+import org.xidea.jsi.impl.RuntimeSupport;
 
 public class RhinoSupportTest {
 
@@ -26,7 +26,7 @@ public class RhinoSupportTest {
 
 	@Test
 	public void testRhinoSupport() throws IOException {
-		RhinoSupport.create().eval("$import('org.xidea.jsidoc.util.$log')(String(123))");
+		RuntimeSupport.create().eval("$import('org.xidea.jsidoc.util.$log')(String(123))");
 	}
 	@Test
 	public void testLoadText() throws IOException {

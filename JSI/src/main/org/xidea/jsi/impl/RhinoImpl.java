@@ -19,9 +19,9 @@ import org.mozilla.javascript.WrapFactory;
  */
 
 
-class RhinoImpl extends RhinoSupport {
+class RhinoImpl extends RuntimeSupport {
 	
-	public static RhinoSupport create(boolean newEngine) {
+	public static RuntimeSupport create(boolean newEngine) {
 		return newEngine?new NewRhinoImpl():new RhinoImpl();
 	}
 

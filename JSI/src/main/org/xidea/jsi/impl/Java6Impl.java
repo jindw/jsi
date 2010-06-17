@@ -14,9 +14,9 @@ import sun.org.mozilla.javascript.internal.Context;
 import sun.org.mozilla.javascript.internal.Function;
 import sun.org.mozilla.javascript.internal.Scriptable;
 
-class Java6Impl extends RhinoSupport {
+class Java6Impl extends RuntimeSupport {
 
-	public static RhinoSupport create(boolean newEngine) {
+	public static RuntimeSupport create(boolean newEngine) {
 		return newEngine ? new NewJava6Impl() : new Java6Impl();
 	}
 

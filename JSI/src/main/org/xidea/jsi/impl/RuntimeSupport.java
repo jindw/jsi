@@ -19,13 +19,16 @@ import org.xidea.jsi.JSIRuntime;
  * @author test
  * 
  */
-public abstract class RhinoSupport implements JSIRuntime {
-	private static final Log log = LogFactory.getLog(RhinoSupport.class);
+public abstract class RuntimeSupport implements JSIRuntime {
+	private static final Log log = LogFactory.getLog(RuntimeSupport.class);
 	protected Object globals;
 	protected ResourceRoot root = new ResourceRoot();
 
 	public void setRoot(ResourceRoot root) {
 		this.root = root;
+	}
+	public ResourceRoot getRoot() {
+		return root;
 	}
 
 	/*
@@ -73,7 +76,7 @@ public abstract class RhinoSupport implements JSIRuntime {
 	@SuppressWarnings("unchecked")
 	public <T> T wrapToJava(final Object thiz, Class<T> clasz) {
 
-		return (T) Proxy.newProxyInstance(RhinoSupport.class.getClassLoader(),
+		return (T) Proxy.newProxyInstance(RuntimeSupport.class.getClassLoader(),
 
 		new Class[] { clasz }, new InvocationHandler() {
 
@@ -141,10 +144,10 @@ public abstract class RhinoSupport implements JSIRuntime {
 		return buf.toString();
 	}
 
-	private static ThreadLocal<RhinoSupport> IMPL = new ThreadLocal<RhinoSupport>();
+	private static ThreadLocal<RuntimeSupport> IMPL = new ThreadLocal<RuntimeSupport>();
 
 	public static JSIRuntime create() {
-		RhinoSupport sp;
+		RuntimeSupport sp;
 		try {
 			sp = RhinoImpl.create(true);
 		} catch (Exception e) {
@@ -175,7 +178,7 @@ public abstract class RhinoSupport implements JSIRuntime {
 	 * @return
 	 */
 	public static JSIRuntime create(Object topScope) {
-		RhinoSupport sp = IMPL.get();
+		RuntimeSupport sp = IMPL.get();
 		if (sp != null) {
 			return sp;
 		}
@@ -197,7 +200,7 @@ public abstract class RhinoSupport implements JSIRuntime {
 	 * @return
 	 */
 	public Object setup(Object arguments) {
-		Object initializer = this.eval(RhinoSupport.class
+		Object initializer = this.eval(RuntimeSupport.class
 				.getResource("setup.js"));
 		return this.invoke(this, initializer, arguments);
 	}
