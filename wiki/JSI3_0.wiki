@@ -1,0 +1,34 @@
+#labels Featured
+== 重大改进 ==
+JSI3.0 即将发布。主要功能改进如下。
+  * 添加$require 函数支持
+  * 支持源码注释内依赖申明 
+  * Java 执行环境支持完善
+
+
+== $require 功能说明==
+    该模式不隔离冲突，仅仅组织脚本载入顺序，document.write方式聚合。
+    没有装载单元的保护，直接以普通脚本的方式运行，对于初级用户，这或许是一种更简单的运用模式。 
+== 支持源码注释内依赖申明 ==
+    用户可以将依赖关系直接申明在文件注释中。
+    * 脚本实例（hello-world.js）：
+{{{
+/**
+ * 测试Hello World
+ * @jsiparser
+ * @import org.xidea.jsidoc.util.$log
+ * @export
+ */
+function sayHello(){
+  $log.error(message);
+}
+var message = "Hello World";
+
+}}}
+    * 包定义文件要求（`__package__.js`）：
+{{{
+ this.addScript('*'); 
+}}}
+== Java 执行环境支持说明 ==
+    * [http://jsi.googlecode.com/svn/trunk/JSI/src/main/org/xidea/jsi/JSIRuntime.java org.xidea.jsi.JSIRuntime 接口]
+    * [http://jsi.googlecode.com/svn/trunk/JSI/src/main/org/xidea/jsi/impl/RuntimeSupport.java org.xidea.jsi.impl.RuntimeSupport 实现]
