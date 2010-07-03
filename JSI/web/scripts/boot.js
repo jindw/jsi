@@ -82,27 +82,15 @@ if("org.xidea.jsi:Require"){
  */
 function $import(loaderEval,cachedScripts){
     if(":Debug"){
-        /*
-         * 日志处理逻辑
-         */
-        function appendObjectInfo(args,arg){
-         	if(typeof arg == 'object'){
-         		for(var n in arg){
-         			args.push(n,'=',arg[n],',')
-         		}
-         	}else{
-         		args.push(arg);
-         	}
-         	args.push('\n  ');
-        }
-        //var logLevel = 0;//{trace:-1,debug:0,info:1,error:2}
+        //var logLevel = 0;//{trace:0,debug:1,info:2,warn:3error:4}
         function reportError(){
             var args = ["JSI 引导文件调试信息\n  "];
-            for(var i = 0;i<arguments.length;i++){
-            	appendObjectInfo(args,arguments[i]);
-            }
-            args.push("\n继续弹出该调试信息？");
-            if(!(this.confirm||print)(args.join(''))){
+            args.push.apply(args,arguments)
+            args = args.join('');
+            if(!(
+            	$JSI.impl?
+            		$JSI.impl.log(4,args)
+            		:confirm(args+"\n继续弹出该调试信息？"))){
                 reportError = Function.prototype;
             }
         }

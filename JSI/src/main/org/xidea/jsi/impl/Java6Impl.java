@@ -100,7 +100,7 @@ class Java6Impl extends RuntimeSupport {
 			buf.append("){");
 			buf.append(code);
 			buf.append("\n}");
-			Function fn = cx.compileFunction(localScope, code, path, 1, null);
+			Function fn = cx.compileFunction(localScope, buf.toString(), path, 1, null);
 			return fn.call(cx, localScope, (Scriptable) thiz, args);
 		} else {
 			return cx.evaluateString(localScope, code, path, 1, null);

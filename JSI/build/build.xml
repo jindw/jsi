@@ -65,7 +65,7 @@ encoding="GBK"
 				<include name="*.tld" />
 			</zipfileset>
 		</jar>
-		<copy tofile="../CDN/war/WEB-INF/lib/JSI.jar" file="build/dest/JSI.jar" />
+		<copy tofile="../JSA/lib/JSI.jar" file="build/dest/JSI.jar" />
 	</target>
 	<target name="jar" depends="init">
 		<delete dir="build/dest/" includes="JSI-*.jar,JSI-*.zip,JSI-*.tar,JSIDoc-*.zip" />
@@ -350,7 +350,7 @@ $import("org.xidea.jsidoc:JSIDoc");</echo>
 				<exclude name="*/**/*test*.html" />
 				<exclude name="*/**/root-frame.html" />
 			</zipfileset>
-			<zipfileset dir="web/scripts/org/xidea/jsidoc/">
+			<zipfileset prefix="org/xidea/jsidoc/" dir="web/scripts/org/xidea/jsidoc/">
 				<include name="index.html" />
 			</zipfileset>
 			<zipfileset dir="build/dest/jsidoc/">

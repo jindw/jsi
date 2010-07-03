@@ -8,7 +8,7 @@ import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIPackage;
 
 /**
- * 初定该实现的依赖只能时一个文件，可能时该文件的全部脚本，也可能时某个确定脚本
+ * 初定该实现的依赖只能时一个文件，可能是该文件的全部脚本，也可能时某个确定脚本
  * 
  * @author jindw
  * 

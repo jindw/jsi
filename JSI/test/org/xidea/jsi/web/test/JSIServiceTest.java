@@ -7,8 +7,8 @@ import java.util.HashMap;
 import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.jsi.impl.JSIText;
+import org.xidea.jsi.impl.RuntimeSupport;
 import org.xidea.jsi.web.JSIService;
-import org.xidea.lite.parser.impl.JSProxy;
 
 import sun.misc.BASE64Decoder;
 import sun.misc.BASE64Encoder;
@@ -73,7 +73,7 @@ public class JSIServiceTest  extends JSIService{
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		new JSIService().service("/scripts/=org.xidea.jsidoc.util:Zip", new HashMap<String, String[]>(), out, "SDN_DEBUG=1");
 		String text = out.toString("utf-8");
-		JSProxy.newProxy().eval("function(){"+text+"\n}");
+		RuntimeSupport.create().eval("function(){"+text+"\n}");
 		System.out.println(text);
 	}
 
