@@ -1,15 +1,17 @@
 package org.xidea.jsi.runtime.test;
-
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.xidea.el.json.JSONEncoder;
 import org.xidea.jsi.JSIRuntime;
 import org.xidea.jsi.impl.RuntimeSupport;
 
@@ -22,7 +24,30 @@ public class RuntimeSupportTest {
 		rt.eval("$import('org.xidea.jsi:$log')");
 		rt.eval("function x(){$log.info(123)\n};x();");
 	}
+	public static interface TestIF{
+		public String toString();
+		public Set<String> getJavaSet();
+		public List<String> getJavaList();
+		public Map<String,Object> getJavaMap();
+	}
 
+
+	@Test
+	public void testInterfaceWrap() throws Exception {
+		JSIRuntime rp = RuntimeSupport.create();
+		String js = "({" +
+		"getJavaSet:function(){return [1,2,3]}," +
+		"getJavaList:function(){return [1,2,3]}," +
+		"getJavaMap:function(){return {a:1,2:2}}," +
+		"toString:function(){return 'Test'}" +
+		"})";
+		Object o = rp.eval(js);
+		//rp.invokeMethod(o, "run");
+		TestIF r = rp.wrapToJava(o,TestIF.class);
+		Assert.assertEquals("toString 测试", "Test",r.toString());
+		String json = JSONEncoder.encode(r);
+		Assert.assertEquals("{\"javaList\":[1,2,3],\"javaMap\":{\"a\":1,\"2\":2},\"javaSet\":[1,2,3]}", json);
+	}
 	@Test
 	public void testJava6Proxy() throws Exception{
 		test(Class.forName("org.xidea.jsi.impl.Java6Impl"));
