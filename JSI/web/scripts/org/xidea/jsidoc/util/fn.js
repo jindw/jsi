@@ -20,7 +20,7 @@ function xmlReplacer(c){
           return '&#34;';
     }
 }
-
+$log.error(1243)
 function loadText(url){
     //$log.info(url);
     var req = new XMLHttpRequest();

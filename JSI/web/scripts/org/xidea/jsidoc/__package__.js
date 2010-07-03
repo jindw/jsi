@@ -1,6 +1,6 @@
 this.addScript('globals-info.js','RootInfo'
                 ,['createPrototypeStack','FileInfo','PackageInfo']
-                ,['.util:$log','SourceEntry','computeURL','ObjectInfo']);
+                ,['org.xidea.jsi:$log','SourceEntry','computeURL','ObjectInfo']);
 
 this.addScript('package-info.js','PackageInfo'
                 ,0
@@ -8,7 +8,7 @@ this.addScript('package-info.js','PackageInfo'
 
 this.addScript('file-info.js','FileInfo'
                 ,0
-                ,['.util:$log','.export:DependenceInfo','SourceEntry','PackageInfo','ObjectInfo']);
+                ,['org.xidea.jsi:$log','.export:DependenceInfo','SourceEntry','PackageInfo','ObjectInfo']);
 
 this.addScript('type-info.js',['TypeInfo','ParamInfo']);
 
@@ -37,7 +37,7 @@ this.addScript('object-info.js',['ObjectInfo','UnknowInfo']
 
 this.addScript('member-info.js','MemberInfo'
                 ,['createPrototypeStack','DocEntry','ObjectInfo']
-                ,['.util:$log','accessOrder']);
+                ,['org.xidea.jsi:$log','accessOrder']);
 
 this.addScript('menu.js','MenuUI'
                 ,0

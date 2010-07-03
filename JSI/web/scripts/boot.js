@@ -102,7 +102,7 @@ function $import(loaderEval,cachedScripts){
             	appendObjectInfo(args,arguments[i]);
             }
             args.push("\n继续弹出该调试信息？");
-            if(!(this.confirm||this.print)(args.join(''))){
+            if(!(this.confirm||print)(args.join(''))){
                 reportError = Function.prototype;
             }
         }
@@ -199,13 +199,19 @@ function $import(loaderEval,cachedScripts){
         }
     }else{
     	if("org.xidea.jsi:Server"){
-    	    loadText = Packages.org.xidea.jsi.impl.RuntimeSupport.create(this).setup(arguments);
-    	}
-    }
-    if(":Debug"){
-        //$JSI.scriptBase += ";path="
-    }
-    
+    	    var impl = $JSI.impl = Packages.org.xidea.jsi.impl.RuntimeSupport.create(this);
+    	    $JSI.scriptBase= "classpath:///";
+		    loaderEval = function(code){
+		        //var evaler =  impl.eval("(function(){eval(arguments[0])})", this.scriptBase + this.name , null)
+		        //return evaler.call(this,code);
+		        return impl.eval(this,code,this.scriptBase + this.name , null);
+		    }
+		    function loadText(url){
+	    		var value =$JSI.loadText&&$JSI.loadText(url)
+		        return value?value:impl.loadText(String(url).replace(/\w+\:\/*/,''));
+		    }
+		}
+	}
     var XHR = this.XMLHttpRequest;
     var scriptBase = $JSI.scriptBase;
     var packageMap = {};
@@ -714,7 +720,7 @@ function $import(loaderEval,cachedScripts){
      * @typeof function
      * @param packageObject 指定的脚本文件名
      * @param scriptPath 指定的脚本文件名
-     * @param object 需要装载的对象 * 代表全部元素
+     * @param object 需要装载的对象 null 代表全部元素
      */
      function loadScript(packageObject,fileName,object){
         var loader = packageObject.loaderMap[fileName];
@@ -736,6 +742,11 @@ function $import(loaderEval,cachedScripts){
         if(loader.initialize){
             //trace("object loader initialize:",packageObject.scriptBase ,fileName);
             loader.initialize(object);
+            if(":debug"){
+	            if(!object || object=='$log'){
+	            	loader.hook("if(typeof $log == 'object' && $log && $log.clone){$log = $log.clone('"+fileName+'@'+packageObject.name+"')}");
+	            }
+            }
         }
     }
     /*
@@ -863,8 +874,8 @@ function $import(loaderEval,cachedScripts){
      * @private
      */
     function prepareScriptLoad(packageObject,loader){
-        var name = loader.name;
-        var deps = packageObject.dependenceMap[name];
+        var fileName = loader.name;
+        var deps = packageObject.dependenceMap[fileName];
         var varText = 'this.hook=function(n){return eval(n)}';
         var vars = [];
         var i = deps && deps.length;
@@ -888,7 +899,7 @@ function $import(loaderEval,cachedScripts){
             }else{//直接装载（只是装载到缓存对象，没有进入装载单元），无需记录
                 //这里貌似有死循环的危险
                 loadDependence(dep,vars);
-                if(dep = packageObject.loaderMap[name]){
+                if(dep = packageObject.loaderMap[fileName]){
                     return dep;
                 }
             }
@@ -896,6 +907,10 @@ function $import(loaderEval,cachedScripts){
         if(vars.length){
             loader.varMap = vars;
             varText += ';var '+vars.join(',').replace(/([^,]+)/g,'$1 = this.varMap.$1');
+        }
+        
+        if(":debug"){
+        	varText+=";if(typeof $log == 'object' && $log && $log.clone){$log = $log.clone('"+fileName+'@'+packageObject.name+"')}";
         }
         loader.varText = varText;
     }

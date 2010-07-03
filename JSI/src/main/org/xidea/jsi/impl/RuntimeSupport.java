@@ -20,6 +20,7 @@ import org.xidea.jsi.JSIRuntime;
  * 
  */
 public abstract class RuntimeSupport implements JSIRuntime {
+	static final Object[] EMPTY_ARG = new Object[0];
 	private static final Log log = LogFactory.getLog(RuntimeSupport.class);
 	protected Object globals;
 	protected ResourceRoot root = new ResourceRoot();
@@ -30,7 +31,42 @@ public abstract class RuntimeSupport implements JSIRuntime {
 	public ResourceRoot getRoot() {
 		return root;
 	}
+	protected String getFileInfo(){return "unknow";}
 
+	// "trace,debug,info,warn,error,fatal"
+	public boolean log(int level,String msg){
+		//e.printStackTrace();
+		StackTraceElement[] sts = new Exception().getStackTrace();
+		String jsName = null;
+		for(StackTraceElement s: sts){
+			String fileName = s.getFileName();
+			if(fileName!=null && !fileName.endsWith(".java")){
+				if(jsName != null && !jsName.equals(fileName)){
+					jsName = fileName+'@'+s.getLineNumber();
+					break;
+				}
+				jsName = fileName;
+			}
+		}
+		msg += "[fileName]:"+jsName;
+		switch(level){
+		case 0:
+			log.trace(msg);break;
+		case 1:
+			log.debug(msg);break;
+		case 2:
+			log.info(msg);break;
+		case 3:
+			log.warn(msg);break;
+		case 4:
+			log.error(msg);break;
+		case 5:
+			log.fatal(msg);break;
+		default:
+			log.info(msg);
+		}
+		return true;
+	}
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -42,7 +78,7 @@ public abstract class RuntimeSupport implements JSIRuntime {
 		}
 		try {
 			String code = JSIText.loadText(resource, "UTF-8");
-			return this.eval(code, resource.toString(), null);
+			return this.eval(code, resource.toString());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -61,16 +97,15 @@ public abstract class RuntimeSupport implements JSIRuntime {
 				path = path.substring(0, 256) + "...";
 			}
 		}
-		return this.eval(source, "source:" + path, null);
+		return this.eval(null,source, "source:" + path, null);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.xidea.jsi.impl.JSIRuntime#eval(java.lang.String,
-	 * java.lang.String, java.util.Map)
-	 */
-	public abstract Object eval(String code, String path,
+
+	public Object eval( String source,String path){
+		return this.eval(null, source, path, null);
+	}
+
+	public abstract Object eval(Object thisObj, String source,String path,
 			Map<String, Object> vars);
 
 	@SuppressWarnings("unchecked")
@@ -156,6 +191,7 @@ public abstract class RuntimeSupport implements JSIRuntime {
 		try {
 			try {
 				IMPL.set(sp);
+				sp.eval("var window =this;this.print = this.print || function(msg){java.lang.System.out.print(String(msg))}");
 				sp.eval(sp.root.getResource("boot.js"));
 			} finally {
 				IMPL.remove();
@@ -191,18 +227,4 @@ public abstract class RuntimeSupport implements JSIRuntime {
 		sp.globals = topScope;
 		return sp;
 	}
-
-	/**
-	 * 1.初始化 freeEval，加上调试信息 2.$JSI.scriptBase 设置为 classpath:/// 3.返回
-	 * loadTextByURL
-	 * 
-	 * @param arguments
-	 * @return
-	 */
-	public Object setup(Object arguments) {
-		Object initializer = this.eval(RuntimeSupport.class
-				.getResource("setup.js"));
-		return this.invoke(this, initializer, arguments);
-	}
-
 }
