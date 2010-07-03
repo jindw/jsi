@@ -4,12 +4,14 @@ import java.net.URL;
 import java.util.Map;
 
 public interface JSIRuntime {
-
+	
 	public abstract Object eval(URL resource);
 	
 	public abstract Object eval(String source);
 
-	public abstract Object eval(String code, String path,
+	public abstract Object eval(String code, String path);
+
+	public abstract Object eval(Object thiz,String code, String path,
 			Map<String, Object> newScope);
 
 	public abstract Object invoke(Object thisObj, Object function,

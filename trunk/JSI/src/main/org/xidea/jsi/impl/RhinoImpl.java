@@ -1,5 +1,6 @@
 package org.xidea.jsi.impl;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.mozilla.javascript.Context;
@@ -18,7 +19,6 @@ import org.mozilla.javascript.WrapFactory;
  * 
  */
 
-
 class RhinoImpl extends RuntimeSupport {
 	private static final WrapFactory wrap = new WrapFactory() {
 		@SuppressWarnings("unchecked")
@@ -36,12 +36,12 @@ class RhinoImpl extends RuntimeSupport {
 					}
 				}, staticType);
 			}
-			return super
-					.wrapAsJavaObject(cx, scope, javaObject, staticType);
+			return super.wrapAsJavaObject(cx, scope, javaObject, staticType);
 		}
 	};
+
 	public static RuntimeSupport create(boolean newEngine) {
-		return newEngine?new NewRhinoImpl():new RhinoImpl();
+		return newEngine ? new NewRhinoImpl() : new RhinoImpl();
 	}
 
 	static Context getContext() {
@@ -50,6 +50,7 @@ class RhinoImpl extends RuntimeSupport {
 		wrap.setJavaPrimitiveWrap(false);
 		return context;
 	}
+
 	@Override
 	protected Object invokeJavaMethod(Object thiz, String name,
 			Class<? extends Object> type, Object[] args) {
@@ -60,39 +61,55 @@ class RhinoImpl extends RuntimeSupport {
 			return Context.jsToJava(result, type);
 		}
 	}
+
 	public Object invoke(Object thisObj, Object function, Object... args) {
 		Context cx = getContext();
 		Scriptable thiz = Context.toObject(thisObj, (Scriptable) globals);
-		if(!(function instanceof Function)){
-			function = (Function) ScriptableObject.getProperty(thiz,
-					function.toString());
+		if (!(function instanceof Function)) {
+			function = (Function) ScriptableObject.getProperty(thiz, function
+					.toString());
 		}
-		return ((Function) function)
-				.call(cx, (Scriptable) globals, thiz, args);
+		return ((Function) function).call(cx, (Scriptable) globals, thiz, args);
 	}
 
-	public Object eval(String code, String path, Map<String, Object> varMap) {
+	public Object eval(Object thiz, String code, String path,
+			Map<String, Object> varMap) {
 		Context cx = getContext();
 		Scriptable localScope = (Scriptable) globals;
 		if (varMap != null) {
 			Scriptable globals = localScope;
 			localScope = cx.newObject(globals);
-//			for (Object key : globals.getIds()) {
-//				if (key instanceof String) {
-//					String index = (String) key;
-//					Object value = globals.get(index, globals);
-//					localScope.put(index, localScope, value);
-//				}
-//			}
 			for (String key : varMap.keySet()) {
 				localScope.put(key, localScope, varMap.get(key));
 			}
 		}
-		return cx.evaluateString(localScope, code, path, 1, null);
+		if (thiz instanceof Scriptable) {
+			Object[] args = EMPTY_ARG;
+			StringBuilder buf = new StringBuilder("function(");
+			if(varMap!= null && !varMap.isEmpty()){
+				ArrayList<Object> list = new ArrayList<Object>();
+				for(Map.Entry<String, Object>e:varMap.entrySet()){
+					if(list.size()>0){
+						buf.append(",");
+					}
+					buf.append(e.getKey());
+					list.add(e.getValue());
+				}
+				args = list.toArray();
+			}
+			buf.append("){");
+			buf.append(code);
+			buf.append("\n}");
+			Function fn = cx.compileFunction(localScope, buf.toString(), path, 1, null);
+			return fn.call(cx, localScope, (Scriptable) thiz, args);
+		} else {
+			return cx.evaluateString(localScope, code, path, 1, null);
+		}
 
 	}
 
 }
+
 class NewRhinoImpl extends RhinoImpl {
 	{
 
@@ -103,6 +120,7 @@ class NewRhinoImpl extends RhinoImpl {
 			Context.exit();
 		}
 	}
+
 	@Override
 	protected Object invokeJavaMethod(Object thiz, String name,
 			Class<? extends Object> type, Object[] args) {
@@ -114,6 +132,7 @@ class NewRhinoImpl extends RhinoImpl {
 			Context.exit();
 		}
 	}
+
 	public Object invoke(Object thisObj, Object function, Object... args) {
 
 		try {
@@ -125,11 +144,11 @@ class NewRhinoImpl extends RhinoImpl {
 		}
 	}
 
-	public Object eval(String code, String path, Map<String, Object> varMap) {
+	public Object eval(Object thiz,String code, String path, Map<String, Object> varMap) {
 		try {
 			Context cx = Context.enter();
 			cx.getWrapFactory().setJavaPrimitiveWrap(false);
-			return super.eval(code, path, varMap);
+			return super.eval(thiz,code, path, varMap);
 		} finally {
 			Context.exit();
 		}

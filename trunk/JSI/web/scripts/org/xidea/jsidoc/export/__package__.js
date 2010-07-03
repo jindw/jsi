@@ -8,7 +8,7 @@ this.addScript('fn.js','findPackages');
 this.addScript('dependence-info.js','DependenceInfo');
 
 this.addScript('export.js','Exporter'
-                ,"..util:$log"
+                ,"org.xidea.jsi:$log"
                 ,[
                 'DependenceInfo',
                 '..util:findGlobals',
@@ -18,7 +18,7 @@ this.addScript('export.js','Exporter'
                 '..util:loadText']);
 
 this.addScript('export-ui.js','ExportUI'
-                ,"..util:$log"
+                ,"org.xidea.jsi:$log"
                 ,['Exporter','DependenceInfo',
                 'findPackages',
                 '..util:Zip',

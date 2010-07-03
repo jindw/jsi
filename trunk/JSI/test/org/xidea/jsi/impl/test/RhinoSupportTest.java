@@ -35,7 +35,7 @@ public class RhinoSupportTest {
 		System.out.println(rs.eval("a"));
 		rs.eval("var a = 2;b=2");
 		System.out.println(rs.eval("a"));
-		rs.eval("a ++","a",new HashMap<String, Object>());
+		rs.eval(null,"a ++","a",new HashMap<String, Object>());
 		System.out.println(rs.eval("a+b"));
 		Assert.assertEquals("变量可以改变，传入的新变量不影响父域，新域可以修改父域数据",5.0d,((Number)rs.eval("a+b")).doubleValue(),0);
 	}
