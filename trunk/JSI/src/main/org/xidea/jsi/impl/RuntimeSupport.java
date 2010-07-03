@@ -5,13 +5,16 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.xidea.el.json.JSONDecoder;
 import org.xidea.jsi.JSIRuntime;
 
 /**
@@ -29,45 +32,56 @@ public abstract class RuntimeSupport implements JSIRuntime {
 	public void setRoot(ResourceRoot root) {
 		this.root = root;
 	}
+
 	public ResourceRoot getRoot() {
 		return root;
 	}
-	protected String getFileInfo(){return "unknow";}
+
+	protected String getFileInfo() {
+		return "unknow";
+	}
 
 	// "trace,debug,info,warn,error,fatal"
-	public boolean log(int level,String msg){
-		//e.printStackTrace();
+	public boolean log(int level, String msg) {
+		// e.printStackTrace();
 		StackTraceElement[] sts = new Exception().getStackTrace();
 		String jsName = null;
-		for(StackTraceElement s: sts){
+		for (StackTraceElement s : sts) {
 			String fileName = s.getFileName();
-			if(fileName!=null && !fileName.endsWith(".java")){
-				if(jsName != null && !jsName.equals(fileName)){
-					jsName = fileName+'@'+s.getLineNumber();
+			if (fileName != null && !fileName.endsWith(".java")) {
+				if (jsName != null && !jsName.equals(fileName)) {
+					jsName = fileName + '@' + s.getLineNumber();
 					break;
 				}
 				jsName = fileName;
 			}
 		}
-		msg += "[fileName]:"+jsName;
-		switch(level){
+		msg += "[fileName]:" + jsName;
+		switch (level) {
 		case 0:
-			log.trace(msg);break;
+			log.trace(msg);
+			break;
 		case 1:
-			log.debug(msg);break;
+			log.debug(msg);
+			break;
 		case 2:
-			log.info(msg);break;
+			log.info(msg);
+			break;
 		case 3:
-			log.warn(msg);break;
+			log.warn(msg);
+			break;
 		case 4:
-			log.error(msg);break;
+			log.error(msg);
+			break;
 		case 5:
-			log.fatal(msg);break;
+			log.fatal(msg);
+			break;
 		default:
 			log.info(msg);
 		}
 		return true;
 	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -98,35 +112,67 @@ public abstract class RuntimeSupport implements JSIRuntime {
 				path = path.substring(0, 256) + "...";
 			}
 		}
-		return this.eval(null,source, "source:" + path, null);
+		return this.eval(null, source, "source:" + path, null);
 	}
 
-
-	public Object eval( String source,String path){
+	public Object eval(String source, String path) {
 		return this.eval(null, source, path, null);
 	}
 
-	public abstract Object eval(Object thisObj, String source,String path,
+	public abstract Object eval(Object thisObj, String source, String path,
 			Map<String, Object> vars);
 
 	@SuppressWarnings("unchecked")
 	public <T> T wrapToJava(final Object thiz, Class<T> clasz) {
 
-		return (T) Proxy.newProxyInstance(RuntimeSupport.class.getClassLoader(),
+		return (T) Proxy.newProxyInstance(
+				RuntimeSupport.class.getClassLoader(),
+				new Class[] { clasz }, new InvocationHandler() {
+					public Object invoke(Object proxy, Method method,
+							Object[] args) throws Throwable {
+						Class<?> returnType = method.getReturnType();
+						Object rtv = invokeJavaMethod(thiz, method.getName(),
+								returnType, args);
+						return rtv;
+					}
 
-		new Class[] { clasz }, new InvocationHandler() {
-
-			public Object invoke(Object proxy, Method method, Object[] args)
-					throws Throwable {
-				return invokeJavaMethod(thiz, method.getName(), method
-						.getReturnType(), args);
-			}
-
-		});
+				});
 	}
 
-	protected abstract Object invokeJavaMethod(Object thiz, String name,
-			Class<? extends Object> type, Object[] args);
+	protected Object invokeJavaMethod(Object thiz, String name,
+			Class<? extends Object> type, Object[] args) {
+		Object result = invoke(thiz, name, args);
+		if (type == Void.TYPE) {
+			return null;
+		} else if (result == null && type.isPrimitive()) {
+			if (Boolean.TYPE == type) {
+				return false;
+			} else if (Character.TYPE == type) {
+				return '\0';
+			}
+			result = 0;
+		}
+		try {
+			return jsToJava(type, result);
+		} catch (Exception e) {
+			if (result != null) {
+				String code = (String) this
+						.eval(
+								result,
+								"return $import('org.xidea.jsidoc.util:JSON').stringify(this)",
+								"<inline>", null);
+				result = JSONDecoder.decode(code);
+				if(result instanceof List<?> && Set.class.isAssignableFrom(type)){
+					
+					result = new HashSet<Object>((List<?>)result);
+				}
+			}
+			return result;
+		}
+	}
+
+	protected abstract Object jsToJava(Class<? extends Object> type,
+			Object result);
 
 	/*
 	 * (non-Javadoc)
@@ -190,7 +236,9 @@ public abstract class RuntimeSupport implements JSIRuntime {
 		sp.initialize();
 		return sp;
 	}
+
 	private static ThreadLocal<RuntimeSupport> IMPL = new ThreadLocal<RuntimeSupport>();
+
 	void initialize() {
 		try {
 			try {
@@ -208,9 +256,10 @@ public abstract class RuntimeSupport implements JSIRuntime {
 			throw new RuntimeException(e);
 		}
 	}
+
 	/**
-	 * 在当前执行上下文中创建执行环境
-	 * JSI 内部预留方法。
+	 * 在当前执行上下文中创建执行环境 JSI 内部预留方法。
+	 * 
 	 * @param topScope
 	 * @private
 	 * @return

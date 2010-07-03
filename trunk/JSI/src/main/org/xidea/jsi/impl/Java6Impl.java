@@ -33,31 +33,24 @@ class Java6Impl extends RuntimeSupport {
 					}
 				}, staticType);
 			}
-			return super
-					.wrapAsJavaObject(cx, scope, javaObject, staticType);
+			return super.wrapAsJavaObject(cx, scope, javaObject, staticType);
 		}
 	};
+
 	public static RuntimeSupport create(boolean newEngine) {
 		return newEngine ? new NewJava6Impl() : new Java6Impl();
 	}
 
 	static Context getContext() {
 		Context context = Context.getCurrentContext();
-		
+
 		context.setWrapFactory(wrap);
 		wrap.setJavaPrimitiveWrap(false);
 		return context;
 	}
 
-	@Override
-	protected Object invokeJavaMethod(Object thiz, String name,
-			Class<? extends Object> type, Object[] args) {
-		Object result = invoke(thiz, name, args);
-		if (type == Void.TYPE) {
-			return null;
-		} else {
-			return Context.jsToJava(result, type);
-		}
+	protected Object jsToJava(Class<? extends Object> type, Object result) {
+		return Context.jsToJava(result, type);
 	}
 
 	@Override
@@ -65,14 +58,14 @@ class Java6Impl extends RuntimeSupport {
 		Context cx = getContext();
 		Scriptable thiz = Context.toObject(thisObj, (Scriptable) globals);
 		if (!(function instanceof Function)) {
-			function = (Function) ScriptableObject.getProperty(thiz, function
-					.toString());
+			function = ScriptableObject.getProperty(thiz, function.toString());
 		}
 		return ((Function) function).call(cx, (Scriptable) globals, thiz, args);
 	}
 
 	@Override
-	public Object eval(Object thiz,String code, String path, Map<String, Object> varMap) {
+	public Object eval(Object thiz, String code, String path,
+			Map<String, Object> varMap) {
 		Context cx = getContext();
 		Scriptable localScope = (Scriptable) globals;
 		if (varMap != null) {
@@ -86,10 +79,10 @@ class Java6Impl extends RuntimeSupport {
 		if (thiz instanceof Scriptable) {
 			Object[] args = EMPTY_ARG;
 			StringBuilder buf = new StringBuilder("function(");
-			if(varMap!= null && !varMap.isEmpty()){
+			if (varMap != null && !varMap.isEmpty()) {
 				ArrayList<Object> list = new ArrayList<Object>();
-				for(Map.Entry<String, Object>e:varMap.entrySet()){
-					if(!list.isEmpty()){
+				for (Map.Entry<String, Object> e : varMap.entrySet()) {
+					if (!list.isEmpty()) {
 						buf.append(",");
 					}
 					buf.append(e.getKey());
@@ -100,7 +93,8 @@ class Java6Impl extends RuntimeSupport {
 			buf.append("){");
 			buf.append(code);
 			buf.append("\n}");
-			Function fn = cx.compileFunction(localScope, buf.toString(), path, 1, null);
+			Function fn = cx.compileFunction(localScope, buf.toString(), path,
+					1, null);
 			return fn.call(cx, localScope, (Scriptable) thiz, args);
 		} else {
 			return cx.evaluateString(localScope, code, path, 1, null);
@@ -121,20 +115,9 @@ class NewJava6Impl extends Java6Impl {
 	}
 
 	@Override
-	protected Object invokeJavaMethod(Object thiz, String name,
-			Class<? extends Object> type, Object[] args) {
-		try {
-			Context.enter();
-			return super.invokeJavaMethod(thiz, name, type, args);
-		} finally {
-			Context.exit();
-		}
-	}
-
-	@Override
 	public Object invoke(Object thisObj, Object function, Object... args) {
 		try {
-			 Context.enter();
+			Context.enter();
 			return super.invoke(thisObj, function, args);
 		} finally {
 			Context.exit();
@@ -142,10 +125,11 @@ class NewJava6Impl extends Java6Impl {
 	}
 
 	@Override
-	public Object eval(Object thiz,String code, String path, Map<String, Object> varMap) {
+	public Object eval(Object thiz, String code, String path,
+			Map<String, Object> varMap) {
 		try {
 			Context.enter();
-			return super.eval(thiz,code, path, varMap);
+			return super.eval(thiz, code, path, varMap);
 		} finally {
 			Context.exit();
 		}

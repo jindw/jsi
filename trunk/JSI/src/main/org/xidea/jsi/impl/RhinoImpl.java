@@ -8,6 +8,8 @@ import org.mozilla.javascript.Function;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.UniqueTag;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -25,16 +27,23 @@ class RhinoImpl extends RuntimeSupport {
 		@Override
 		public Scriptable wrapAsJavaObject(Context cx, Scriptable scope,
 				final Object javaObject, Class staticType) {
-			if (NodeList.class == staticType) {
-				return super.wrapAsJavaObject(cx, scope, new NodeList() {
-					public Node item(int index) {
-						return ((NodeList) javaObject).item(index);
-					}
+			if (javaObject == null || javaObject == Undefined.instance
+					|| javaObject == UniqueTag.NOT_FOUND
+					|| javaObject == UniqueTag.NULL_VALUE) {
+				return null;
+			}
+			if (staticType != null) {
+				if (NodeList.class == staticType) {// apache xml error
+					return super.wrapAsJavaObject(cx, scope, new NodeList() {
+						public Node item(int index) {
+							return ((NodeList) javaObject).item(index);
+						}
 
-					public int getLength() {
-						return ((NodeList) javaObject).getLength();
-					}
-				}, staticType);
+						public int getLength() {
+							return ((NodeList) javaObject).getLength();
+						}
+					}, staticType);
+				}
 			}
 			return super.wrapAsJavaObject(cx, scope, javaObject, staticType);
 		}
@@ -51,25 +60,22 @@ class RhinoImpl extends RuntimeSupport {
 		return context;
 	}
 
-	@Override
-	protected Object invokeJavaMethod(Object thiz, String name,
-			Class<? extends Object> type, Object[] args) {
-		Object result = this.invoke(thiz, name, args);
-		if (type == Void.TYPE) {
-			return null;
-		} else {
-			return Context.jsToJava(result, type);
-		}
+	protected Object jsToJava(Class<? extends Object> type, Object result) {
+		return Context.jsToJava(result, type);
 	}
 
 	public Object invoke(Object thisObj, Object function, Object... args) {
 		Context cx = getContext();
 		Scriptable thiz = Context.toObject(thisObj, (Scriptable) globals);
 		if (!(function instanceof Function)) {
-			function = (Function) ScriptableObject.getProperty(thiz, function
-					.toString());
+			function = ScriptableObject.getProperty(thiz, function.toString());
 		}
-		return ((Function) function).call(cx, (Scriptable) globals, thiz, args);
+		if (function instanceof Function) {
+			return ((Function) function).call(cx, (Scriptable) globals, thiz,
+					args);
+		} else {
+			return null;
+		}
 	}
 
 	public Object eval(Object thiz, String code, String path,
@@ -86,10 +92,10 @@ class RhinoImpl extends RuntimeSupport {
 		if (thiz instanceof Scriptable) {
 			Object[] args = EMPTY_ARG;
 			StringBuilder buf = new StringBuilder("function(");
-			if(varMap!= null && !varMap.isEmpty()){
+			if (varMap != null && !varMap.isEmpty()) {
 				ArrayList<Object> list = new ArrayList<Object>();
-				for(Map.Entry<String, Object>e:varMap.entrySet()){
-					if(list.size()>0){
+				for (Map.Entry<String, Object> e : varMap.entrySet()) {
+					if (list.size() > 0) {
 						buf.append(",");
 					}
 					buf.append(e.getKey());
@@ -100,7 +106,8 @@ class RhinoImpl extends RuntimeSupport {
 			buf.append("){");
 			buf.append(code);
 			buf.append("\n}");
-			Function fn = cx.compileFunction(localScope, buf.toString(), path, 1, null);
+			Function fn = cx.compileFunction(localScope, buf.toString(), path,
+					1, null);
 			return fn.call(cx, localScope, (Scriptable) thiz, args);
 		} else {
 			return cx.evaluateString(localScope, code, path, 1, null);
@@ -121,34 +128,21 @@ class NewRhinoImpl extends RhinoImpl {
 		}
 	}
 
-	@Override
-	protected Object invokeJavaMethod(Object thiz, String name,
-			Class<? extends Object> type, Object[] args) {
-		try {
-			Context cx = Context.enter();
-			cx.getWrapFactory().setJavaPrimitiveWrap(false);
-			return super.invokeJavaMethod(thiz, name, type, args);
-		} finally {
-			Context.exit();
-		}
-	}
-
 	public Object invoke(Object thisObj, Object function, Object... args) {
 
 		try {
-			Context cx = Context.enter();
-			cx.getWrapFactory().setJavaPrimitiveWrap(false);
+			Context.enter();
 			return super.invoke(thisObj, function, args);
 		} finally {
 			Context.exit();
 		}
 	}
 
-	public Object eval(Object thiz,String code, String path, Map<String, Object> varMap) {
+	public Object eval(Object thiz, String code, String path,
+			Map<String, Object> varMap) {
 		try {
-			Context cx = Context.enter();
-			cx.getWrapFactory().setJavaPrimitiveWrap(false);
-			return super.eval(thiz,code, path, varMap);
+			Context.enter();
+			return super.eval(thiz, code, path, varMap);
 		} finally {
 			Context.exit();
 		}
