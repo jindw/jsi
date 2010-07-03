@@ -20,6 +20,7 @@ import org.xidea.jsi.JSIRuntime;
  * 
  */
 public abstract class RuntimeSupport implements JSIRuntime {
+	private static final String ININT_SCRIPT = "this.window =this;this.print = this.print || function(msg){java.lang.System.out.print(String(msg))}";
 	static final Object[] EMPTY_ARG = new Object[0];
 	private static final Log log = LogFactory.getLog(RuntimeSupport.class);
 	protected Object globals;
@@ -179,8 +180,6 @@ public abstract class RuntimeSupport implements JSIRuntime {
 		return buf.toString();
 	}
 
-	private static ThreadLocal<RuntimeSupport> IMPL = new ThreadLocal<RuntimeSupport>();
-
 	public static JSIRuntime create() {
 		RuntimeSupport sp;
 		try {
@@ -188,24 +187,27 @@ public abstract class RuntimeSupport implements JSIRuntime {
 		} catch (Exception e) {
 			sp = Java6Impl.create(true);
 		}
+		sp.initialize();
+		return sp;
+	}
+	private static ThreadLocal<RuntimeSupport> IMPL = new ThreadLocal<RuntimeSupport>();
+	void initialize() {
 		try {
 			try {
-				IMPL.set(sp);
-				sp.eval("var window =this;this.print = this.print || function(msg){java.lang.System.out.print(String(msg))}");
-				sp.eval(sp.root.getResource("boot.js"));
+				IMPL.set(this);
+				this.eval(ININT_SCRIPT);
+				this.eval(this.root.getResource("boot.js"));
 			} finally {
 				IMPL.remove();
 			}
-			if ((Boolean) sp.eval("!($JSI && $import)")) {
+			if ((Boolean) this.eval("!($JSI && $import)")) {
 				log.error("JSI 加载失败");
 			}
 		} catch (Exception e) {
 			log.error("尝试JSI启动编译脚本失败", e);
 			throw new RuntimeException(e);
 		}
-		return sp;
 	}
-
 	/**
 	 * 在当前执行上下文中创建执行环境
 	 * JSI 内部预留方法。
@@ -216,6 +218,7 @@ public abstract class RuntimeSupport implements JSIRuntime {
 	public static JSIRuntime create(Object topScope) {
 		RuntimeSupport sp = IMPL.get();
 		if (sp != null) {
+			sp.eval(ININT_SCRIPT);
 			return sp;
 		}
 		String cn = topScope.getClass().getName();
@@ -225,6 +228,7 @@ public abstract class RuntimeSupport implements JSIRuntime {
 			sp = RhinoImpl.create(false);
 		}
 		sp.globals = topScope;
+		sp.eval(ININT_SCRIPT);
 		return sp;
 	}
 }
