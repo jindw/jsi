@@ -226,11 +226,17 @@ public abstract class RuntimeSupport implements JSIRuntime {
 		return buf.toString();
 	}
 
+	private static boolean testRhino = true;
 	public static JSIRuntime create() {
-		RuntimeSupport sp;
+		RuntimeSupport sp = null;
 		try {
-			sp = RhinoImpl.create(true);
-		} catch (Exception e) {
+			if(testRhino){
+				sp = RhinoImpl.create(true);
+			}
+		} catch (NoClassDefFoundError e) {
+			testRhino = false;
+		}
+		if(sp == null){
 			sp = Java6Impl.create(true);
 		}
 		sp.initialize();
