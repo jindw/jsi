@@ -28,7 +28,7 @@ public class DefaultLoadContext implements JSILoadContext {
 	 */
 	public void loadScript(JSIPackage pkg, final String path,
 			final String objectName, final boolean export) {
-		String id = pkg.getName().replace('.', '/') + "/" + path;
+		final String id = pkg.getName().replace('.', '/') + "/" + path;
 		if (export) {
 			if (objectName == null) {
 				org.xidea.jsi.ScriptLoader loader = pkg.getLoaderMap()
@@ -109,6 +109,9 @@ public class DefaultLoadContext implements JSILoadContext {
 		ArrayList<ScriptLoader> result = new ArrayList<ScriptLoader>();
 		for (String file : loadList) {
 			org.xidea.jsi.ScriptLoader entry = loadMap.get(file);
+			if(entry == null){
+				throw new IllegalStateException("找不到："+file+" 对应的Loader");
+			}
 			result.add(entry);
 		}
 		return result;
