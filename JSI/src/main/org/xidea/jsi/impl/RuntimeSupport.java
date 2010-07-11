@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -41,19 +42,26 @@ public abstract class RuntimeSupport implements JSIRuntime {
 		return "unknow";
 	}
 
+	static final Pattern LOG_FILE = Pattern
+			.compile("^classpath\\:[/]+org/xidea/jsi/log.js$");
+
 	// "trace,debug,info,warn,error,fatal"
 	public boolean log(int level, String msg) {
 		// e.printStackTrace();
 		StackTraceElement[] sts = new Exception().getStackTrace();
-		String jsName = null;
+		ArrayList<String> jsName = new ArrayList<String>();
+		String firstFile = null;
 		for (StackTraceElement s : sts) {
 			String fileName = s.getFileName();
 			if (fileName != null && !fileName.endsWith(".java")) {
-				if (jsName != null && !jsName.equals(fileName)) {
-					jsName = fileName + '@' + s.getLineNumber();
-					break;
+				if (firstFile == null) {
+					firstFile = fileName;
+
 				}
-				jsName = fileName;
+				if (!LOG_FILE.matcher(firstFile).find()
+						|| !firstFile.equals(fileName)) {
+					jsName.add(fileName + '@' + s.getLineNumber());
+				}
 			}
 		}
 		msg += "[fileName]:" + jsName;
@@ -126,8 +134,8 @@ public abstract class RuntimeSupport implements JSIRuntime {
 	public <T> T wrapToJava(final Object thiz, Class<T> clasz) {
 
 		return (T) Proxy.newProxyInstance(
-				RuntimeSupport.class.getClassLoader(),
-				new Class[] { clasz }, new InvocationHandler() {
+				RuntimeSupport.class.getClassLoader(), new Class[] { clasz },
+				new InvocationHandler() {
 					public Object invoke(Object proxy, Method method,
 							Object[] args) throws Throwable {
 						Class<?> returnType = method.getReturnType();
@@ -162,9 +170,10 @@ public abstract class RuntimeSupport implements JSIRuntime {
 								"return $import('org.xidea.jsidoc.util:JSON').stringify(this)",
 								"<inline>", null);
 				result = JSONDecoder.decode(code);
-				if(result instanceof List<?> && Set.class.isAssignableFrom(type)){
-					
-					result = new HashSet<Object>((List<?>)result);
+				if (result instanceof List<?>
+						&& Set.class.isAssignableFrom(type)) {
+
+					result = new HashSet<Object>((List<?>) result);
 				}
 			}
 			return result;
@@ -227,16 +236,17 @@ public abstract class RuntimeSupport implements JSIRuntime {
 	}
 
 	private static boolean testRhino = true;
+
 	public static JSIRuntime create() {
 		RuntimeSupport sp = null;
 		try {
-			if(testRhino){
+			if (testRhino) {
 				sp = RhinoImpl.create(true);
 			}
 		} catch (NoClassDefFoundError e) {
 			testRhino = false;
 		}
-		if(sp == null){
+		if (sp == null) {
 			sp = Java6Impl.create(true);
 		}
 		sp.initialize();

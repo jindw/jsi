@@ -97,6 +97,7 @@ encoding="GBK"
 			<zipfileset dir="build/dest/jsi/" prefix="org/xidea/jsi">
 				<include name="__package__.js" />
 				<include name="impl.js" />
+				<include name="log.js" />
 			</zipfileset>
 			<zipfileset src="${basedir}/build/dest/jsidoc/util/util.jar">
 				<include name="org/xidea/jsidoc/util/*.js" />
@@ -205,8 +206,21 @@ encoding="GBK"
 			<arg value="${basedir}/build/dest/jsi/__package__.js" />
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jsi/impl.js" />
-
+			<arg value="-bootCached" />
+			<arg value="org.xidea.jsi:$log" />
 		</java>
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-config.ascii" />
+			<arg value="false" />
+			<arg value="-exports" />
+			<arg value="org.xidea.jsi:$log" />
+			<arg value="-outputExported" />
+			<arg value="${basedir}/build/dest/jsi/log.js" />
+		</java>
+		<replace file="${basedir}/build/dest/jsi/__package__.js" token="'$log'," value="" />
+		<echo file="${basedir}/build/dest/jsi/__package__.js" append="true" message="&#10;this.addScript('log.js','$log');" />
 	</target>
 	<target name="buildJSIPreload">
 		<property name="preload_dest" value="build/dest/jsidoc/preload.js" />
@@ -217,6 +231,9 @@ encoding="GBK"
 		</antcall>
 		<antcall target="_appendPreload">
 			<param name="source" value="build/dest/jsi/impl.js" />
+		</antcall>
+		<antcall target="_appendPreload">
+			<param name="source" value="build/dest/jsi/log.js" />
 		</antcall>
 		<property name="packageName" value="org.xidea.jsidoc" />
 		<antcall target="_appendPreload">

@@ -28,9 +28,9 @@ function output(outputLevel,msg){
     temp = temp.join('');
     if(outputLevel>this.userLevel){
     	var n =window.$JSI && $JSI.impl;
-    	n =n?n.log(outputLevel,temp)!==false:confirm(temp+"\n\n继续弹出 ["+this.title+"]"+outputLevelName+" 日志?\r\n");
-        if(n){
-        	this.userLevel = outputLevel+1;
+    	n = n?n.log(outputLevel,temp):confirm(temp+"\n\n继续弹出 ["+this.title+"]"+outputLevelName+" 日志?\r\n");
+        if(n===false){
+        	this.userLevel = outputLevel;
         }
         return temp;
     }else if(":debug"){
