@@ -1,7 +1,9 @@
 package org.xidea.jsi.impl;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
@@ -15,6 +17,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xidea.el.json.JSONDecoder;
 import org.xidea.jsi.JSIRuntime;
 
@@ -89,7 +93,17 @@ public abstract class RuntimeSupport implements JSIRuntime {
 		}
 		return true;
 	}
+	protected static NodeList wrapNodeList(final NodeList javaObject) {
+		return new NodeList() {
+			public Node item(int index) {
+				return javaObject.item(index);
+			}
 
+			public int getLength() {
+				return javaObject.getLength();
+			}
+		};
+	}
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -148,7 +162,7 @@ public abstract class RuntimeSupport implements JSIRuntime {
 	}
 
 	protected Object invokeJavaMethod(Object thiz, String name,
-			Class<? extends Object> type, Object[] args) {
+			Class<? extends Object> type, Object[] args) throws IllegalArgumentException, InstantiationException, IllegalAccessException, InvocationTargetException {
 		Object result = invoke(thiz, name, args);
 		if (type == Void.TYPE) {
 			return null;
@@ -164,6 +178,14 @@ public abstract class RuntimeSupport implements JSIRuntime {
 			return jsToJava(type, result);
 		} catch (Exception e) {
 			if (result != null) {
+				try {
+					Constructor<? extends Object> cons = type.getConstructor(String.class);
+					String code = (String) this.eval(result,
+							"return String(this)","<inline>", null);
+					return cons.newInstance(code);
+				} catch (SecurityException e1) {
+				} catch (NoSuchMethodException e1) {
+				}
 				String code = (String) this
 						.eval(
 								result,

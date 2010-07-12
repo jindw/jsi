@@ -1,10 +1,13 @@
 package org.xidea.jsi.impl;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import sun.org.mozilla.javascript.internal.WrapFactory;
-import org.w3c.dom.Node;
+
+import sun.org.mozilla.javascript.internal.NativeJavaObject;
+import sun.org.mozilla.javascript.internal.Undefined;
 import org.w3c.dom.NodeList;
 
 import sun.org.mozilla.javascript.internal.ScriptableObject;
@@ -23,15 +26,11 @@ class Java6Impl extends RuntimeSupport {
 		public Scriptable wrapAsJavaObject(Context cx, Scriptable scope,
 				final Object javaObject, Class staticType) {
 			if (NodeList.class == staticType) {
-				return super.wrapAsJavaObject(cx, scope, new NodeList() {
-					public Node item(int index) {
-						return ((NodeList) javaObject).item(index);
-					}
+				return super.wrapAsJavaObject(cx, scope, wrapNodeList((NodeList)javaObject), staticType);
+			}
 
-					public int getLength() {
-						return ((NodeList) javaObject).getLength();
-					}
-				}, staticType);
+			if (javaObject instanceof List || javaObject instanceof Map) {
+				return new Java6MapList(scope, javaObject, staticType);
 			}
 			return super.wrapAsJavaObject(cx, scope, javaObject, staticType);
 		}
@@ -56,11 +55,18 @@ class Java6Impl extends RuntimeSupport {
 	@Override
 	public Object invoke(Object thisObj, Object function, Object... args) {
 		Context cx = getContext();
-		Scriptable thiz = Context.toObject(thisObj, (Scriptable) globals);
+		Scriptable scope = (Scriptable) globals;
+		Scriptable thiz = Context.toObject(thisObj, scope);
 		if (!(function instanceof Function)) {
 			function = ScriptableObject.getProperty(thiz, function.toString());
 		}
-		return ((Function) function).call(cx, (Scriptable) globals, thiz, args);
+		if (args != null) {
+			int i = args.length;
+			while (i-- > 0) {
+				args[i] = wrap.wrap(cx, scope, args[i], Object.class);
+			}
+		}
+		return ((Function) function).call(cx, scope, thiz, args);
 	}
 
 	@Override
@@ -134,4 +140,120 @@ class NewJava6Impl extends Java6Impl {
 			Context.exit();
 		}
 	}
+}
+
+@SuppressWarnings("unchecked")
+class Java6MapList extends NativeJavaObject {
+	private static final long serialVersionUID = 1L;
+	boolean isList = false;
+
+	public Java6MapList(Scriptable scope, Object javaObject,
+			Class<?> staticType) {
+		super(scope, javaObject, staticType);
+		isList = javaObject instanceof List<?>;
+	}
+
+	private List list() {
+		return (List) javaObject;
+	}
+	private Map map() {
+		return (Map)javaObject;
+	}
+	private int getLength() {
+		if (isList) {
+			return list().size();
+		} else {
+			return map().size();
+		}
+	}
+	public String getClassName() {
+		if (isList) {
+			return "JavaList";
+		} else {
+			return "JavaMap";
+		}
+	}
+	public Object unwrap() {
+		return javaObject;
+	}
+
+	public boolean has(String id, Scriptable start) {
+		if(isList){
+			return id.equals("length") || super.has(id, start);
+		}else{
+			return map().containsKey(id) || super.has(id, start);
+		}
+	}
+
+	public boolean has(int index, Scriptable start) {
+		if(isList){
+			return 0 <= index && index < getLength();
+		}else{
+			return super.has(index, start);
+		}
+	}
+
+	public Object get(String id, Scriptable start) {
+		if (isList) {
+			if (id.equals("length")) {
+				return new Integer(getLength());
+			}
+		}else{
+			Context cx = Context.getCurrentContext();
+			Object obj = map().get(id);
+			return cx.getWrapFactory().wrap(cx, this, obj, null);
+		}
+		return super.get(id, start);
+	}
+
+	public Object get(int index, Scriptable start) {
+		if (isList) {
+			Context cx = Context.getCurrentContext();
+			Object obj = list().get(index);
+			return cx.getWrapFactory().wrap(cx, this, obj, null);
+		}
+		return Undefined.instance;
+	}
+
+
+	public void put(String id, Scriptable start, Object value) {
+		// Ignore assignments to "length"--it's readonly.
+		if(! isList){
+			map().put(id, Context
+					.jsToJava(value, Object.class));
+		}else if (!id.equals("length")){
+			super.put(id, start, value);
+		}
+	}
+
+	public void put(int index, Scriptable start, Object value) {
+		if (isList) {
+			list().set(index, Context
+					.jsToJava(value, Object.class));
+		} else {
+			super.put(index, start, value);
+		}
+	}
+	public Object[] getIds() {
+		if (isList) {
+
+			int length = getLength();
+			Object[] result = new Object[length];
+			int i = length;
+			while (--i >= 0)
+				result[i] = new Integer(i);
+			return result;
+		} else {
+			return map().keySet().toArray();
+		}
+	}
+
+	public Scriptable getPrototype() {
+		if (prototype == null) {
+			prototype = ScriptableObject.getClassPrototype(this
+					.getParentScope(), isList ? "Array" : "Object");
+		}
+		return prototype;
+	}
+
 }
