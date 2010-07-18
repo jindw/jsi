@@ -40,7 +40,7 @@ public class DataRoot extends AbstractRoot implements JSIRoot {
 		this.dataMap = data;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public List<String> listPath() {
 		return new ArrayList(dataMap.keySet());
 	}

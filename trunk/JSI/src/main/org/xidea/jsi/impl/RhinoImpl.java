@@ -22,10 +22,9 @@ import org.mozilla.javascript.WrapFactory;
  */
 class RhinoImpl extends RuntimeSupport {
 	private static final WrapFactory wrap = new WrapFactory() {
-		@SuppressWarnings("unchecked")
 		@Override
 		public Scriptable wrapAsJavaObject(Context cx, Scriptable scope,
-				final Object javaObject, Class staticType) {
+				final Object javaObject, @SuppressWarnings("rawtypes") Class staticType) {
 			// if (javaObject == null || javaObject == Undefined.instance
 			// || javaObject == UniqueTag.NOT_FOUND
 			// || javaObject == UniqueTag.NULL_VALUE) {
@@ -62,6 +61,9 @@ class RhinoImpl extends RuntimeSupport {
 	public Object invoke(Object thisObj, Object function, Object... args) {
 		Context cx = getContext();
 		Scriptable scope = (Scriptable) globals;
+		if(thisObj == null){
+			thisObj = scope;
+		}
 		Scriptable thiz = Context.toObject(thisObj, scope);
 		if (!(function instanceof Function)) {
 			function = ScriptableObject.getProperty(thiz, function.toString());
@@ -73,8 +75,9 @@ class RhinoImpl extends RuntimeSupport {
 					args[i] = wrap.wrap(cx, scope, args[i], Object.class);
 				}
 			}
-			return ((Function) function).call(cx,scope , thiz,
+			Object result = ((Function) function).call(cx,scope , thiz,
 					args);
+			return jsToJava(Object.class,result);
 		} else {
 			return null;
 		}
@@ -163,9 +166,11 @@ class RhinoMapList extends NativeJavaObject {
 		isList = javaObject instanceof List<?>;
 	}
 
+	@SuppressWarnings("rawtypes")
 	private List list() {
 		return (List) javaObject;
 	}
+	@SuppressWarnings("rawtypes")
 	private Map map() {
 		return (Map)javaObject;
 	}
