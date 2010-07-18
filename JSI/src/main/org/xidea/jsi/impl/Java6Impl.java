@@ -21,10 +21,9 @@ import sun.org.mozilla.javascript.internal.Scriptable;
 class Java6Impl extends RuntimeSupport {
 
 	private static final WrapFactory wrap = new WrapFactory() {
-		@SuppressWarnings("unchecked")
 		@Override
 		public Scriptable wrapAsJavaObject(Context cx, Scriptable scope,
-				final Object javaObject, Class staticType) {
+				final Object javaObject, @SuppressWarnings("rawtypes") Class staticType) {
 			if (NodeList.class == staticType) {
 				return super.wrapAsJavaObject(cx, scope, wrapNodeList((NodeList)javaObject), staticType);
 			}
@@ -56,6 +55,9 @@ class Java6Impl extends RuntimeSupport {
 	public Object invoke(Object thisObj, Object function, Object... args) {
 		Context cx = getContext();
 		Scriptable scope = (Scriptable) globals;
+		if(thisObj == null){
+			thisObj = scope;
+		}
 		Scriptable thiz = Context.toObject(thisObj, scope);
 		if (!(function instanceof Function)) {
 			function = ScriptableObject.getProperty(thiz, function.toString());
@@ -66,7 +68,8 @@ class Java6Impl extends RuntimeSupport {
 				args[i] = wrap.wrap(cx, scope, args[i], Object.class);
 			}
 		}
-		return ((Function) function).call(cx, scope, thiz, args);
+		Object result = ((Function) function).call(cx, scope, thiz, args);
+		return jsToJava(Object.class, result);
 	}
 
 	@Override

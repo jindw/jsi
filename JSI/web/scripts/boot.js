@@ -83,14 +83,12 @@ if("org.xidea.jsi:Require"){
 function $import(loaderEval,cachedScripts){
     if(":Debug"){
         //var logLevel = 0;//{trace:0,debug:1,info:2,warn:3error:4}
-        function reportError(){
-            var args = ["JSI 引导文件调试信息\n  "];
-            args.push.apply(args,arguments)
-            args = args.join('');
+        function reportError(msg){
+        	msg = "JSI 引导文件调试信息\n  "+msg;
             if(!(
             	$JSI.impl?
-            		$JSI.impl.log(4,args)
-            		:confirm(args+"\n继续弹出该调试信息？"))){
+            		$JSI.impl.log(4,msg)
+            		:confirm(msg+"\n继续弹出该调试信息？"))){
                 reportError = Function.prototype;
             }
         }
@@ -458,7 +456,7 @@ function $import(loaderEval,cachedScripts){
         }catch(e){
             if(":Debug"){
                 //packageMap[name] = null;
-                reportError("Package Syntax Error:["+name+"]\n\nException:",e);
+                reportError("Package Syntax Error:["+name+"]\n\nException:"+e+"@"+e.fileName+e.lineNumber);
             }
             throw e;
         }
@@ -490,7 +488,7 @@ function $import(loaderEval,cachedScripts){
                 var afterLoad = dep[2];
                 if(":Debug"){
                     if(!targetPath){
-                        reportError("依赖异常",dep.join('\n'),list.join('\n'));
+                        reportError("依赖异常"+dep.join('\n')+list.join('\n'));
                     }
                 }
     
@@ -523,7 +521,7 @@ function $import(loaderEval,cachedScripts){
                             targetPackage = realPackage(findPackageByPath(targetPath));
                             if(":Debug"){
                                 if(!targetPackage){
-                                    reportError("targetPath:"+targetPath+" 不是有效对象路径",this.name);
+                                    reportError("targetPath:"+targetPath+" 不是有效对象路径"+this.name);
                                 }
                             }
                             
@@ -547,7 +545,7 @@ function $import(loaderEval,cachedScripts){
                             targetPackage = findPackageByPath(targetPath);
                             if(":Debug"){
                                 if(!targetPackage){
-                                    reportError("targetPath:"+targetPath+" 不是有效对象路径",this.name);
+                                    reportError("targetPath:"+targetPath+" 不是有效对象路径"+this.name);
                                 }
                             }
                             targetPath = targetPath.substring(targetPackage.name.length + 1);
@@ -593,7 +591,7 @@ function $import(loaderEval,cachedScripts){
                         targetPackage = findPackageByPath(targetPath);
                         if(":Debug"){
                             if(!targetPackage){
-                                reportError("targetPath:"+targetPath+" 不是有效对象路径",this.name);
+                                reportError("targetPath:"+targetPath+" 不是有效对象路径"+this.name);
                             }
                         }
                         targetPath = targetPath.substr(targetPackage.name.length + 1);
@@ -762,7 +760,7 @@ function $import(loaderEval,cachedScripts){
     function realPackage(packageObject){
         if(":Debug"){
             if(!packageObject){
-                reportError('包对象不能为空:',arguments.caller)
+                reportError('包对象不能为空:'+arguments.caller)
             }
         }
         while(packageObject && packageObject.implementation){
@@ -929,7 +927,7 @@ function $import(loaderEval,cachedScripts){
             
         }catch(e){
             if(":Debug"){
-                reportError("Load Error:\n"+loader.scriptBase + loaderName+"\n\nException:",e);
+                reportError("Load Error:\n"+loader.scriptBase + loaderName+"\n\nException:"+e+"@"+e.fileName+"#"+e.lineNumber);
             }
             throw e;
         }finally{
@@ -1005,10 +1003,10 @@ function $import(loaderEval,cachedScripts){
             	this.hook(vars.replace(/([^,]+)/g,'$1 = this.varMap.$1'));
             }catch(e){
                 if(":Debug"){
-                	reportError("奇怪的状态",
-                	    this.varMap,this,
-                	    this.constructor,
-                	    this.hook == null,
+                	reportError("奇怪的状态"+
+                	    this.varMap+this+
+                	    this.constructor+
+                	    (this.hook == null)+
                 	   "status"+ScriptLoader[loaderName].toString(16)
                 	)
                 }
