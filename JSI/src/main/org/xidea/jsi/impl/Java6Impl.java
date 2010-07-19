@@ -204,7 +204,9 @@ class Java6MapList extends NativeJavaObject {
 		}else{
 			Context cx = Context.getCurrentContext();
 			Object obj = map().get(id);
-			return cx.getWrapFactory().wrap(cx, this, obj, null);
+			if(obj != null){
+				return cx.getWrapFactory().wrap(cx, this, obj, null);
+			}
 		}
 		return super.get(id, start);
 	}
@@ -213,9 +215,11 @@ class Java6MapList extends NativeJavaObject {
 		if (isList) {
 			Context cx = Context.getCurrentContext();
 			Object obj = list().get(index);
-			return cx.getWrapFactory().wrap(cx, this, obj, null);
+			if(obj!=null){
+				return cx.getWrapFactory().wrap(cx, this, obj, null);
+			}
 		}
-		return Undefined.instance;
+		return super.get(index, start);
 	}
 
 
