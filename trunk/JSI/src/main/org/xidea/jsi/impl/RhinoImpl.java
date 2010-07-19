@@ -194,9 +194,9 @@ class RhinoMapList extends NativeJavaObject {
 
 	public boolean has(String id, Scriptable start) {
 		if(isList){
-			return id.equals("length") || super.has(id, start);
+			return id.equals("length");// || super.has(id, start);
 		}else{
-			return map().containsKey(id) || super.has(id, start);
+			return map().containsKey(id) ;//|| super.has(id, start);
 		}
 	}
 
@@ -216,7 +216,9 @@ class RhinoMapList extends NativeJavaObject {
 		}else{
 			Context cx = Context.getCurrentContext();
 			Object obj = map().get(id);
-			return cx.getWrapFactory().wrap(cx, this, obj, null);
+			if(obj != null){
+				return cx.getWrapFactory().wrap(cx, this, obj, null);
+			}
 		}
 		return super.get(id, start);
 	}
@@ -225,9 +227,11 @@ class RhinoMapList extends NativeJavaObject {
 		if (isList) {
 			Context cx = Context.getCurrentContext();
 			Object obj = list().get(index);
-			return cx.getWrapFactory().wrap(cx, this, obj, null);
+			if(obj!=null){
+				return cx.getWrapFactory().wrap(cx, this, obj, null);
+			}
 		}
-		return Undefined.instance;
+		return super.get(index, start);
 	}
 
 
