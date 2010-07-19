@@ -192,7 +192,7 @@ function $import(loaderEval,cachedScripts){
 		        //return evaler.call(this,code);
 		        return impl.eval(this,code,this.scriptBase + this.name , null);
 		    }
-		    function loadText(url){
+		    loadText = function(url){
 	    		var value =$JSI.loadText&&$JSI.loadText(url)
 		        return value?value:impl.loadText(String(url).replace(/\w+\:\/*/,''));
 		    }
