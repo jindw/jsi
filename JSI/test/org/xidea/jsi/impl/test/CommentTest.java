@@ -5,7 +5,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import javax.script.ScriptException;
 
 import org.junit.Test;
 import org.xidea.jsi.JSIRuntime;
@@ -15,7 +14,7 @@ public class CommentTest {
 
 	@Test
 	public void testRhino() throws UnsupportedEncodingException,
-			ScriptException, IOException, URISyntaxException {
+			IOException, URISyntaxException {
 		JSIRuntime jp = RuntimeSupport.create();
 
 		
