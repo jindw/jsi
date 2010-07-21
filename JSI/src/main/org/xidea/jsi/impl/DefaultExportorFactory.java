@@ -22,21 +22,15 @@ public class DefaultExportorFactory {
 	 */
 	public static final int TYPE_SIMPLE = 1;
 	/**
-	 * 混淆隔离支持的导出合并实现
+	 * 混淆隔离支持的导出合并实现(保留公开变量)
 	 */
 	public static final int TYPE_EXPORT_RESERVE = 2;
 	/**
-	 * 混淆隔离支持的导出合并实现
+	 * 混淆隔离支持的导出合并实现(混淆未导出的公开变量)
 	 */
 	public static final int TYPE_EXPORT_CONFUSE = 3;
-	/**
-	 * 混淆隔离支持的导出合并实现
-	 */
-	public static final int TYPE_PRELOAD = -1;
-	/**
-	 * 创建XML数据打包实现 创建问题报告实现
-	 */
-	public static final int TYPE_XML = -2;
+
+
 
 	private final static String JSI_EXPORTOR_FACTORY_CLASS = "org.jside.jsi.tools.export.JSAExportorFactory";
 	private static DefaultExportorFactory exportorFactory = null;
@@ -69,17 +63,10 @@ public class DefaultExportorFactory {
 			return createReserveExplorter(param);
 		case TYPE_SIMPLE:
 			return createSimpleExplorter(param);
-		case TYPE_XML:
-			return createXMLExplorter(param);
 		case TYPE_REPORT:
 			return createReportExplorter(param);
-		case TYPE_PRELOAD:
-			return createPreloadExplorter(param);
-		}
-		return null;
-	}
 
-	protected JSIExportor createPreloadExplorter(Map<String, String[]> param) {
+		}
 		return null;
 	}
 
