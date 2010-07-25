@@ -230,8 +230,9 @@ function defaultTemplateFilter(text,path){
     }
     if(templateBegin >=0){
     	try{
-        $import(path,{});
+        	$import(path,{});
     	}catch(e){
+    		$log.warn("模板装载失败",e);
     	}
         var result = [];
 		var packageObject = $import(packageName);
@@ -246,6 +247,7 @@ function defaultTemplateFilter(text,path){
 				while(tryCount -- && (pathEnd=text.indexOf(')',pathEnd))){
 					try{
 						var templateCode = text.substring(0,pathEnd+1);
+						
 						new Function(templateCode);
 						break;
 					}catch(e){
@@ -264,6 +266,8 @@ function defaultTemplateFilter(text,path){
 			}while((templateBegin = text.search(templateRegexp))>=0);
 			result.push(text);
 			text = result.join('')
+        }else{
+        	$log.warn("忽略脚本："+path)
         }
     }
     return text;
@@ -275,17 +279,20 @@ function getTemplateCode(loader,templateCode){
 		path = loader.hook(path);
 		if((typeof path == 'string')){
             var object = loader.hook(templateCode);
-		    if(object && (object = object.compileData)){
-		    	if(object instanceof Function){
-		    		object = object.toString();
+            var fn = object && object.compileData;
+		    if(fn){
+		    	if(fn instanceof Function){
+		    		fn = fn.toString();
 		    	}else{
-		    		object = JSON.stringify(object);
+		    		fn = JSON.stringify(fn);
 		    	}
-		    	
-		        return "new Template"+"("+object+")";
+		        return "new Template"+"("+fn+")";
+		    }else{
+				$log.warn("未找到编译结果",path,object)
 		    }
         }
 	}catch(e){
+		$log.warn("处理变异失败",templateCode,e)
 	}
 	return templateCode;
 }

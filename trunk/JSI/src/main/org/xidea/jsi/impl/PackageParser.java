@@ -110,11 +110,10 @@ public abstract class PackageParser {
 		addDependenceCall.add(Arrays.asList(thisPath, targetPath, afterLoad));
 	}
 
-	@SuppressWarnings("unchecked")
 	private Object filterStrings(Object object) {// check type...
 		try {
 			if (object instanceof Collection) {
-				for (Object o : (Collection) object) {
+				for (Object o : (Collection<?>) object) {
 					o = (String) o;
 				}
 				return object;
