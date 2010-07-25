@@ -168,7 +168,7 @@ function $import(loaderEval,cachedScripts){
          * @param url 文件url
          * @return <string> 结果文本
          */
-        function loadText(url){
+        var loadText = function(url){
             if("org.xidea.jsi:Block"){
                 var req = new XHR();
                 req.open("GET",url,false);

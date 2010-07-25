@@ -4,52 +4,10 @@
  * @version $Id: event-util.js,v 1.5 2008/02/25 01:55:59 jindw Exp $
  */
 
-/**
- * @public
- * @param data
- * @return JSON
- */
- 
-var JSON = {
-    /**
-     * 解析JSON文本
-     * @public 解析
-     * @owner JSON
-     */
-    parse :parse, 
-    /**
-     * 以JSON格式，系列化javascript对象
-     * @public
-     * @owner JSON
-     * @param <Object> value
-     * @return <String> json 表达式
-     */
-    stringify : serialize,
-    format : function(obj){
-    	return serialize(parse(obj),'','  ',32)
-    }
-}
 function parse(data){
     return window.eval("("+data+")")
 };
-/**
- * IE 好像容易出问题，可能是线程不安全导致。
- * @internal
- */
-var stringRegexp = /["\\\x00-\x1f\x7f-\x9f]/g;
-/**
- * 转义替换字符
- * @internal
- */
-var charMap = {
-    '\b': '\\b',
-    '\t': '\\t',
-    '\n': '\\n',
-    '\f': '\\f',
-    '\r': '\\r',
-    '"' : '\\"',
-    '\\': '\\\\'
-};
+
 /**
  * 转义替换函数
  * @internal
@@ -115,5 +73,48 @@ function serialize(value,prefix,indent,maxLength) {
             }
         default:
             return String(value);
+    }
+}
+
+/**
+ * IE 好像容易出问题，可能是线程不安全导致。
+ * @internal
+ */
+var stringRegexp = /["\\\x00-\x1f\x7f-\x9f]/g;
+/**
+ * 转义替换字符
+ * @internal
+ */
+var charMap = {
+    '\b': '\\b',
+    '\t': '\\t',
+    '\n': '\\n',
+    '\f': '\\f',
+    '\r': '\\r',
+    '"' : '\\"',
+    '\\': '\\\\'
+};
+/**
+ * @public
+ * @param data
+ * @return JSON
+ */
+var JSON = {
+    /**
+     * 解析JSON文本
+     * @public 解析
+     * @owner JSON
+     */
+    parse :parse, 
+    /**
+     * 以JSON格式，系列化javascript对象
+     * @public
+     * @owner JSON
+     * @param <Object> value
+     * @return <String> json 表达式
+     */
+    stringify : serialize,
+    format : function(obj){
+    	return serialize(parse(obj),'','  ',32)
     }
 }
