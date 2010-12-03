@@ -79,9 +79,12 @@ class Java6MapList extends NativeJavaObject {
 	public Object get(int index, Scriptable start) {
 		if (isList) {
 			Context cx = Context.getCurrentContext();
-			Object obj = list().get(index);
-			if(obj!=null){
-				return cx.getWrapFactory().wrap(cx, this, obj, null);
+			List list = list();
+			if(index < list.size()){
+				Object obj = list.get(index);
+				if(obj!=null){
+					return cx.getWrapFactory().wrap(cx, this, obj, null);
+				}
 			}
 		}
 		return null;
