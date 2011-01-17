@@ -4,7 +4,7 @@
 		<format property="version" pattern="yyyyMMdd" />
 	</tstamp>
 
-	<!-- web/WEB-INF/lib/Template.jar;web/WEB-INF/classes;../JSA/classes;../JSA/build/dest/JSA-CMD.jar;../JSA/classes -->
+	<!-- web/WEB-INF/lib/Lite.jar;web/WEB-INF/classes;../JSA/classes;../JSA/build/dest/JSA-CMD.jar;../JSA/classes -->
 	<available file="../JSA/build/dest/JSide.jar" property="JSAPath" value="../JSA/build/dest/JSide.jar;" />
 
 	<target name="init">
@@ -50,7 +50,7 @@ encoding="GBK"
 				<exclude name="**/test/**.*" />
 				<exclude name="**/sandbox/**.*" />
 			</fileset>
-			<zipfileset src="web/WEB-INF/lib/Template.jar" defaultexcludes="true">
+			<zipfileset src="web/WEB-INF/lib/Lite.jar" defaultexcludes="true">
 				<include name="org/xidea/lite/*.js" />
 			</zipfileset>
 			<fileset dir="src/main">
