@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <html xmlns="http://www.xidea.org/ns/xhtml"
-	xmlns:c="http://www.xidea.org/ns/lite/core">
+	xmlns:c="http://www.xidea.org/lite/core">
 	<body>
 		<div id="memberTable">
-			<c:for var="memberName" items="${memberInfos}">
+			<c:for var="memberName" list="${memberInfos}">
 				<c:set name="memberInfo"
 					value="${memberInfos[memberName]}" />
 				<tr class="access-${memberInfo.getAccess()}">
@@ -34,7 +34,7 @@
 			</c:for>
 		</div>
 		<div id="memberDetail">
-			<c:for var="memberName" items="${memberInfos}">
+			<c:for var="memberName" list="${memberInfos}">
 				<c:set name="memberInfo"
 					value="${memberInfos[memberName]}" />
 				<a name="${memberInfo.name}"></a>
@@ -58,7 +58,7 @@
 							<h2>参数</h2>
 							<ul>
 								<c:for var="param"
-									items="${memberInfo.getParams().data}">
+									list="${memberInfo.getParams().data}">
 									<h3>${param.name}</h3>
 									<p>
 										<c:out

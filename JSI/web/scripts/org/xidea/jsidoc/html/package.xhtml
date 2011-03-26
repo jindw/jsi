@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <html xmlns="http://www.xidea.org/ns/xhtml"
-	xmlns:c="http://www.xidea.org/ns/lite/core">
+	xmlns:c="http://www.xidea.org/lite/core">
 	<head>
 		<link rel="stylesheet" type="text/css"
 			href="../styles/package.css" />
@@ -23,7 +23,7 @@
 				</thead>
 				<tbody>
 					<c:for var="line"
-						items="${packageInfo.getSourceEntry().parse().toArray()}">
+						list="${packageInfo.getSourceEntry().parse().toArray()}">
 						<tr
 							class="${for.index%2?'xidea-syntax-row1':'xidea-syntax-row0'}">
 							<td class="xidea-syntax-vrule0">
@@ -49,7 +49,7 @@
 					<th>File Path</th>
 					<th>Constructor Description</th>
 				</tr>
-				<c:for var="object" items="${constructors}">
+				<c:for var="object" list="${constructors}">
 					<tr>
 						<td>
 							<a class="item-${object.type}"
@@ -80,7 +80,7 @@
 					<th>File Path</th>
 					<th>Function Description</th>
 				</tr>
-				<c:for var="object" items="${functions}">
+				<c:for var="object" list="${functions}">
 					<tr>
 						<td>
 							<a class="item-${object.type}"
@@ -111,7 +111,7 @@
 					<th>File Path</th>
 					<th>Object Description</th>
 				</tr>
-				<c:for var="object" items="${objects}">
+				<c:for var="object" list="${objects}">
 					<tr>
 						<td>
 							<a class="item-${object.type}"
@@ -143,7 +143,7 @@
 				<th>File List</th>
 				<th>File Infomation</th>
 			</tr>
-			<c:for var="file" items="${files}">
+			<c:for var="file" list="${files}">
 				<tr>
 					<td>
 						<a class="item-file"

@@ -336,7 +336,7 @@ $JSI.preload('${packageName}',${fileNameAndPrefix}</echo>
 		</java>
 		<java classname="org.jside.jsi.tools.CompressAction" classpath="${JSAPath}">
 			<arg value="-output" />
-			<arg value="${basedir}/build/dest/jsidoc/boot-all-featrues.js" />
+			<arg value="${basedir}/build/dest/jsidoc/boot-all-features.js" />
 			<arg value="-source" />
 			<arg value="${basedir}/web/scripts/boot.js" />
 			<arg value="-config.features" />
@@ -351,7 +351,7 @@ $JSI.preload('${packageName}',${fileNameAndPrefix}</echo>
 $import("org.xidea.jsidoc:JSIDoc");</echo>
 
 		<concat encoding="utf-8" destfile="${basedir}/build/dest/jsidoc/boot.js">
-			<path path="build/dest/jsidoc/boot-all-featrues.js" />
+			<path path="build/dest/jsidoc/boot-all-features.js" />
 			<path path="build/dest/jsidoc/preload.js" />
 			<path path="build/dest/jsidoc/temp.js" />
 			<path path="build/dest/jsidoc/source.js" />

@@ -81,17 +81,20 @@ class RhinoImpl extends RuntimeSupport {
 		}
 	}
 	
-
-	public Object eval(Object thiz, String code, String path,
-			Map<String, Object> varMap) {
+	@SuppressWarnings("unchecked")
+	public Object eval(final Object thiz, String code, String path,
+			Object scope) {
 		Context cx = getContext();
-		Scriptable localScope = (Scriptable) globals;
-		if (varMap != null) {
-			Scriptable globals = localScope;
-			localScope = cx.newObject(globals);
+		Scriptable localScope;
+		Map<String, Object> varMap = null;
+		if (scope instanceof Map) {
+			localScope = cx.newObject((Scriptable)this.globals);
+			varMap = (Map<String, Object>)scope;
 			for (String key : varMap.keySet()) {
 				localScope.put(key, localScope, varMap.get(key));
 			}
+		}else{
+			localScope = (Scriptable) (scope==null?globals:scope);
 		}
 		if (thiz instanceof Scriptable) {
 			Object[] args = EMPTY_ARG;
@@ -143,7 +146,7 @@ class NewRhinoImpl extends RhinoImpl {
 	}
 
 	public Object eval(Object thiz, String code, String path,
-			Map<String, Object> varMap) {
+			Object varMap) {
 		try {
 			Context.enter();
 			return super.eval(thiz, code, path, varMap);
