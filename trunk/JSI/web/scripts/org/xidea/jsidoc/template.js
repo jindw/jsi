@@ -14,9 +14,9 @@ var Template=function (path){
         this.data = path;
     }else{
         var impl = $import('org.xidea.lite:Template',{} );
-        var XMLParser = $import('org.xidea.lite:XMLParser',{} );
-        var parser = new XMLParser(true);
-        parser.parserList.unshift(function(node,context,chain){
+        var XMLParser = $import('org.xidea.lite.parse:ParseContext',{} );
+        var parser = new XMLParser(null,path);
+        parser.nodeParsers.push(function(node,context,chain){
 		    if(node.localName == 'a'){
 			    if(!node.getAttribute("onclick")){
 			    	node = node.cloneNode(true);
@@ -25,7 +25,7 @@ var Template=function (path){
 		    }
 		    chain.process(node);
         });
-        return new impl(path,parser);
+        return new impl(path);
     }
 }
 Template.prototype.render = function(context){

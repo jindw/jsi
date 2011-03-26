@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <html xmlns="http://www.xidea.org/ns/xhtml"
-	xmlns:c="http://www.xidea.org/ns/lite/core">
+	xmlns:c="http://www.xidea.org/lite/core">
 	<head>
 		<link rel="stylesheet" type="text/css"
 			href="../styles/object.css" />
@@ -18,10 +18,10 @@
 		<div>
 			<a class="item-constructor">Object</a>
 		</div>
-		<c:for var='c' items="${objectInfo.getInheritList()}">
+		<c:for var='c' list="${objectInfo.getInheritList()}">
 			<div class='inheritor'
 				style="margin-left:${(1+for.index)*34}px;">
-				<c:if test="${for.index == for.end}">
+				<c:if test="${for.index == for.lastIndex}">
 					<a class="item-constructor">${c.name}</a>
 				</c:if>
 				<c:else>
@@ -63,7 +63,7 @@
 						<h2>参数</h2>
 						<ul>
 							<c:for var="param"
-								items="${objectInfo.getParams().data}">
+								list="${objectInfo.getParams().data}">
 								<h3>${param.name}</h3>
 								<p>
 									<c:out

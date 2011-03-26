@@ -10,7 +10,7 @@ function Exporter(){
     this.externPackage = [];
     this.result = [];
     this.cachedInfos = [];
-    this.featrueMap = {};
+    this.featureMap = {};
 }
 Exporter.prototype = {
     addImport : function(path){
@@ -32,8 +32,8 @@ Exporter.prototype = {
     getResult : function(){
         return this.result;
     },
-    addFeatrue : function(featrue){
-        this.featrueMap[featrue] = true;
+    addFeature : function(feature){
+        this.featureMap[feature] = true;
     },
     buildSourceFilter : function(){
         var list = [];
@@ -44,7 +44,7 @@ Exporter.prototype = {
             }
             return text;
         }
-        if(this.featrueMap.mixTemplate){
+        if(this.featureMap.mixTemplate){
             list.push(defaultTemplateFilter);
         }
         list.reverse();

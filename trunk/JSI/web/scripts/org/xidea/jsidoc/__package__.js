@@ -22,7 +22,7 @@ this.addScript('source-entry.js','SourceEntry'
 this.addScript('template.js','templateMap');
 
 this.addScript('jsidoc.js','JSIDoc'
-                ,0
+                ,"org.xidea.jsi:$log"
                 ,['templateMap','MenuUI','SourceEntry','.export:findPackages','.util:JSON','.export:ExportUI','.util:loadText','PackageInfo']);
 
 this.addScript('syntax-parser.js',['SyntaxParser','ECMAParser','LineIterator']);

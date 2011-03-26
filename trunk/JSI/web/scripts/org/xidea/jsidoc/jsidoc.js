@@ -240,7 +240,6 @@ var JSIDoc = {
             rootInfo:JSIDoc.rootInfo,
             packageInfoGroupMap:JSIDoc.packageInfoGroupMap
         });
-        //alert(text)
         return text;
         //out.close();
     },

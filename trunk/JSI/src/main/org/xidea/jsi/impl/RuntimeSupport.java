@@ -10,7 +10,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+//import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -157,15 +157,20 @@ public abstract class RuntimeSupport implements JSIRuntime {
 				path = path.substring(0, 256) + "...";
 			}
 		}
-		return this.eval(null, source, "source:" + path, null);
+		return this.eval(null, source, "source:" + path, (Object)null);
 	}
 
 	public Object eval(String source, String path) {
-		return this.eval(null, source, path, null);
+		return this.eval(null, source, path, (Object)null);
 	}
 
+	public Object eval(String source, String path,Object scope) {
+		return this.eval(null, source, path, (Object)scope);
+	}
+
+
 	public abstract Object eval(Object thisObj, String source, String path,
-			Map<String, Object> vars);
+			Object scope);
 
 	@SuppressWarnings("unchecked")
 	public <T> T wrapToJava(final Object thiz, Class<T> clasz) {

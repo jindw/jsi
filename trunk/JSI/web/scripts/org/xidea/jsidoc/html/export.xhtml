@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <html xmlns="http://www.xidea.org/ns/xhtml"
-	xmlns:c="http://www.xidea.org/ns/lite/core">
+	xmlns:c="http://www.xidea.org/lite/core">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 		<link rel="stylesheet" type="text/css"
 			href="../styles/export.css" />
 		<script>
-			//<!-- opera bug -->
-			<![CDATA[
+			//<!-- opera bug --><![CDATA[
     parent.$import("org.xidea.jsidoc.export.ExportUI",this);
 //]]>
 		</script>
@@ -18,7 +17,7 @@
 
 		<div id="body">
 			<div id="treeContainer">
-				<c:for var="packageName" items="${packageNodes}">
+				<c:for var="packageName" list="${packageNodes}">
 					<c:set name="packageNode"
 						value="${packageNodes[packageName]}" />
 					<table class="closed" border="0" cellpadding="0"
@@ -50,7 +49,7 @@
 						</thead>
 						<tbody>
 							<c:for var="objectName"
-								items="${packageNode.children}">
+								list="${packageNode.children}">
 								<c:set name="objectNode"
 									value="${packageNode.children[objectName]}" />
 								<tr>
@@ -213,9 +212,8 @@
 				</tr>
 			</table>
 			<script>
-				//<!-- opera bug -->
-				<![CDATA[
-function collapse(el){
+				//<!-- opera bug --><![CDATA[
+				function collapse(el){
     while(el && el.tagName!="TABLE"){
         el = el.parentNode;
     }

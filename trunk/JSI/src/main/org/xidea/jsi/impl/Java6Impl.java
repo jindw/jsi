@@ -70,17 +70,21 @@ class Java6Impl extends RuntimeSupport {
 		return jsToJava(Object.class, result);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Object eval(Object thiz, String code, String path,
-			Map<String, Object> varMap) {
+			Object scope) {
 		Context cx = getContext();
-		Scriptable localScope = (Scriptable) globals;
-		if (varMap != null) {
-			Scriptable globals = localScope;
-			localScope = cx.newObject(globals);
+		Scriptable localScope;
+		Map<String, Object> varMap = null;
+		if (scope instanceof Map) {
+			varMap = (Map<String, Object>)scope;
+			localScope = cx.newObject((Scriptable)this.globals);
 			for (String key : varMap.keySet()) {
 				localScope.put(key, localScope, varMap.get(key));
 			}
+		}else{
+			localScope = (Scriptable) (scope==null?globals:scope);
 		}
 
 		if (thiz instanceof Scriptable) {
@@ -133,7 +137,7 @@ class NewJava6Impl extends Java6Impl {
 
 	@Override
 	public Object eval(Object thiz, String code, String path,
-			Map<String, Object> varMap) {
+			Object varMap) {
 		try {
 			Context.enter();
 			return super.eval(thiz, code, path, varMap);

@@ -95,7 +95,7 @@ var ExportUI = {
         var exporter = new Exporter();
         for(var path in checkMap){
             if(mixTemplate){
-                exporter.addFeatrue("mixTemplate");
+                exporter.addFeature("mixTemplate");
             }
             exporter.addImport(path);
         }
