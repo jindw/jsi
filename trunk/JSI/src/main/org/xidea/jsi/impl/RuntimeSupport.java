@@ -33,6 +33,7 @@ public abstract class RuntimeSupport implements JSIRuntime {
 	private static final Log log = LogFactory.getLog(RuntimeSupport.class);
 	protected Object globals;
 	protected ResourceRoot root = new ResourceRoot();
+	protected int optimizationLevel = 0;
 	protected static ThreadLocal<Object> TITLE = new ThreadLocal<Object>();
 	public static Object setTitle(Object info){
 		Object old = TITLE.get();
@@ -40,6 +41,9 @@ public abstract class RuntimeSupport implements JSIRuntime {
 		return old;
 	}
 
+	public void setOptimizationLevel(int optimizationLevel){
+		this.optimizationLevel  = optimizationLevel;
+	}
 	public void setRoot(ResourceRoot root) {
 		this.root = root;
 	}
@@ -83,15 +87,17 @@ public abstract class RuntimeSupport implements JSIRuntime {
 							}
 						}
 					}
-					jsName.add(fileName + '@' + line);
+					if(log.isDebugEnabled() || jsName.size()<4){
+						jsName.add(fileName + '@' + line+'\n');
+					}
 				}
 			}
 		}
 		Object title = TITLE.get();
-		msg += "[fileName]:" + jsName;
 		if(title != null){
-			msg += "\n[title]:" + title;
+			msg += "[title]:" + title;
 		}
+		msg += "[fileName]:\n" + jsName;
 		switch (level) {
 		case 0:
 			log.trace(msg);

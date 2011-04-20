@@ -45,10 +45,11 @@ class RhinoImpl extends RuntimeSupport {
 		return newEngine ? new NewRhinoImpl() : new RhinoImpl();
 	}
 
-	static Context getContext() {
+	Context getContext() {
 		Context context = Context.getCurrentContext();
 		context.setWrapFactory(wrap);
 		wrap.setJavaPrimitiveWrap(false);
+		context.setOptimizationLevel(optimizationLevel);
 		return context;
 	}
 
