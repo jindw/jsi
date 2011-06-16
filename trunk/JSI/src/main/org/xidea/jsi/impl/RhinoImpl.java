@@ -49,6 +49,7 @@ class RhinoImpl extends RuntimeSupport {
 		Context context = Context.getCurrentContext();
 		context.setWrapFactory(wrap);
 		wrap.setJavaPrimitiveWrap(false);
+		//context.hasFeature(Context.FEATURE_RESERVED_KEYWORD_AS_IDENTIFIER);
 		context.setOptimizationLevel(optimizationLevel);
 		return context;
 	}
@@ -58,6 +59,7 @@ class RhinoImpl extends RuntimeSupport {
 	}
 
 	public Object invoke(Object thisObj, Object function, Object... args) {
+		try{
 		Context cx = getContext();
 		Scriptable scope = (Scriptable) globals;
 		if(thisObj == null){
@@ -80,6 +82,9 @@ class RhinoImpl extends RuntimeSupport {
 		} else {
 			return null;
 		}
+		}catch (org.mozilla.javascript.WrappedException e) {
+			throw new RuntimeException("Java Exception At"+e.sourceName()+"@"+e.lineNumber()+','+e.columnNumber(),e.getWrappedException());
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -92,7 +97,7 @@ class RhinoImpl extends RuntimeSupport {
 			localScope = cx.newObject((Scriptable)this.globals);
 			varMap = (Map<String, Object>)scope;
 			for (String key : varMap.keySet()) {
-				localScope.put(key, localScope, varMap.get(key));
+				localScope.put(key, localScope, Context.javaToJS(varMap.get(key),localScope));
 			}
 		}else{
 			localScope = (Scriptable) (scope==null?globals:scope);

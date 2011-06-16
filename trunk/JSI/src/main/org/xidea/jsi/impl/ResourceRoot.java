@@ -380,29 +380,38 @@ public class ResourceRoot extends AbstractRoot {
 	private static URL findByZip(File file, String path) throws IOException {
 		final ZipFile jarFile = new ZipFile(file);
 		ZipEntry ze = jarFile.getEntry(path);
-		if (ze != null) {
-			return new URL("jar", "", file.toURI().toURL() + "!/" + path);
-		} else {
-			return null;
+		try{
+			if (ze != null) {
+				return new URL("jar", "", file.toURI().toURL() + "!/" + path);
+			} else {
+				return null;
+			}
+		}finally{
+			jarFile.close();
 		}
 	}
 
 	private static void appendZipPackage(File file, Collection<String> result) {
 		try {
 			final ZipFile jarFile = new ZipFile(file);
-			Enumeration<? extends ZipEntry> ze = jarFile.entries();
-			while (ze.hasMoreElements()) {
-				ZipEntry zipEntry = ze.nextElement();
-				String name = zipEntry.getName();
-				if (name.endsWith(JSIPackage.PACKAGE_FILE_NAME)) {
-					name = name.substring(0, name.lastIndexOf('/'));
-					if (name.startsWith("/")) {
-						name = name.substring(1);
+			try{
+				Enumeration<? extends ZipEntry> ze = jarFile.entries();
+				while (ze.hasMoreElements()) {
+					ZipEntry zipEntry = ze.nextElement();
+					String name = zipEntry.getName();
+					if (name.endsWith(JSIPackage.PACKAGE_FILE_NAME)) {
+						name = name.substring(0, name.lastIndexOf('/'));
+						if (name.startsWith("/")) {
+							name = name.substring(1);
+						}
+						result.add(name.replace('/', '.'));
 					}
-					result.add(name.replace('/', '.'));
+				}
+			} finally {
+				if(jarFile != null){
+					jarFile.close();
 				}
 			}
-
 		} catch (IOException e) {
 			log.warn(e);
 		}

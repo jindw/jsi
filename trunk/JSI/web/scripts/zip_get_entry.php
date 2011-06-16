@@ -176,21 +176,24 @@ function zip_get_entry($file,$path) {
 				// Gzip
 			case 8:
 				if(function_exists('gzinflate')){
-					header("Content-Encoding:deflate");
-					return $data;//false;
+					//header("Content-Encoding:deflate");
+					//return $data;//false;
+					return "alert('严重错误!\\n 找不到gzinflate 函数(PHP zlib 扩展未安装);无法装载打包内容.');"
 				}
 				// Uncompress data
 				return gzinflate($data);
 				// Bzip2
 			case 12:
 				if(!function_exists('bzdecompress')){
-					return null;//false;
+					//return null;//false;
+					return "alert('严重错误!\\n 找不到gzinflate 函数(PHP zlib 扩展未安装);无法装载打包内容.');"
 				}
 				// Decompress data
 				return bzdecompress($data);
 				// Compression not supported -> error
 			default:
-				return null;//false;
+				return "alert('严重错误!\\n 未知压缩模式:".$header_info['compression_method'].".');"
+				//return null;//false;
 		}
 	}
 	return null;//true;

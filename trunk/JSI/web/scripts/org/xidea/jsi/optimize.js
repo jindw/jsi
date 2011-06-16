@@ -41,9 +41,12 @@ function addScriptFilter(scriptPath, objectNames, beforeLoadDependences, afterLo
             }
 		}else{
     		var pattern = objectNames.replace(/\*/,'.*');
+    		var cache = thiz.nsCache || (thiz.nsCache = {});
     		findGlobals = findGlobals || $import("org.xidea.jsidoc.util.findGlobals");
-			var source = loadText($JSI.scriptBase+thiz.name.replace(/\.|$/g,'/')+scriptPath);
-            objectNames = findGlobals(source);
+    		if(!cache[scriptPath]){
+				cache[scriptPath] = loadText($JSI.scriptBase+thiz.name.replace(/\.|$/g,'/')+scriptPath);
+    		}
+    		objectNames = findGlobals(cache[scriptPath]);
             pattern = new RegExp('^'+pattern+'$');
             var i = objectNames.length;
             while(i--){
