@@ -34,12 +34,6 @@ public abstract class RuntimeSupport implements JSIRuntime {
 	protected Object globals;
 	protected ResourceRoot root = new ResourceRoot();
 	protected int optimizationLevel = 0;
-	protected static ThreadLocal<Object> TITLE = new ThreadLocal<Object>();
-	public static Object setTitle(Object info){
-		Object old = TITLE.get();
-		TITLE.set(info);
-		return old;
-	}
 
 	public void setOptimizationLevel(int optimizationLevel){
 		this.optimizationLevel  = optimizationLevel;
@@ -56,48 +50,14 @@ public abstract class RuntimeSupport implements JSIRuntime {
 		return "unknow";
 	}
 
-	static final Pattern LOG_FILE = Pattern
+	private static final Pattern LOG_FILE = Pattern
 			.compile("^classpath\\:[/]+org/xidea/jsi/log.js$");
 
 	// "trace,debug,info,warn,error,fatal"
-	public boolean log(int level, String msg) {
-		// e.printStackTrace();
-		StackTraceElement[] sts = new Exception().getStackTrace();
-		String firstFile = null;
-		ArrayList<String> jsName = new ArrayList<String>();
-		for (StackTraceElement s : sts) {
-			String fileName = s.getFileName();
-			if (fileName != null && !fileName.endsWith(".java")) {
-				if (firstFile == null) {
-					firstFile = fileName;
-				}
-				if (!LOG_FILE.matcher(firstFile).find()
-						|| !firstFile.equals(fileName)) {
-					int pos = jsName.size() - 1;
-					int line = s.getLineNumber();
-					if(pos >=0 ){
-						String file = jsName.get(pos);
-						if(file.startsWith(fileName)){
-							if(file.equals(fileName+"@-1")){
-								jsName.remove(pos);
-							}else{
-								if(line == -1){
-									continue;
-								}
-							}
-						}
-					}
-					if(log.isDebugEnabled() || jsName.size()<4){
-						jsName.add(fileName + '@' + line+'\n');
-					}
-				}
-			}
-		}
-		Object title = TITLE.get();
-		if(title != null){
-			msg += "[title]:" + title;
-		}
-		msg += "[fileName]:\n" + jsName;
+	public boolean log(String title,int level, String msg) {
+		List<String> jsName = getFileStack();
+		msg += "[scriptName]:" + jsName;
+		Log log = LogFactory.getLog(title);
 		switch (level) {
 		case 0:
 			log.trace(msg);
@@ -121,6 +81,39 @@ public abstract class RuntimeSupport implements JSIRuntime {
 			log.info(msg);
 		}
 		return true;
+	}
+	private List<String> getFileStack() {
+		String firstFile = null;
+		ArrayList<String> jsName = new ArrayList<String>();
+		for (StackTraceElement s : new Exception().getStackTrace()) {
+			String fileName = s.getFileName();
+			if (fileName != null && !fileName.endsWith(".java")) {
+				if (firstFile == null) {
+					firstFile = fileName;
+				}
+				if (!LOG_FILE.matcher(firstFile).find()
+						|| !firstFile.equals(fileName)) {
+					int pos = jsName.size() - 1;
+					int line = s.getLineNumber();
+					if(pos >=0 ){
+						String file = jsName.get(pos);
+						if(file.startsWith(fileName)){
+							if(file.equals(fileName+"@-1")){
+								jsName.remove(pos);
+							}else{
+								if(line == -1){
+									continue;
+								}
+							}
+						}
+					}
+					if(log.isDebugEnabled() || jsName.size()<3){
+						jsName.add(fileName + '@' + line);
+					}
+				}
+			}
+		}
+		return jsName;
 	}
 	protected static NodeList wrapNodeList(final NodeList javaObject) {
 		return new NodeList() {

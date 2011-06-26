@@ -87,7 +87,7 @@ function $import(loaderEval,cachedScripts){
         	msg = "JSI 引导文件调试信息\n  "+msg;
             if(!(
             	$JSI.impl?
-            		$JSI.impl.log(4,msg)
+            		$JSI.impl.log('jsi-boot',4,msg)
             		:confirm(msg+"\n继续弹出该调试信息？"))){
                 reportError = Function.prototype;
             }
