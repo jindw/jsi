@@ -6,50 +6,33 @@
  * @version $Id: fn.js,v 1.5 2008/02/24 08:58:15 jindw Exp $
  */
 
-/**
- */
-function output(outputLevel,msg){
-    var temp = [];
-    var outputLevelName = logLevelNameMap[outputLevel];
-    var i = 2;
-    temp.push(outputLevelName,":\n");
-    while(msg || i<arguments.length){
-        if(msg instanceof Object){
-            temp.push(msg,"{");
-            for(var n in msg){
-                temp.push(n,":",msg[n],";");
-            }
-            temp.push("}\n");
-        }else{
-            temp.push(msg,"\n");
-        }
-        msg = arguments[i++];
-    }
-    temp = temp.join('');
-    if(outputLevel>this.userLevel){
-    	var n =window.$JSI && $JSI.impl;
-    	n = n?n.log(outputLevel,temp):confirm(temp+"\n\n继续弹出 ["+this.title+"]"+outputLevelName+" 日志?\r\n");
-        if(n===false){
-        	this.userLevel = outputLevel;
-        }
-        return temp;
-    }else if(":debug"){
-    	if((typeof console == 'object') && (typeof console.log == 'function')){
-        	console.log(msg)
-    	}
-    }
-    return temp;
+if(window.$JSI && $JSI.impl){
+	function output(title,bindLevel,msg){
+		return $JSI.impl.log(title,bindLevel,msg);
+	}
+}else{
+	function output(title,bindLevel,msg){
+    	var outputLevelName = logLevelNameMap[bindLevel];
+		return confirm(outputLevelName+':' + msg+"\n\n继续弹出 ["+title+"]"+outputLevelName+" 日志?\r\n");
+	}
 }
-
 /*
  * @param bindLevel 绑定函数的输出级别，只有该级别大于等于输出级别时，才可输出日志
  */
 function buildLevelLog(bindLevel){
     return function(){
 	    if(bindLevel>this.level){
-            var msg = [bindLevel];
-            msg.push.apply(msg,arguments);
-            msg = output.apply(this,msg);
+            var msg = this.format.apply(this,arguments);
+            if(bindLevel>this.userLevel){
+		        if(output(this.title,bindLevel,msg)===false){
+		        	this.userLevel = bindLevel;
+		        }
+		    }
+		    if(":debug"){
+				if(typeof (window.console && console.log) == 'function'){
+		    		console.log(msg)
+				}
+			}
         }
         return msg;
     }
@@ -73,6 +56,23 @@ JSILog.prototype = {
 		var c = new JSILog(this);
 		c.title = title;
 		return c;
+	},
+	format: function(msg){
+	    for(var buf = [],i = 0;i<arguments.length;i++){
+	    	msg = arguments[i];
+	        if(msg instanceof Array){
+	        	buf.push('[',msg,']\n');
+	        }else if(msg instanceof Object){
+	            buf.push(msg,"{");
+	            for(var n in msg){
+	                buf.push(n,":",msg[n],",");
+	            }
+	            buf.push("}\n");
+	        }else{
+	            buf.push(msg,"\n");
+	        }
+	    }
+	    return buf.join('');
 	}
 }
 //var confirm = window.confirm || function(arg){

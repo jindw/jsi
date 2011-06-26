@@ -15,15 +15,18 @@ import sun.org.mozilla.javascript.internal.ScriptRuntime;
 import sun.org.mozilla.javascript.internal.Context;
 import sun.org.mozilla.javascript.internal.Function;
 import sun.org.mozilla.javascript.internal.Scriptable;
+import sun.org.mozilla.javascript.internal.WrappedException;
 
 class Java6Impl extends RuntimeSupport {
 
 	private static final WrapFactory wrap = new WrapFactory() {
 		@Override
 		public Scriptable wrapAsJavaObject(Context cx, Scriptable scope,
-				final Object javaObject, @SuppressWarnings("rawtypes") Class staticType) {
+				final Object javaObject,
+				@SuppressWarnings("rawtypes") Class staticType) {
 			if (NodeList.class == staticType) {
-				return super.wrapAsJavaObject(cx, scope, wrapNodeList((NodeList)javaObject), staticType);
+				return super.wrapAsJavaObject(cx, scope,
+						wrapNodeList((NodeList) javaObject), staticType);
 			}
 
 			if (javaObject instanceof List || javaObject instanceof Map) {
@@ -53,7 +56,7 @@ class Java6Impl extends RuntimeSupport {
 	public Object invoke(Object thisObj, Object function, Object... args) {
 		Context cx = getContext();
 		Scriptable scope = (Scriptable) globals;
-		if(thisObj == null){
+		if (thisObj == null) {
 			thisObj = scope;
 		}
 		Scriptable thiz = Context.toObject(thisObj, scope);
@@ -66,49 +69,60 @@ class Java6Impl extends RuntimeSupport {
 				args[i] = wrap.wrap(cx, scope, args[i], Object.class);
 			}
 		}
-		Object result = ((Function) function).call(cx, scope, thiz, args);
-		return jsToJava(Object.class, result);
+		try {
+			Object result = ((Function) function).call(cx, scope, thiz, args);
+			return jsToJava(Object.class, result);
+		} catch (WrappedException e) {
+			throw new RuntimeException("Java Exception :" + e.sourceName()
+					+ "@" + e.lineNumber() + ',' + e.columnNumber(), e
+					.getWrappedException());
+		}
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Object eval(Object thiz, String code, String path,
-			Object scope) {
+	public Object eval(Object thiz, String code, String path, Object scope) {
 		Context cx = getContext();
 		Scriptable localScope;
 		Map<String, Object> varMap = null;
 		if (scope instanceof Map) {
-			varMap = (Map<String, Object>)scope;
-			localScope = cx.newObject((Scriptable)this.globals);
+			varMap = (Map<String, Object>) scope;
+			localScope = cx.newObject((Scriptable) this.globals);
 			for (String key : varMap.keySet()) {
-				localScope.put(key, localScope, varMap.get(key));
+				localScope.put(key, localScope, Context.javaToJS(varMap
+						.get(key), localScope));
 			}
-		}else{
-			localScope = (Scriptable) (scope==null?globals:scope);
-		}
-
-		if (thiz instanceof Scriptable) {
-			Object[] args = EMPTY_ARG;
-			StringBuilder buf = new StringBuilder("function(");
-			if (varMap != null && !varMap.isEmpty()) {
-				ArrayList<Object> list = new ArrayList<Object>();
-				for (Map.Entry<String, Object> e : varMap.entrySet()) {
-					if (!list.isEmpty()) {
-						buf.append(",");
-					}
-					buf.append(e.getKey());
-					list.add(e.getValue());
-				}
-				args = list.toArray();
-			}
-			buf.append("){");
-			buf.append(code);
-			buf.append("\n}");
-			Function fn = cx.compileFunction(localScope, buf.toString(), path,
-					1, null);
-			return fn.call(cx, localScope, (Scriptable) thiz, args);
 		} else {
-			return cx.evaluateString(localScope, code, path, 1, null);
+			localScope = (Scriptable) (scope == null ? globals : scope);
+		}
+		try {
+			if (thiz instanceof Scriptable) {
+				Object[] args = EMPTY_ARG;
+				StringBuilder buf = new StringBuilder("function(");
+				if (varMap != null && !varMap.isEmpty()) {
+					ArrayList<Object> list = new ArrayList<Object>();
+					for (Map.Entry<String, Object> e : varMap.entrySet()) {
+						if (!list.isEmpty()) {
+							buf.append(",");
+						}
+						buf.append(e.getKey());
+						list.add(e.getValue());
+					}
+					args = list.toArray();
+				}
+				buf.append("){");
+				buf.append(code);
+				buf.append("\n}");
+				Function fn = cx.compileFunction(localScope, buf.toString(),
+						path, 1, null);
+				return fn.call(cx, localScope, (Scriptable) thiz, args);
+			} else {
+				return cx.evaluateString(localScope, code, path, 1, null);
+			}
+		} catch (WrappedException e) {
+			throw new RuntimeException("Java Exception :" + e.sourceName()
+					+ "@" + e.lineNumber() + ',' + e.columnNumber(), e
+					.getWrappedException());
 		}
 
 	}
@@ -136,8 +150,7 @@ class NewJava6Impl extends Java6Impl {
 	}
 
 	@Override
-	public Object eval(Object thiz, String code, String path,
-			Object varMap) {
+	public Object eval(Object thiz, String code, String path, Object varMap) {
 		try {
 			Context.enter();
 			return super.eval(thiz, code, path, varMap);
@@ -146,4 +159,3 @@ class NewJava6Impl extends Java6Impl {
 		}
 	}
 }
-
