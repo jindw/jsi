@@ -1,7 +1,6 @@
 package org.xidea.jsi;
 
 import java.net.URL;
-import java.util.Map;
 
 public interface JSIRuntime {
 	
