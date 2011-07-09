@@ -37,25 +37,25 @@ function buildLevelLog(bindLevel){
         return msg;
     }
 }
-function JSILog(plog){
-	for(var n in plog){
-		this[n] = plog[n];
-	}
-}
-JSILog.prototype = {
+function JSILog(title,level){
 	/**
 	 * 基本级别(不输出，只有大于才输出)
 	 */
-	level : 1,
+	this.title = title;
+	this.level = level;
+}
+JSILog.prototype = {
 	/**
 	 * 用户许可级别（最终用户使用过程中禁止某些级别输出）
 	 */
 	userLevel : 1,
-	title:'',
+	filters:[],
 	clone:function(title){
-		var c = new JSILog(this);
-		c.title = title;
+		var c = new JSILog(title,this.level);
 		return c;
+	},
+	addFilter:function(f){
+		this.filters.push(f);
 	},
 	format: function(msg){
 	    for(var buf = [],i = 0;i<arguments.length;i++){
@@ -72,7 +72,11 @@ JSILog.prototype = {
 	            buf.push(msg,"\n");
 	        }
 	    }
-	    return buf.join('');
+	    buf =  buf.join('');
+	    for(var i=0;i<this.filters.length;i++){
+	    	buf = this.filters[i].call(this,buf)
+	    }
+	    return buf;
 	}
 }
 //var confirm = window.confirm || function(arg){
@@ -80,7 +84,7 @@ JSILog.prototype = {
 //	return true;
 //}
 		
-var $log = new JSILog();
+var $log = new JSILog('',1);
 var logLevelNameMap = "trace,debug,info,warn,error,fatal".split(',');
 /* 
  * 允许输出的级别最小 
