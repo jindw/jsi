@@ -56,7 +56,7 @@ public class AnalyserDialog extends JDialog {
 		this.pack();
 	}
 
-	static JavaScriptAnalysisResult doAnalyse(JavaScriptCompressor compressor, String source,
+	public static JavaScriptAnalysisResult doAnalyse(JavaScriptCompressor compressor, String source,
 			String filePath, JTextArea resultArea) {
 		JavaScriptAnalysisResult analyser = compressor.analyse(source);
 		String text;

@@ -1,24 +1,18 @@
 package org.jside.jsi.tools;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.swing.tree.DefaultTreeModel;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
 
-import org.jside.JSide;
-import org.jside.JSideListener;
-import org.jside.JSideWebServer;
 import org.jside.jsi.tools.ui.JSAConfig;
-import org.jside.jsi.tools.ui.frame.JSAFrame;
-import org.jside.jsi.tools.ui.frame.project.ProjectRootNode;
-import org.jside.jsi.tools.ui.frame.project.ProjectTree;
-import org.jside.jsi.tools.web.ScriptAction;
+import org.jside.jsi.tools.ui.frame.AnalyserDialog;
 import org.jside.ui.ContextMenu;
-import org.jside.ui.DockUI;
 
 public class JSA {
 	public static final String HOST = "jsa.jside.org";
@@ -32,91 +26,41 @@ public class JSA {
 	}
 	private static ActionListener openUIAction = new ActionListener(){
 		public void actionPerformed(ActionEvent e) {
-			new Thread() {
-				public void run() {
-					long t2 = System.currentTimeMillis();
-					JSAFrame.showUI();
-					System.out.println("启动UI耗时:"
-							+ (System.currentTimeMillis() - t2));
+			final JTextArea resultArea = new JTextArea();
+			JFrame frame = new JFrame("JSI脚本分析窗口");
+			frame.setPreferredSize(new Dimension(400,400));
+			frame.setLayout(new BorderLayout());
+			frame.add(resultArea,BorderLayout.CENTER);
+			JPanel jp = new JPanel(new java.awt.FlowLayout());
+			final JButton abt = new JButton("分析");
+			final JButton cbt = new JButton("压缩");
+			jp.add(abt);
+			jp.add(cbt);
+			frame.add(jp,BorderLayout.SOUTH);
+			abt.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					AnalyserDialog.doAnalyse(compressor, resultArea.getText(), "source.js", resultArea);
+					//bt.setEnabled(false);
 				}
-			}.start();
-		}
-	};
-		
-
-	@SuppressWarnings("unchecked")
-	static JSideListener webRootChanged =new JSideListener.WebRootChange(){
-		public boolean execute(File source) {
-			File file = (File)source;
-			List<String> projectList = new ArrayList<String>();
-			projectList.add(file.getAbsolutePath());
-			JSAConfig ac = JSAConfig.getInstance();
-			ac.setProjectList(projectList);
-			ac.save();
-			ProjectTree.getInstance().setModel(
-					new DefaultTreeModel(new ProjectRootNode()));
-			return false;
-		}
-		
-	};
-
-	@SuppressWarnings("unchecked")
-	private static JSideListener beforeOpenAction = new JSideListener.BeforeFileOpen() {
-		public boolean execute(File file) {
-			if (file.isFile() && file.getName().toLowerCase().endsWith(".js")) { //$NON-NLS-1$
-				DockUI.getInstance().updateMessage("压缩脚本");
-				return true;
-			} else {
-				return false;
-			}
-		}
-	};
-	@SuppressWarnings("unchecked")
-	private static JSideListener openAction = new JSideListener.FileOpen() {
-		public boolean execute(File source) {
-			File file = (File) source;
-			if (file.isFile() && file.getName().toLowerCase().endsWith(".js")) { //$NON-NLS-1$
-
-				DockUI.getInstance().updateMessage("准备压缩:", "将在默认浏览器操作",
-						file.getName());
-				JSAFrame.getInstance().openFile(file);
-				JSAFrame.showUI();
-				return true;
-			} else {
-				return false;
-			}
+			});
+			cbt.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					String text = compressor.compress(resultArea.getText(), null);
+					resultArea.setText(text);
+				}
+			});
+			frame.pack();
+			frame.setVisible(true);
+			
 		}
 	};
 	/**
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	public static void main(String args[]) throws Exception {
 		ContextMenu cm = ContextMenu.getInstance();
 		cm.addMenuSeparator();
-		//cm.addMenuItem("JSA工具首页",null,WebLinkAction.createScriptLink("tools.xhtml"));
-		cm.addMenuItem("打开JSA窗口",null,openUIAction);
-		
-		JSideWebServer server = JSideWebServer.getInstance();
-		String scriptBase = "/scripts/";
-		server.getApplication().put(JSideWebServer.SCRIPT_BASE_KEY,
-				scriptBase);
-		server.addAction(scriptBase + "**", ScriptAction.class);
-		JSFormatFilter jsFormator = new JSFormatFilter();
-		//ProxyHandler.getInstance().addResponseContentFilter("**.js", jsFormator);
-		
-		JSide.addListener(webRootChanged);
-		JSide.addListener(new JSideListener.DockClick(){
-			public boolean execute(MouseEvent e) {
-				if(e.getClickCount() >=2){
-					openUIAction.actionPerformed(null);
-				}
-				return false;
-			}
-
-		} );
-		JSide.addListener( beforeOpenAction);
-		JSide.addListener(openAction);
+		cm.addMenuItem("分析脚本",null,openUIAction);
 	}
 
 }
