@@ -1,0 +1,41 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core"
+	xmlns:ex="http://www.xidea.org/ns/lite/example">
+	<head>
+		<c:include path="#page" xpath="//xhtml:head/*" />
+		<style>
+		#navigator a{
+		font-size:12px;
+		padding:6px;
+		}
+		</style>
+	</head>
+	<body>
+		<!-- 插入导航菜单 -->
+		<p id="navigator">
+		<h4>实例:</h4>
+			<a href="/logo-xml.s.js" title="服务端js+logo输出">LiteXML语法</a>、
+			<a href="/logo-txt.s.js" title="服务端js＋logo输出">LiVi语法(文本模板)</a>、
+			<a href="/autoencoding.s.js"
+				title="通过模板自动解决一些XSS漏洞的办法">
+				自动编码测试
+			</a>、
+			<a href="/autoform.s.js"
+				title="只有通过*.s.js调用的模板才会启用自动表单填充">
+				自动表单填充
+			</a>、
+			<a href="/autoform.xhtml" title="没有配置自动填充特征">表单模板</a>、
+			<br/>
+			<a href="/extension.xhtml" title="百科词条">编译扩展1</a>、
+			<a href="/code.xhtml" title="代码高亮">编译扩展2</a>、
+			<a href="/zip.xhtml">JSI 脚本管理</a>、
+			<a href="/debug.xhtml">JSI 调试模式设置</a>、
+
+			<a href="closure.s.js" title="Google Closure Template 也不过如此嘛^_^">小无相功？GCT 模拟</a>
+<hr/>
+		</p>
+		<div style="position:relative">
+		<c:include path="#page" xpath="//xhtml:body/node()" />
+		</div>
+	</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:c="http://www.xidea.org/ns/lite/core"
+	xmlns:ex="http://www.xidea.org/ns/lite/example">
+	<head>
+		<title>语法高亮测试</title>
+		<c:extension>
+		<![CDATA[
+var style = 'border: 1px solid #DFECF1;'
+    			+'font-family:"Courier New",monospace;'
+    			+'padding:4px;margin:4px;'
+    			+'font-size:12px;overflow:auto;'
+    			+'background-color:#EEE;border:1px solid #222;';
+context.addNodeParser(function(node,context,chain){
+    if(node.namespaceURI == "http://www.xidea.org/ns/lite/example"
+    	 && node.localName == 'code'){
+    	var text = String(node.textContent);
+    	text = text.replace(/^\s+|\s+$/g,'');
+		context.append("<pre style='"+style+"'>"+text.replace(/[<>&]/g,xmlReplacer)+"</pre>");
+    }else{
+    	chain.process(node);
+    }
+});
+function xmlReplacer(c){
+	return "&#"+c.charCodeAt(0)+';'
+}
+]]>
+		</c:extension>
+	</head>
+	<body>
+		<h2>JS 代码高亮</h2>
+		<ex:code>
+    <![CDATA[
+    var serverToken = "1";
+    var cookie = new Cookie("SDN_DEBUG");
+    function openDebug(){
+    	cookie.set(serverToken);
+    	initialize();
+    }
+    function closenDebug(){
+    	cookie.remove();
+    	initialize();
+    }
+    function initialize(){
+    	var token = cookie.get();
+    	var opened = (token == serverToken);
+    	if(!opened && token){
+    		confirm("Token已过期")
+    		cookie.remove();
+    	}
+        E('openHandle').disabled=opened;
+        E('closeHandle').disabled=!opened;
+    }
+    setInterval(initialize,1000);
+    initialize();
+    ]]>
+    </ex:code>
+	</body>
+</html>

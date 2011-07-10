@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	 xmlns:c="http://www.xidea.org/ns/lite/core">
+	<head>
+		<title>自动表单测试</title>
+	</head>
+	<body>
+		<p>
+			key1（在form节点外）:
+			<input name='key1' />
+		</p>
+		<fieldset>
+			<legend>表单数据</legend>
+			<form action="#">
+
+				<p>
+					key1:
+					<input name='key1' />
+				</p>
+				<p>
+					key2:
+					<input name='key2' />
+				</p>
+				<p>
+					<select name='year'>
+						<option>1980</option>
+						<option>1981</option>
+						<option>1982</option>
+					</select>
+					年
+					<select name='month'>
+						<c:for var='item'
+							items="${[1,2,3,4,5,6,7,8,9,10,11,12]}">
+							<option>${item}</option>
+						</c:for>
+					</select>
+					月
+					<input name='date' />
+					日
+				</p>
+			</form>
+		</fieldset>
+	</body>
+</html>

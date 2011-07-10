@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta content="text/html; charset=UTF-8"
+			http-equiv="content-type" />
+		<title>系统管理页</title>
+		<link href="/styles/default.css" rel="Stylesheet"
+			type="text/css" />
+		<script src="/scripts/export/org.jside:E+org.jside:Cookie"></script>
+	</head>
+	<body>
+		<h2>开启调试选项</h2>
+		<input id="openHandle" onclick="openDebug()" type="button"
+			value="开启调试标记" />
+		<input id="closeHandle" onclick="closenDebug()" type="button"
+			value="关闭调试标记" />
+		<script>
+    //<![CDATA[
+    var serverToken = "1";
+    var cookie = new Cookie("SDN_DEBUG");
+    function openDebug(){
+    	cookie.set(serverToken);
+    	initialize();
+    }
+    function closenDebug(){
+    	cookie.remove();
+    	initialize();
+    }
+    function initialize(){
+    	var token = cookie.get();
+    	var opened = (token == serverToken);
+    	if(!opened && token){
+    		confirm("Token已过期")
+    		cookie.remove();
+    	}
+        E('openHandle').disabled=opened;
+        E('closeHandle').disabled=!opened;
+    }
+    setInterval(initialize,1000);
+    initialize();
+    //]]>
+    </script>
+	</body>
+</html>
