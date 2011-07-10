@@ -19,7 +19,7 @@ this.addScript('source-entry.js','SourceEntry'
                 ,['JSIDoc','DocEntry']);
 
 
-this.addScript('template.js','templateMap');
+this.addScript('template.js','templateMap',"org.xidea.lite:Template");
 
 this.addScript('jsidoc.js','JSIDoc'
                 ,"org.xidea.jsi:$log"

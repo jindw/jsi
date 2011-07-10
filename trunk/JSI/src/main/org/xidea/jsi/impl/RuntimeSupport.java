@@ -139,7 +139,7 @@ public abstract class RuntimeSupport implements JSIRuntime {
 			String code = JSIText.loadText(resource, "UTF-8");
 			return this.eval(code, resource.toString());
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new RuntimeException("script load error:"+resource,e);
 		}
 	}
 

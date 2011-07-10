@@ -5,7 +5,7 @@
 	</tstamp>
 
 	<!-- web/WEB-INF/lib/Lite.jar;web/WEB-INF/classes;../JSA/classes;../JSA/build/dest/JSA-CMD.jar;../JSA/classes -->
-	<available file="../JSA/build/dest/JSide.jar" property="JSAPath" value="../JSA/build/dest/JSide.jar;" />
+	<available file="../JSA/build/dest/JSide.jar" property="JSAPath" value="web/WEB-INF/classes;../Lite2/web/WEB-INF/classes;../JSA/web/WEB-INF/classes;../JSA/build/dest/JSide.jar;" />
 
 	<target name="init">
 		<mkdir dir="build/dest" />
@@ -330,7 +330,7 @@ $JSI.preload('${packageName}',${fileNameAndPrefix}</echo>
 	</target>
 	<target name="JSIDoc" depends="init,buildJSIPreload">
 		<delete dir="build/dest/" includes="JSIDoc-*.zip" />
-		<java classname="org.xidea.jsi.test.SimpleCacheBuilder" classpath="${JSAPath};web/WEB-INF/classes">
+		<java classname="org.xidea.jsi.test.SimpleCacheBuilder" classpath="${JSAPath}">
 			<arg value="${basedir}/web/scripts" />
 			<arg value="${basedir}/build/dest/jsidoc/source.js/" />
 		</java>
