@@ -138,7 +138,7 @@ Exporter.prototype = {
     	for(var n in content){
     		var text = content[n];
     		if(/[<>&]/.test(text)){
-    			if(text.indexOf(']]>')<0){
+    			if(text.indexOf(']]>')>0){
     				text = text.replace(/[<>&]/g,xmlReplacer)
     			}else{
     				text = "<![CDATA["+text + ']]>';
