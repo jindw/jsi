@@ -127,10 +127,13 @@ public class JSIService extends ResourceRoot {
 			}
 			addHeader(context,"Content-Type","text/plain;charset=" + encoding);
 			out.write(result.getBytes(encoding));
-		} else if (service!=null && service.length()>0) {
+		} else if (service!=null && service.length()>0 ) {
 			addHeader(context,"Content-Type","text/plain;charset=" + encoding);
 			sdn.process(service, getHeader(context,"Cookie"), out);
-		} else {
+		} else if(service == null &&  path.startsWith("export/")){
+			addHeader(context,"Content-Type","text/plain;charset=" + encoding);
+			sdn.process(path.substring("export/".length()), getHeader(context,"Cookie"), out);
+		} else{
 			addHeader(context,"Content-Type","text/html;charset=" + encoding);
 			out.write(document().getBytes(encoding));
 		}
