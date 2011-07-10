@@ -9,25 +9,25 @@
 /**
  * @internal
  */
-var Template=function (path){
-    if(path instanceof Function){
-        this.data = path;
-    }else{
-        var impl = $import('org.xidea.lite:Template',{} );
-        var XMLParser = $import('org.xidea.lite.parse:ParseContext',{} );
-        var parser = new XMLParser(null,path);
-        parser.nodeParsers.push(function(node,context,chain){
-		    if(node.localName == 'a'){
-			    if(!node.getAttribute("onclick")){
-			    	node = node.cloneNode(true);
-			    	node.setAttribute("onclick","return parent.JSIDoc.jump(this)");
-			    }
-		    }
-		    chain.process(node);
-        });
-        return new impl(path);
-    }
-}
+//var Template=function (path){
+//    if(path instanceof Function){
+//        this.data = path;
+//    }else{
+//        var impl = $import('org.xidea.lite:Template',{} );
+////        var ParseContext = $import('org.xidea.lite.parse:ParseContext',{} );
+////        var parser = new ParseContext(null,path);
+////        parser.nodeParsers.push(function(node,context,chain){
+////		    if(node.localName == 'a'){
+////			    if(!node.getAttribute("onclick")){
+////			    	node = node.cloneNode(true);
+////			    	node.setAttribute("onclick","return parent.JSIDoc.jump(this)");
+////			    }
+////		    }
+////		    chain.process(node);
+////        });
+//        return new impl(path);
+//    }
+//}
 Template.prototype.render = function(context){
     return this.data(context)
 }

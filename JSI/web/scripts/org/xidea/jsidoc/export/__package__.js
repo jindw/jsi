@@ -8,8 +8,9 @@ this.addScript('fn.js','findPackages');
 this.addScript('dependence-info.js','DependenceInfo');
 
 this.addScript('export.js','Exporter'
-                ,"org.xidea.jsi:$log"
+                ,["org.xidea.lite:Template","org.xidea.jsi:$log"]
                 ,[
+                
                 'DependenceInfo',
                 '..util:findGlobals',
                 'findPackages',

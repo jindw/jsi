@@ -247,10 +247,10 @@ function defaultTemplateFilter(text,path){
 				while(tryCount -- && (pathEnd=text.indexOf(')',pathEnd))){
 					try{
 						var templateCode = text.substring(0,pathEnd+1);
-						
 						new Function(templateCode);
 						break;
 					}catch(e){
+						$log.warn(e);
 						templateCode = '';
 					}
 				}
@@ -292,7 +292,7 @@ function getTemplateCode(loader,templateCode){
 		    }
         }
 	}catch(e){
-		$log.warn("处理变异失败",templateCode,e)
+		$log.warn("处理模板编译失败",templateCode,e)
 	}
 	return templateCode;
 }
@@ -342,20 +342,6 @@ function addDependenceInfo(dependenceInfo,result,cachedInfos){
     
 }
 
-/**
- * @internal
- */
-function Template(path){
-    if(path instanceof Function){
-        this.data = path;
-    }else{
-        var t = $import('org.xidea.lite:Template',{} );
-        t = new t(path);
-        return t;
-    }
-}
-Template.prototype.render = function(context){
-    return this.data(context)
-}
+
 //alert(this.scriptBase.replace(/\w+\/$/,"html/export-data.xml"))
-var documentTemplate = new Template(this.scriptBase+"../html/document.xhtml#//*[@id='document']/*");
+var documentTemplate = new Template(this.scriptBase+"../html/document.xhtml");
