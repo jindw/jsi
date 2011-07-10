@@ -190,7 +190,7 @@ function exportResult(content,exportService){
     form.action=exportService
     content.service = "export";
     for(var n in content){
-    	var input = doc.createElement("input");
+    	var input = doc.createElement("textarea");
     	input.name = n;
     	input.value = content[n];
         form.appendChild(input)
