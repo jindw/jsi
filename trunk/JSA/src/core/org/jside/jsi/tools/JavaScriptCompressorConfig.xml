@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<java version="1.6.0_02" class="java.beans.XMLDecoder"> 
+ <object class="org.xidea.jsi.tools.JavaScriptCompressorConfig"> 
+ </object>
+ </java>
+	<!-- 
+  key:ee258bb8af876af6b81021fe98e0af7c4,ff59665e0729f1c68427f37910f56e4
+	<copyright description="授权xidea开源项目使用,数据不可修改!!">
+		<![CDATA[
+/*
+ * Copyright www.xidea.org
+ * License LGPL
+ * Compressed by JSA(www.xidea.org)
+ */
+]]>
+	</copyright>
+    <copyright description="免费授权,数据不可修改!!">
+        <![CDATA[
+/*
+ * Compressed by JSA(www.xidea.org)
+ */
+]]>
+    </copyright>
+	 -->

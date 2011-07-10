@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<java version="1.6.0_02" class="java.beans.XMLDecoder">
+  <object class="java.util.LinkedHashMap">
+    <!-- try catch -->
+    <void method="put">
+      <string>
+        var i=0; if(!i){ while(i++&lt;5){ } }else { i--; } alert(i);
+      </string>
+      <string>var i=0;if(!i)while(i++&lt;5);else i--;alert(i)</string>
+    </void>
+    <void method="put">
+      <string>if(i){ for(;;){ } } if(i){ while(true){ } }</string>
+      <string>if(i)for(;;);if(i)while(true);</string>
+    </void>
+    <void method="put">
+      <string>if(b1){if(b2){x()}}else{x()}</string>
+      <string>if(b1){if(b2)x()}else x()</string>
+    </void>
+    <!-- if 歧义 -->
+    <void method="put">
+        <string>if(b1){
+  if(b2){
+    i++;
+  }else if(b3){
+    i++;
+  }
+}else{
+  i++;
+}</string><string>if(b1){if(b2)i++;else if(b3)i++}else i++</string>
+    </void>
+    <!-- 我担心IE会jjyy的。 -->
+    <void method="put">
+      <string>var i=0;
+if(i){
+  if(i){
+    do {
+      i++;
+    }while(i!=10);
+  }else {
+    i--;
+  }
+}</string>
+              var i=0;if(i)if(i)do i++;while(i!=10);else i--
+              var i=0;if(i)if(i){do i++;while(i!=10)}else i--
+              var i=0;if(i)if(i)do{i++}while(i!=10);else i--//IE 上解析错误(else 后移悬空)
+      <string>var i=0;if(i)if(i)do{i++}while(i!=10)else i--</string>
+    </void>
+    <void method="put">
+      <string>var i=0;
+  do{
+    do {
+      i++;
+    }while(i!=10);
+  }while(false)
+</string>
+      <!--  <string>var i=0;if(i)if(i)do i++;while(i!=10);else i-=1</string>-->
+              var i=0;do do i++;while(i!=10);while(false)
+              var i=0;do do i++;while(i!=10)while(false)
+      <string>var i=0;do{do{i++}while(i!=10)}while(false)</string>
+    </void>
+    <void method="put">
+      <string>var i=0;
+  do{
+    while(i!=10){
+      i++;
+    }
+  }while(false)
+</string>
+              var i=0;do do i++;while(i!=10);while(false)
+              var i=0;do while(i!=10)i++;while(false)
+      <string>var i=0;do{while(i!=10)i++}while(false)</string>
+    </void>
+  </object>
+</java>
+
+

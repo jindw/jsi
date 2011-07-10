@@ -1,0 +1,10 @@
+<decorators>
+    <decorator layout="layout.xhtml">
+        <pattern>*.xhtml</pattern>
+    </decorator>
+    <!-- 
+    <decorator layout="/book/layout.xhtml">
+        <pattern>/book/*.xhtml</pattern>
+    </decorator>
+     -->
+</decorators>

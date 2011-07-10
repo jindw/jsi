@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/core"/>
+	<classpathentry kind="src" path="src/ui"/>
+	<classpathentry kind="src" path="web/scripts"/>
+	<classpathentry kind="src" path="src/test"/>
+	<classpathentry kind="src" path="src/endorsed"/>
+	<classpathentry kind="src" path="src/commons"/>
+	<classpathentry kind="src" path="src/server"/>
+	<classpathentry kind="src" path="src/jsaui"/>
+	<classpathentry kind="src" path="src/jsi"/>
+	<classpathentry kind="src" path="src/tools"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="lib/JSI.jar"/>
+	<classpathentry kind="lib" path="build/dest/js.jar"/>
+	<classpathentry kind="lib" path="lib/chardet.jar"/>
+	<classpathentry kind="lib" path="lib/fs.jar" sourcepath="/FileServer/src/main"/>
+	<classpathentry kind="lib" path="lib/Lite.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Lite2"/>
+	<classpathentry kind="output" path="classes"/>
+</classpath>

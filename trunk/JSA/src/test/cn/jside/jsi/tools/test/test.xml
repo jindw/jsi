@@ -1,0 +1,418 @@
+<properties>
+<entry key="export">org.xidea.sandbox.util:StyleUtil</entry>
+<entry key='org/xidea/sandbox/util/browser-info.js'>/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id$
+ */
+
+
+
+/** 
+ * 检测是否是指定版本范围内的&lt;b&gt;[$1]&lt;/b&gt;浏览器
+ * @public 
+ * @param &lt;string|double&gt; minVersion 最小版本
+ * @param &lt;string|double&gt; maxVersion 最大版本
+ * @id BrowserInfo.is*
+ */
+var falseChecker = function(minVersion,maxVersion){return false};
+/**
+ * BrowserInfo 对象，用于判断浏览器的相关信息，如浏览器类型、客户端语言（简体中文？英语..未实现）、操作系统（未实现）等等。
+ * @public
+ */
+var BrowserInfo = {
+    isIE : falseChecker,
+    isOpera : falseChecker,
+    isGecko : falseChecker,
+    isNetscape : falseChecker,
+    isMozilla : falseChecker,
+    isFirefox : falseChecker,
+    isKhtml : falseChecker,
+    isSafari : falseChecker,
+    isKonqueror : falseChecker//,
+};
+
+//这段打算用函数式风格重写
+function Version(version){
+    var vs = version.match(/([\d\.]*)(.*)?/);
+    this.flag = vs[2]?vs[2].replace(/^\s+(.*[^\s])\s+$/,'$1')||'':'';
+    vs = vs[1].match(/(\d+(\.\d+)?)/g); 
+    for(var i = vs.length-1;i&gt;=0;i--){
+        vs[i] = parseFloat(vs[i]);
+    }
+    this.version = version;
+    this.value = vs[0];
+    this.values = vs;
+}
+Version.prototype.compare = function(v){
+    if(typeof v == 'number'){
+        if(v == this.value){
+            for(var i = 1;i&lt;this.values.length;i++){
+                if(this.values[i])return 1;
+            }
+            return 0;
+        }else{
+            //alert(v-this.value)
+            return v-this.value;
+        }
+    }else{
+        if(typeof v == 'string'){
+            if(v == this.version){
+                return 0;
+            }
+            v = new Version(v);
+        }
+        if(v.value == this.value){
+            var l = Math.min(this.values.length,v.values.length);
+            for(var i = 1;i&lt;l;i++){
+                if(this.values[i])return 1;
+            }
+            l = v.values.length - this.value.length;
+            if(l&gt;0){
+                return 1;
+            }else if(l&lt;0){
+                return -1;
+            }
+            if(v.flag == this.flag){
+                return 0;
+            }else if(!v.flag ){
+                return 1;
+            }else if(!this.flag ){
+                return -1;
+            }else{
+                return v.flag&gt;this.flag?1:-1;
+            }
+        }else{
+            return v.value - this.value
+        }
+    }
+  
+  
+}
+Version.prototype.before = function(v){
+    return this.compare(v)&gt;=0;
+}
+Version.prototype.after = function(v){
+    return this.compare(v)&lt;=0;
+}
+
+
+function buildBrowserChecker(version){
+    var v = new Version(version);
+    //function check(min,max){
+    return function(min,max){
+        if(min == null){
+            if(max == null){
+                return version;
+            }else{
+                return v.before(max)? version:false;
+            }
+        }else if(max == null){
+            return v.after(min)? version:false;
+        }else{
+            return v.after(min) &amp;&amp; v.before(max)? version:false;
+        }
+    }
+}
+var ua = window.navigator.userAgent;
+if(ua.indexOf("Opera") &gt; 0){//Opera
+    var version = ua.replace(/.*Opera\s+([^; ]+).*/,'$1');
+    BrowserInfo.isOpera = buildBrowserChecker(version);
+}else if(ua.indexOf(" MSIE ") &gt; 0){//MSIE
+    var version = ua.replace(/.*MSIE\s+([^; ]+).*/,'$1');
+    BrowserInfo.isIE = buildBrowserChecker(version);
+    if(BrowserInfo.isIE(null,5.9)){
+        BrowserInfo.isQuirks = function(){return true;};
+    }
+}else if(ua.indexOf("Gecko/") &gt; 0){//mozilla netscape firefox ...
+    var version = ua.replace(/.*Gecko[\s\/]*([^;\/\) ]+).*/,'$1');
+    BrowserInfo.isGecko = buildBrowserChecker(version);
+    if(ua.indexOf("Firefox") &gt; 0){
+        var version = ua.replace(/.*Firefox[\s\/]*([^;\/\) ]+).*/,'$1');
+        BrowserInfo.isFirefox = buildBrowserChecker(version);
+    }else if(ua.indexOf("Netscape") &gt; 0){
+        var version = ua.replace(/.*Netscape[\s\/]*([^;\/\) ]+).*/,'$1');
+        BrowserInfo.isNetscape = buildBrowserChecker(version);
+    }else if(ua.indexOf("Mozilla") &gt; 0){
+        var version = ua.replace(/.*rv:([^;\/\) ]+).*/,'$1');
+        BrowserInfo.isMozilla = buildBrowserChecker(version);
+    }
+}else if(ua.indexOf("KHTML") &gt; 0){//khtml 
+    if(ua.indexOf("Konqueror") &gt; 0){//Konqueror 糟糕的浏览器
+        //var version = ua.replace(/.*AppleWebKit\/([^;\/ ]+).*/,'$1');
+        //BrowserInfo.isKhtml = buildBrowserChecker(version);
+        BrowserInfo.isKhtml = function(){return true;};
+        version = ua.replace(/.*Konqueror\/([^;\/ ]+).*/,'$1');
+        BrowserInfo.isKonqueror = buildBrowserChecker(version);
+    }
+}else if(ua.indexOf("Safari") &gt; 0){//Safari khtml 
+    //var version = ua.replace(/.*AppleWebKit\/([^;\/ ]+).*/,'$1');
+    //BrowserInfo.isKhtml = buildBrowserChecker(version);
+    BrowserInfo.isKhtml = function(){return true;};
+    version = ua.replace(/.*Safari\/([^;\/ ]+).*/,'$1');
+    BrowserInfo.isSafari = buildBrowserChecker(version);
+}else{
+    //UNKNOW 
+}
+//@Deprecated ???
+//for(var n in BrowserInfo){
+//    window.navigator[n] = BrowserInfo[n];
+//}</entry>
+<entry key='org/xidea/sandbox/util/__package__.js'>/*
+ * 杂项，任务队列，IO，编码...
+ */
+this.addScript('cookie.js','Cookie');
+
+this.addScript("tween.js",'Tween');
+
+this.addScript("tween-rule.js",'TweenRuleMap');
+this.addScript("log.js",'log');
+
+
+//HTML DOM 处理相关
+
+this.addScript("browser-info.js",'BrowserInfo');
+this.addScript("event-util.js",'EventUtil',
+               "BrowserInfo");
+this.addScript("style-util.js",'StyleUtil',
+               "BrowserInfo");
+
+
+this.addScript("task-queue.js",['TaskQueue','LoadTask','ScriptLoadTask']);
+
+this.addScript("chinese-calendar.js",['getLunarString']);
+this.addScript("commons.js",'CommonUtil');
+this.addScript("collections.js",['Iterator','StackMap']);
+</entry>
+<entry key='org/xidea/sandbox/util/style-util.js'>/*
+ * JavaScript Integration Framework
+ * License LGPL(您可以在任何地方免费使用,但请不要吝啬您对框架本身的改进)
+ * http://www.xidea.org/project/jsi/
+ * @author jindw
+ * @version $Id$
+ */
+
+
+/**
+ * 页面显示方面的功能函数集，目前还不成熟，现在放js包里，只是觉得这个东西比较常用。
+ * @public
+ */
+var StyleUtil = {
+
+  /**
+   * 设置透明度
+   * @public
+   * @member StyleUtil
+   * @static
+   */
+  setOpacity:function(node,opacity){
+    if(BrowserInfo.isIE()){
+      if(node.nodeName.toLowerCase() == "tr"){
+        // FIXME: is this too naive? will we get more than we want?
+        var tds = node.getElementsByTagName("td");
+        for(var x=0; x&lt;tds.length; x++){
+          tds[x].style.filter = "Alpha(Opacity="+opacity*100+")";
+        }
+      }
+      node.style.filter = "Alpha(Opacity="+opacity*100+")";
+    }else if(BrowserInfo.isMozilla()){
+      node.style.opacity = opacity; // ffox 1.0 directly supports "opacity"
+      node.style.MozOpacity = opacity;
+    }else if(BrowserInfo.isSafari()){
+      node.style.opacity = opacity; // 1.3 directly supports "opacity"
+      node.style.KhtmlOpacity = opacity;
+    }else{
+      node.style.opacity = opacity;
+    }
+  },
+  /**
+   * 获取元素当前透明度
+   * @public
+   * @member StyleUtil
+   * @static
+   */
+  getOpacity: function(node){
+    if(BrowserInfo.isIE()){
+        var opac = (node.filters &amp;&amp; node.filters.alpha &amp;&amp;
+            typeof node.filters.alpha.opacity == "number"
+            ? node.filters.alpha.opacity : 100) / 100;
+    }else{
+      var opac = node.style.opacity || node.style.MozOpacity ||
+        node.style.KhtmlOpacity || 1;
+    }
+    return opac &gt;= 0.999999 ? 1.0 : opac;    //  float
+  },
+  /**
+   * 获取滚动条的顶端位置
+   * @public
+   * @member StyleUtil
+   * @static
+   */
+  getScrollTop : function(element){
+    return getScrollLength(element,'scrollTop');
+  },
+  /**
+   * 获取滚动条的左端位置
+   * @public
+   * @member StyleUtil
+   * @static
+   */
+  getScrollLeft : function(element){
+    return getScrollLength(element,'scrollLeft');
+  },
+  /**
+   * 获取滚动条高度
+   * @public
+   * @member StyleUtil
+   * @static
+   */
+  getScrollHeight : function(element){
+    return getScrollLength(element,'scrollHeight');
+  },
+  /**
+   * 获取滚动条宽度
+   * @public
+   * @member StyleUtil
+   * @static
+   */
+  getScrollWidth : function(element){
+    return getScrollLength(element,'scrollWidth');
+  },
+  /**
+   * 获取窗口可见区域高度
+   * @public
+   * @member StyleUtil
+   * @static
+   */
+  getWindowHeight : function ()
+  {
+    if (window.innerHeight &gt;=0){
+      return window.innerHeight;
+    }
+    if (document.compatMode == 'CSS1Compat'){
+      return document.documentElement.clientHeight;
+    }
+    if (document.body){
+      return document.body.clientHeight;
+    }
+  },
+  /**
+   * 获取窗口可见区域宽度
+   * @public
+   * @member StyleUtil
+   * @static
+   */
+  getWindowWidth : function()
+  {
+    if (window.innerWidth &gt;=0){//!= undefined
+      return window.innerWidth; 
+    }
+    if (document.compatMode == 'CSS1Compat'){
+      return document.documentElement.clientWidth; 
+    }
+    if (document.body){
+      return document.body.clientWidth; 
+    }
+  },
+  /**
+   * 给指定元素设置class 属性
+   * @public
+   * @member StyleUtil
+   * @static
+   */
+  setClass : function(node,className){
+    node.className = className;
+  },
+  /**
+   * 给指定元素添加class 属性
+   * @public
+   * @member StyleUtil
+   * @static
+   */
+  addClass : function(node,className){
+    this.removeClass(node,className)
+    node.className += (" " +className);
+  },
+  /**
+   * 给指定元素移除class 属性
+   * @public
+   * @member StyleUtil
+   * @static
+   */
+  removeClass : function(node,className){
+    var oldName = node.className;
+    if(oldName.indexOf(className)&gt;=0){
+      if(oldName == className){
+        node.className = "";
+      }else{
+        node.className = oldName.replace(new RegExp('(^|\\s+)'+className+'(\\s+|$)'), " ");
+      }
+    }
+  },
+  /**
+   * 给指定元素设置style文本属性
+   * @public
+   * @member StyleUtil
+   * @static
+   */
+  setStyleText : function (node, text) {
+    if(typeof node.style.cssText == 'string'){
+        node.style.cssText = text;
+    }else{
+        node.setAttribute("style", text);
+    }
+  },
+  /**
+   * 给指定元素设置style属性集
+   * @public
+   * @member StyleUtil
+   * @static
+   */
+  setStyleMap : function (node, valueMap) {
+    node = node.style;
+    for(var n in valueMap){
+      node[n] = valueMap[n];
+    }
+  },
+  /**
+   * 设置元素是否可选择
+   * @public
+   * @member StyleUtil
+   * @static
+   */
+  setSelectable: function(element,selectable){
+    // summary: disable selection on a node
+    if(BrowserInfo.isGecko()){
+      element.style.MozUserSelect = selectable?"":"none";
+    }else if(BrowserInfo.isKhtml()){
+      element.style.KhtmlUserSelect = selectable?"":"none";
+    }else if(BrowserInfo.isIE()){
+      if(selectable){
+        element.detachEvent("onselectstart",returnFalse);
+      }else{
+        element.attachEvent("onselectstart",returnFalse);
+      }
+      //element.unselectable = selectable?"off":"on";
+    }else{
+      return false;
+    }
+    return true;
+  }
+};
+/*
+ * @internal
+ */
+function returnFalse(){return false;}
+/*
+ * @internal
+ */
+function getScrollLength(element,attribute){
+  if(element){
+    return parseInt(element[attribute], 10);
+  }else{
+    return parseInt(document.documentElement[attribute] || document.body[attribute], 10)
+  }
+}</entry>
+</properties>

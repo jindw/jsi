@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<java version="1.6.0_02" class="java.beans.XMLDecoder">
+  <object class="java.util.LinkedHashMap">
+    <!-- try catch -->
+    <void method="put">
+      <string>try{}catch(e){alert(A)}</string>
+      <string></string>
+    </void>
+    <void method="put">
+      <string>try{alert();}catch(e){throw e}</string>
+      <string>alert();</string>
+    </void>
+    <void method="put">
+      <string>try{alert();}catch(e){throw e}finally{}</string>
+      <string>try{alert();}finally{}</string>
+    </void>
+    <void method="put">
+      <string>
+var a;var b;var a;while(true){};var a;
+      </string>
+      <string>var a,b;while(true){}</string>
+    </void>
+    <void method="put">
+      <string>try{}catch(e){alert(A)}finally{alert(B)}</string>
+      <string>alert(B);</string>
+    </void>
+    <void method="put">
+      <string>if(":debug"){A()}else{B()}</string>
+      <string>B();</string>
+    </void>
+    <void method="put">
+      <string>if(!":debug"){A()}else{B()}</string>
+      <string>B();</string>
+    </void>
+    <void method="put">
+      <string>if(false){$log.error()}else{$log.debug()}</string>
+      <string>;</string>
+    </void>
+    <void method="put">
+      <string>if(false){A()}else{B()}</string>
+      <string>B();</string>
+    </void>
+    <void method="put">
+      <string>if(true){A()}else{B()}</string>
+      <string>A();</string>
+    </void>
+    <void method="put">
+      <string>if(!false){A()}else{B()}</string>
+      <string>A();</string>
+    </void>
+    <void method="put">
+      <string>if(!true){A()}else{B()}</string>
+      <string>B();</string>
+    </void>
+    <void method="put">
+      <string>if(!0){A()}else{B()}</string>
+      <string>A();</string>
+    </void>
+    <void method="put">
+      <string>if(!1){A()}else{B()}</string>
+      <string>B();</string>
+    </void>
+    <void method="put">
+      <string>if(1){A()}else{B()}</string>
+      <string>A();</string>
+    </void>
+    <void method="put">
+      <string>if(0){A()}else{B()}</string>
+      <string>B();</string>
+    </void>
+    <void method="put">
+      <string>var A;if("test"){var B;}</string>
+      <string>var A,B;</string>
+    </void>
+    
+    <void method="put">
+      <string>var A;var B;alert(1);var A,B</string>
+      <string>var A,B;alert(1);</string>
+    </void>
+    
+    
+    <!-- empty try -->
+    <void method="put">
+      <string>try{}finally{alert(B)}</string>
+      <string>alert(B);</string>
+    </void>
+    <!-- var -->
+    <void method="put">
+      <string>function A(a,b,c){var a;var b;var c;}</string>
+      <string>function A(a,b,c){}</string>
+    </void>
+    <void method="put">
+      <string>function A(a,b,c){var a;var b;var c;var d}</string>
+      <string>function A(a,b,c){var d;}</string>
+    </void>
+    <void method="put">
+      <string>function A(){var a;var b;alert(1);var a;var b}</string>
+      <string>function A(){var a,b;alert(1);}</string>
+    </void>
+  </object>
+</java>
+
+
