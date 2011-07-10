@@ -67,7 +67,6 @@ public class JSideWebServer extends ActionWebServer {
 	public static WebLinkAction browseAction = WebLinkAction
 			.createFileLink("/");
 	public static final String SCRIPT_BASE_KEY = "scriptBase";
-	@SuppressWarnings("unused")
 	private static Log log = LogFactory.getLog(JSideWebServer.class);
 	private static JSideWebServer instance;
 
