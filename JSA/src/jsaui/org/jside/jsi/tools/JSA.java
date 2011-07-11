@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.text.Document;
@@ -98,7 +99,7 @@ public class JSA extends JFrame {
 		popup.add(redo);
 		this.setPreferredSize(new Dimension(400,400));
 		this.setLayout(new BorderLayout());
-		this.add(resultArea,BorderLayout.CENTER);
+		this.add(new JScrollPane(resultArea),BorderLayout.CENTER);
 		JPanel jp = new JPanel(new java.awt.FlowLayout());
 		final JButton abt = new JButton("分析");
 		final JButton cbt = new JButton("压缩");

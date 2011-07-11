@@ -103,6 +103,8 @@ public class AnalyserDialog extends JDialog {
 		}
 		try {
 			resultArea.setText(text);
+//			resultArea.selectAll();
+//			resultArea.replaceSelection(text);
 		} catch (NoSuchMethodError e) {
 			// System.out.println("奇怪的问题");
 			((JTextComponent) resultArea).setText(text);
