@@ -3,7 +3,6 @@ package org.jside.webserver.sjs.test;
 
 import java.util.List;
 
-import org.jside.webserver.sjs.AdapterFactory;
 import org.jside.webserver.sjs.JSExcutor;
 import org.junit.Before;
 import org.junit.Test;

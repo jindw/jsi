@@ -1,4 +1,4 @@
-package org.jside.webserver.sjs;
+package org.jside.webserver.handler;
 
 import java.io.IOException;
 import java.net.URI;

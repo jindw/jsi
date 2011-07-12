@@ -1,4 +1,4 @@
-package org.jside.webserver.sjs;
+package org.jside.webserver.sjs.test;
 
 import java.util.AbstractList;
 import java.util.AbstractMap;
