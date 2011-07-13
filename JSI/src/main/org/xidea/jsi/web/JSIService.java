@@ -48,7 +48,7 @@ public class JSIService extends ResourceRoot {
 		if (path.endsWith(".css")) {
 			contentType = "text/css";
 		} else if (path.endsWith(".js")) {// for debug
-			contentType = "text/plain";
+			contentType = "text/js";
 		}else if(path.startsWith("export/")){
 			contentType = "text/paint;charset=UTF-8";
 		}
@@ -68,14 +68,16 @@ public class JSIService extends ResourceRoot {
 	public void service(String path, Map<String, String[]> params,
 			OutputStream out,Object... context) throws IOException {
 		String service = getParam(params,"service");
-		if( path == null || path.length() == 0) {
+		if(path == null || path.length() == 0) {
 			path = getParam(params,"path");
+			if(path == null){
+				path = "";
+			}
 		}
 		if(service != null){
 			processAction(service, path,params,
 					out, context);
-		}else if( path == null) {
-			path = getParam(params,"path");
+		}else if( path.length() == 0) {
 			// ByteArrayOutputStream out2 = new ByteArrayOutputStream();
 			processAction(service, path,params,
 					out, context);
@@ -133,9 +135,11 @@ public class JSIService extends ResourceRoot {
 		} else if(service == null &&  path.startsWith("export/")){
 			addHeader(context,"Content-Type","text/plain;charset=" + encoding);
 			sdn.process(path.substring("export/".length()), getHeader(context,"Cookie"), out);
-		} else{
+		} else if(path.length() ==0){
 			addHeader(context,"Content-Type","text/html;charset=" + encoding);
 			out.write(document().getBytes(encoding));
+		} else{
+			throw new java.lang.IllegalArgumentException("resource not found. path:"+path+";serveice:"+service);
 		}
 	}
 
