@@ -29,7 +29,7 @@ import org.xidea.commons.i18n.swing.MessageBase;
 public class DockUI extends JDialog {
 	protected Image icon = ((ImageIcon) MessageBase.loadIcon(DockUI.class,
 			"icon/jside.png")).getImage();
-	private static int WIDTH = 80;
+	private static int WIDTH = 88;
 	private static int HEIGHT = 100;
 	private static final long serialVersionUID = 1L;
 	private static DockUI instance;
@@ -65,13 +65,18 @@ public class DockUI extends JDialog {
 	@Override
 	public void paint(Graphics g) {
 		//g.drawImage(getImage(), 0, 0, this);
+		g.setColor(new Color(0xFF,0xFF,0xFF,1));
+
+		g.fillRect(0,0,88,100);
 		g.setColor(new Color(0,0x44,0x88));
+		
 		g.fill3DRect(0,0,19,100,true);
 		g.fillRect(0,81,42,19);
 		g.fillRect(23,0,19,19);
 		g.fillRect(23,23,19,54);
 		g.fillRect(46,0,42,19);
 		g.fillRect(46,23,19,77);
+		g.setColor(Color.BLUE);
 		g.fillRect(69,81,19,19);
 		
 //		g.drawRect(x, y, width, height)

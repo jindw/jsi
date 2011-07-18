@@ -123,7 +123,7 @@ public class ReplacerHolderDialog extends JDialog {
 		}
 		JavaScriptCompressor compressor=JSA.getCompressor();
 		//analyser.analyse(source, path);
-		JavaScriptAnalysisResult analyser = AnalyserDialog.doAnalyse(compressor, source, path,this.resultArea);
+		JavaScriptAnalysisResult analyser = JSA.doAnalyse(compressor, source, path,this.resultArea);
 		Collection<String> locals = analyser.getLocalVars();
 		external = analyser.getExternalVars();
 		reserveds = analyser.getReservedVars();

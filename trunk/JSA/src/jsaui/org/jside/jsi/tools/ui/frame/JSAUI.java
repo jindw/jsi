@@ -1,4 +1,4 @@
-package org.jside.jsi.tools;
+package org.jside.jsi.tools.ui.frame;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,8 +12,9 @@ import javax.swing.tree.DefaultTreeModel;
 import org.jside.JSide;
 import org.jside.JSideListener;
 import org.jside.JSideWebServer;
+import org.jside.jsi.tools.JSAToolkit;
+import org.jside.jsi.tools.JavaScriptCompressor;
 import org.jside.jsi.tools.ui.JSAConfig;
-import org.jside.jsi.tools.ui.frame.JSAFrame;
 import org.jside.jsi.tools.ui.frame.project.ProjectRootNode;
 import org.jside.jsi.tools.ui.frame.project.ProjectTree;
 import org.jside.jsi.tools.web.ScriptAction;

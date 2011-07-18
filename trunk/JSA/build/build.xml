@@ -169,7 +169,20 @@
 				<attribute name="Main-Class" value="org.jside.JSide" />
 			</manifest>
 			<fileset dir="classes">
-				<include name="**/*.*" />
+				<include name="org/jside/*.*" />
+				<include name="org/jside/ui/*.*" />
+				<include name="org/jside/ui/icon/*.*" />
+				<include name="cn/jside/jsi/tools/**" />
+
+				<include name="org/jside/webserver/**" />
+				<include name="org/jside/jsi/tools/**" />
+				<exclude name="org/jside/jsi/tools/ui/**"/>
+				<exclude name="org/jside/jsi/tools/ui/**"/>
+
+				<include name="org/xidea/commons/i18n/**" />
+
+				<include name="org/jside/xtools/**" />
+				
 				<exclude name="**/*Test.class" />
 				<exclude name="**/*test*.xml" />
 				<exclude name="**/test/**/*.class" />

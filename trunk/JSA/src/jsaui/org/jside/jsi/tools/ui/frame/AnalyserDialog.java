@@ -18,6 +18,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.JTextComponent;
 
+import org.jside.jsi.tools.JSA;
 import org.jside.jsi.tools.JavaScriptAnalysisResult;
 import org.jside.jsi.tools.JavaScriptCompressor;
 import org.jside.jsi.tools.ui.Messages;
@@ -51,129 +52,9 @@ public class AnalyserDialog extends JDialog {
 		// String filePath = selectedFile == null ? null : selectedFile
 		// .getAbsolutePath();
 		this.setSize(new Dimension(580, 460));
-		doAnalyse(analyser, source, filePath, this.resultArea);
+		JSA.doAnalyse(analyser, source, filePath, this.resultArea);
 		this.setVisible(true);
 		this.pack();
-	}
-
-	public static JavaScriptAnalysisResult doAnalyse(JavaScriptCompressor compressor, String source,
-			String filePath, JTextArea resultArea) {
-		JavaScriptAnalysisResult analyser = compressor.analyse(source);
-		String text;
-		try {
-			// analyser.analyse(analyserUI.getScriptText(), filePath);
-			String name = filePath;
-			if (name == null) {
-				name = Messages.ui.unknowFile; //$NON-NLS-1$
-			} else {
-				name = name.substring(Math.max(name.lastIndexOf('/'), name
-						.lastIndexOf('\\')) + 1);
-			}
-
-
-
-			StringWriter buf = new StringWriter();
-			PrintWriter out = new PrintWriter(buf);
-			if (analyser.getLocalVars().isEmpty()) {
-				out.println("//未申明任何变量："); //$NON-NLS-1$
-				out.println("//JSI 中脚本描述参考："); //$NON-NLS-1$
-				out.print(" this.addScript('"); //$NON-NLS-1$
-				out.print(name);
-				out.println("')"); //$NON-NLS-1$
-			} else {
-				printAddScript(out, name, analyser.getLocalVars());
-			}
-			if (!analyser.getExternalVars().isEmpty()) {
-				out.print("\n\n//外部变量有（包含内置）："); //$NON-NLS-1$
-				out.println(analyser.getExternalVars());
-			}
-			if (!analyser.getUnknowVars().isEmpty()) {
-				out.print("\n\n//未知变量集（非内置且未申明,可能需要申明依赖）："); //$NON-NLS-1$
-				out.println(analyser.getUnknowVars());
-				printAddDependence(out);
-			}
-			resultArea.setForeground(Color.BLUE);
-			out.flush();
-			out.close();
-			text = buf.toString();
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			resultArea.setForeground(Color.RED);
-			text = analyser.getErrors().toString();
-		}
-		try {
-			resultArea.setText(text);
-//			resultArea.selectAll();
-//			resultArea.replaceSelection(text);
-		} catch (NoSuchMethodError e) {
-			// System.out.println("奇怪的问题");
-			((JTextComponent) resultArea).setText(text);
-			// e.printStackTrace();
-		}
-		return analyser;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static void printAddScript(PrintWriter out, String name,
-			Collection set) {
-		out.print("//申明变量有："); //$NON-NLS-1$
-		out.println(set);
-		out.println("//JSI 中脚本描述参考："); //$NON-NLS-1$
-		out.print(" this.addScript('"); //$NON-NLS-1$
-		out.print(name);
-		out.print("',"); //$NON-NLS-1$
-		out.print("["); //$NON-NLS-1$
-		Iterator it = set.iterator();
-		if (it.hasNext()) {
-			while (true) {
-				out.print("'"); //$NON-NLS-1$
-				out.print(it.next());
-				out.print("'"); //$NON-NLS-1$
-				if (it.hasNext()) {
-					out.print(","); //$NON-NLS-1$
-				} else {
-					break;
-				}
-			}
-		}
-		out.println("]);"); //$NON-NLS-1$
-		out.println("//更多详细资料请参考：http://www.xidea.org/project/jsi/script.html");//$NON-NLS-1$
-	}
-/*
-
-//JSI 中脚本依赖描述参考：
-
-/*===========================================*\\
-方式1：填加脚本时直接定义（JSI2.1+）
-this.addScript('xx.js','xx',
-                            beforeLoadDependences,
-                            beforeLoadDependences)
-方式2：在包文件后定义
- this.addDependence(object,
-                                        dependenceObject,
-                                        isBeforeLoadDependence);
-
-
-更多详细资料请参考：http://www.xidea.org/project/jsi/dependence.html
-\*===========================================*/
-
-	private static void printAddDependence(PrintWriter out) {
-		out.println();
-		out.println();
-		out.println("//JSI 中脚本依赖描述参考："); //$NON-NLS-1$
-		out.println();
-		out.println("/*===========================================*\\"); //$NON-NLS-1$
-		out.println("方式1：填加脚本时直接定义（JSI2.1+）");//$NON-NLS-1$
-		out.println("this.addScript('xx.js','xx',");//$NON-NLS-1$
-		out.println("                            beforeLoadDependences,");//$NON-NLS-1$
-		out.println("                            beforeLoadDependences)");//$NON-NLS-1$
-		out.println("方式2：在包文件后定义");//$NON-NLS-1$
-		out.println(" this.addDependence(object,");//$NON-NLS-1$
-		out.println("                                        dependenceObject,"); //$NON-NLS-1$
-		out.println("                                        isBeforeLoadDependence);"); //$NON-NLS-1$
-		out.println(); //$NON-NLS-1$
-		out.println("更多详细资料请参考：http://www.xidea.org/project/jsi/dependence.html"); //$NON-NLS-1$
-		out.println("\\*===========================================*/"); //$NON-NLS-1$
 	}
 
 	public void initialize() {

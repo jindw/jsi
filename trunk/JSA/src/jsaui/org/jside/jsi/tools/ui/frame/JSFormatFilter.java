@@ -1,4 +1,4 @@
-package org.jside.jsi.tools;
+package org.jside.jsi.tools.ui.frame;
 
 import java.io.InputStream;
 import java.util.Locale;
