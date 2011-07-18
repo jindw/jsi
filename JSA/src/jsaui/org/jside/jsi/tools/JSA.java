@@ -1,9 +1,14 @@
 package org.jside.jsi.tools;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Collection;
+import java.util.Iterator;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -16,12 +21,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
-import org.jside.jsi.tools.ui.JSAConfig;
-import org.jside.jsi.tools.ui.frame.AnalyserDialog;
+//import org.jside.jsi.tools.ui.Messages;
 import org.jside.ui.ContextMenu;
 
 public class JSA extends JFrame {
@@ -31,9 +36,9 @@ public class JSA extends JFrame {
 	private static final long serialVersionUID = 7901259629153741454L;
 	public static final String HOST = "jsa.jside.org";
 	public static JavaScriptCompressor compressor = JSAToolkit.getInstance().createJavaScriptCompressor();
-	static{
-		compressor.setCompressorConfig(JSAConfig.getInstance());
-	}
+//	static{
+//		compressor.setCompressorConfig(JSAConfig.getInstance());
+//	}
 
 	public static JavaScriptCompressor getCompressor() {
 		return compressor;
@@ -108,7 +113,7 @@ public class JSA extends JFrame {
 		this.add(jp,BorderLayout.SOUTH);
 		abt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				AnalyserDialog.doAnalyse(compressor, resultArea.getText(), "source.js", resultArea);
+				doAnalyse(compressor, resultArea.getText(), "source.js", resultArea);
 				//bt.setEnabled(false);
 			}
 		});
@@ -127,6 +132,127 @@ public class JSA extends JFrame {
 			
 		}
 	};
+	public static JavaScriptAnalysisResult doAnalyse(JavaScriptCompressor compressor, String source,
+			String filePath, JTextArea resultArea) {
+		JavaScriptAnalysisResult analyser = compressor.analyse(source);
+		String text;
+		try {
+			// analyser.analyse(analyserUI.getScriptText(), filePath);
+			String name = filePath;
+			if (name == null) {
+				name = "unknow.js"; //$NON-NLS-1$
+			} else {
+				name = name.substring(Math.max(name.lastIndexOf('/'), name
+						.lastIndexOf('\\')) + 1);
+			}
+
+
+
+			StringWriter buf = new StringWriter();
+			PrintWriter out = new PrintWriter(buf);
+			if (analyser.getLocalVars().isEmpty()) {
+				out.println("//未申明任何变量："); //$NON-NLS-1$
+				out.println("//JSI 中脚本描述参考："); //$NON-NLS-1$
+				out.print(" this.addScript('"); //$NON-NLS-1$
+				out.print(name);
+				out.println("')"); //$NON-NLS-1$
+			} else {
+				printAddScript(out, name, analyser.getLocalVars());
+			}
+			if (!analyser.getExternalVars().isEmpty()) {
+				out.print("\n\n//外部变量有（包含内置）："); //$NON-NLS-1$
+				out.println(analyser.getExternalVars());
+			}
+			if (!analyser.getUnknowVars().isEmpty()) {
+				out.print("\n\n//未知变量集（非内置且未申明,可能需要申明依赖）："); //$NON-NLS-1$
+				out.println(analyser.getUnknowVars());
+				printAddDependence(out);
+			}
+			resultArea.setForeground(Color.BLUE);
+			out.flush();
+			out.close();
+			text = buf.toString();
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			resultArea.setForeground(Color.RED);
+			text = analyser.getErrors().toString();
+		}
+		try {
+			resultArea.setText(text);
+//			resultArea.selectAll();
+//			resultArea.replaceSelection(text);
+		} catch (NoSuchMethodError e) {
+			// System.out.println("奇怪的问题");
+			((JTextComponent) resultArea).setText(text);
+			// e.printStackTrace();
+		}
+		return analyser;
+	}
+
+
+	@SuppressWarnings("unchecked")
+	private static void printAddScript(PrintWriter out, String name,
+			Collection set) {
+		out.print("//申明变量有："); //$NON-NLS-1$
+		out.println(set);
+		out.println("//JSI 中脚本描述参考："); //$NON-NLS-1$
+		out.print(" this.addScript('"); //$NON-NLS-1$
+		out.print(name);
+		out.print("',"); //$NON-NLS-1$
+		out.print("["); //$NON-NLS-1$
+		Iterator it = set.iterator();
+		if (it.hasNext()) {
+			while (true) {
+				out.print("'"); //$NON-NLS-1$
+				out.print(it.next());
+				out.print("'"); //$NON-NLS-1$
+				if (it.hasNext()) {
+					out.print(","); //$NON-NLS-1$
+				} else {
+					break;
+				}
+			}
+		}
+		out.println("]);"); //$NON-NLS-1$
+		out.println("//更多详细资料请参考：http://www.xidea.org/project/jsi/script.html");//$NON-NLS-1$
+	}
+/*
+
+//JSI 中脚本依赖描述参考：
+
+/*===========================================*\\
+方式1：填加脚本时直接定义（JSI2.1+）
+this.addScript('xx.js','xx',
+                            beforeLoadDependences,
+                            beforeLoadDependences)
+方式2：在包文件后定义
+ this.addDependence(object,
+                                        dependenceObject,
+                                        isBeforeLoadDependence);
+
+
+更多详细资料请参考：http://www.xidea.org/project/jsi/dependence.html
+\*===========================================*/
+
+	private static void printAddDependence(PrintWriter out) {
+		out.println();
+		out.println();
+		out.println("//JSI 中脚本依赖描述参考："); //$NON-NLS-1$
+		out.println();
+		out.println("/*===========================================*\\"); //$NON-NLS-1$
+		out.println("方式1：填加脚本时直接定义（JSI2.1+）");//$NON-NLS-1$
+		out.println("this.addScript('xx.js','xx',");//$NON-NLS-1$
+		out.println("                            beforeLoadDependences,");//$NON-NLS-1$
+		out.println("                            beforeLoadDependences)");//$NON-NLS-1$
+		out.println("方式2：在包文件后定义");//$NON-NLS-1$
+		out.println(" this.addDependence(object,");//$NON-NLS-1$
+		out.println("                                        dependenceObject,"); //$NON-NLS-1$
+		out.println("                                        isBeforeLoadDependence);"); //$NON-NLS-1$
+		out.println(); //$NON-NLS-1$
+		out.println("更多详细资料请参考：http://www.xidea.org/project/jsi/dependence.html"); //$NON-NLS-1$
+		out.println("\\*===========================================*/"); //$NON-NLS-1$
+	}
+
 	/**
 	 * @throws Exception
 	 */
