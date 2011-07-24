@@ -7,7 +7,7 @@ import org.jside.JSideWebServer;
 import org.jside.webserver.RequestContext;
 import org.jside.webserver.RequestUtil;
 
-public class JSFilterHandler extends JSHandler{
+public class JSFilterHandler extends SJSHandler{
 
 	private static final String DEFAULT_SJS = "/WEB-INF/default-filter.s.js";
 	private String script;

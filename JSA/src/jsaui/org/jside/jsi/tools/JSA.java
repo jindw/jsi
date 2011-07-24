@@ -9,6 +9,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Iterator;
+import java.awt.FontMetrics;  
+import java.awt.Component;  
+import java.awt.Graphics;  
+import java.awt.Insets;  
+  import javax.swing.border.AbstractBorder;  
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -28,6 +33,7 @@ import javax.swing.undo.UndoManager;
 
 //import org.jside.jsi.tools.ui.Messages;
 import org.jside.ui.ContextMenu;
+import org.jside.ui.DesktopUtil;
 
 public class JSA extends JFrame {
 	/**
@@ -44,6 +50,10 @@ public class JSA extends JFrame {
 		return compressor;
 	}
 	final JTextArea resultArea = new JTextArea();
+	{
+		LineNumberBorder border = new LineNumberBorder();
+		resultArea.setBorder(border);
+	}
 	final UndoManager undo = new UndoManager();
 	
 	public final Action REDO_ACTION = new AbstractAction(
@@ -113,14 +123,22 @@ public class JSA extends JFrame {
 		this.add(jp,BorderLayout.SOUTH);
 		abt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				doAnalyse(compressor, resultArea.getText(), "source.js", resultArea);
-				//bt.setEnabled(false);
+				try{
+					doAnalyse(compressor, resultArea.getText(), "source.js", resultArea);
+					//bt.setEnabled(false);
+				}catch (Exception e2) {
+					DesktopUtil.alert("语法错误："+e2);
+				}
 			}
 		});
 		cbt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String text = compressor.compress(resultArea.getText(), null);
-				resultArea.setText(text);
+				try{
+					String text = compressor.compress(resultArea.getText(), null);
+					resultArea.setText(text);
+				}catch (Exception e2) {
+					DesktopUtil.alert("压缩失败："+e2);
+				}
 			}
 		});
 	}
@@ -263,3 +281,112 @@ this.addScript('xx.js','xx',
 	}
 
 }
+
+  
+  
+
+class LineNumberBorder extends AbstractBorder {  
+     public LineNumberBorder(){  
+           
+     }  
+      
+     /*Insets 对象是容器边界的表示形式。 
+                              它指定容器必须在其各个边缘留出的空间。 
+     */  
+     //此方法在实例化时自动调用  
+     //此方法关系到边框是否占用组件的空间  
+     public Insets getBorderInsets(Component c)  
+     {  
+        return getBorderInsets(c,new Insets(0,0,0,0));   
+     }  
+       
+     public Insets getBorderInsets(Component c, Insets insets)  
+     {  
+         if(c instanceof JTextArea){  
+             int width=lineNumberWidth((JTextArea)c);  
+             insets.left=width;  
+         }  
+         return insets;  
+               
+     }  
+       
+     public boolean isBorderOpaque()  
+     {  
+         return false;  
+     }  
+     //边框的绘制方法  
+     //此方法必须实现  
+     public void paintBorder(Component c, Graphics g, int x, int y, int width, int height)  
+     {  
+         //获得当前剪贴区域的边界矩形。  
+         java.awt.Rectangle clip=g.getClipBounds();  
+         FontMetrics fm=g.getFontMetrics();  
+         int fontHeight=fm.getHeight();  
+           
+         //starting location at the "top" of the page...  
+         // y is the starting baseline for the font...  
+         int ybaseline=y+fm.getAscent();  
+           
+         // now determine if it is the "top" of the page...or somewhere else  
+         int startingLineNumber=(clip.y/fontHeight)+1;  
+           
+         if(startingLineNumber!=1){  
+             ybaseline=y+startingLineNumber*fontHeight-  
+                        (fontHeight-fm.getAscent());  
+         }  
+           
+         int yend=ybaseline+height;  
+         if(yend>(y+height)){  
+             yend=y+height;  
+         }  
+           
+         JTextArea jta=(JTextArea)c;  
+         int lineWidth=lineNumberWidth(jta);  
+           
+         int lnxStart=x+lineWidth;  
+
+           
+           
+         // loop until out of the "visible" region...  
+         int length=(""+Math.max(jta.getRows(), jta.getLineCount()+1)).length();  
+
+         if(ybaseline<yend){
+         Color c0 = g.getColor();
+//    	 g.setColor(new Color(0xAA,0xAA,0xAA));
+//    	 g.fillRect(clip.x, clip.y, lineWidth, jta.getHeight());
+         g.setColor(Color.blue);  
+         
+         //绘制行号  
+         while(ybaseline<yend)  
+         {  
+             String label = padLabel(startingLineNumber, length, true);  
+               
+             g.drawString(label, lnxStart- fm.stringWidth(label),  ybaseline);  
+             ybaseline+=fontHeight;  
+             startingLineNumber++;  
+         }  
+         
+         g.setColor(c0);
+         }
+     }  
+       
+     //寻找适合的数字宽度  
+     private int lineNumberWidth(JTextArea jta){  
+         int lineCount=Math.max(jta.getRows(), jta.getLineCount());  
+         return jta.getFontMetrics(jta.getFont()).stringWidth(lineCount+" ");  
+     }  
+       
+     private static String padLabel(int lineNumber, int length, boolean addSpace)  
+     {  
+         StringBuffer buffer=new StringBuffer();  
+         buffer.append(lineNumber);  
+         for(int count=(length-buffer.length());count>0;count--){  
+             buffer.insert(0, ' ');  
+         }  
+         if(addSpace){  
+             buffer.append(' ');  
+         }  
+         return buffer.toString();  
+     }  
+       
+}  

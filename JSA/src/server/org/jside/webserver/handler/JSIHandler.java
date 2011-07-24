@@ -28,6 +28,7 @@ public class JSIHandler {
 				if(js == null){
 					js = new JSIService();
 					js.addSource(new File(file));
+					js.addSource(new File(new File(base),"WEB-INF/classes"));
 					js.addLib(new File(new File(base),"WEB-INF/lib"));
 				}
 				js.service(uri.substring(prefix.length()), context.getParams(),

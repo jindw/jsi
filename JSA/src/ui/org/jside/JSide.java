@@ -30,11 +30,10 @@ public class JSide {
 			args = new String[] {// "org.jside.webserver.proxy.ProxyHandler",
 					"org.jside.webserver.handler.JSFilterHandler",
 					"org.jside.webserver.handler.PHPHandler",
-					"org.jside.webserver.handler.LiteXMLHandler",
+					"org.jside.webserver.handler.SJSHandler",
 					"org.jside.webserver.handler.JSIHandler",
-					"org.jside.webserver.handler.JSHandler",
-					"org.jside.webserver.handler.ResourceHandler",
-					"org.jside.jsi.tools.JSA" ,
+					"org.jside.webserver.handler.LiteHandler",
+					"org.jside.jsi.tools.JSA",
 					"org.jside.xtools.encoding.EncodingTransformer",
 					//"org.jside.xtools.xml.XTransformer"
 					};
