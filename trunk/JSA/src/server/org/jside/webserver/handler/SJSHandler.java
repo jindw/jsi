@@ -10,7 +10,7 @@ import org.jside.webserver.RequestContext;
 import org.jside.webserver.RequestUtil;
 import org.jside.webserver.sjs.JSExcutor;
 
-public class JSHandler {
+public class SJSHandler {
 
 	public void execute() throws IOException{
 		RequestContext context = RequestUtil.get();
@@ -30,6 +30,6 @@ public class JSHandler {
 		JSExcutor.getCurrentInstance().eval(resource.toURL(),globals);
 	}
 	public static void main(String[] args){
-		JSideWebServer.getInstance().addAction("/**.s.js", new JSHandler());
+		JSideWebServer.getInstance().addAction("/**.s.js", new SJSHandler());
 	}
 }

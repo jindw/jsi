@@ -20,7 +20,7 @@ public class PHPHandler {
 		String rp = CGIEnvironment.toRealPath(base, uri);
 		if (rp.endsWith(".php")) {
 			Map<String, String> envp = new CGIEnvironment(context).toMap(null);
-			CGIRunner cr = new CGIRunner(context, "php-cgi.exe", envp,
+			CGIRunner cr = new CGIRunner(context, "php-cgi", envp,
 					new File(new File(base), rp).getParentFile(), null);
 			cr.run();
 		}
