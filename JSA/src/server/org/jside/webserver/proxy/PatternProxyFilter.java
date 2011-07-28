@@ -1,7 +1,5 @@
 package org.jside.webserver.proxy;
 
-import java.io.InputStream;
-
 import org.jside.webserver.action.URLMatcher;
 
 class PatternProxyFilter implements ProxyFilter {
@@ -25,9 +23,4 @@ class PatternProxyFilter implements ProxyFilter {
 	public String filter(String content) {
 		return base.filter(content);
 	}
-	public String findEncoding(InputStream content) {
-		return base.findEncoding(content);
-	}
-
-
 }
