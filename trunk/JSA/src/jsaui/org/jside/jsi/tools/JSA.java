@@ -118,8 +118,10 @@ public class JSA extends JFrame {
 		JPanel jp = new JPanel(new java.awt.FlowLayout());
 		final JButton abt = new JButton("分析");
 		final JButton cbt = new JButton("压缩");
+		final JButton fbt = new JButton("格式化");
 		jp.add(abt);
 		jp.add(cbt);
+		jp.add(fbt);
 		this.add(jp,BorderLayout.SOUTH);
 		abt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -138,6 +140,16 @@ public class JSA extends JFrame {
 					resultArea.setText(text);
 				}catch (Exception e2) {
 					DesktopUtil.alert("压缩失败："+e2);
+				}
+			}
+		});
+		fbt.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e) {
+				try{
+					String text = compressor.format(resultArea.getText());
+					resultArea.setText(text);
+				}catch (Exception e2) {
+					DesktopUtil.alert("格式失败："+e2);
 				}
 			}
 		});

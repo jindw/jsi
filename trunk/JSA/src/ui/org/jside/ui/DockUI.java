@@ -19,6 +19,7 @@ import java.io.File;
 
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JPopupMenu;
 
 import org.jside.JSide;
@@ -104,7 +105,12 @@ public class DockUI extends JDialog {
 		dock.setSize(WIDTH, HEIGHT);
 		Toolkit toolkit = Toolkit.getDefaultToolkit();
 		Dimension scmSize = toolkit.getScreenSize();
-		dock.setLocation(scmSize.width - WIDTH, scmSize.height / 2 - HEIGHT);
+//		JFrame f = new JFrame();
+//		f.setExtendedState(JFrame.MAXIMIZED_BOTH);
+//		f.setVisible(true);
+		int top =/* f.getHeight() - HEIGHT;//*/scmSize.height - HEIGHT;
+		int left =/* f.getWidth() - WIDTH ;//*/scmSize.width - WIDTH;
+		dock.setLocation(left, top);
 		dock.setAlwaysOnTop(true);
 		dock.setVisible(true);
 		dock.toFront();
