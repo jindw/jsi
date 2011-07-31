@@ -4,8 +4,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,12 +18,12 @@ import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jside.JSideWebServer;
 import org.jside.webserver.RequestUtil;
 import org.jside.webserver.RequestContext;
 import org.jside.webserver.RequestContextImpl;
+import org.jside.webserver.action.ActionInvocation;
 
-public class ProxyHandler {
+public class ProxyHandler implements ActionInvocation {
 	private static Log log = LogFactory.getLog(ProxyHandler.class);
 	private static final String ISO_8859_1 = "ISO-8859-1";
 	private static final Pattern HOST_PATTERN = Pattern
@@ -62,17 +64,6 @@ public class ProxyHandler {
 				contentFilter));
 	}
 
-	public void processRequest() throws IOException {
-		RequestContext context = RequestUtil.get();
-		String url = context.getRequestURI();
-		if (log.isDebugEnabled()) {
-			log.debug("处理请求：" + url);
-		}
-		if (!processProxy(context)) {
-			context.setStatus(500, "不支持协议：" + url);
-		}
-	}
-
 	/**
 	 * .jside.org 域名不走代理
 	 * 
@@ -83,7 +74,12 @@ public class ProxyHandler {
 	protected boolean processProxy(RequestContext context) throws IOException {
 		String url = context.getRequestURI();
 		if (url.startsWith("http://")) {
-			String host = getHost(context);
+			URL resource = new URL(url);
+			int port = resource.getPort();
+			if (port < 0) {
+				port = resource.getDefaultPort();
+			}
+			String host = resource.getHost() + ':' + port;
 			if (host.indexOf(".jside.org:") < 0) {
 				// TODO:WHY???
 				// context.setEncoding(null);
@@ -96,8 +92,19 @@ public class ProxyHandler {
 		return false;
 	}
 
-	public void execute() throws IOException {
-		processProxy(RequestUtil.get());
+	public void execute(RequestContext context) throws IOException {
+		try {
+			if (!processProxy(context)) {
+				context.setStatus(500, "不支持协议：" + context.getRequestURI());
+			}
+			return ;
+		} catch (ConnectException e) {
+			context.setStatus(500, "Proxy Failed:" + e.getMessage());
+		} catch (SocketException e) {
+			context.setStatus(500, "Proxy Failed:" + e.getMessage());
+		}
+
+		context.getOutputStream().flush();
 	}
 
 	public void dispatch(RequestContext context, String path)
@@ -169,11 +176,11 @@ public class ProxyHandler {
 			ip = remote;
 			port = "80";
 		}
-		Socket socket = new Socket(ip, Integer.parseInt(port));
-		InputStream rin = socket.getInputStream();
-		OutputStream rout = (socket.getOutputStream());
 		List<String> headers = context.getRequestHeaders();
 		List<String> result = new ArrayList<String>();
+		// if(context.getRequestURI().endsWith("/search")){
+		// System.out.println(111);
+		// }
 		for (String line : headers) {
 			if (line.startsWith("Proxy-")) {
 				continue;
@@ -182,26 +189,18 @@ public class ProxyHandler {
 				if (host.endsWith(":80")) {
 					host = host.substring(0, host.length() - 3);
 				}
-				line = "Host:" + host;
+				line = "Host: " + host;
 			}
 			result.add(line);
 		}
+		Socket socket = new Socket(ip, Integer.parseInt(port));
+		InputStream rin = socket.getInputStream();
+		OutputStream rout = (socket.getOutputStream());
 		doSend(context, result, rout);
 		doReceive(context, rin);
+		context.getOutputStream().flush();
+		context.getOutputStream().close();
 
-	}
-
-	private String getHost(RequestContext context) throws IOException {
-		String url = context.getRequestURI();
-		if (log.isDebugEnabled()) {
-			log.debug("处理代理请求：" + url);
-		}
-		URL resource = new URL(url);
-		int port = resource.getPort();
-		if (port < 0) {
-			port = resource.getDefaultPort();
-		}
-		return resource.getHost() + ':' + port;
 	}
 
 	private void doSend(RequestContext context, List<String> headers,
@@ -223,17 +222,21 @@ public class ProxyHandler {
 		}
 
 		rout.write(requestLine.getBytes(ISO_8859_1));
+		rout.write('\r');
+		rout.write('\n');
 		int contentLength = getContentLength(headers);
 		for (String line : headers) {
 			rout.write(line.getBytes(ISO_8859_1));
+			rout.write('\r');
+			rout.write('\n');
 		}
 		rout.write('\r');
 		rout.write('\n');
 		rout.flush();
 		if (contentLength >= 0) {
 			InputStream in = context.getInputStream();
-			processContent(context, in, rout,null, this.requestContentFilters, url,
-					contentLength);
+			processContent(context, in, rout, null, this.requestContentFilters,
+					url, contentLength);
 		}
 		rout.flush();
 	}
@@ -250,7 +253,12 @@ public class ProxyHandler {
 	private void doReceive(RequestContextImpl context, InputStream rin)
 			throws IOException {
 		OutputStream out = context.getOutputStream();
-		String firstLine = readLine(rin);// rin.readLine();
+		String firstLine;
+		try{
+			firstLine = readLine(rin);// rin.readLine();
+		}catch (SocketException e) {
+			throw e;
+		}
 		if (firstLine != null) {
 			String url = context.getRequestURI();
 			List<String> headers = readHeaders(rin);
@@ -263,22 +271,31 @@ public class ProxyHandler {
 			}
 			String[] fls = firstLine.split("[\\s]");
 
-			int code = Integer.parseInt(fls[1]);
+			int statusCode = Integer.parseInt(fls[1]);
 
-			context.setStatus(code, fls.length > 2 ? fls[2] : null);
+			context.setStatus(statusCode, fls.length > 2 ? fls[2] : null);
 
 			filters = findFilter(url, this.responseContentFilters);
-			int contentLength = getContentLength(headers);
-			if (filters == null) {
-				for (String line : headers) {
-					context.addResponseHeader(line);
-				}
-				context.setResponseHeader("Connection:close");
-				printFix(rin, out, contentLength);
 
+			String method = context.getMethod();
+
+			if ("HEAD".equals(method) || "TRACE".equals(method)
+					|| statusCode == 304 || statusCode == 204
+					|| statusCode == 205 || statusCode < 200) {
 			} else {
-				filterReceivedContent(context, filters, rin, out, headers,
-						code, contentLength);
+
+				int contentLength = getContentLength(headers);
+				if (filters == null) {
+					for (String line : headers) {
+						context.addResponseHeader(line);
+					}
+					context.setResponseHeader("Connection:close");
+					printFix(rin, out, contentLength);
+
+				} else {
+					filterReceivedContent(context, filters, rin, out, headers,
+							contentLength);
+				}
 			}
 
 		} else {
@@ -289,8 +306,8 @@ public class ProxyHandler {
 
 	private void filterReceivedContent(RequestContextImpl context,
 			List<PatternProxyFilter> filters, InputStream rin,
-			OutputStream out, List<String> headers, int statusCode,
-			int contentLength) throws IOException {
+			OutputStream out, List<String> headers, int contentLength)
+			throws IOException {
 
 		String method = context.getMethod();
 		boolean isGZip = "gzip".equalsIgnoreCase(getHeader(headers,
@@ -298,47 +315,44 @@ public class ProxyHandler {
 		boolean isChunked = "chunked".equalsIgnoreCase(getHeader(headers,
 				"Transfer-Encoding"));
 
-		for (String line : headers) {//不用gzip，不用chunk
-			if ((!isChunked || !line.startsWith("Transfer-Encoding")) && (!isGZip || !line.startsWith("Content-Encoding"))) {
+		for (String line : headers) {// 不用gzip，不用chunk
+			if ((!isChunked || !line.startsWith("Transfer-Encoding"))
+					&& (!isGZip || !line.startsWith("Content-Encoding"))) {
 				context.addResponseHeader(line);
 			}
 		}
-		log.debug("返回数据长度：" + method + statusCode + contentLength);
+		log.debug("返回数据长度：" + method + contentLength);
 		// 1xx, 204, and 304
-		if ("HEAD".equals(method) || "TRACE".equals(method)
-				|| statusCode == 304 || statusCode == 204 || statusCode == 205
-				|| statusCode < 200) {
-		} else {
-			if (isChunked) {
-				rin = new ChunkedInputStream(rin);
-			}
-			if (isGZip) {
-				rin = new GZIPInputStream(rin);
+		if (isChunked) {
+			rin = new ChunkedInputStream(rin);
+		}
+		if (isGZip) {
+			rin = new GZIPInputStream(rin);
+		}
+
+		// Content-Type text/html; charset=UTF-8
+		String encoding = getHeader(headers, "Content-Type");
+		if (encoding != null) {
+			int p = encoding.indexOf("=");
+			if (p > 0) {
+				encoding = encoding.substring(p + 1);
+			} else {
+				encoding = null;
 			}
 
-			//Content-Type	text/html; charset=UTF-8
-			String encoding = getHeader(headers, "Content-Type");
-			if(encoding != null){
-				int p = encoding.indexOf("=");
-				if(p>0){
-					encoding = encoding.substring(p+1);
-				}else{
-					encoding = null;
-				}
-				
-			}
-			processContent(context, rin, out, encoding, filters, context.getRequestURI(),
-					contentLength);
 		}
+		processContent(context, rin, out, encoding, filters, context
+				.getRequestURI(), contentLength);
 	}
 
 	private void processContent(RequestContext context, InputStream in,
-			OutputStream out,String encoding, List<PatternProxyFilter> filters,
-			final String url, int contentLength) throws IOException {
+			OutputStream out, String encoding,
+			List<PatternProxyFilter> filters, final String url,
+			int contentLength) throws IOException {
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
 		printFix(in, buf, contentLength);
 		byte[] data = buf.toByteArray();
-		if(encoding == null){
+		if (encoding == null) {
 			encoding = ISO_8859_1;
 		}
 		String content = new String(data, encoding);
@@ -358,13 +372,13 @@ public class ProxyHandler {
 
 	}
 
-//	private void write(InputStream in, OutputStream out) throws IOException {
-//		byte[] buf = new byte[1024];
-//		int c;
-//		while ((c = in.read(buf)) >= 0) {
-//			out.write(buf, 0, c);
-//		}
-//	}
+	// private void write(InputStream in, OutputStream out) throws IOException {
+	// byte[] buf = new byte[1024];
+	// int c;
+	// while ((c = in.read(buf)) >= 0) {
+	// out.write(buf, 0, c);
+	// }
+	// }
 
 	private List<PatternProxyFilter> findFilter(String url,
 			ArrayList<PatternProxyFilter> headFilters) {
@@ -398,19 +412,15 @@ public class ProxyHandler {
 		return new ArrayList<String>(Arrays.asList(list));
 	}
 
-	private String readLine(InputStream in) {
+	private String readLine(InputStream in) throws IOException {
 		StringBuilder buf = new StringBuilder();
 		int c;
-		try {
-			while ((c = in.read()) >= 0) {
-				if (c == '\n') {
-					return buf.toString();
-				} else if (c != '\r') {// r//n
-					buf.append((char) c);
-				}
+		while ((c = in.read()) >= 0) {
+			if (c == '\n') {
+				return buf.toString();
+			} else if (c != '\r') {// r//n
+				buf.append((char) c);
 			}
-		} catch (IOException e) {
-			log.error(e);
 		}
 		throw new RuntimeException("请求异常");
 	}
@@ -476,9 +486,9 @@ public class ProxyHandler {
 		return null;
 	}
 
-	public static void main(String[] args) throws IOException {
-		JSideWebServer.getInstance().addAction("http://**",
-				ProxyHandler.getInstance());
+	public boolean match(String uri) {
+		return uri.startsWith("http://");
+		// return false;
 	}
 
 }

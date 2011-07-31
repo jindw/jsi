@@ -6,12 +6,14 @@ import java.net.MalformedURLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jside.jsi.tools.ui.frame.JSFormatFilter;
 import org.jside.ui.ContextMenu;
 import org.jside.ui.DockUI;
 import org.jside.ui.SplashWindow;
 import org.jside.ui.DesktopUtil;
 import org.jside.ui.WebLinkAction;
 import org.jside.webserver.action.ActionWebServer;
+import org.jside.webserver.proxy.ProxyHandler;
 
 public class JSideWebServer extends ActionWebServer {
 	/**
@@ -77,6 +79,8 @@ public class JSideWebServer extends ActionWebServer {
 		if (port != null) {
 			this.defaultPort = Integer.parseInt(port);
 		}
+		invocationList.add(ProxyHandler.getInstance());
+		ProxyHandler.getInstance().addResponseContentFilter("**.js", new JSFormatFilter());
 		ContextMenu dock = ContextMenu.getInstance();
 		dock.addMenuItem("浏览网站", null, WebLinkAction.createLocalLink("/"));
 		dock.addMenuItem("浏览文件", null, browseAction);
