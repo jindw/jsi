@@ -42,6 +42,10 @@ public abstract class RuntimeSupport implements JSIRuntime {
 		this.root = root;
 	}
 
+	public Object getGlobals() {
+		return this.globals;
+	}
+
 	public ResourceRoot getRoot() {
 		return root;
 	}
