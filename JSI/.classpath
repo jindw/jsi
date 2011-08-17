@@ -7,7 +7,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="var" path="TOMCAT_HOME/lib/servlet-api.jar" sourcepath="/servlet-src"/>
 	<classpathentry kind="var" path="TOMCAT_HOME/lib/jsp-api.jar"/>
-	<classpathentry kind="lib" path="web/WEB-INF/lib/js.jar"/>
+	<classpathentry kind="lib" path="web/WEB-INF/lib/js.jar" sourcepath="E:/opensource/mozilla/rhino1_7R2-src.zip"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="web/WEB-INF/lib/Lite.jar"/>
 	<classpathentry kind="output" path="web/WEB-INF/classes"/>
