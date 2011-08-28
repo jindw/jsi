@@ -1,5 +1,8 @@
 package org.xidea.jsi.runtime.test;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.mozilla.javascript.Callable;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
@@ -33,6 +36,7 @@ public class DebugTest {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		System.out.println(new SimpleDateFormat("yyyy-MM-dd'T'HH:mmZ").format(new Date()));
 		final ContextFactory factory = ContextFactory.getGlobal();
 		rt.setOptimizationLevel(-1);
 		Scriptable global = (Scriptable) rt.getGlobals();

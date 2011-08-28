@@ -220,8 +220,13 @@ public class JSIService extends ResourceRoot {
 		} else {
 			root = this;
 		}
+		String[] levels = param.get("level");
+		int level = 1;
+		if (levels != null) {
+			level = Integer.parseInt(levels[0]);
+		}
 		JSIExportor exportor = DefaultExportorFactory.getInstance()
-				.createExplorter(param);
+				.createExplorter(level,param);
 		if (exportor == null) {
 			if (!param.containsKey(exportService)) {
 				HttpURLConnection url = (HttpURLConnection) new URL(

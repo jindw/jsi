@@ -113,7 +113,7 @@ class SDNService {
 		exportConfig.put("internalPrefix", new String[] { "$"
 				+ Integer.toString(ips++, 32) });
 		JSIExportor releaseExportor = DefaultExportorFactory.getInstance()
-				.createExplorter(exportConfig);
+				.createExplorter(DefaultExportorFactory.TYPE_EXPORT_CONFUSE,exportConfig);
 
 		return releaseExportor.export(buildLoadContext(CDN_PATH_SPLITER
 				.split(path)));
