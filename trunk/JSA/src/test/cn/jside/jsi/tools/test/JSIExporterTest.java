@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.impl.DataRoot;
+import org.xidea.jsi.impl.DefaultExportorFactory;
 import org.xidea.jsi.impl.DefaultLoadContext;
 
 public class JSIExporterTest extends TestCase {
@@ -41,8 +42,7 @@ public class JSIExporterTest extends TestCase {
 		}
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
 		params.put("lineSeperator",new String[]{"\r\n\r\n"});
-		params.put("level",new String[]{"3"});
-		String result = new JSAExportorFactory().createExplorter(params).export(loadContext);
+		String result = new JSAExportorFactory().createExplorter(DefaultExportorFactory.TYPE_EXPORT_CONFUSE,params).export(loadContext);
 		Assert.assertTrue("不能压出外部变量啊！！", JSAToolkit.getInstance()
 				.createJavaScriptCompressor().analyse(result).getUnknowVars().isEmpty());
 		System.err.println(result);
@@ -62,8 +62,7 @@ public class JSIExporterTest extends TestCase {
 		//"confuse",new JavaScriptCompressorConfig(),, false
 		HashMap<String, String[]> params = new HashMap<String, String[]>();
 		params.put("lineSeperator",new String[]{"\r\n\r\n"});
-		params.put("level",new String[]{"3"});
-		String result = new JSAExportorFactory().createExplorter(params).export(loadContext);
+		String result = new JSAExportorFactory().createExplorter(DefaultExportorFactory.TYPE_EXPORT_CONFUSE,params).export(loadContext);
 		Collection<String> unknow = JSAToolkit.getInstance()
 				.createJavaScriptCompressor().analyse(result).getUnknowVars();
 		System.err.println(unknow);

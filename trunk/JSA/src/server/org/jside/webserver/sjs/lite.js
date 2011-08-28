@@ -10,10 +10,6 @@ var lite = {
         impl.render(path,af.toJava(data),out);
     }
 }
-/**
- * 添加自动表单的支持
- */
-//impl.addFeature("http://www.xidea.org/ns/lite/autoform","form");
 
 function getGlobalContext(){
 	return Packages.org.jside.webserver.sjs.JSExcutor.getCurrentInstance().getGlobals();

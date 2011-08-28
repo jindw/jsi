@@ -6,22 +6,23 @@ import java.net.MalformedURLException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jside.jsi.tools.ui.frame.JSFormatFilter;
+import org.jside.jsi.tools.JSFormatFilter;
 import org.jside.ui.ContextMenu;
 import org.jside.ui.DockUI;
 import org.jside.ui.SplashWindow;
 import org.jside.ui.DesktopUtil;
 import org.jside.ui.WebLinkAction;
+import org.jside.webserver.action.Invocation;
+import org.jside.webserver.action.InvocationImpl;
 import org.jside.webserver.action.ActionWebServer;
 import org.jside.webserver.proxy.ProxyHandler;
 
 public class JSideWebServer extends ActionWebServer {
 	/**
-	 * 发出方：JSideWebServer#openListener
-	 * 参数 File
+	 * 发出方：JSideWebServer#openListener 参数 File
 	 */
-	public static JSideListener<File> rootChangedAction = new JSideListener.WebRootChange(){
-		public boolean execute(File source){
+	public static JSideListener<File> rootChangedAction = new JSideListener.WebRootChange() {
+		public boolean execute(File source) {
 			try {
 				JSideConfig.getInstance().setWebRoot(source.getCanonicalPath());
 				JSideConfig.getInstance().save();
@@ -43,8 +44,22 @@ public class JSideWebServer extends ActionWebServer {
 			return false;
 		}
 	};
+
+	@SuppressWarnings("unchecked")
+	public <T> T getHandler(Class<T> type) {
+		for (Invocation i : this.invocationList) {
+			if (i instanceof InvocationImpl) {
+				Object h = ((InvocationImpl) i).getHandle();
+				if (type.isInstance(h)) {
+					return (T) h;
+				}
+			}
+		}
+		return null;
+	}
+
 	private static final JSideListener<File> openListener = new JSideListener.FileOpen() {
-		public boolean execute(File file ) {
+		public boolean execute(File file) {
 			if (file.isDirectory()) {
 				rootChangedAction.execute(file);
 				return true;
@@ -80,23 +95,24 @@ public class JSideWebServer extends ActionWebServer {
 			this.defaultPort = Integer.parseInt(port);
 		}
 		invocationList.add(ProxyHandler.getInstance());
-		ProxyHandler.getInstance().addResponseContentFilter("**.js", new JSFormatFilter());
+		ProxyHandler.getInstance().addResponseContentFilter("**.js",
+				new JSFormatFilter());
 		ContextMenu dock = ContextMenu.getInstance();
 		dock.addMenuItem("浏览网站", null, WebLinkAction.createLocalLink("/"));
 		dock.addMenuItem("浏览文件", null, browseAction);
 		JSide.addListener(rootChangedAction);
-		JSide.addListener( beforeOpenListener);
+		JSide.addListener(beforeOpenListener);
 		// jside.addListener(JSideListener.DOCK_CLICK, new WebLinkAction("/"));
 		JSide.addListener(openListener);
 	}
 
 	@Override
-	public void start(){
+	public void start() {
 		SplashWindow.showSplash("打开web服务器...");
 		String thread = System.getProperty("jside.web.thread");
-		if(thread!=null){
+		if (thread != null) {
 			super.start(Integer.parseInt(thread));
-		}else{
+		} else {
 			super.start();
 		}
 		while (true) {
@@ -126,14 +142,13 @@ public class JSideWebServer extends ActionWebServer {
 	}
 
 	public static JSideWebServer getInstance() {
-		if(instance == null){
+		if (instance == null) {
 			String root = JSideConfig.getInstance().getWebRoot();
 			if (root == null) {
 				root = ".";
 			}
 			try {
-				instance = new JSideWebServer(new File(root)
-						.getCanonicalFile());
+				instance = new JSideWebServer(new File(root).getCanonicalFile());
 			} catch (IOException e) {
 				log.error(e);
 			}

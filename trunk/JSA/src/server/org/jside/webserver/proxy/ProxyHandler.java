@@ -21,9 +21,9 @@ import org.apache.commons.logging.LogFactory;
 import org.jside.webserver.RequestUtil;
 import org.jside.webserver.RequestContext;
 import org.jside.webserver.RequestContextImpl;
-import org.jside.webserver.action.ActionInvocation;
+import org.jside.webserver.action.Invocation;
 
-public class ProxyHandler implements ActionInvocation {
+public class ProxyHandler implements Invocation {
 	private static Log log = LogFactory.getLog(ProxyHandler.class);
 	private static final String ISO_8859_1 = "ISO-8859-1";
 	private static final Pattern HOST_PATTERN = Pattern

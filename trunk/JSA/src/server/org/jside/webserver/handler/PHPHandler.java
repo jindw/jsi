@@ -12,6 +12,7 @@ import org.jside.webserver.RequestContext;
 import org.jside.webserver.RequestUtil;
 
 public class PHPHandler {
+	private static PHPEnv phpEnv = new PHPEnv(); 
 
 	public void execute() throws IOException {
 		RequestContext context = RequestUtil.get();
@@ -19,9 +20,11 @@ public class PHPHandler {
 		URI base = context.getServer().getWebBase();
 		String rp = CGIEnvironment.toRealPath(base, uri);
 		if (rp.endsWith(".php")) {
-			Map<String, String> envp = new CGIEnvironment(context).toMap(null);
-			CGIRunner cr = new CGIRunner(context, "php-cgi", envp,
+			CGIEnvironment env = new CGIEnvironment(context);
+			Map<String, String> envp = env.toMap(null);
+			CGIRunner cr = new CGIRunner(context, env.scriptFilename, envp,
 					new File(new File(base), rp).getParentFile(), null);
+			cr.setCgiExecutable(phpEnv.getPHPCmd());
 			cr.run();
 		}
 	}

@@ -13,6 +13,7 @@ import org.jside.JSide;
 import org.jside.JSideListener;
 import org.jside.JSideWebServer;
 import org.jside.jsi.tools.JSAToolkit;
+import org.jside.jsi.tools.JSFormatFilter;
 import org.jside.jsi.tools.JavaScriptCompressor;
 import org.jside.jsi.tools.ui.JSAConfig;
 import org.jside.jsi.tools.ui.frame.project.ProjectRootNode;
