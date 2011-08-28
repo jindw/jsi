@@ -33,6 +33,7 @@ public class JSide {
 					"org.jside.webserver.handler.SJSHandler",
 					"org.jside.webserver.handler.JSIHandler",
 					"org.jside.webserver.handler.LiteHandler",
+					"org.jside.webserver.handler.VelocityHandler",
 					"org.jside.jsi.tools.JSA",
 					"org.jside.xtools.encoding.EncodingTransformer",
 					//"org.jside.xtools.xml.XTransformer"

@@ -107,12 +107,6 @@
 				<include name="**/*.*" />
 			</zipfileset>
 		</jar>
-		<jar destfile="build/dest/dependence/fs.jar">
-			<zipfileset src="lib/fs.jar">
-				<exclude name="**/*.java" />
-				<include name="**/*.*" />
-			</zipfileset>
-		</jar>
 		<jar destfile="build/dest/dependence/Lite.jar">
 			<zipfileset src="lib/Lite.jar">
 				<exclude name="**/*.java" />
@@ -290,12 +284,6 @@
 		</antcall>
 	</target>
 	<target name="call-dependence">
-		<jar destfile="lib/fs.jar">
-			<fileset dir="../FileServer/web/WEB-INF/classes">
-				<include name="org/jside/webserver/**/*.*" />
-				<exclude name="**/test/**/*.*" />
-			</fileset>
-		</jar>
 		<condition property="dependenceTarget" value="build" else="jar">
 			<equals arg1="${dependenceTarget}" arg2="build" />
 		</condition>

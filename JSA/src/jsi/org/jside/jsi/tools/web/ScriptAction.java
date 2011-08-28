@@ -16,7 +16,7 @@ import org.jside.jsi.tools.generator.PackageAction;
 import org.jside.webserver.RequestContextImpl;
 import org.jside.webserver.RequestUtil;
 import org.jside.webserver.RequestContext;
-import org.jside.webserver.action.ActionInvocationImpl;
+import org.jside.webserver.action.InvocationImpl;
 import org.xidea.jsi.impl.ResourceRoot;
 import org.xidea.jsi.web.JSIService;
 import org.xidea.lite.impl.HotTemplateEngine;
@@ -27,13 +27,13 @@ public class ScriptAction extends JSIService {
 	// private ActionInvocationImpl liteAction = new
 	// ActionInvocationImpl("",lite);
 	private PackageAction packageAction = new PackageAction(this);
-	private ActionInvocationImpl packageGen = new ActionInvocationImpl("",
+	private InvocationImpl packageGen = new InvocationImpl("",
 			packageAction);
 
 	public ScriptAction() {
 		try {
 			URI root = new URI("classpath:///org/jside/jsi/tools/web/");
-			lite = new HotTemplateEngine(root);
+			lite = new HotTemplateEngine(root,null,null);
 		} catch (URISyntaxException e) {
 		}
 	}
