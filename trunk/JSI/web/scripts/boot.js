@@ -23,7 +23,7 @@
  * JSI对象
  * @public
  */
-var $JSI= {
+var $JSI= this.$JSI || {
     /**
      * 脚本根路径，调试模式下，系统根据启动脚本文件名自动探测，但是真实部署时，需要用户自己手动指定包路径。
      * @public
@@ -34,9 +34,9 @@ var $JSI= {
      //scriptBase : "http://localhost:8080/script2/"
 };
 
-if("org.xidea.jsi:Require"){
-   var $require;
-}
+//if("org.xidea.jsi:Require"){
+//   var $require;
+//}
 /**
  * 导入指定元素（脚本、函数、类、变量）至指定目标,默认方式为同步导入，默认目标为全局对象（Global == window(html)）。
  * <pre class="code"><code>  //Example:
@@ -185,7 +185,7 @@ function $import(loaderEval,cachedScripts){
         }
     }else{
     	if("org.xidea.jsi:Server"){
-    	    var impl = $JSI.impl = Packages.org.xidea.jsi.impl.RuntimeSupport.create(this);
+    		var impl = $JSI.impl || Packages.org.xidea.jsi.impl.RuntimeSupport.create(this);
     	    $JSI.scriptBase= "classpath:///";
 		    loaderEval = function(code){
 		        //var evaler =  impl.eval("(function(){eval(arguments[0])})", this.scriptBase + this.name , null)
@@ -1181,14 +1181,14 @@ function $import(loaderEval,cachedScripts){
     		findPackage('org.xidea.jsi'),
     		'isBrowser',null);
     }
-    if("org.xidea.jsi:Require"){
-    	$require = function(){
-    		$require = doObjectImport(
-    			findPackage('org.xidea.jsi'),
-    			'buildRequire',null)(null,findPackageByPath,realPackage);
-    		return $require.apply(this,arguments);
-    	}
-    }
+//    if("org.xidea.jsi:Require"){
+//    	$require = function(){
+//    		$require = doObjectImport(
+//    			findPackage('org.xidea.jsi'),
+//    			'buildRequire',null)(null,findPackageByPath,realPackage);
+//    		return $require.apply(this,arguments);
+//    	}
+//    }
     /*
      * 即JSI 的$import函数
      */

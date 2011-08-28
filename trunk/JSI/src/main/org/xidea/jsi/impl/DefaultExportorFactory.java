@@ -24,11 +24,11 @@ public class DefaultExportorFactory {
 	/**
 	 * 混淆隔离支持的导出合并实现(保留公开变量)
 	 */
-	public static final int TYPE_EXPORT_RESERVE = 2;
+	public static final int TYPE_EXPORT_RESERVE = 3;
 	/**
 	 * 混淆隔离支持的导出合并实现(混淆未导出的公开变量)
 	 */
-	public static final int TYPE_EXPORT_CONFUSE = 3;
+	public static final int TYPE_EXPORT_CONFUSE = 4;
 
 
 
@@ -50,12 +50,7 @@ public class DefaultExportorFactory {
 	 * (non-Javadoc)
 	 * 
 	 */
-	public JSIExportor createExplorter(Map<String, String[]> param) {
-		String[] levels = param.get("level");
-		int level = 1;
-		if (levels != null) {
-			level = Integer.parseInt(levels[0]);
-		}
+	public JSIExportor createExplorter(int level,Map<String, String[]> param) {
 		switch (level) {
 		case TYPE_EXPORT_CONFUSE:
 			return createConfuseExplorter(param);
