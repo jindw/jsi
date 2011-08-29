@@ -185,8 +185,9 @@ function $import(loaderEval,cachedScripts){
         }
     }else{
     	if("org.xidea.jsi:Server"){
-    		var impl = $JSI.impl || Packages.org.xidea.jsi.impl.RuntimeSupport.create(this);
-    	    $JSI.scriptBase= "classpath:///";
+    		$JSI.impl = $JSI.impl || Packages.org.xidea.jsi.impl.RuntimeSupport.create(this);
+    		var impl = $JSI.impl ;
+    		$JSI.scriptBase= "classpath:///";
 		    loaderEval = function(code){
 		        //var evaler =  impl.eval("(function(){eval(arguments[0])})", this.scriptBase + this.name , null)
 		        //return evaler.call(this,code);

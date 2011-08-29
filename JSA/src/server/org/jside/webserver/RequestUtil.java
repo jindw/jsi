@@ -159,7 +159,7 @@ public abstract class RequestUtil {
 			write(html.getBytes(context.getEncoding()), context
 					.getOutputStream());
 		} else {
-			context.setMimeType(contentType);
+			context.setContentType(contentType);
 			String fileModified = new Date(file.lastModified()).toString();
 			String headModified = context.getRequestHeader("If-Modified-Since");
 			if (fileModified.equals(headModified)) {
@@ -190,7 +190,7 @@ public abstract class RequestUtil {
 				&& contentType.indexOf("charset=") < 0) {
 			contentType += ";charset=" + context.getEncoding();
 		}
-		context.setMimeType(contentType);
+		context.setContentType(contentType);
 	}
 
 	/**

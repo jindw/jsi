@@ -283,8 +283,8 @@ public class RequestContextImpl implements RequestContext {
 		out.status = status + " " + message;
 	}
 
-	public void setMimeType(String mimeType) {
-		out.setMimeType(mimeType);
+	public void setContentType(String contentType) {
+		out.setContentType(contentType);
 	}
 
 	public boolean isAccept() {

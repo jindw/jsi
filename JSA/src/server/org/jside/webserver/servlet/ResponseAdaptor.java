@@ -3,6 +3,8 @@ package org.jside.webserver.servlet;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Locale;
 
@@ -10,16 +12,21 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jside.webserver.RequestUtil;
 import org.jside.webserver.WebServer;
 
 
 abstract class ResponseAdaptor extends RequestAdaptor implements HttpServletResponse{
 
-	public ResponseAdaptor(WebServer server) {
-		super(server);
-	}
 
-	public void addCookie(Cookie arg0) {
+	public void addCookie(Cookie cookie) {
+		try {
+			base().addResponseHeader("Cookie:"+
+					URLEncoder.encode(cookie.getName(), "UTF-8")+'='+
+					URLEncoder.encode(cookie.getValue(), "UTF-8")
+					);
+		} catch (UnsupportedEncodingException e) {
+		}
 	}
 
 	public void addDateHeader(String arg0, long arg1) {
@@ -31,7 +38,7 @@ abstract class ResponseAdaptor extends RequestAdaptor implements HttpServletResp
 	}
 
 	public void addIntHeader(String key, int value) {
-		addHeader(key,""+value);
+		base().addResponseHeader(key+":"+value);
 		
 	}
 
@@ -39,32 +46,32 @@ abstract class ResponseAdaptor extends RequestAdaptor implements HttpServletResp
 		return getHeader(key) != null;
 	}
 
-	public String encodeRedirectURL(String arg0) {
-		return null;
+	public String encodeRedirectURL(String url) {
+		return url;
 	}
 
-	public String encodeRedirectUrl(String arg0) {
-		return null;
+	public String encodeRedirectUrl(String url) {
+		return encodeRedirectURL(url);
 	}
 
-	public String encodeURL(String arg0) {
-		return null;
+	public String encodeURL(String url) {
+		return url;
 	}
 
-	public String encodeUrl(String arg0) {
-		return null;
+	public String encodeUrl(String url) {
+		return encodeURL(url);
 	}
 
-	public void sendError(int arg0) throws IOException {
-		
+	public void sendError(int status) throws IOException {
+		this.setStatus(status);
 	}
 
-	public void sendError(int arg0, String arg1) throws IOException {
-		
+	public void sendError(int status, String msg) {
+		base().setStatus(status, msg);
 	}
 
-	public void sendRedirect(String arg0) throws IOException {
-		
+	public void sendRedirect(String href) throws IOException {
+		RequestUtil.sendRedirect(href);
 	}
 
 	public void setDateHeader(String key, long value) {
@@ -82,14 +89,12 @@ abstract class ResponseAdaptor extends RequestAdaptor implements HttpServletResp
 		
 	}
 
-	public void setStatus(int arg0) {
-		// TODO Auto-generated method stub
-		
+	public void setStatus(int status) {
+		base().setStatus(status, "");
 	}
 
-	public void setStatus(int arg0, String arg1) {
-		// TODO Auto-generated method stub
-		
+	public void setStatus(int status, String msg) {
+		this.sendError(status, msg);
 	}
 
 	public void flushBuffer() throws IOException {
@@ -101,7 +106,7 @@ abstract class ResponseAdaptor extends RequestAdaptor implements HttpServletResp
 	}
 
 	public Locale getLocale() {
-		return null;
+		return Locale.getDefault();
 	}
 
 	public ServletOutputStream getOutputStream() throws IOException {
@@ -117,6 +122,7 @@ abstract class ResponseAdaptor extends RequestAdaptor implements HttpServletResp
 		};
 	}
 
+	
 	public PrintWriter getWriter() throws IOException {
 		return new PrintWriter(new OutputStreamWriter(base().getOutputStream(),"UTF-8"),true);
 	}
@@ -130,32 +136,26 @@ abstract class ResponseAdaptor extends RequestAdaptor implements HttpServletResp
 	}
 
 	public void resetBuffer() {
-		// TODO Auto-generated method stub
 		
 	}
 
 	public void setBufferSize(int arg0) {
-		// TODO Auto-generated method stub
 		
 	}
 
-	public void setCharacterEncoding(String arg0) {
-		// TODO Auto-generated method stub
-		
+	public void setCharacterEncoding(String encoding) {
+		base().setEncoding(encoding);
 	}
 
-	public void setContentLength(int arg0) {
-		// TODO Auto-generated method stub
-		
+	public void setContentLength(int length) {
+		this.addIntHeader("Content-Length", length);
 	}
 
 	public void setContentType(String arg0) {
-		base().setMimeType(arg0);
+		base().setContentType(arg0);
 	}
 
 	public void setLocale(Locale arg0) {
-		// TODO Auto-generated method stub
-		
 	}
 
 

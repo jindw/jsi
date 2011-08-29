@@ -39,7 +39,7 @@ public interface RequestContext {
 
 	
 	public URI getResource(String path);
-	public void setMimeType(String mimeType);
+	public void setContentType(String contentType);
 	public InputStream openStream(URI path);
 
 	public String getQuery();

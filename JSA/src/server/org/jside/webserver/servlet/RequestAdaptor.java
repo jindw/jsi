@@ -1,11 +1,11 @@
 package org.jside.webserver.servlet;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,14 +25,9 @@ import javax.servlet.http.HttpSession;
 import org.jside.webserver.CGIEnvironment;
 import org.jside.webserver.RequestContextImpl;
 import org.jside.webserver.RequestUtil;
-import org.jside.webserver.WebServer;
 
 @SuppressWarnings("unchecked")
 abstract class RequestAdaptor implements HttpServletRequest {
-	final WebServer server;
-	public RequestAdaptor(WebServer server) {
-		this.server = server;
-	}
 
 	public String getAuthType() {
 		return null;
@@ -53,16 +48,25 @@ abstract class RequestAdaptor implements HttpServletRequest {
 					cookie = cookies[p];
 					int s = cookie.indexOf('=');
 					if (s >= 0) {
-						results[p] = new Cookie(cookie.substring(0, s), cookie
-								.substring(s + 1));
+						results[p] = new Cookie(decode(cookie.substring(0, s)), 
+								decode(cookie
+								.substring(s + 1)));
 					} else {
-						results[p] = new Cookie(cookie, "");
+						results[p] = new Cookie(decode(cookie), "");
 					}
 				}
 			}
 			return results;
 		}
 		return new Cookie[0];
+	}
+
+	private String decode(String v){
+		try {
+			return URLDecoder.decode(v, "utf-8");
+		} catch (UnsupportedEncodingException e) {
+			return v;
+		}
 	}
 
 	private static SimpleDateFormat formats[] = {
@@ -109,7 +113,8 @@ abstract class RequestAdaptor implements HttpServletRequest {
 	}
 
 	public int getIntHeader(String key) {
-		return Integer.parseInt(getHeader(key));
+		String value = getHeader(key);
+		return value == null?-1:Integer.parseInt(value);
 	}
 
 	public String getMethod() {
@@ -118,7 +123,7 @@ abstract class RequestAdaptor implements HttpServletRequest {
 
 	public String getPathInfo() {
 		String requestUri = base().getRequestURI();
-		URI base = server.getWebBase();
+		URI base = base().getServer().getWebBase();
 		String realpath =  CGIEnvironment.toRealPath(base,requestUri);
 		return requestUri.substring(realpath.length());
 	}
@@ -168,12 +173,10 @@ abstract class RequestAdaptor implements HttpServletRequest {
 	}
 
 	public boolean isRequestedSessionIdFromCookie() {
-		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	public boolean isRequestedSessionIdFromURL() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -198,7 +201,7 @@ abstract class RequestAdaptor implements HttpServletRequest {
 	}
 
 	public int getContentLength() {
-		return 0;
+		return this.getIntHeader("Content-Length");
 	}
 
 	public String getContentType() {
@@ -240,8 +243,8 @@ abstract class RequestAdaptor implements HttpServletRequest {
 		return null;
 	}
 
-	public String getParameter(String arg0) {
-		return null;
+	public String getParameter(String key) {
+		return base().getParam().get(key);
 	}
 
 	public Map getParameterMap() {
