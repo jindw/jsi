@@ -25,6 +25,6 @@ public class VelocityHandler {
 		RequestContext context = lite.init();
 		final String uri = context.getRequestURI();
 		OutputStream os = context.getOutputStream();
-		ServletContextImpl sc = new ServletContextImpl(server);
+		ServletContextImpl sc = new ServletContextImpl();
 	}
 }

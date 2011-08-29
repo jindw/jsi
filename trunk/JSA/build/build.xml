@@ -196,9 +196,6 @@
 				<include name="org/jside/webserver/**/*.java" />
 				<exclude name="**/test/**/*.*" />
 			</fileset>
-			<zipfileset src="lib/JSI.jar">
-				<include name="**/*.java" />
-			</zipfileset>
 			<zipfileset src="lib/Lite.jar">
 				<include name="**/*.java" />
 			</zipfileset>
@@ -288,13 +285,15 @@
 			<equals arg1="${dependenceTarget}" arg2="build" />
 		</condition>
 		<echo>call-dependence : ${dependenceTarget}</echo>
+
+		<ant antfile="build/build.xml" dir="../JSI2/" target="${dependenceTarget}"/>
+		<copy file="../JSI2/build/dest/JSI.jar" todir="lib" />
+		<copy file="../JSI2/build/dest/JSI.jar" todir="../Lite2/web/WEB-INF/lib" />
+		
 		<ant antfile="build/build.xml" dir="../Lite2/" target="${dependenceTarget}"/>
 		<copy file="../Lite2/build/dest/Lite.jar" todir="lib" />
 		<copy file="../Lite2/build/dest/Lite.jar" todir="../JSI2/web/WEB-INF/lib" />
 		<copy file="../Lite2/build/dest/Lite.jar" todir="../FileServer/web/WEB-INF/lib" />
 
-		<ant antfile="build/build.xml" dir="../JSI2/" target="${dependenceTarget}"/>
-		<copy file="../JSI2/build/dest/JSI.jar" todir="lib" />
-		<copy file="../JSI2/build/dest/JSI.jar" todir="../Lite2/web/WEB-INF/lib" />
 	</target>
 </project>

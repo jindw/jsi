@@ -39,7 +39,7 @@ public class LiteHandler {
 			String encoding = fm.get(ParseContext.FEATURE_ENCODING);
 			context.setEncoding(encoding);
 			String mimeType = fm.get(ParseContext.FEATURE_MIME_TYPE);
-			context.setMimeType(mimeType == null ? "text/html" : mimeType);
+			context.setContentType(mimeType == null ? "text/html" : mimeType);
 			OutputStreamWriter out = new OutputStreamWriter(os, encoding);
 			Object data = loadData(uri);
 			ht.render(uri, data, out);

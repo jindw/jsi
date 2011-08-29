@@ -17,7 +17,7 @@ import javax.servlet.ServletException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jside.webserver.WebServer;
+import org.jside.webserver.RequestContextImpl;
 
 @SuppressWarnings("unchecked")
 public class ServletContextImpl extends ResponseAdaptor implements
@@ -25,9 +25,6 @@ public class ServletContextImpl extends ResponseAdaptor implements
 
 	private static final String WEB_INF_CLASSES = "/WEB-INF/classes/";
 	private static final Log log = LogFactory.getLog(ServletContextImpl.class);
-	public ServletContextImpl( WebServer server){
-		super(server);
-	}
 
 
 	public ServletContext getContext(String arg0) {
@@ -85,11 +82,12 @@ public class ServletContextImpl extends ResponseAdaptor implements
 
 
 	public URL getResource(String path) throws MalformedURLException {
-		URL base = server.getWebBase().toURL();
+		RequestContextImpl context = base();
+		URL base = context.getServer().getWebBase().toURL();
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		} else {
-			String uri = base().getRequestURI();
+			String uri = context.getRequestURI();
 			if (uri.length() > 1) {
 				base = new URL(base, uri.substring(1));
 			}
