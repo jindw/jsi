@@ -5,13 +5,13 @@
  * @author jindw
  * @version $Id: fn.js,v 1.5 2008/02/24 08:58:15 jindw Exp $
  */
-
-if(window.$JSI && $JSI.impl){
+console.log(window.$JSI  && $JSI.impl)
+if(typeof window.confirm !='function'){
 	function output(title,bindLevel,msg){
 		return $JSI.impl.log(title,bindLevel,msg);
 	}
 }else{
-	function output(title,bindLevel,msg){
+	output = function (title,bindLevel,msg){
     	var outputLevelName = logLevelNameMap[bindLevel];
 		return confirm(outputLevelName+':' + msg+"\n\n继续弹出 ["+title+"]"+outputLevelName+" 日志?\r\n");
 	}
