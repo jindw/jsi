@@ -5,6 +5,7 @@ import java.util.LinkedList;
 
 import org.jside.jsi.tools.JavaScriptCompressionAdvisor;
 import org.jside.jsi.tools.JavaScriptCompressorConfig;
+import org.mozilla.javascript.NodeTransformer;
 import org.mozilla.javascript.Parser;
 import org.mozilla.javascript.ScriptOrFnNode;
 import org.mozilla.javascript.Token;
@@ -26,6 +27,7 @@ public class ReplaceCompressor extends RhinoTool {
 
 	public synchronized String compress(String source, JavaScriptCompressionAdvisor advisor) {
 		ScriptOrFnNode root = parser.parse(source, "", 1);
+		new NodeTransformer().transform(root);
 		this.initializeReplacer(root,source,advisor);
 		char[] data = parser.getEncodedSource().toCharArray();
 		String result = this.doReplace(data, 0);

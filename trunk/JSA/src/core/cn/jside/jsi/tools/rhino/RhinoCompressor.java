@@ -7,6 +7,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
 import org.mozilla.javascript.FunctionNode;
 import org.mozilla.javascript.Node;
+import org.mozilla.javascript.NodeTransformer;
 import org.mozilla.javascript.Parser;
 import org.mozilla.javascript.ScriptOrFnNode;
 import org.mozilla.javascript.ScriptRuntime;
@@ -37,6 +38,7 @@ public class RhinoCompressor {
 		errorReporter.clearErrors();
 		try {
 			root = parser.parse(source, "<jsfile>", 0);
+			new NodeTransformer().transform(root);
 			int fncount = root.getFunctionCount();
 			for (int i = 0; i < fncount; i++) {
 				FunctionNode fn = root.getFunctionNode(i);

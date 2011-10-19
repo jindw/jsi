@@ -1,53 +1,42 @@
 package org.jside.webserver.handler;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
+
+import javax.servlet.ServletException;
 
 import org.jside.JSideWebServer;
 import org.jside.webserver.RequestContext;
 import org.jside.webserver.RequestUtil;
-import org.xidea.el.ExpressionFactory;
-import org.xidea.lite.impl.HotTemplateEngine;
-import org.xidea.lite.impl.ParseUtil;
-import org.xidea.lite.parse.ParseConfig;
-import org.xidea.lite.parse.ParseContext;
 import org.xidea.lite.tools.ResourceManager;
 import org.xidea.lite.tools.ResourceManagerImpl;
 
 public class LiteHandler {
+	static final String LITE_COMPILE_SERVICE = "/WEB-INF/service/lite-compile";
 	private File root;
 	ResourceManagerImpl manager;
-	private HotTemplateEngine ht;
+	private TemplateServletImpl templateServlet;
 	private long lastModifiedTime = 0;
 
 	public static void main(String[] args) {
 		JSideWebServer.getInstance().addAction("/**", new LiteHandler());
 	}
 
-	public void execute() throws IOException {
+
+	public void execute() throws IOException, ServletException {
 		RequestContext context = init();
 		final String uri = context.getRequestURI();
-		if (uri.endsWith(".xhtml")) {
-			OutputStream os = context.getOutputStream();
-			Map<String, String> fm = ((ParseConfig) manager).getFeatureMap(uri);
-			String encoding = fm.get(ParseContext.FEATURE_ENCODING);
-			context.setEncoding(encoding);
-			String mimeType = fm.get(ParseContext.FEATURE_MIME_TYPE);
-			context.setContentType(mimeType == null ? "text/html" : mimeType);
-			OutputStreamWriter out = new OutputStreamWriter(os, encoding);
-			Object data = loadData(uri);
-			ht.render(uri, data, out);
-			out.flush();
+		if (uri.equals(LITE_COMPILE_SERVICE)) {
+			
+			templateServlet.compileLite(context);
+		} else if (uri.endsWith(".xhtml")|| uri.equals("/WEB-INF/service/lite-service")) {
+			templateServlet.service(context);
 		} else {
 			File file = new File(root, uri);
 			if (file.isDirectory()) {
-				RequestUtil.printResource();
+				templateServlet.service(context);
 			} else {
 				Object result = manager.getFilteredContent(uri);
 				RequestUtil.printResource(result, null);
@@ -55,7 +44,8 @@ public class LiteHandler {
 		}
 	}
 
-	synchronized RequestContext init() throws IOException {
+
+	synchronized RequestContext init() throws IOException, ServletException {
 		RequestContext context = RequestUtil.get();
 		URI base = context.getServer().getWebBase();
 		File root = new File(base);
@@ -77,31 +67,16 @@ public class LiteHandler {
 		}
 		manager = new ResourceManagerImpl(base, base
 				.resolve("WEB-INF/lite.xml"));
-		ht = new HotTemplateEngine((ParseConfig) manager,null);
+		templateServlet = new TemplateServletImpl(manager);
 		this.root = root;
 		lastModifiedTime = System.currentTimeMillis();
 		return context;
 	}
 
-	Object loadData(String uri)
-			throws IOException {
-		String jsonpath = uri.replaceFirst(".\\w+$", ".json");
-		Object data = new Object();
-		if (jsonpath.endsWith(".json")) {
-			File df = new File(root, jsonpath);
-			if (df.exists()) {
-				String source = ParseUtil.loadTextAndClose(new FileInputStream(
-						df), null);
-				data = ExpressionFactory.getInstance().create(source).evaluate(
-						data);
-			}
-		}
-		return data;
-	}
+
 
 	public ResourceManager getResourceManager() {
 		return this.manager;
-		
 	}
 
 }

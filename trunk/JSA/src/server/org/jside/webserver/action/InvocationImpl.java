@@ -58,7 +58,10 @@ public class InvocationImpl implements Invocation {
 	static void doExecute(RequestContext context, Object action, Method method)
 			throws IllegalAccessException, InvocationTargetException {
 		try {
-			new CommandParser(null).setup(action, context.getParams());
+			new CommandParser(null){
+				public void onMissedProperty(Object context,String name){
+				}
+			}.setup(action, context.getParams());
 		} catch (Exception e) {
 			log.warn("无效参数:" + context.getParam(), e);
 		}

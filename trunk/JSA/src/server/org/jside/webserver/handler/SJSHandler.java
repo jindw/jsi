@@ -11,25 +11,36 @@ import org.jside.webserver.RequestUtil;
 import org.jside.webserver.sjs.JSExcutor;
 
 public class SJSHandler {
+	private String filterScript = "/WEB-INF/default-filter.s.js";
 
-	public void execute() throws IOException{
+	public void execute() throws IOException {
 		RequestContext context = RequestUtil.get();
 		String uri = context.getRequestURI();
-		execute(context, uri);
+		File root = new File(context.getServer().getWebBase());
+		if (new File(root, filterScript).exists()) {
+			execute(context, filterScript);
+		}
+		if (!context.isAccept()) {
+			execute(context, uri);
+		}
 	}
 
-	protected void execute(RequestContext context, String uri) throws IOException {
-		URI resource = context.getResource(uri);
-		HashMap<String, Object> globals = new HashMap<String, Object>();
-		globals.put("context", context);
-		if("file".equals(resource.getScheme())){
-			if(!new File(resource).exists()){
-				return;
+	protected void execute(RequestContext context, String uri)
+			throws IOException {
+		if (uri.endsWith(".s.js")) {
+			URI resource = context.getResource(uri);
+			HashMap<String, Object> globals = new HashMap<String, Object>();
+			globals.put("context", context);
+			if ("file".equals(resource.getScheme())) {
+				if (!new File(resource).exists()) {
+					return;
+				}
 			}
+			JSExcutor.getCurrentInstance().eval(resource.toURL(), globals);
 		}
-		JSExcutor.getCurrentInstance().eval(resource.toURL(),globals);
 	}
-	public static void main(String[] args){
-		JSideWebServer.getInstance().addAction("/**.s.js", new SJSHandler());
+
+	public static void main(String[] args) {
+		JSideWebServer.getInstance().addAction("/**", new SJSHandler());
 	}
 }
