@@ -48,11 +48,11 @@ abstract class RequestAdaptor implements HttpServletRequest {
 					cookie = cookies[p];
 					int s = cookie.indexOf('=');
 					if (s >= 0) {
-						results[p] = new Cookie(decode(cookie.substring(0, s)), 
-								decode(cookie
+						results[p] = new Cookie((cookie.substring(0, s)), 
+								(cookie
 								.substring(s + 1)));
 					} else {
-						results[p] = new Cookie(decode(cookie), "");
+						results[p] = new Cookie((cookie), "");
 					}
 				}
 			}
@@ -61,13 +61,13 @@ abstract class RequestAdaptor implements HttpServletRequest {
 		return new Cookie[0];
 	}
 
-	private String decode(String v){
-		try {
-			return URLDecoder.decode(v, "utf-8");
-		} catch (UnsupportedEncodingException e) {
-			return v;
-		}
-	}
+//	private String decode(String v){
+//		try {
+//			return URLDecoder.decode(v, "utf-8");
+//		} catch (UnsupportedEncodingException e) {
+//			return v;
+//		}
+//	}
 
 	private static SimpleDateFormat formats[] = {
 			new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US),

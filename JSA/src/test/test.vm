@@ -1,3 +1,3 @@
 <div>
-#parse( '/bg.gif',"/org/jside/webserver/test/test.vm" )
+#parse( "/org/jside/webserver/test/test.vm" )
 </div>

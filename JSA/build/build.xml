@@ -109,9 +109,10 @@
 		</jar>
 		<jar destfile="build/dest/dependence/Lite.jar">
 			<zipfileset src="lib/Lite.jar">
-				<exclude name="**/*.java" />
-				<include name="org/apache/commons/**/*.*" />
 				<include name="**/*.*" />
+				<include name="org/apache/commons/**/*.*" />
+				<exclude name="org/mozilla/**/**" />
+				<exclude name="**/*.java" />
 			</zipfileset>
 		</jar>
 		<!--
@@ -183,6 +184,7 @@
 				<exclude name="cn/**/test/**/*.*" />
 				<exclude name="**/TokenStream.class" />
 			</fileset>
+			<zipgroupfileset dir="lib/"  includes="servlet-api.jar"/>
 			<zipgroupfileset dir="build/dest/dependence/" includes="*.jar" excludes="nekohtml.jar"/>
 		</jar>
 	</target>

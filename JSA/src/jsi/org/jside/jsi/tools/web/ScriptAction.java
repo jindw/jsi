@@ -19,11 +19,11 @@ import org.jside.webserver.RequestContext;
 import org.jside.webserver.action.InvocationImpl;
 import org.xidea.jsi.impl.ResourceRoot;
 import org.xidea.jsi.web.JSIService;
-import org.xidea.lite.impl.HotTemplateEngine;
+import org.xidea.lite.impl.HotLiteEngine;
 
 public class ScriptAction extends JSIService {
 	private Log log = LogFactory.getLog(ScriptAction.class);
-	private HotTemplateEngine lite;
+	private HotLiteEngine lite;
 	// private ActionInvocationImpl liteAction = new
 	// ActionInvocationImpl("",lite);
 	private PackageAction packageAction = new PackageAction(this);
@@ -33,7 +33,7 @@ public class ScriptAction extends JSIService {
 	public ScriptAction() {
 		try {
 			URI root = new URI("classpath:///org/jside/jsi/tools/web/");
-			lite = new HotTemplateEngine(root,null,null);
+			lite = new HotLiteEngine(root,null,null);
 		} catch (URISyntaxException e) {
 		}
 	}
