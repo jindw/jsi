@@ -11,6 +11,11 @@ import org.jside.webserver.RequestContext;
 import org.jside.webserver.RequestUtil;
 import org.xidea.jsi.web.JSIService;
 
+/**
+ * @deprecated
+ * @author jindawei
+ *
+ */
 public class JSIHandler {
 	///static/js/**
 	///scripts/**

@@ -33,11 +33,11 @@ public class JSAExportorAdaptor implements JSIExportor {
 	public JSAExportorAdaptor(){
 		config = new JavaScriptCompressorConfig();
 	}
-	public JSAExportorAdaptor(JavaScriptCompressorConfig config,String lineSeparator, boolean preserveImportable) {
+	public JSAExportorAdaptor(JavaScriptCompressorConfig config,String internalPrefix, boolean preserveImportable) {
 		super();
 		this.config = config;
-		if(lineSeparator != null){
-			this.lineSeparator = lineSeparator;
+		if(internalPrefix != null){
+			this.internalPrefix = internalPrefix;
 		}
 		this.preserve = preserveImportable;
 	}

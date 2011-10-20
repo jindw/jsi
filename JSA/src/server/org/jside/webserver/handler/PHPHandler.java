@@ -37,7 +37,7 @@ public class PHPHandler {
 			Map<String, String> envp = env.toMap(System.getenv());
 			String compile_service = "http://127.0.0.1:"
 					+ context.getServer().getPort()
-					+ LiteHandler.LITE_COMPILE_SERVICE;
+					+ TemplateHandler.LITE_COMPILE_SERVICE;
 			envp.put("LITE_COMPILE_SERVICE", compile_service);
 			CGIRunner cr = new CGIRunner(context, env.scriptFilename, envp,
 					new File(new File(base), rp).getParentFile(), null);

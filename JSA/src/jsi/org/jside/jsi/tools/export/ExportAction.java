@@ -203,7 +203,7 @@ public class ExportAction extends ExportBase {
 			List<ScriptLoader> list = getExportList();
 			Map<String, String> exportMap = exportContext.getExportMap();
 			Map<String, String> exportResultMap = new JSAExportorAdaptor(
-					config, internalPrefix, preserve).export(list, exportMap);
+					config, getInternalPrefix(), preserve).export(list, exportMap);
 
 			this.exportData = exportResultMap;
 		}
