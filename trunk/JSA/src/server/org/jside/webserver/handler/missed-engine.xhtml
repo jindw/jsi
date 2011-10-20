@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<html c:extends="layout.xhtml">
+	<title c:block="title">模板测试异常</title>
+	<c:block name="content">
+		<style>
+			p,ul,li{font-size:13px}
+			h4{margin:0;}
+			pre{background:#ddd;border-radius: 6px 6px 6px 6px;margin:20px;}
+			
+		</style>
+		<ul>
+			<h4>模板引擎初始化失败：${engineName}</h4>
+			<p>提示：除Lite模板外，其他模板渲染需要手动添加模板jar。到当前测试网站的 <strong>/WEB-INF/lib</strong> 中。</p>
+			<li>
+				Velocity 部署
+				<p>
+					下载：
+					<a
+						href="https://jsi.googlecode.com/svn/trunk/JSA/lib/velocity-1.7-dep.jar">velocity-1.7-dep.jar</a>
+					，或者访问：http://velocity.apache.org/ 搜寻最新版本。
+				</p>
+			</li>
+			<li>
+				FreeMarker 部署
+				<p>
+					下载：
+					<a
+						href="https://jsi.googlecode.com/svn/trunk/JSA/lib/freemarker-2.3.15.jar">freemarker-2.3.15.jar</a>
+					，或者访问：http://freemarker.sf.net/ 搜寻最新版本。
+				</p>
+			</li>
+		</ul>
+		<div>
+			<pre>${error}</pre>
+		</div>
+	</c:block>
+</html>

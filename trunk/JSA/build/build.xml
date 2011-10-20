@@ -177,13 +177,19 @@
 				<include name="org/xidea/commons/i18n/**" />
 
 				<include name="org/jside/xtools/**" />
-				
+
+				<exclude name="org/jside/webserver/handler/Velocity*"/>
+				<exclude name="org/jside/webserver/handler/Freemarker*"/>
 				<exclude name="**/*Test.class" />
 				<exclude name="**/*test*.xml" />
 				<exclude name="**/test/**/*.class" />
 				<exclude name="cn/**/test/**/*.*" />
 				<exclude name="**/TokenStream.class" />
 			</fileset>
+			<zipfileset dir="classes" prefix="internal/">
+				<include name="org/jside/webserver/handler/Velocity*"/>
+				<include name="org/jside/webserver/handler/Freemarker*"/>
+			</zipfileset>
 			<zipgroupfileset dir="lib/"  includes="servlet-api.jar"/>
 			<zipgroupfileset dir="build/dest/dependence/" includes="*.jar" excludes="nekohtml.jar"/>
 		</jar>

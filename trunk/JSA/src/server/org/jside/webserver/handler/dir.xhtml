@@ -1,75 +1,17 @@
-<!doctype html>
-<html>
-	<head>
-		<title>目录浏览:${path}</title>
-		<style>/*<![CDATA[*/
-			html,body{
-				width:100%;height:100%;
-				margin:0;padding:0;
-			}
-			.topbar,.buttombar{
-				background:#EEEEEE;
-    			border:1px outset #333333;
-    			border-width:1px 0;
-				padding:2px 0;
-				font-weight:bold;
-				font-size:14px;
-				margin:0px;
-				height:14px;
-				width:100%;
-				z-index:10;
-				text-indent:4px;
-				position:absolute;
-				opacity:0.8;
-			}
-			.topbar{
-				top:0px;
-			}
-			.buttombar{
-				bottom:0px;
-				font-size:12px;
-			}
-			.buttombar a,.topbar a{
-				color:#333;
-			}
-			#content{
-				width:100%;
-				height:100%;
-				position:absolute;
-				overflow:auto;
-				top:0px;
-			}
-			#content ul{
-				margin:0px 0;
-				padding:30px 38px
-			}
-			/*]]>*/
-		</style>
-	</head>
-	<body>
-		<div  id="content">
-		<ul>
-			<c:for var="sub" list="${fileList}">
-				<c:var name="name" value="${sub.directory ? sub.name + '/' : sub.name}" />
-				<li>
-					<a href='${name}'><span>${name}</span></a>
-				</li>
-			</c:for>
-			<c:else>
-				<p>找不到文件列表</p>
-			</c:else>
-		</ul></div>
-		<div class="topbar" h:trim="true">
-			<a href="/">${root.absolutePath.replace(/[\\]/g,'/')}</a>
-			<c:var name="list" value="${path.split('/').slice(1)}" />
-			<c:for var="name" list="${list}">
-				/<a href="/${list.slice(0,for.index+1).join('/')}">${name}</a>
-			</c:for>
-		</div>
-		<div class="buttombar" h:trim="true">
-			<a href="#">查看数据模型</a>
-			/
-			<a href="#">部署Lite实例</a>
-		</div>
-	</body>
+<!doctype html2>
+<html c:extends="layout.xhtml">
+	<title c:block="title">目录浏览:${path}</title>
+	<ul c:block="content">
+		<c:for var="sub" list="${fileList}">
+			<c:var name="name" value="${sub.directory ? sub.name + '/' : sub.name}" />
+			<li>
+				<a href='${name}'>
+					<span>${name}</span>
+				</a>
+			</li>
+		</c:for>
+		<c:else>
+			<p>找不到文件列表</p>
+		</c:else>
+	</ul>
 </html>

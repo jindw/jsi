@@ -17,6 +17,7 @@
 	<classpathentry kind="lib" path="lib/servlet-api.jar" sourcepath="E:/opensource/servlet/servlet-api-2.4-src.jar"/>
 	<classpathentry kind="lib" path="lib/velocity-1.7-dep.jar" sourcepath="E:/opensource/apache/velocity/velocity-1.7-src.zip"/>
 	<classpathentry kind="lib" path="lib/Lite.jar"/>
+	<classpathentry kind="lib" path="lib/freemarker-2.3.15.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Lite2"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

@@ -4,58 +4,36 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.collections.ExtendedProperties;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.RuntimeInstance;
 import org.apache.velocity.runtime.resource.Resource;
 import org.jside.JSideWebServer;
 import org.xidea.lite.tools.ResourceManager;
-import org.xidea.lite.tools.ResourceManagerImpl;
 
 public class VelocityResourceLoader extends
 		org.apache.velocity.runtime.resource.loader.ResourceLoader {
-	static LiteHandler defaultHandler = null;
-	private LiteHandler lite;
-
+	private TemplateHandler lite;
+	private static TemplateHandler TEST_HANDLER = null;
 	static RuntimeInstance init() {
 		RuntimeInstance engine = new RuntimeInstance();
 		engine.setProperty("input.encoding", "UTF-8");
 		engine.setProperty("resource.loader", "lite");
-		engine.setProperty("lite.resource.loader.class", VelocityResourceLoader.class
-				.getName());
+		engine.setProperty("lite.resource.loader.class",
+				VelocityResourceLoader.class.getName());
 		engine.init();
 		return engine;
 	}
-	public VelocityResourceLoader(LiteHandler lite) {
+
+	public VelocityResourceLoader(TemplateHandler lite) {
 		this.lite = lite;
 	}
 
 	public VelocityResourceLoader() throws IOException {
-		this(defaultHandler == null ? JSideWebServer.getInstance().getHandler(
-				LiteHandler.class) : defaultHandler);
+		this(TEST_HANDLER == null ? JSideWebServer.getInstance().getHandler(
+				TemplateHandler.class) : TEST_HANDLER);
 	}
-
-	public static void main(String[] args) throws Exception {
-		VelocityResourceLoader.defaultHandler = new LiteHandler();
-		defaultHandler.manager = new ResourceManagerImpl(new File(
-				"D:\\workspace\\JSA\\src\\test").toURI(), null);
-
-		RuntimeInstance engine = init();
-		Map<String, Object> context = new HashMap<String, Object>();
-		OutputStreamWriter out = new OutputStreamWriter(System.out, "utf-8");
-		
-		Template template = engine.getTemplate("/test.vm");
-		template.merge(new VelocityContext(context), out);
-		
-		out.flush();
-	}
-
 
 
 	@Override
@@ -97,4 +75,6 @@ public class VelocityResourceLoader extends
 		long rlm = rm.getLastModified(resource.getName());
 		return rlm != lm;
 	}
+
+
 }
