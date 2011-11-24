@@ -10,7 +10,7 @@ var $JSI = function(){
         var url = url.replace(/\\/g,'/');
         if(url.charAt(0) == '.'){
         	url = base.replace(/[^\/]+$/,'')+url
-        	while(url != (url.replace( /[^\/]+\/\.\.\/|\/\.\//,'')));
+        	while(url != (url =url.replace( /[^\/]+\/\.\.\/|(\/?)\.\//,'$1')));
         }
         return url;
     }
@@ -55,7 +55,7 @@ var $JSI = function(){
 				dependenceCount++;
 			}
 		}
-		outer:while(p in notifySet){
+		outer:for(p in notifySet){
 			var notifyDependenceMap = loaderMap[p][2];
 			if(delete notifyDependenceMap[path]){//has and deleted
 				if(dependenceCount){
@@ -80,7 +80,7 @@ var $JSI = function(){
 		if(task){
 			var len = task.length;
 			while(len--){
-				task[len].apply(this,require(path))
+				task[len].call(this,require(path))
 			}
 		}
 	}
@@ -95,7 +95,11 @@ var $JSI = function(){
 		if(!notifySet){
 			notifyMap[path] =notifySet = {};
 			if(from){
-				notifyList[from]=1
+				notifySet[from]=1
+			}
+			console.log(path)
+			if(path.indexOf('imagebox')>=0){
+				alert(path)
 			}
 			path = $JSI.scriptBase+path+'__define__.js';
 			if(async){
@@ -107,7 +111,7 @@ var $JSI = function(){
 				document.write('<script src="'+path+'" onerror="$JSI.loadError.apply(this)"><\/script>');
 			}
 		}else if(from){
-			notifyList[from]=1;
+			notifySet[from]=1;
 		}
 	}
 	$import = function (path,target){
@@ -116,9 +120,10 @@ var $JSI = function(){
 			task = taskMap[path] = [];
 		}
 		var a = typeof target == 'function';
-		task.push(a?target:function(){
+		task.push(a?target:function(result){
 				copy(result,target ||this);
 			});
+		console.log(path)
 		async = a;
 		load(path);
 	}

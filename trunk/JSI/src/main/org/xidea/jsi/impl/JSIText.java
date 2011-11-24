@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,13 +16,14 @@ import org.xidea.jsi.JSIRuntime;
 
 public abstract class JSIText {
 	public static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
-	static final Pattern FILE_POSTFIX = Pattern.compile("__(preload|define)__\\.js$");
+	static final Pattern FILE_POSTFIX = Pattern
+			.compile("__(preload|define)__\\.js$");
 
 	public static final String PRELOAD_PREFIX = "$JSI.preload(";
 	public static final String PRELOAD_CONTENT_PREFIX = "eval(this.varText);";
-	static final Pattern REQUIRE_PATTERN = Pattern.compile("\\brequire\\((\"[^\\\"]+\")\\)");
-	
-	
+	static final Pattern REQUIRE_PATTERN = Pattern
+			.compile("\\brequire\\((\"[^\\\"]+\")\\)");
+
 	static private JSIRuntime rs;
 
 	public static String loadText(InputStream in, String encoding)
@@ -58,8 +60,7 @@ public abstract class JSIText {
 		return buildPreloadPerfix(packageName, fileName);
 	}
 
-	final static String buildPreloadPerfix(String packageName,
-			String fileName) {
+	final static String buildPreloadPerfix(String packageName, String fileName) {
 		if (packageName.startsWith(".")) {
 			packageName = packageName.substring(1);
 		}
@@ -139,19 +140,25 @@ public abstract class JSIText {
 	}
 
 	public static String buildDefinePerfix(String path, String source) {
-		if(rs == null){
-			rs  = RuntimeSupport.create();
+		if (rs == null) {
+			rs = RuntimeSupport.create();
 		}
-		source = (String) rs.eval("''+function(){"+source+"\n}");
+		source = (String) rs.eval("''+function(){" + source + "\n}");
 		Matcher match = REQUIRE_PATTERN.matcher(source);
-		StringBuilder buf = new StringBuilder("$JSI.define('"+path+"',[");
+		StringBuilder buf = new StringBuilder("$JSI.define('"
+				+ FILE_POSTFIX.matcher(path).replaceFirst("") + "',[");
 		String sep = "";
-		while(match.find()){
-			buf.append(sep);
-			buf.append(match.group(1));
-			sep = ",";
+		HashSet<String> set = new HashSet<String>();
+		while (match.find()) {
+			String dep = match.group(1);
+			if (!set.contains(dep)) {
+				set.add(dep);
+				buf.append(sep);
+				buf.append(dep);
+				sep = ",";
+			}
 		}
-		buf.append("],function(require,export){");
+		buf.append("],function(require,exports){");
 		return buf.toString();
 	}
 }
