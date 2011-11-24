@@ -5,7 +5,6 @@
  * @author jindw
  * @version $Id: fn.js,v 1.5 2008/02/24 08:58:15 jindw Exp $
  */
-console.log(window.$JSI  && $JSI.impl)
 if(typeof window.confirm !='function'){
 	function output(title,bindLevel,msg){
 		return $JSI.impl.log(title,bindLevel,msg);
@@ -29,8 +28,8 @@ function buildLevelLog(bindLevel){
 		        }
 		    }
 		    if(":debug"){
-				if(typeof (window.console && console.log) == 'function'){
-		    		console.log(msg)
+				if(typeof (window.console && window.console.log) == 'function'){
+		    		window.console.log(msg)
 				}
 			}
         }
@@ -56,6 +55,13 @@ JSILog.prototype = {
 	},
 	addFilter:function(f){
 		this.filters.push(f);
+	},
+	dir:function(o){
+		var buf = [];
+		for(o in o){
+			buf.push(o);
+		}
+		this.info(buf.join('\n'))
 	},
 	format: function(msg){
 	    for(var buf = [],i = 0;i<arguments.length;i++){
@@ -96,4 +102,4 @@ while(logLevelIndex--){
     var logName = logLevelNameMap[logLevelIndex];
     JSILog.prototype[logName] = buildLevelLog(logLevelIndex);
 };
-
+var console= $log;

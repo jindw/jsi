@@ -111,9 +111,14 @@ public abstract class RuntimeSupport implements JSIRuntime {
 							}
 						}
 					}
-					if(log.isDebugEnabled() || jsName.size()<3){
-						jsName.add(fileName + '@' + line);
+					if(!log.isDebugEnabled()){
+						if(jsName.size()>10){
+							break;
+						}else if(jsName.size()>3){
+							fileName = fileName.substring(fileName.lastIndexOf('/')+1);
+						}
 					}
+					jsName.add(fileName + '@' + line);
 				}
 			}
 		}

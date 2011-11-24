@@ -104,7 +104,7 @@ public class ResourceRoot extends AbstractRoot {
 	public String getResourceAsString(String path) {
 		StringWriter out = new StringWriter();
 		try {
-			if (this.output(path, out, false)) {
+			if (this.output(path, out)) {
 				return out.toString();
 			} else {
 				return null;
@@ -122,10 +122,10 @@ public class ResourceRoot extends AbstractRoot {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean output(String path, Writer out, boolean isPreload)
+	public boolean output(String path, Writer out)
 			throws IOException {
 		ByteArrayOutputStream buf = new ByteArrayOutputStream();
-		if (this.output(path, buf, isPreload)) {
+		if (this.output(path, buf)) {
 			out.write(new String(buf.toByteArray(), this.encoding));
 			return true;
 		} else {
@@ -141,24 +141,31 @@ public class ResourceRoot extends AbstractRoot {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean output(String path, OutputStream out, boolean isPreload)
+	public boolean output(String path, OutputStream out)
 			throws IOException {
-		URL url = this.getResource(path);
+		String purePath = JSIText.FILE_POSTFIX.matcher(path).replaceFirst(".js");
+		URL url = this.getResource(purePath);
 		InputStream in = url == null ? null : url.openStream();
 		if (in == null) {
 			return false;
 		} else {
+			boolean isPreload = purePath.endsWith(JSIText.PRELOAD_FILE_POSTFIX);
+			boolean isDefine = !isPreload && purePath.equals(path);
 			try {
 				if (isPreload) {
 					out.write(JSIText.buildPreloadPerfix(path).getBytes(
 							this.encoding));
+					write(in, out);
+				}else if(isDefine){
+					ByteArrayOutputStream out2 = new ByteArrayOutputStream();
+
+					out.write(JSIText.buildDefinePerfix(path,out2.toString(this.encoding)).getBytes(
+							this.encoding));
+					
+					write(in, out2);
+					out2.writeTo(out);
 				}
-				byte[] buf = new byte[1024];
-				int len = in.read(buf);
-				while (len > 0) {
-					out.write(buf, 0, len);
-					len = in.read(buf);
-				}
+				
 				if (isPreload) {
 					out.write(JSIText.buildPreloadPostfix("//").getBytes(
 							this.encoding));
@@ -169,6 +176,16 @@ public class ResourceRoot extends AbstractRoot {
 			}
 		}
 	}
+
+	private void write(InputStream in, OutputStream out) throws IOException {
+		byte[] buf = new byte[1024];
+		int len = in.read(buf);
+		while (len > 0) {
+			out.write(buf, 0, len);
+			len = in.read(buf);
+		}
+	}
+
 
 	public List<JSIPackage> getPackageObjectList() {
 		List<String> result = findPackageList(true);

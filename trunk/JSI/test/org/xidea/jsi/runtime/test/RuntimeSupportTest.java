@@ -18,6 +18,11 @@ import org.xidea.jsi.impl.RuntimeSupport;
 
 public class RuntimeSupportTest {
 	@Test
+	public void testURIEncode(){
+		JSIRuntime rt = RuntimeSupport.create();
+		System.out.println(rt.eval("encodeURI('金大卫+a&bc=123')"));
+	}
+	@Test
 	public void testLog(){
 		JSIRuntime rt = RuntimeSupport.create();
 		rt.eval("$import('org.xidea.jsi:parse')");
