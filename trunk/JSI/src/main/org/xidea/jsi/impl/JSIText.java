@@ -14,15 +14,15 @@ import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRuntime;
 
 public abstract class JSIText {
-	static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
+	public static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
 	static final Pattern FILE_POSTFIX = Pattern.compile("__(preload|define)__\\.js$");
 
-	static final String PRELOAD_PREFIX = "$JSI.preload(";
-	static final String PRELOAD_CONTENT_PREFIX = "eval(this.varText);";
+	public static final String PRELOAD_PREFIX = "$JSI.preload(";
+	public static final String PRELOAD_CONTENT_PREFIX = "eval(this.varText);";
 	static final Pattern REQUIRE_PATTERN = Pattern.compile("\\brequire\\((\"[^\\\"]+\")\\)");
 	
 	
-	static private JSIRuntime rs = RuntimeSupport.create();
+	static private JSIRuntime rs;
 
 	public static String loadText(InputStream in, String encoding)
 			throws IOException {
@@ -51,7 +51,7 @@ public abstract class JSIText {
 		}
 	}
 
-	final static String buildPreloadPerfix(String path) {
+	public final static String buildPreloadPerfix(String path) {
 		String packageName = path.substring(0, path.lastIndexOf('/')).replace(
 				'/', '.');
 		String fileName = path.substring(packageName.length() + 1);
@@ -76,7 +76,7 @@ public abstract class JSIText {
 		return buf.toString();
 	}
 
-	static String buildPreloadPostfix(String content) {
+	public static String buildPreloadPostfix(String content) {
 		int pos1 = content.lastIndexOf("//");
 		if (content.indexOf('\n', pos1) > 0 || content.indexOf('\r', pos1) > 0) {
 			return "\n})";
@@ -139,6 +139,9 @@ public abstract class JSIText {
 	}
 
 	public static String buildDefinePerfix(String path, String source) {
+		if(rs == null){
+			rs  = RuntimeSupport.create();
+		}
 		source = (String) rs.eval("''+function(){"+source+"\n}");
 		Matcher match = REQUIRE_PATTERN.matcher(source);
 		StringBuilder buf = new StringBuilder("$JSI.define('"+path+"',[");
