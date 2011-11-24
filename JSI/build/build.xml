@@ -164,6 +164,7 @@ encoding="GBK"
 	</target>
 	<target name="compress-jsi" depends="init">
 		<!-- export util -->
+		<echo message="export util ${JSAPath}"/>
 		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />
 			<arg value="${basedir}/web/scripts" />
@@ -183,6 +184,7 @@ encoding="GBK"
 			<arg value="-outputJAR" />
 			<arg value="${basedir}/build/dest/jsidoc/util/util.jar" />
 		</java>
+		<echo message="export export "/>
 		<!-- export export -->
 		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
 			<arg value="-scriptBase" />

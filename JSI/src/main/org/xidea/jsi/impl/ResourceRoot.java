@@ -132,7 +132,6 @@ public class ResourceRoot extends AbstractRoot {
 			return false;
 		}
 	}
-
 	/**
 	 * 输出指定资源，如果该资源存在，返回真
 	 * 
@@ -149,8 +148,8 @@ public class ResourceRoot extends AbstractRoot {
 		if (in == null) {
 			return false;
 		} else {
-			boolean isPreload = purePath.endsWith(JSIText.PRELOAD_FILE_POSTFIX);
-			boolean isDefine = !isPreload && purePath.equals(path);
+			boolean isPreload = path.endsWith(JSIText.PRELOAD_FILE_POSTFIX);
+			boolean isDefine = !isPreload && !purePath.equals(path);
 			try {
 				if (isPreload) {
 					out.write(JSIText.buildPreloadPerfix(path).getBytes(
@@ -159,14 +158,16 @@ public class ResourceRoot extends AbstractRoot {
 				}else if(isDefine){
 					ByteArrayOutputStream out2 = new ByteArrayOutputStream();
 
+					write(in, out2);
 					out.write(JSIText.buildDefinePerfix(path,out2.toString(this.encoding)).getBytes(
 							this.encoding));
 					
-					write(in, out2);
 					out2.writeTo(out);
+				}else{
+					write(in, out);
 				}
 				
-				if (isPreload) {
+				if (isPreload || isDefine) {
 					out.write(JSIText.buildPreloadPostfix("//").getBytes(
 							this.encoding));
 				}
