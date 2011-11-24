@@ -104,6 +104,7 @@ encoding="GBK"
 				<exclude name="org/xidea/jsidoc/util/*__preload__.js" />
 			</zipfileset>
 			<fileset dir="${basedir}/build/dest/">
+				<include name="require.js" />
 				<include name="boot-min.js" />
 				<include name="boot-col.js" />
 				<include name="boot-rhino.js" />
@@ -133,10 +134,32 @@ encoding="GBK"
 			<arg value="${basedir}/build/dest/boot-rhino.js" />
 			<arg value="-source" />
 			<arg value="${basedir}/web/scripts/boot.js" />
+			<arg value="-bootCached" />
+			<arg value="org.xidea.jsi:*" />
 			<arg value="-config.features" />
 			<arg value=":Debug" />
 			<arg value="org.xidea.jsi:Server" />
 			<arg value="org.xidea.jsi:PackageOptimize" />
+		</java>
+	</target>
+	<target name="fornodejs">
+		<echo>${JSAPath}</echo>
+
+
+		<java classname="org.jside.jsi.tools.export.ExportAction" classpath="${JSAPath}">
+			<arg value="-scriptBase" />
+			<arg value="${basedir}/web/scripts" />
+			<arg value="-config.ascii" />
+			<arg value="false" />
+			<arg value="-config.syntaxCompression" />
+			<arg value="false" />
+			<arg value="-bootCached" />
+			<arg value="org.xidea.jsi.*" />
+			<arg value="org.xidea.jsidoc.util.JSON" />
+			<arg value="org.xidea.jsidoc.util.XMLHttpRequest" />
+			
+			<arg value="-outputBoot" />
+			<arg value="${basedir}/build/dest/boot4node.js" />
 		</java>
 	</target>
 	<target name="compress-jsi" depends="init">
@@ -216,11 +239,13 @@ encoding="GBK"
 			<arg value="false" />
 			<arg value="-exports" />
 			<arg value="org.xidea.jsi:$log" />
+			<arg value="org.xidea.jsi:console" />
 			<arg value="-outputExported" />
 			<arg value="${basedir}/build/dest/jsi/log.js" />
 		</java>
 		<replace file="${basedir}/build/dest/jsi/__package__.js" token="'$log'," value="" />
-		<echo file="${basedir}/build/dest/jsi/__package__.js" append="true" message="&#10;this.addScript('log.js','$log');" />
+		<replace file="${basedir}/build/dest/jsi/__package__.js" token="'console'," value="" />
+		<echo file="${basedir}/build/dest/jsi/__package__.js" append="true" message="&#10;this.addScript('log.js',['$log','console']);" />
 	</target>
 	<target name="buildJSIPreload">
 		<property name="preload_dest" value="build/dest/jsidoc/preload.js" />

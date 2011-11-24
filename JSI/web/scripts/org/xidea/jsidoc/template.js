@@ -28,9 +28,9 @@
 //        return new impl(path);
 //    }
 //}
-Template.prototype.render = function(context){
-    return this.data(context)
-}
+//Template.prototype.render = function(context){
+//    return this.data(context)
+//}
 //$import("org.xidea.jsidoc.util.$log")
 //$log.error = function(msg){
 //	prompt("@@@",msg);

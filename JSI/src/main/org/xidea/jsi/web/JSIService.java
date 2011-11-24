@@ -153,14 +153,12 @@ public class JSIService extends ResourceRoot {
 	}
 
 	protected boolean writeResource(String path, Writer out) throws IOException {
-		String purePath = toSourcePath(path);
-		return this.output(path, out, path != purePath);
+		return this.output(path, out);
 	}
 
 	protected boolean writeResource(String path, OutputStream out)
 			throws IOException {
-		String purePath = toSourcePath(path);
-		return this.output(purePath, out, path != purePath);
+		return this.output(path, out);
 	}
 
 	protected String document() {
@@ -285,12 +283,4 @@ public class JSIService extends ResourceRoot {
 		return out.toString();
 	}
 
-	private String toSourcePath(String path) {
-		if (path.endsWith(JSIText.PRELOAD_FILE_POSTFIX)) {
-			return path.substring(0, path.length()
-					- JSIText.PRELOAD_FILE_POSTFIX.length())
-					+ ".js";
-		}
-		return path;
-	}
 }

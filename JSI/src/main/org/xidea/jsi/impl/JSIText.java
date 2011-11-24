@@ -6,14 +6,23 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.net.URL;
+import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.xidea.jsi.JSIPackage;
+import org.xidea.jsi.JSIRuntime;
 
 public abstract class JSIText {
-	public static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
+	static final String PRELOAD_FILE_POSTFIX = "__preload__.js";
+	static final Pattern FILE_POSTFIX = Pattern.compile("__(preload|define)__\\.js$");
 
-	public static final String PRELOAD_PREFIX = "$JSI.preload(";
-	public static final String PRELOAD_CONTENT_PREFIX = "eval(this.varText);";
+	static final String PRELOAD_PREFIX = "$JSI.preload(";
+	static final String PRELOAD_CONTENT_PREFIX = "eval(this.varText);";
+	static final Pattern REQUIRE_PATTERN = Pattern.compile("\\brequire\\((\"[^\\\"]+\")\\)");
+	
+	
+	static private JSIRuntime rs = RuntimeSupport.create();
 
 	public static String loadText(InputStream in, String encoding)
 			throws IOException {
@@ -42,14 +51,14 @@ public abstract class JSIText {
 		}
 	}
 
-	public final static String buildPreloadPerfix(String path) {
+	final static String buildPreloadPerfix(String path) {
 		String packageName = path.substring(0, path.lastIndexOf('/')).replace(
 				'/', '.');
 		String fileName = path.substring(packageName.length() + 1);
 		return buildPreloadPerfix(packageName, fileName);
 	}
 
-	public final static String buildPreloadPerfix(String packageName,
+	final static String buildPreloadPerfix(String packageName,
 			String fileName) {
 		if (packageName.startsWith(".")) {
 			packageName = packageName.substring(1);
@@ -67,7 +76,7 @@ public abstract class JSIText {
 		return buf.toString();
 	}
 
-	public static String buildPreloadPostfix(String content) {
+	static String buildPreloadPostfix(String content) {
 		int pos1 = content.lastIndexOf("//");
 		if (content.indexOf('\n', pos1) > 0 || content.indexOf('\r', pos1) > 0) {
 			return "\n})";
@@ -127,5 +136,19 @@ public abstract class JSIText {
 			previousByte = currentByte;
 		}
 
+	}
+
+	public static String buildDefinePerfix(String path, String source) {
+		source = (String) rs.eval("''+function(){"+source+"\n}");
+		Matcher match = REQUIRE_PATTERN.matcher(source);
+		StringBuilder buf = new StringBuilder("$JSI.define('"+path+"',[");
+		String sep = "";
+		while(match.find()){
+			buf.append(sep);
+			buf.append(match.group(1));
+			sep = ",";
+		}
+		buf.append("],function(require,export){");
+		return buf.toString();
 	}
 }
