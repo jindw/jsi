@@ -1,3 +1,0 @@
-<div>
-#parse( "/org/jside/webserver/test/test.vm" )
-</div>
