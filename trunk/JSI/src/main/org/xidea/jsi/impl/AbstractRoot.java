@@ -16,11 +16,11 @@ public abstract class AbstractRoot implements JSIRoot {
 	protected void reset(){
 		packageMap.clear();
 	}
-	public JSILoadContext $import(String path) {
-		return $import(path, new DefaultLoadContext());
+	public JSILoadContext $export(String path) {
+		return $export(path, new DefaultLoadContext());
 	}
 
-	public JSILoadContext $import(String  path, JSILoadContext context) {
+	public JSILoadContext $export(String  path, JSILoadContext context) {
 		JSIPackage pkg = findPackageByPath( path);
 		String fileNames  =  path.substring(pkg.getName().length() + 1);
 		pkg = requirePackage(pkg.getName());

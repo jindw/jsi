@@ -22,17 +22,17 @@ public class SelfLoadTest {
 	@Test
 	public void testLoadText() {
 		JSILoadContext context = new DefaultLoadContext();
-		root.$import("example.*",context);
-		root.$import("example.alias.*",context);
-		root.$import("example.dependence.*",context);
-		root.$import("example.internal.*",context);
-		root.$import("org.xidea.jsidoc.*",context);
-		root.$import("org.xidea.jsidoc.export.*",context);
-//		root.$import("org.xidea.jsidoc.html.*",context);
-//		root.$import("org.xidea.jsidoc.styles.*",context);
-		root.$import("org.xidea.jsidoc.util.*",context);
-		root.$import("org.xidea.test.*",context);
-		root.$import("org.xidea.test.loader.*",context);
+		root.$export("example",context);
+		root.$export("example/alias",context);
+		root.$export("example/dependence",context);
+		root.$export("example/internal",context);
+		root.$export("org/xidea/jsidoc",context);
+		root.$export("org/xidea/jsidoc/export",context);
+//		root.$export("org/xidea/jsidoc/html",context);
+//		root.$export("org/xidea/jsidoc/styles",context);
+		root.$export("org/xidea/jsidoc/util",context);
+		root.$export("org/xidea/test",context);
+		root.$export("org/xidea/test/loader",context);
 		System.out.println(context.getScriptList());
 	}
 }

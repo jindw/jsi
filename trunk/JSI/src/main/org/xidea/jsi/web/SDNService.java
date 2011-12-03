@@ -148,7 +148,7 @@ class SDNService {
 	public PackageLoadContext buildLoadContext(String[] paths) {
 		PackageLoadContext context = new PackageLoadContext();
 		for (String path : paths) {
-			root.$import(path, context);
+			root.$export(path, context);
 		}
 		return context;
 	}

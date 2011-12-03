@@ -13,8 +13,8 @@ package org.xidea.jsi;
  */
 public interface JSIRoot {
 
-	public abstract JSILoadContext $import(String path, JSILoadContext context);
-	public abstract JSILoadContext $import(String path);
+	public abstract JSILoadContext $export(String path, JSILoadContext context);
+	public abstract JSILoadContext $export(String path);
 
 	/**
 	 * 查找具体的实现包

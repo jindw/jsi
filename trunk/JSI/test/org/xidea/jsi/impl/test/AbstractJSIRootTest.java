@@ -49,19 +49,19 @@ public class AbstractJSIRootTest {
 	 */
 	@Test
 	public void test$importString() {
-		JSILoadContext context = root.$import("example.*");
+		JSILoadContext context = root.$export("example");
 		assertEquals(ALL_EXAMPLE_MAP, context.getExportMap());
 		assertEquals(1, context.getScriptList().size());
 
-		context = root.$import("example.internal.*");
+		context = root.$export("example/internal");
 		assertEquals(ALL_EXAMPLE_INTERNAL_MAP, context.getExportMap());
 		assertEquals(2, context.getScriptList().size());
 
-		context = root.$import("example.dependence.*");
+		context = root.$export("example/dependence");
 		assertEquals(ALL_EXAMPLE_DEPENDENCE_MAP, context.getExportMap());
 		assertEquals(2, context.getScriptList().size());
 
-		context = root.$import("org.xidea.jsidoc.JSIDoc");
+		context = root.$export("org.xidea.jsidoc.JSIDoc");
 		assertTrue(context.getExportMap().size() > 0);
 	}
 
@@ -70,17 +70,17 @@ public class AbstractJSIRootTest {
 		JSILoadContext context = new DefaultLoadContext();
 		Map<String, String> expect = new HashMap<String, String>(
 				ALL_EXAMPLE_MAP);
-		root.$import("example.*", context);
+		root.$export("example", context);
 		assertEquals(expect, context.getExportMap());
 		assertEquals(1, context.getScriptList().size());
 
-		root.$import("example.internal.*", context);
+		root.$export("example/internal", context);
 		expect.putAll(ALL_EXAMPLE_INTERNAL_MAP);
 		assertEquals(expect, context.getExportMap());
 		assertEquals(3, context.getScriptList().size());
 
 		expect.putAll(ALL_EXAMPLE_DEPENDENCE_MAP);
-		root.$import("example.dependence.*", context);
+		root.$export("example/dependence", context);
 		assertEquals(expect, context.getExportMap());
 		assertEquals(5, context.getScriptList().size());
 

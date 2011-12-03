@@ -48,7 +48,7 @@ public class DataJSIRootTest {
 		String source = loadDestText("exported-all.xml");
 		JSIRoot root = new DataRoot(source);
 		JSILoadContext loadContext = new DefaultLoadContext();
-		root.$import("example.*", loadContext);
+		root.$export("example", loadContext);
 		//root.$import("example.alias.*", loadContext);
 //		root.$import("example.dependence.*", loadContext);
 //		root.$import("example.internal.*", loadContext);

@@ -23,37 +23,37 @@ public class DefaultJSILoadContextTest {
 
 	@Test
 	public void testLoadScript() {
-		JSILoadContext context = root.$import("example/hello-world.js");
+		JSILoadContext context = root.$export("example/hello-world");
 		assertEquals(ALL_EXAMPLE_MAP,context.getExportMap());
 
-		context = root.$import("example.internal.*");
+		context = root.$export("example/internal");
 		assertEquals(ALL_EXAMPLE_INTERNAL_MAP,context.getExportMap());
 		
-		context = root.$import("example/dependence/show-detail.js");
+		context = root.$export("example/dependence/show-detail");
 		assertEquals(ALL_EXAMPLE_DEPENDENCE_MAP,context.getExportMap());
 	}
 
 	@Test
 	public void testGetExportMap() {
-		JSILoadContext context = root.$import("example.sayHello");
+		JSILoadContext context = root.$export("example:sayHello");
 		assertEquals(createObjectPackageMap("example","sayHello"),context.getExportMap());
 
-		context = root.$import("example.internal.*");
+		context = root.$export("example/internal");
 		assertEquals(ALL_EXAMPLE_INTERNAL_MAP,context.getExportMap());
 		
-		context = root.$import("example.dependence.*");
+		context = root.$export("example/dependence");
 		assertEquals(ALL_EXAMPLE_DEPENDENCE_MAP,context.getExportMap());
 	}
 
 	@Test
 	public void testGetScriptList() {
-		JSILoadContext context = root.$import("example.*");
+		JSILoadContext context = root.$export("example");
 		assertEquals(1,context.getScriptList().size());
 		
-		context = root.$import("example.internal.*");
+		context = root.$export("example/internal");
 		assertEquals(2,context.getScriptList().size());
 		
-		context = root.$import("example.dependence.*");
+		context = root.$export("example/dependence");
 		assertEquals(2,context.getScriptList().size());
 	}
 

@@ -257,7 +257,7 @@ public class JSIService extends ResourceRoot {
 				// PHP 不支持同名参数
 				for (String subitem : item.split("[^\\w\\$\\:\\.\\-\\*]+")) {
 					if(subitem.trim().length()>0){
-						root.$import(subitem, context);
+						root.$export(subitem, context);
 					}else{
 						log.debug("无效脚本对象："+subitem +","+item);
 					}

@@ -32,7 +32,7 @@ public class CircularDependenceTest {
 							"test/__package__.js",
 							"this.addScript('test1.js','test1','test2.js');this.addScript('test2.js','test2','test1.js')");
 			root = new DataRoot(data);
-			root.$import("test/test1.js");
+			root.$export("test/test1");
 		} catch (StackOverflowError e) {
 			return;
 		}
@@ -54,7 +54,7 @@ public class CircularDependenceTest {
 						+ "this.addScript('test4.js','test4',0,'test1.js');");
 		root = new DataRoot(data);
 		for (int i = 1; i < 4; i++) {
-			JSILoadContext context = root.$import("test/test" + i + ".js");
+			JSILoadContext context = root.$export("test/test" + i + "");
 			ArrayList<String> result = new ArrayList<String>();
 			for (ScriptLoader s : context.getScriptList()) {
 				result.add(s.getName());

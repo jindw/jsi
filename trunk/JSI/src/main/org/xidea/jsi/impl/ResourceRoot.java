@@ -71,13 +71,13 @@ public class ResourceRoot extends AbstractRoot {
 		return t;
 	}
 
-	public JSILoadContext $import(String path, JSILoadContext context) {
+	public JSILoadContext $export(String path, JSILoadContext context) {
 		long t = getLastModified();
 		if (token < t) {
 			super.reset();
 			token = t;
 		}
-		return super.$import(path, context);
+		return super.$export(path, context);
 	}
 
 	public void setEncoding(String encoding) {
