@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<html xmlns="http://www.xidea.org/ns/xhtml"
+	xmlns:c="http://www.xidea.org/lite/core">
+	<head>
+		<link rel="stylesheet" type="text/css"
+			href="../styles/package.css" />
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+		<title>Package Information:${packageInfo.name}</title>
+	</head>
+	<body>
+		<h2>
+			&#x2193;${packageInfo.name}
+			<span class="item-package"></span>
+		</h2>
+		<div class="package-source">
+
+			<table width="100%" cellpadding="0" border="0"
+				cellspacing="0" class="xidea--syntax-source">
+				<thead>
+					<tr>
+						<th colspan="2"></th>
+					</tr>
+				</thead>
+				<tbody>
+					<c:for var="line"
+						list="${packageInfo.getSourceEntry().parse().toArray()}">
+						<tr
+							class="${for.index%2?'xidea-syntax-row1':'xidea-syntax-row0'}">
+							<td class="xidea-syntax-vrule0">
+								<input type="button"
+									value="${for.index+1}" />
+							</td>
+							<td nowrap="true">
+								<pre>
+									<c:out value="${line}" />
+								</pre>
+							</td>
+						</tr>
+					</c:for>
+				</tbody>
+			</table>
+		</div>
+
+		<table width="98%" class="content" cellpadding="0"
+			cellspacing="0">
+			<c:if test="${constructors.length}">
+				<tr>
+					<th>Constructor Name</th>
+					<th>File Path</th>
+					<th>Constructor Description</th>
+				</tr>
+				<c:for var="object" list="${constructors}">
+					<tr>
+						<td>
+							<a class="item-${object.type}"
+								href="?${object.getPath()}">
+								${object.name}
+							</a>
+						</td>
+						<td>
+							<a class="item-file"
+								href="?${object.fileInfo.getPath()}">
+								${object.fileInfo.name}
+							</a>
+						</td>
+						<td>
+							<c:out
+								value="${object.docEntry.description}" />
+							&#160;
+						</td>
+					</tr>
+				</c:for>
+				<tr class="space">
+					<td colspan="3"></td>
+				</tr>
+			</c:if>
+			<c:if test="${functions.length}">
+				<tr>
+					<th>Function Name</th>
+					<th>File Path</th>
+					<th>Function Description</th>
+				</tr>
+				<c:for var="object" list="${functions}">
+					<tr>
+						<td>
+							<a class="item-${object.type}"
+								href="?${object.getPath()}">
+								${object.name}
+							</a>
+						</td>
+						<td>
+							<a class="item-file"
+								href="?${object.fileInfo.getPath()}">
+								${object.fileInfo.name}
+							</a>
+						</td>
+						<td>
+							<c:out
+								value="${object.docEntry.description}" />
+							&#160;
+						</td>
+					</tr>
+				</c:for>
+				<tr class="space">
+					<td colspan="3"></td>
+				</tr>
+			</c:if>
+			<c:if test="${objects.length}">
+				<tr>
+					<th>Object Name</th>
+					<th>File Path</th>
+					<th>Object Description</th>
+				</tr>
+				<c:for var="object" list="${objects}">
+					<tr>
+						<td>
+							<a class="item-${object.type}"
+								href="?${object.getPath()}">
+								${object.name}
+							</a>
+						</td>
+						<td>
+							<a class="item-file"
+								href="?${object.fileInfo.getPath()}">
+								${object.fileInfo.name}
+							</a>
+						</td>
+						<td>
+							<c:out
+								value="${object.docEntry.description}" />
+							&#160;
+						</td>
+					</tr>
+				</c:for>
+				<tr class="space">
+					<td colspan="3"></td>
+				</tr>
+			</c:if>
+		</table>
+		<table width="98%" class="content" cellpadding="0"
+			cellspacing="0">
+			<tr>
+				<th>File List</th>
+				<th>File Infomation</th>
+			</tr>
+			<c:for var="file" list="${files}">
+				<tr>
+					<td>
+						<a class="item-file"
+							href="?${file.getPath()}">
+							${file.name}
+						</a>
+					</td>
+					<td>
+						<c:out value="${file.getDescription()}" />
+					</td>
+				</tr>
+			</c:for>
+			<tr class="space">
+				<td colspan="2"></td>
+			</tr>
+		</table>
+	</body>
+</html>

@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<script src="../../../boot.js"></script>
+<script>
+$import("org.xidea.jsidoc:JSIDoc",true);
+</script>
+<script>
+var ps = ["org.xidea.jsidoc"];
+if(data){
+	try{
+		var data = window.hash.substring(1);
+		ps = window.eval('('+data+')');
+	}catch(e){
+	}
+}
+var pm = {};
+for(var i = 0;i<ps.length;i++){
+	pm[ps[i]] = true;
+}
+JSIDoc.packageInfoMap=pm;
+JSIDoc.genSource = function(d){
+    var html = this.genExport(d);
+	return html;
+}
+JSIDoc.render=function(d){
+    d.write(this.genSource(d));
+}
+</script>
+<frameset rows='100%'>
+	<frame name="content" src='html/controller.html'></frame>
+</frameset>
+</html>
+

@@ -1,0 +1,58 @@
+<html>
+    <head>
+        <title>Test Suite</title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <script src="../../../../boot.js"></script>
+    </head>
+    <body topmargin="0" bottommargin="0">
+    <div id="loading">Loading.....<div>
+    <script>
+        var parameterMap = {};
+        var query = window.location.search;
+        var params = query.substr(1).split('&');
+        for(var i=0;i<params.length;i++){
+            var kv = params[i].split('=');
+            parameterMap[decodeURIComponent(kv[0])] = decodeURIComponent(kv[1]);
+        }
+        var target = {};
+        var suite = parent.LoadSuite[parameterMap.id];
+        var path = parameterMap.path;
+        var type = parameterMap.type;
+        var lazy;
+        //继续处理
+        function next(e){
+            if(!e && writeHtml.length){
+                e = new Error("脚本：【 "+path + "】不支持异步装载");
+            }
+            suite.nextTest(path,type,target,e);
+        }
+        var writeHtml = [];
+        function write(){
+            writeHtml.push(arguments[0])
+        };
+        try{
+	        switch(type){
+	        case 'L'://'lazy':
+	            $import(path,target,true);
+	            lazy = true;
+	            break;
+	        case 'A'://'asynchronous':
+                document.write = document.writeln = document.print = document.println = write;
+	            $import(path,target,function(){next()});
+	            break;
+	        case 'S'://'synchronous':
+	            $import(path,target,false);
+	            next();
+	            break;
+	        }
+        }catch(e){
+            next(e);
+        }
+    </script>
+    <script>
+        if(lazy){
+            next();
+        }
+    </script>
+    </body>
+</html>

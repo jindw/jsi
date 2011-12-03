@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<html xmlns="http://www.xidea.org/ns/xhtml"
+	xmlns:c="http://www.xidea.org/lite/core">
+<head>
+<base target="content"/>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<title>JSI Doc Menu</title>
+<link rel="stylesheet" type="text/css" href="../styles/menu.css" />
+<script>//<!-- opera bug --><![CDATA[
+window.onload = window.onresize = function(){
+    var content = document.getElementById("content");
+    content.style.width = document.body.clientWidth-10+'px';
+    content.style.height = document.body.clientHeight-35+'px';
+}
+function collapse(li){
+  while(li && li.tagName!="LI"){
+    li = li.parentNode;
+  }
+  if(li.className.indexOf("open")>-1){
+    li.className = li.className.replace(/\bopen\b/,'closed');
+  }else{
+    li.className = li.className.replace(/\bclosed\b/,'open');
+  }
+}
+function openMenu(li){
+    li.className = li.className.replace(/\s*\bopen\b|$/,' open')
+}
+function closeMenu(li){
+    li.className = li.className.replace(/\s*\bopen\b/,'')
+}
+
+
+function addPackage(form){
+    var groupName = form.groupName.value;
+    var packageName = form.packageName.value;
+    var findDependence = form.findDependence.checked;
+    var data = [groupName];
+    data[groupName] = packageName.match(/[\w\.]+/g);
+    parent.JSIDoc.addPackageMap(data,findDependence);
+    this.location.replace(this.location.href);
+}
+//]]> 
+</script>
+
+
+</head>
+<body style="margin: 0px;padding: 0px;">
+<div id="toolbar">
+<li class="menu-box" onmouseover="openMenu(this)" onmouseout="closeMenu(this)">
+    <a title="更多" href="#null" target="_self" onclick="return false">&gt;&gt;</a>
+    <ul class="menu-block">
+        <li class="menu-item"><a title="跳转至文档首页" href="../welcome.html">文档首页</a></li>
+        <li class="menu-item"><a title="跳转至网站首页" href="/" target="_top">网站首页</a></li>
+        <li class="menu-item"><a title="JSI开源项目首页" href="http://www.xidea.org/project/jsi" target="_top">JSI首页&gt;&gt;</a></li>
+    </ul>
+</li> 
+<li class="menu-box" onmouseover="openMenu(this)" onmouseout="closeMenu(this)">
+    <a href="#null"  onclick="return false">工具</a> 
+    <ul class="menu-block" style="right:-10px">
+        <li class="menu-item"><a title="导出成普通脚本，脱离JSI框架" href="?@export">导出</a> </li>
+        <li class="menu-item"><a title="自动装载测试" href="../../test/loader/">装载测试</a></li>
+        <li class="menu-item"><a title="定制类库" href="/" onclick="alert('尚未实现');return false">定制类库</a></li>
+    </ul>
+</li>
+<li class="menu-box" onmouseover="openMenu(this)" onmouseout="closeMenu(this)">
+    <a href="#null" title="JSI内核脚本"  onclick="return false">内核参考</a> 
+    <ul class="menu-block root-pane" style="width:170px;right:-40px">
+        <li class="menu-item"><a>内部对象参考</a></li>
+        <li class="menu-item"><a class="item-constructor" href="?:Package">Package</a></li>
+        <li class="menu-item"><a class="item-constructor" href="?:ScriptLoader">ScriptLoader</a></li>
+        <li class="menu-item"><a>可用对象参考</a></li>
+        <li class="menu-item"><a class="item-object" href="?:$JSI">$JSI</a></li>
+        <li class="menu-item"><a class="item-function" href="?:$import">$import</a></li>
+        <li class="menu-item"><a class="item-constructor" href="?:XMLHttpRequest">XMLHttpRequest</a></li>
+    </ul> 
+</li>
+<li class="menu-box" onmouseover="openMenu(this)" onmouseout="closeMenu(this)">
+    <a href="#null" title="JSI内核脚本"  onclick="return false"><img src="../styles/big-plus.gif" border="0"/></a>
+    <ul class="menu-block" style="font-size:12px;padding:8px;width:180px;height:150px;left:-60px;border:1px solid #000;background:#FFF">
+        <form style="position:fixed;">
+        <div>分组：</div>
+        <div><input style="width:160px" name="groupName" value="其他类库"/></div>
+        <div>包名：</div>
+        <div><textarea style="width:160px" name="packageName"/></div>
+        <div><button onclick="addPackage(this.form);return false">添加类库</button>
+        <input type="checkbox" name="findDependence"/> 附加依赖</div>
+        </form>
+    </ul> 
+</li>
+</div>
+
+<div id="content">
+
+<c:for var="key" list="${packageInfoGroupMap}">
+    <h4>${key}</h4>
+    <ul class="package-pane">
+	<c:for var="packageInfo" list="${packageInfoGroupMap[key]}">
+		<c:if test="${packageInfo.implementation}">
+			<li class="closed">
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr>
+					<td style="width:14px;">
+					<button class="openhandle" onclick="collapse(this)">+</button>
+					<button class="closehandle" onclick="collapse(this)">-</button>
+					</td>
+					<td><a class="item-package-ref"
+						 href="?${packageInfo.implementation}:">${packageInfo.name}
+					</a></td>
+				</tr>
+				<tr>
+					<td colspan="2">
+					<ul>
+						<div>指向: ${packageInfo.implementation}</div>
+					</ul>
+					</td>
+				</tr>
+			</table>
+			</li>
+		</c:if>
+		<c:else>
+			<li title="${packageInfo.getDescription()}" class="closed" onclick="parent.JSIDoc.collapsePackage('${packageInfo.name}')">
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr>
+					<td style="width:14px;">
+					<button class="openhandle" onclick="collapse(this)">+</button>
+					<button class="closehandle" onclick="collapse(this)">-</button>
+					</td>
+					<td><a class="item-package"
+						href="?${packageInfo.name}:">${packageInfo.name}
+					</a></td>
+				</tr>
+				<tr>
+					<td colspan="2">
+					<ul id="package_${packageInfo.name}" title="loading">
+						<div class="loading">Loading....</div>
+					</ul>
+					</td>
+				</tr>
+			</table>
+			</li>
+		</c:else>
+    </c:for>
+    </ul>
+</c:for>
+</div>
+</body>
+</html>
