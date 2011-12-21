@@ -13,9 +13,9 @@ import org.mozilla.javascript.ContextAction;
 import org.mozilla.javascript.ErrorReporter;
 import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.Parser;
-import org.mozilla.javascript.ScriptOrFnNode;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.ast.AstRoot;
 import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.PackageSyntaxException;
 
@@ -81,13 +81,13 @@ public class RhinoScriptPackagePaser extends PackageParser {
 					}
 
 				});
-		ScriptOrFnNode node = parser.parse(
+		AstRoot node = parser.parse(
 				source, "<>", 0);
 		HashSet<String> result = new HashSet<String>();
 		result.addAll(Arrays.asList(node.getParamAndVarNames()));
 		int count = node.getFunctionCount();
 		while ((count--) > 0) {
-			String name = node.getFunctionNode(count).getFunctionName();
+			String name = node.getFunctionNode(count).getName();
 			if (name != null && name.length() > 0) {
 				result.add(name);
 			}
