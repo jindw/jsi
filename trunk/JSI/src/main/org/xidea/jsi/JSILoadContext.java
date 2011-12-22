@@ -3,7 +3,7 @@ package org.xidea.jsi;
 import java.util.List;
 import java.util.Map;
 
-import org.xidea.jsi.impl.DefaultLoadContext;
+import org.xidea.jsi.impl.v2.DefaultLoadContext;
 
 
 /**

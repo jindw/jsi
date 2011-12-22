@@ -21,11 +21,11 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIRoot;
-import org.xidea.jsi.impl.DataRoot;
-import org.xidea.jsi.impl.DefaultExportorFactory;
-import org.xidea.jsi.impl.DefaultLoadContext;
-import org.xidea.jsi.impl.ResourceRoot;
-import org.xidea.jsi.impl.JSIText;
+import org.xidea.jsi.impl.v2.DataRoot;
+import org.xidea.jsi.impl.v2.DefaultExportorFactory;
+import org.xidea.jsi.impl.v2.DefaultLoadContext;
+import org.xidea.jsi.impl.v2.JSIText;
+import org.xidea.jsi.impl.v2.ResourceRoot;
 
 public class JSIService extends ResourceRoot {
 	private static final Log log = LogFactory.getLog(JSIService.class);
@@ -244,7 +244,7 @@ public class JSIService extends ResourceRoot {
 					}
 				}
 				url.getOutputStream().write(buf.toString().getBytes("UTF-8"));
-				return org.xidea.jsi.impl.JSIText.loadText(
+				return org.xidea.jsi.impl.v2.JSIText.loadText(
 						url.getInputStream(), "UTF-8");
 			} else {
 				return null;

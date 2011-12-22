@@ -13,9 +13,9 @@ import java.util.regex.Pattern;
 
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.impl.DefaultExportorFactory;
-import org.xidea.jsi.impl.DefaultLoadContext;
-import org.xidea.jsi.impl.ResourceRoot;
+import org.xidea.jsi.impl.v2.DefaultExportorFactory;
+import org.xidea.jsi.impl.v2.DefaultLoadContext;
+import org.xidea.jsi.impl.v2.ResourceRoot;
 
 class SDNService {
 	public static final String SDN_DEBUG_TOKEN_NAME = "SDN_DEBUG";

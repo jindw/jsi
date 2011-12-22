@@ -3,7 +3,7 @@ package org.xidea.jsi;
 import java.util.Collection;
 import java.util.Map;
 
-import org.xidea.jsi.impl.DefaultScriptLoader;
+import org.xidea.jsi.impl.v2.DefaultScriptLoader;
 
 
 /**

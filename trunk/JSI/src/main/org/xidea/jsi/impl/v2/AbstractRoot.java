@@ -1,4 +1,4 @@
-package org.xidea.jsi.impl;
+package org.xidea.jsi.impl.v2;
 
 import java.util.HashMap;
 import java.util.Iterator;

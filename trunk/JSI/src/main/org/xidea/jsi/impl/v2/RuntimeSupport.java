@@ -1,4 +1,4 @@
-package org.xidea.jsi.impl;
+package org.xidea.jsi.impl.v2;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -23,7 +23,7 @@ import org.xidea.el.json.JSONDecoder;
 import org.xidea.jsi.JSIRuntime;
 
 /**
- * @see org.xidea.jsi.impl.Java6Impl
+ * @see org.xidea.jsi.impl.v2.Java6Impl
  * @author test
  * 
  */

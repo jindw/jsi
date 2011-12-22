@@ -19,7 +19,7 @@ public interface JSIRoot {
 	/**
 	 * 查找具体的实现包
 	 * 如果找不到指定的包，应该抛出 PackageNotFoundException 异常
-	 * @see org.xidea.jsi.impl.AbstractRoot#requirePackage(String, boolean)
+	 * @see org.xidea.jsi.impl.v2.AbstractRoot#requirePackage(String, boolean)
 	 * @param name
 	 * @param exact
 	 * @return
@@ -29,7 +29,7 @@ public interface JSIRoot {
 	/**
 	 * 查找的包位置，可能是抽象包（只管获取，不做初始化）
 	 * 如果找不到指定的包，应该抛出 PackageNotFoundException 异常
-	 * @see org.xidea.jsi.impl.AbstractRoot#findPackageByPath(String)
+	 * @see org.xidea.jsi.impl.v2.AbstractRoot#findPackageByPath(String)
 	 * @param path
 	 * @return
 	 */

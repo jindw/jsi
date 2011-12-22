@@ -3,7 +3,7 @@ package org.xidea.jsi;
 import java.util.List;
 import java.util.Map;
 
-import org.xidea.jsi.impl.DefaultPackage;
+import org.xidea.jsi.impl.v2.DefaultPackage;
 
 
 
@@ -13,7 +13,7 @@ import org.xidea.jsi.impl.DefaultPackage;
  * 该对象需要在多个LoadContext中共享数据。
  * 实现中需要注意线程安全设计。
  * @scope Application
- * @see org.xidea.jsi.impl.DefaultPackage
+ * @see org.xidea.jsi.impl.v2.DefaultPackage
  * @author jindw
  */
 public interface JSIPackage {
