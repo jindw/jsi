@@ -38,6 +38,7 @@ import org.mozilla.javascript.ast.RegExpLiteral;
 import org.mozilla.javascript.ast.ReturnStatement;
 import org.mozilla.javascript.ast.Scope;
 import org.mozilla.javascript.ast.ScriptNode;
+import org.mozilla.javascript.ast.StringLiteral;
 import org.mozilla.javascript.ast.SwitchCase;
 import org.mozilla.javascript.ast.SwitchStatement;
 import org.mozilla.javascript.ast.ThrowStatement;
@@ -56,20 +57,30 @@ import org.mozilla.javascript.ast.XmlRef;
 import org.mozilla.javascript.ast.Yield;
 
 public class JavaScriptSerialize {
-	// private AstNode root;
-	private StringBuilder sb = new StringBuilder();
+	private AstNode root;
+	private StringBuilder sb;
 	int depth = 0;
 
 	public JavaScriptSerialize(AstNode root) {
-		// this.root = root;
+		this.root = root;
+	}
+
+	public String toString() {
+		try {
+			sb = new StringBuilder();
+			write(root);
+			return sb.toString();
+		} finally {
+			sb = null;
+		}
 	}
 
 	protected void write(AstNode node) {
-		makeIndent();
 		if (node instanceof Name || node instanceof NumberLiteral
+				|| node instanceof StringLiteral
 				|| node instanceof RegExpLiteral
 				|| node instanceof KeywordLiteral) {
-			sb.append(node.toSource(depth));
+			sb.append(node.toSource(depth).trim());
 		} else if (node instanceof ArrayLiteral) {
 			writeArray((ArrayLiteral) node);
 		} else if (node instanceof ObjectLiteral) {
@@ -83,42 +94,51 @@ public class JavaScriptSerialize {
 		} else if (node instanceof ParenthesizedExpression) {
 			sb.append("(");
 			ParenthesizedExpression pe = (ParenthesizedExpression) node;
-			sb.append(toSource(pe.getExpression(), depth + 1));
+			sb.append(toSource(pe.getExpression(), depth ).trim());
 			sb.append(")");
-
 		} else if (node instanceof ExpressionStatement) {
+			makeIndent();
 			write(((ExpressionStatement) node).getExpression());
 			sb.append(";");
 			println();
 		} else if (node instanceof Jump) {
+			// makeIndent();expression function
 			writeJump(node);
 		} else if (node instanceof LabeledStatement) {
+			makeIndent();
 			writeLabeledStatement((LabeledStatement) node);
 		} else if (node instanceof ReturnStatement) {
+			makeIndent();
 			writeReturn((ReturnStatement) node);
 		} else if (node instanceof VariableDeclaration) {
+			makeIndent();
 			writeVar((VariableDeclaration) node);
 		} else if (node instanceof VariableInitializer) {
 			writeVarAssign((VariableInitializer) node);
 		} else {
 			switch (node.getType()) {
 			case Token.BLOCK:
+				makeIndent();
 				sb.append("{");
+				depth++;
 				println();
 				for (Node kid : node) {
 					write((AstNode) kid);
 				}
+				depth--;
 				makeIndent();
 				sb.append("}");
 				println();
 				break;
 			case Token.TRY:
+				makeIndent();
 				writeTry((TryStatement) node);
 				break;
 			case Token.CATCH:
 				writeCatch((CatchClause) node);
 				break;
 			case Token.THROW:
+				makeIndent();
 				writeThrow((ThrowStatement) node);
 				break;
 			case Token.HOOK:
@@ -131,15 +151,19 @@ public class JavaScriptSerialize {
 				writeNew((NewExpression) node);
 				break;
 			case Token.IF:
+				makeIndent();
 				writeIf((IfStatement) node);
 				break;
 			case Token.CASE:
+				makeIndent();
 				writeCase((SwitchCase) node);
 				break;
 			case Token.YIELD:
+				makeIndent();
 				writeYield((Yield) node);
 				break;
 			case Token.WITH:
+				makeIndent();
 				writeWith((WithStatement) node);
 				break;
 
@@ -151,7 +175,7 @@ public class JavaScriptSerialize {
 				// xml name 不能和 javascript name 混淆
 				if (!processXML(node)) {
 					throw new IllegalArgumentException("unknow token:"
-							+ node.toSource());
+							+ node.getClass() + node.toSource());
 				}
 
 			}
@@ -204,6 +228,7 @@ public class JavaScriptSerialize {
 	private void writeJump(AstNode node) {
 		if (node instanceof Scope) {
 			if (node instanceof Loop) {
+				makeIndent();
 				writeLoop((Loop) node);
 			} else if (node instanceof ScriptNode) {
 				if (node instanceof FunctionNode) {
@@ -215,37 +240,52 @@ public class JavaScriptSerialize {
 				}
 
 			} else if (node instanceof LetNode) {
+				makeIndent();
 				writeLetScope((LetNode) node);
 			} else if (node instanceof ArrayComprehension) {
+				makeIndent();
 				writeArrayComprehension((ArrayComprehension) node);
+			} else {
+				makeIndent();
+				sb.append("{\n");
+				for (Node kid : node) {
+					sb.append(toSource((AstNode) kid, depth + 1));
+				}
+				makeIndent();
+				sb.append("}\n");
 			}
 
 		} else if (node instanceof SwitchStatement) {
+			makeIndent();
 			writeSwitch((SwitchStatement) node);
 		} else {// break,continue label
+			makeIndent();
 			writeLabelJump(node);
 		}
 	}
 
 	private void writeFunction(FunctionNode fn) {
+		if (fn.getFunctionType() == FunctionNode.FUNCTION_STATEMENT) {
+			makeIndent();
+		}
 		sb.append("function");
 		Name functionName = fn.getFunctionName();
 		if (functionName != null) {
 			sb.append(" ");
-			sb.append(toSource(functionName, 0));
+			sb.append(toSource(functionName, 0).trim());
 		}
 		List<AstNode> params = fn.getParams();
 		if (params == null) {
-			sb.append("() ");
+			sb.append("()");
 		} else {
 			sb.append("(");
-			writeList(params);
-			sb.append(") ");
+			writeList(params, true);
+			sb.append(")");
 		}
 		AstNode body = fn.getBody();
 		if (fn.isExpressionClosure()) {
-			sb.append(" ");
-			sb.append(toSource(body, depth));
+			// sb.append(" ");
+			sb.append(toSource(body, depth).trim());
 		} else {
 			sb.append(toSource(body, depth).trim());
 		}
@@ -280,7 +320,7 @@ public class JavaScriptSerialize {
 
 	private void writeSwitch(SwitchStatement ss) {
 		sb.append("switch(");
-		sb.append(toSource(ss.getExpression(), depth + 1).trim());
+		sb.append(toSource(ss.getExpression(), depth).trim());
 		sb.append("){\n");
 		for (SwitchCase sc : ss.getCases()) {
 			sb.append(toSource(sc, depth + 1));
@@ -291,7 +331,7 @@ public class JavaScriptSerialize {
 
 	private void writeLetScope(LetNode ln) {
 		sb.append("let(");
-		writeList(ln.getVariables().getVariables());
+		writeList(ln.getVariables().getVariables(), true);
 		sb.append(")");
 		AstNode body = ln.getBody();
 		if (body != null) {
@@ -308,7 +348,7 @@ public class JavaScriptSerialize {
 		AstNode filter = ac.getFilter();
 		if (filter != null) {
 			sb.append("if(");
-			sb.append(toSource(filter, depth + 1).trim());
+			sb.append(toSource(filter, depth).trim());
 			sb.append(")");
 		}
 		sb.append("]");
@@ -319,68 +359,66 @@ public class JavaScriptSerialize {
 		if (node instanceof ForLoop) {
 			ForLoop fl = (ForLoop) node;
 			sb.append("for(");
-			sb.append(toSource(fl.getInitializer(), depth + 1));
+			sb.append(toSource(fl.getInitializer(), depth));
 			sb.append(";");
-			sb.append(toSource(fl.getCondition(), depth + 1));
+			sb.append(toSource(fl.getCondition(), depth));
 			sb.append("; ");
-			sb.append(toSource(fl.getIncrement(), depth + 1));
-			sb.append(") ");
-			if (body instanceof Block) {
-				sb.append(toSource(body, depth).trim()).append("\n");
-			} else {
-				sb.append("\n").append(toSource(body, depth + 1));
-			}
+			sb.append(toSource(fl.getIncrement(), depth));
+			sb.append(")");
+			printBlock(body, sb);
 		} else if (node instanceof WhileLoop) {
-			sb.append("while (");
-			sb.append(toSource(((WhileLoop) node).getCondition(), depth + 1)
-					.trim());
-			sb.append(") ");
-			if (body instanceof Block) {
-				sb.append(toSource(body, depth));
-				sb.append("\n");
-			} else {
-				sb.append("\n");
-				sb.append(toSource(body, depth));
-			}
+			sb.append("while(");
+			sb
+					.append(toSource(((WhileLoop) node).getCondition(), depth)
+							.trim());
+			sb.append(")");
 
-			sb.append("do");
-			;
-			sb.append("while (");
-			sb.append(");\n");
+			sb.append(body.getClass());
+			printBlock(body, sb);
 		} else if (node instanceof DoLoop) {
 			sb.append("do");
 			sb.append(toSource(body, depth).trim());
 			sb.append("while (");
-			sb.append(toSource(((DoLoop) node).getCondition(), depth + 1)
-					.trim());
+			sb.append(toSource(((DoLoop) node).getCondition(), depth).trim());
 			sb.append(");\n");
 		} else if (node instanceof ForInLoop) {
 			ForInLoop fil = (ForInLoop) node;
 			if (node instanceof ArrayComprehensionLoop) {
-				sb.append(" for (");
-				sb.append(toSource(fil.getIterator(), depth + 1).trim());
+				sb.append("for(");
+				sb.append(toSource(fil.getIterator(), depth).trim());
 				sb.append(" in ");
-				sb.append(toSource(fil.getIteratedObject(), depth + 1).trim());
+				sb.append(toSource(fil.getIteratedObject(), depth).trim());
 				sb.append(")");
 			} else {
-				sb.append("for ");
+				sb.append("for");
 				if (fil.isForEach()) {
 					sb.append("each ");
 				}
 				sb.append("(");
-				sb.append(toSource(fil.getIterator(), depth + 1).trim());
+				sb.append(toSource(fil.getIterator(), depth).trim());
 				sb.append(" in ");
-				sb.append(toSource(fil.getIteratedObject(), depth + 1).trim());
-				sb.append(") ");
-				if (body instanceof Block) {
-					sb.append(toSource(body, depth + 1).trim());
-					sb.append("\n");
-				} else {
-					sb.append("\n").append(toSource(body, depth + 1));
-				}
+				sb.append(toSource(fil.getIteratedObject(), depth).trim());
+				sb.append(")");
+				printBlock(body, sb);
 			}
 		}
 
+	}
+
+	private StringBuilder printBlock(AstNode body, StringBuilder sb) {
+		if (body instanceof Block || body instanceof Scope) {
+			sb.append(toSource(body, depth).trim());
+			sb.append("\n");
+		} else {
+			// if(!(body instanceof IfStatement && sb.length()>5 &&
+			// sb.substring(sb.length()-5).equals("else "))){
+			sb.append("\n");
+			// }
+			depth++;
+			sb.append(toSource(body, depth));
+			depth--;
+		}
+		return sb;
 	}
 
 	private void writeUnary(UnaryExpression ue) {
@@ -401,7 +439,7 @@ public class JavaScriptSerialize {
 	private void writeVar(VariableDeclaration node) {
 		sb.append(Token.typeToName(node.getType()).toLowerCase());
 		sb.append(" ");
-		writeList(node.getVariables());
+		writeList(node.getVariables(), true);
 		if (!(node.getParent() instanceof Loop)) {
 			sb.append(";");
 			println();
@@ -409,11 +447,11 @@ public class JavaScriptSerialize {
 	}
 
 	private void writeVarAssign(VariableInitializer node) {
-		sb.append(toSource(node.getTarget(), 0));
+		sb.append(toSource(node.getTarget(), 0).trim());
 		AstNode initializer = node.getInitializer();
 		if (initializer != null) {
 			sb.append("=");
-			sb.append(toSource(initializer, depth + 1).trim());
+			sb.append(toSource(initializer, depth ).trim());
 		}
 	}
 
@@ -448,10 +486,10 @@ public class JavaScriptSerialize {
 
 	private void writeWith(WithStatement node) {
 		sb.append("with (");
-		sb.append(toSource(node.getExpression(), depth + 1));
+		sb.append(toSource(node.getExpression(), depth));
 		sb.append(") ");
 		AstNode statement = node.getStatement();
-		sb.append(toSource(statement, depth + 1).trim());
+		sb.append(toSource(statement, depth).trim());
 		if (!(statement instanceof Block)) {
 			sb.append(";");
 			println();
@@ -479,17 +517,18 @@ public class JavaScriptSerialize {
 
 	private void writeThrow(ThrowStatement node) {
 		sb.append("throw ");
-		sb.append(toSource(node.getExpression(), depth + 1).trim());
+		sb.append(toSource(node.getExpression(), depth).trim());
 		sb.append(";");
 		println();
 	}
 
 	private String toSource(AstNode node, int depth) {
-		int d0 = this.depth;
-		int p0 = sb.length();
+		final int d0 = this.depth;
+		final int p0 = sb.length();
 		this.depth = depth;
 		write(node);
 		String result = sb.substring(p0);
+		sb.setLength(p0);
 		this.depth = d0;
 		return result;
 	}
@@ -513,32 +552,59 @@ public class JavaScriptSerialize {
 			processXML(node);
 		} else {
 			write(node.getLeft());
-			String op = InfixExpression.operatorToString(type);
-			sb.append(" ");
+			String op;
+			if (type == Token.GETPROP) {
+				op = ".";
+			} else {
+				op = InfixExpression.operatorToString(type);
+			}
+			if(!canJoin(sb.charAt(sb.length()-1) ,op.charAt(0))){
+				sb.append(" ");
+			}
 			sb.append(op);
-			sb.append(" ");
-			write(node.getRight());
+			String tail = toSource(node.getRight(),depth);
+			if(!canJoin(op.charAt(op.length()-1),tail.charAt(0))){
+				sb.append(" ");
+			}
+			sb.append(tail);
 		}
+	}
+	boolean canJoin(char c1,char c2){
+		boolean b1 = Character.isJavaIdentifierPart(c1);
+		boolean b2 = Character.isJavaIdentifierPart(c2);
+		if(b1^b2){//相异 可以合并
+			return true;
+		}else if(!b1 && !b2){
+			if(c1 == c2 && (c1 == '+'||c1=='-')){
+				return false;//+ ++ --- + + - - 不能随意合并
+			}else{
+				return true;
+			}
+		}
+		return false;//不能合并
 	}
 
 	private void writeIf(IfStatement ifs) {
 		sb.append("if(");
 		sb.append(toSource(ifs.getCondition(), depth).trim());
-		sb.append(") ");
+		sb.append(")");
 		AstNode thenPart = ifs.getThenPart();
-		if (!(thenPart instanceof Block)) {
-			println();
-			makeIndent();
-		}
-		write(thenPart);
+		printBlock(thenPart, sb);
 		AstNode elsePart = ifs.getElsePart();
-		if (elsePart instanceof IfStatement) {
-			sb.append("else");
-			sb.append(toSource(elsePart, depth).trim());
-		} else if (elsePart != null) {
-			sb.append("else");
-			sb.append(toSource(elsePart, depth).trim());
+		if (elsePart != null) {
+			sb.setLength(sb.length() - 1);
+			if (elsePart instanceof IfStatement) {
+				sb.append("else ");
+				depth--;
+				sb.append(printBlock(elsePart, new StringBuilder()).toString()
+						.trim());
+				depth++;
+			} else {
+				sb.append("else");
+				printBlock(elsePart, sb);
+			}
 		}
+
 		println();
 	}
 
@@ -548,7 +614,7 @@ public class JavaScriptSerialize {
 		ObjectLiteral initializer = nf.getInitializer();
 		if (initializer != null) {
 			sb.append(" ");
-			sb.append(toSource(initializer, depth + 1).trim());
+			sb.append(toSource(initializer, depth).trim());
 		}
 	}
 
@@ -557,7 +623,7 @@ public class JavaScriptSerialize {
 		sb.append("(");
 		List<AstNode> arguments = fc.getArguments();
 		if (arguments != null) {
-			writeList(arguments);
+			writeList(arguments, true);
 		}
 		sb.append(")");
 	}
@@ -565,16 +631,16 @@ public class JavaScriptSerialize {
 	private void writeGet(ElementGet node) {
 		write(node.getTarget());
 		sb.append("[");
-		sb.append(toSource(node.getElement(), depth + 1).trim());
+		sb.append(toSource(node.getElement(), depth).trim());
 		sb.append("]");
 	}
 
 	private void writeCondition(ConditionalExpression ce) {
 		write(ce.getTestExpression());
 		sb.append("?");
-		sb.append(toSource(ce.getTrueExpression(), depth + 1).trim());
+		sb.append(toSource(ce.getTrueExpression(), depth).trim());
 		sb.append(":");
-		sb.append(toSource(ce.getFalseExpression(), depth + 1).trim());
+		sb.append(toSource(ce.getFalseExpression(), depth).trim());
 	}
 
 	private void writeCatch(CatchClause cc) {
@@ -592,7 +658,7 @@ public class JavaScriptSerialize {
 	private void writeArray(ArrayLiteral al) {
 		sb.append("[");
 		List<AstNode> elements = al.getElements();
-		writeList(elements);
+		writeList(elements, true);
 		sb.append("]");
 	}
 
@@ -620,17 +686,19 @@ public class JavaScriptSerialize {
 		sb.append("}");
 	}
 
-	private void writeList(List<? extends AstNode> elements) {
+	private void writeList(List<? extends AstNode> elements, boolean trim) {
 		if (elements != null) {
-			depth++;
 			int i = 0;
 			for (AstNode item : elements) {
 				if (i++ > 0) {
 					sb.append(",");
 				}
-				write(item);
+				if (trim) {
+					sb.append(toSource(item, depth).trim());
+				} else {
+					write(item);
+				}
 			}
-			depth--;
 		}
 	}
 
@@ -639,12 +707,9 @@ public class JavaScriptSerialize {
 	}
 
 	protected void makeIndent() {
+		// sb.append("^"+depth);
 		for (int i = 0; i < depth; i++) {
 			sb.append("  ");
 		}
-	}
-
-	public String toString() {
-		return null;
 	}
 }

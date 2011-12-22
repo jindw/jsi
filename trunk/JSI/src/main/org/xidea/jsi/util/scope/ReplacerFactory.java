@@ -17,7 +17,6 @@ import org.xidea.jsi.util.ReplaceAdvisor;
 
 public class ReplacerFactory {
 	public Replacer createReplacer(String path,String source,ReplaceAdvisor advisor){
-
 		CompilerEnvironsImpl env = new CompilerEnvironsImpl();
 		Parser parser = env.createParser();
 		AstRoot root = parser.parse(source,path,1);

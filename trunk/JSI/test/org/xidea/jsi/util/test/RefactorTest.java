@@ -20,7 +20,7 @@ public class RefactorTest {
 	@Test
 	public void testRename(){
 		String path = ".js";
-		String source = "var xxx = function xxx(){var xxx = 1;alert(xxx)}";
+		String source = "var xxx = function xxx(){var xxx = 1;alert(xxx.xxx)}";
 		String name = "xxx";
 		int index = source.lastIndexOf(name);
 		String result = new NameRefactor(path, source).rename(index, name+"$__");

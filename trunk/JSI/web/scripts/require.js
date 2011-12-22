@@ -1,6 +1,5 @@
 var $export;
-var $JSI = function(){
-	var loaderMap = {};//path=>[exports,loader,dependenceMap]//只在define中初始化。存在说明当前script已经装载，depengdenceMap为空，说明依赖已经装载。
+var $JSI = function(loaderMap){//path=>[exports,loader,dependenceMap]//只在define中初始化。存在说明当前script已经装载，depengdenceMap为空，说明依赖已经装载。
 	var notifyMap = {};//path=>[waiting path list]
 	var taskMap = {};//path=>[task...]
 	var async;//is async load model?
@@ -12,8 +11,8 @@ var $JSI = function(){
 			task = taskMap[path] = [];
 		}
 		task.push(a?target:function(result){
-				copy(result,target ||this);
-			});
+			copy(result,target ||this);
+		});
 		if(loader){
 			for(loader in loader[2]){
 				return;//task 会在 dependence 装载后自动唤醒。
@@ -36,7 +35,7 @@ var $JSI = function(){
 			},entry[0]);
 			return entry[0];
 		}else{
-			console.error('script not defined:'+path);
+			console.warn('script not defined:'+path);
 		}
 	}
 	function load(path){
@@ -62,7 +61,7 @@ var $JSI = function(){
 					if(!notifySet){
 						notifyMap[dep] =notifySet = {};
 					}
-					notifySet[path]=1
+					notifySet[path]=1;
 					dependenceMap[dep] = 1;
 					load(dep,path);
 				}
@@ -131,23 +130,6 @@ var $JSI = function(){
         }
         return url;
     }
-	if(!this.console){
-		this.console = {
-			log:function(){
-				this.data.push([].join.call(arguments,' '))>32 && this.data.shift();
-			},
-			show:function(){alert(this.data.join('\n'))},
-			data:[]//cache ie data; add log view link: javascript:console.show())
-		};
-	}
-	"error,warn,info,debug".replace(/\w+/,function(n){
-		if(!console[n]){
-			console[n] = function(){
-				arguments[0] = n + ':' + arguments[0]
-				this.log.apply(this,arguments);
-			}
-		}
-	})
 	return {
 		realpath:function(path){
 			return '/scripts/'+path+'__define__.js';////scriptBase:/scripts/,
@@ -155,4 +137,4 @@ var $JSI = function(){
 		require : require,
 		define : define			// $JSI.define('path',['deps'],function(require,exports){...})
 	}
-}();
+}({});
