@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSILoadContext;
-import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.ScriptLoader;
 
 /**
@@ -93,8 +92,8 @@ class PreloadExporter implements JSIExportor {
 		//TODO:还应该吧依赖的package 信息装载进去
 		for (ScriptLoader loader : result) {
 			String fileName = loader.getName();
-			String packageName = loader.getPackage().getName();
-			String source = loader.getPackage().loadText(loader.getName());
+			String packageName = SimpleExporter.getPackage(loader).getName();
+			String source = SimpleExporter.getPackage(loader).loadText(loader.getName());
 			out.append(JSIText.buildPreloadPerfix(packageName, fileName));
 			out.append(source);
 			out.append(JSIText.buildPreloadPostfix(source));
@@ -108,10 +107,14 @@ class SimpleExporter implements JSIExportor {
 		StringBuilder result = new StringBuilder();
 		List<ScriptLoader> scriptList = context.getScriptList();
 		for (ScriptLoader entry : scriptList) {
-			result.append(entry.getPackage().loadText(entry.getName()));
+			result.append(getPackage(entry).loadText(entry.getName()));
 			result.append("\r\n;\r\n");
 		}
 		return result.toString();
+	}
+
+	static JSIPackage getPackage(ScriptLoader entry) {
+		return ((DefaultScriptLoader)entry).getPackage();
 	}
 
 }
@@ -138,12 +141,12 @@ class XMLExporter implements JSIExportor {
 		content.append("</entry>\n");
 		HashMap<String, Object> packageFileMap = new HashMap<String, Object>();
 		for (ScriptLoader entry : scriptList) {
-			appendEntry(content, entry.getPath(), entry.getPackage().loadText(
+			appendEntry(content, entry.getPath(), SimpleExporter.getPackage(entry).loadText(
 					entry.getName()));
-			String packageName = entry.getPackage().getName();
+			String packageName = SimpleExporter.getPackage(entry).getName();
 			if (packageFileMap.get(packageName) == null) {
 				packageFileMap.put(packageName, "");
-				JSIPackage jsiPackage = entry.getPackage();
+				JSIPackage jsiPackage = SimpleExporter.getPackage(entry);
 				String source = jsiPackage
 						.loadText(JSIPackage.PACKAGE_FILE_NAME);
 				appendEntry(content, jsiPackage.getName().replace('.', '/')

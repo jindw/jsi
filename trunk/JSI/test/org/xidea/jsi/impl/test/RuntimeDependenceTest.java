@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.jsi.JSILoadContext;
-import org.xidea.jsi.impl.DataRoot;
+import org.xidea.jsi.impl.v2.DataRoot;
 
 public class RuntimeDependenceTest {
 	ScriptEngine engine = new ScriptEngineManager().getEngineByExtension("js");

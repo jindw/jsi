@@ -3,7 +3,6 @@ package org.xidea.jsi;
 import java.util.Collection;
 import java.util.Map;
 
-import org.xidea.jsi.impl.v2.DefaultScriptLoader;
 
 
 /**
@@ -15,10 +14,10 @@ import org.xidea.jsi.impl.v2.DefaultScriptLoader;
  */
 public interface ScriptLoader { 
 
-	/**
-	 * @return real package
-	 */
-	public abstract JSIPackage getPackage();
+//	/**
+//	 * @return real package
+//	 */
+//	public abstract JSIPackage getPackage();
 
 	/**
 	 * @return short name(without path)
@@ -37,7 +36,7 @@ public interface ScriptLoader {
 	public abstract String getPath();
 
 	/**
-	 * varName -> targetPackageName(real package)
+	 * varName -> targetPackageName(2.0 real package)/targetFile(3.0)
 	 * @return
 	 */
 	public abstract Map<String, String> getDependenceVarMap();

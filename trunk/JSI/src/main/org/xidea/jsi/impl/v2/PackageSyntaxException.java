@@ -1,4 +1,4 @@
-package org.xidea.jsi;
+package org.xidea.jsi.impl.v2;
 
 public class PackageSyntaxException extends RuntimeException {
 	private static final long serialVersionUID = 1L;

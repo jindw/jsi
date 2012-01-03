@@ -6,8 +6,8 @@ import java.util.HashMap;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.xidea.jsi.impl.JSIText;
-import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.jsi.impl.v2.JSIText;
+import org.xidea.jsi.impl.v2.RuntimeSupport;
 import org.xidea.jsi.web.JSIService;
 
 import sun.misc.BASE64Decoder;

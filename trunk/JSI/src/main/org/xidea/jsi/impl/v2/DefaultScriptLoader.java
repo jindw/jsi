@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.xidea.jsi.JSIDependence;
-import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.ScriptLoader;
 
 /**

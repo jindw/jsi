@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.xidea.jsi.impl.DefaultPackage;
+import org.xidea.jsi.impl.v2.DefaultPackage;
 
 public class DefaultPackageTest {
 

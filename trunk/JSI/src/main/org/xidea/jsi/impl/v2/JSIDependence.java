@@ -1,4 +1,5 @@
-package org.xidea.jsi;
+package org.xidea.jsi.impl.v2;
+
 
 public interface JSIDependence {
 	

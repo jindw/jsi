@@ -11,8 +11,8 @@ import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.impl.FileRoot;
+import org.xidea.jsi.impl.v2.FileRoot;
+import org.xidea.jsi.impl.v2.JSIPackage;
 
 public class FilePackageFinderTest {
 

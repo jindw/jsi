@@ -1,27 +1,24 @@
 var $export;
-var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在define中初始化。存在(包括空数组)说明当前script已在装载中，不空说明已经装载完成，depengdenceMap为空，说明依赖已经装载。
-	var exportMap = {}//path=>exports// 存在说明已经载入【并初始化】
-	var notifyMap = {};//path=>[waitingPathMap:{path=>1}]
-	var taskMap = {};//path=>[task...]
-	var async;//is async load model?
+var $JSI = function(){
+	var exportMap = {};		//path=>exports//只在define中初始化。存在说明当前script已经装载，depengdenceMap为空，说明依赖已经装载。
+	var cachedMap = {};//path=>[impl,{waiting path map}]
+	var taskMap = {};//path=>[taskCount, [lazy task...]]
 	function require(path){
-		if(path in exportMap){
-			return exportMap[path];
-		}else{
-			var requireCache = {};
-			var result = exportMap[path] = {}
-			console.warn(path)
-			cachedMap[path][0].call(this,function(path2){
-				if(path2 in requireCache){
-					return requireCache[path2];
+		var entry = loaderMap[path];
+		var cache = {};
+		if(entry){
+			return entry[0] || entry[1].call(this,function(path2){
+				if(path2 in cache){
+					return cache[path2];
 				}
-				return requireCache[path2] = require(normalizeModule(path2,path));
-			},result);
-			return result;
+				return cache[path2] = require(normalizeURI(path2,path));
+			},entry[0]={}),entry[0];
+		}else{
+			console.warn('script not defined:'+path);
 		}
 	}
 	$export = function (path,target){
-		async = typeof target == 'function';
+		var async = typeof target == 'function';
 		var callback = async ?target : function(result){
 			copy(result,target ||this);
 		};
@@ -31,11 +28,9 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 			var i = 0;
 			var end = path.length;
 			var end2 = end;
-			var all = {};
 			while(i<end){
 				_export(path[i++],function(result){
-					copy(result,all)
-					--end2 || callback(all);
+					--end2 || callback(result);
 				},async);
 			}
 		}
@@ -44,14 +39,16 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 		if(path in exportMap){
 			return callback(exportMap[path])
 		}
+		var index = async+1;
 		var task = taskMap[path];
 		var cached = cachedMap[path];
 		if(!task){
 			task = taskMap[path] = [];
+			task[index] = []
 		}
-		task.push(callback);
+		task[index].push(callback);
 		if(cached){
-			for(var dep in cached[1]){
+			for(var dep in cached[index]){
 				return;//task 会在 dependence 装载后自动唤醒。
 			}
 			onComplete(path,async);
@@ -59,9 +56,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 			load(path,async);
 		}
 	}
-
-	function load(path){
-		cachedMap[path] = [];//已经开始装载了，但是还没有值
+	function load(path,async){
 		path = $JSI.realpath(path);
 		if(async){
 			var s = document.createElement('script');
@@ -72,60 +67,53 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 		}
 	}
 	function define(path,dependences,impl){
-		//if(path in cacheMap){return;} //异常，认为不会发生
 		var dependenceMap = {};
-		var loader = cachedMap[path];
+		var loader = loaderMap[path];
 		var len = dependences.length;
-		if(!loader.length){//js执行机制需要确保以下行为原子性（js单线程模型确保这点，不会被中断插入其他js逻辑）
-			loader.push(impl,dependenceMap);//dependenceMap 为空确保程序装载完成
-			var list = [];
+		if(!loader){//js执行机制需要确保以下行为原子性（js单线程模型确保这点，不会被中断插入其他js逻辑）
+			loader = loaderMap[path] = [{},impl,dependenceMap];//dependenceMap 为空确保程序装载完成
 			while(len--){
-				var dep = normalizeModule(dependences[len],path);
-				if(!cachedMap[dep]){
+				var dep = normalizeURI(dependences[len],path);
+				if(!loaderMap[dep]){
 					var notifySet = notifyMap[dep];
 					if(!notifySet){
 						notifyMap[dep] =notifySet = {};
 					}
 					notifySet[path]=1;
 					dependenceMap[dep] = 1;
-					//console.info(path,dep)
-					list.push(dep);
-					
+					load(dep,path);
 				}
-			}
-			while(dep = list.pop()){
-				load(dep);
 			}
 			onDefined(path)
 		}
 	}
 	function onDefined(path){//只在define 原子块中被调用，重构时小心！！
 		var notifySet = notifyMap[path];
-		var dependenceMap = cachedMap[path][1];
+		var dependenceMap = loaderMap[path][2];
 		var dependenceCount=0;
 		for(var p in dependenceMap){
-			if(cachedMap[p]){
+			if(loaderMap[p]){
 				delete dependenceMap[p];
 			}else{
 				dependenceCount++;
 			}
 		}
-		outer:for(p in notifySet){//遍历所有依赖当前脚本的脚本
-			var notifyDependenceMap = cachedMap[p][1];//找到依赖当前脚本的脚本的依赖【a】
-			if(delete notifyDependenceMap[path]){//如果存在，删除（因为已经装）
+		outer:for(p in notifySet){
+			var notifyDependenceMap = loaderMap[p][2];
+			if(delete notifyDependenceMap[path]){//has and deleted
 				if(dependenceCount){
-					copy(dependenceMap,notifyDependenceMap);	//并将未装载依赖移入
+					copy(dependenceMap,notifyDependenceMap)
 					_moveNodify(dependenceMap,p)
 					//add nodify
 				}else{
-					for(p in notifyDependenceMap){ //如果还有其他未装载依赖， 跳过
+					for(p in notifyDependenceMap){
 						continue outer;
 					}
-					onComplete(p);//没有其他为装载的依赖， 完成
+					onComplete(p);
 				}
 			}
 		}
-		if(!dependenceCount){//直接就没有未装载依赖
+		if(!dependenceCount){
 			//notify
 			onComplete(path);
 		}
@@ -136,13 +124,12 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 			notifySet[path] = 1;
 		}
 	}
-	function onComplete(path){//逻辑上不应该被多次调用【除非有bug】
+	function onComplete(path){
 		var task = taskMap[path];
-		var result = require(path);
 		if(task){
-			var item;
-			while(item = task.pop()){//每个task只能被调用一次！！！
-				item.call(this,result)
+			var len = task.length;
+			while(len--){
+				task.pop().call(this,require(path))
 			}
 		}
 	}
@@ -153,7 +140,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 			dest[p] = src[p]
 		}
 	}
-	function normalizeModule(url,base){
+	function normalizeURI(url,base){
         var url = url.replace(/\\/g,'/');
         if(url.charAt(0) == '.'){
         	url = base.replace(/[^\/]+$/,'')+url

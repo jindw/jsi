@@ -18,10 +18,10 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.impl.DefaultPackage;
-import org.xidea.jsi.impl.FileRoot;
-import org.xidea.jsi.impl.Java6ScriptPackagePaser;
+import org.xidea.jsi.impl.v2.DefaultPackage;
+import org.xidea.jsi.impl.v2.FileRoot;
+import org.xidea.jsi.impl.v2.JSIPackage;
+import org.xidea.jsi.impl.v2.Java6ScriptPackagePaser;
 
 public class TestFindGlobals {
 	public static final ScriptEngine engine = new javax.script.ScriptEngineManager()

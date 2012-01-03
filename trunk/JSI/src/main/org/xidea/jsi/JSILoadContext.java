@@ -3,7 +3,7 @@ package org.xidea.jsi;
 import java.util.List;
 import java.util.Map;
 
-import org.xidea.jsi.impl.v2.DefaultLoadContext;
+import org.xidea.jsi.impl.v2.JSIPackage;
 
 
 /**
@@ -35,5 +35,10 @@ public interface JSILoadContext {
 	 * @return
 	 */
 	public abstract List<ScriptLoader> getScriptList();
+	
+	
+	
+	
+
 
 }

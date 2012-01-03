@@ -13,8 +13,6 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.PackageSyntaxException;
 
 public abstract class PackageParser {
 	private static final Log log = LogFactory.getLog(PackageParser.class);

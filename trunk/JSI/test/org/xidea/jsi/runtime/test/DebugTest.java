@@ -17,7 +17,7 @@ import org.mozilla.javascript.tools.debugger.Main;
 import org.mozilla.javascript.tools.debugger.ScopeProvider;
 import org.mozilla.javascript.tools.shell.Global;
 import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.jsi.impl.v2.RuntimeSupport;
 
 public class DebugTest {
 	static RuntimeSupport rt = (RuntimeSupport) RuntimeSupport.create();

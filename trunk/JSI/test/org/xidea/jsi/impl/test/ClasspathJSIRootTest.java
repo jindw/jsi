@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.jsi.impl.ClasspathRoot;
+import org.xidea.jsi.impl.v2.ClasspathRoot;
 
 public class ClasspathJSIRootTest {
 	private ClasspathRoot root;

@@ -10,11 +10,11 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSILoadContext;
-import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.ScriptNotFoundException;
-import org.xidea.jsi.impl.AbstractRoot;
-import org.xidea.jsi.impl.ClasspathRoot;
-import org.xidea.jsi.impl.DefaultLoadContext;
+import org.xidea.jsi.impl.v2.AbstractRoot;
+import org.xidea.jsi.impl.v2.ClasspathRoot;
+import org.xidea.jsi.impl.v2.DefaultLoadContext;
+import org.xidea.jsi.impl.v2.JSIPackage;
 
 public class AbstractJSIRootTest {
 	private AbstractRoot root;

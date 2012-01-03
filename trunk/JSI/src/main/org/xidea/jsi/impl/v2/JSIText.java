@@ -11,7 +11,6 @@ import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRuntime;
 
 public abstract class JSIText {

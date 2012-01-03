@@ -26,7 +26,6 @@ import java.util.zip.ZipFile;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSILoadContext;
-import org.xidea.jsi.JSIPackage;
 
 public class ResourceRoot extends AbstractRoot {
 	private static final File[] EMPTY_FILES = {};

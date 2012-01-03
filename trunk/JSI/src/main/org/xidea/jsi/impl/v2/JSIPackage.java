@@ -1,9 +1,9 @@
-package org.xidea.jsi;
+package org.xidea.jsi.impl.v2;
 
 import java.util.List;
 import java.util.Map;
 
-import org.xidea.jsi.impl.v2.DefaultPackage;
+import org.xidea.jsi.ScriptLoader;
 
 
 

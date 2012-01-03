@@ -10,7 +10,7 @@ import static org.xidea.jsi.impl.test.AbstractJSIRootTest.createObjectPackageMap
 import org.junit.Before;
 import org.junit.Test;
 import org.xidea.jsi.JSILoadContext;
-import org.xidea.jsi.impl.ClasspathRoot;
+import org.xidea.jsi.impl.v2.ClasspathRoot;
 
 public class DefaultJSILoadContextTest {
 

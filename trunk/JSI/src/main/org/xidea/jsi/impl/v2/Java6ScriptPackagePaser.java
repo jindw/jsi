@@ -9,8 +9,6 @@ import javax.script.ScriptEngine;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.PackageSyntaxException;
 
 import sun.org.mozilla.javascript.internal.CompilerEnvirons;
 import sun.org.mozilla.javascript.internal.ErrorReporter;

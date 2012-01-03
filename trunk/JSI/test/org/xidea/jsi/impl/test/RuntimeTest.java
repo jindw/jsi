@@ -12,10 +12,10 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
-import org.xidea.jsi.impl.ClasspathRoot;
-import org.xidea.jsi.impl.JSIText;
-import org.xidea.jsi.impl.RhinoScriptPackagePaser;
-import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.jsi.impl.v2.ClasspathRoot;
+import org.xidea.jsi.impl.v2.JSIText;
+import org.xidea.jsi.impl.v2.RhinoScriptPackagePaser;
+import org.xidea.jsi.impl.v2.RuntimeSupport;
 
 public class RuntimeTest{
 	

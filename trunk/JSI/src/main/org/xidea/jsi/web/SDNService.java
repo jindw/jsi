@@ -12,9 +12,9 @@ import java.util.WeakHashMap;
 import java.util.regex.Pattern;
 
 import org.xidea.jsi.JSIExportor;
-import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.impl.v2.DefaultExportorFactory;
 import org.xidea.jsi.impl.v2.DefaultLoadContext;
+import org.xidea.jsi.impl.v2.JSIPackage;
 import org.xidea.jsi.impl.v2.ResourceRoot;
 
 class SDNService {

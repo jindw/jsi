@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.PackageSyntaxException;
 
 public class RegexpPackagePaser extends PackageParser {
 

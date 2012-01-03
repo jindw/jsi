@@ -13,7 +13,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.xidea.el.json.JSONEncoder;
 import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.jsi.impl.v2.RuntimeSupport;
 
 
 public class RuntimeSupportTest {

@@ -13,16 +13,8 @@ if(!this.console || !console.dir){
 			this.log.apply(this,arguments);
 		}
 	});
-	console.dir = function(o){
-		for(var n in o){
-			console.log(n,o[n]);
-		}
-	}
-//	console.time = function(l){
-//		this['#'+l] = +new Date
-//	}
-//	console.timeEnd = function(l){
-//		this.info(l + (new Date-this['#'+l]));
-//	}
-//	console.assert = function(l){}
+	console.dir = function(o){for(var n in o){console.log(n,o[n]);}}
+	console.time = console.time || function(l){this['#'+l] = +new Date}
+	console.timeEnd = console.timeEnd || function(l){this.info(l + (new Date-this['#'+l]));}
+	console.assert = console.assert || function(l){if(!l){console.error('Assert Failed!!!')}}
 }

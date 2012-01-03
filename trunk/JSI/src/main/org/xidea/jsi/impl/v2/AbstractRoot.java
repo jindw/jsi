@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.xidea.jsi.JSILoadContext;
-import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.ScriptNotFoundException;
 
@@ -19,6 +18,7 @@ public abstract class AbstractRoot implements JSIRoot {
 	public JSILoadContext $export(String path) {
 		return $export(path, new DefaultLoadContext());
 	}
+
 
 	public JSILoadContext $export(String  path, JSILoadContext context) {
 		JSIPackage pkg = findPackageByPath( path);
@@ -51,7 +51,11 @@ public abstract class AbstractRoot implements JSIRoot {
 
 	/**
 	 * 不能返回null
-	 * @see org.xidea.jsi.JSIRoot#requirePackage(java.lang.String, boolean)
+	 * 查找具体的实现包
+	 * 如果找不到指定的包，应该抛出 PackageNotFoundException 异常
+	 * @see org.xidea.jsi.impl.v2.AbstractRoot#requirePackage(String, boolean)
+	 * @param name
+	 * @return
 	 */
 	public JSIPackage requirePackage(String name) {
 		JSIPackage pkg = findPackage(name, false);
@@ -66,7 +70,11 @@ public abstract class AbstractRoot implements JSIRoot {
 
 	/**
 	 * 不能返回null
-	 * @see org.xidea.jsi.JSIRoot#findPackageByPath(java.lang.String)
+	 * 查找的包位置，可能是抽象包（只管获取，不做初始化）
+	 * 如果找不到指定的包，应该抛出 PackageNotFoundException 异常
+	 * @see org.xidea.jsi.impl.v2.AbstractRoot#findPackageByPath(String)
+	 * @param path
+	 * @return
 	 */
 	public JSIPackage findPackageByPath(String path) {
 		int splitPos = path.lastIndexOf('/');
@@ -128,6 +136,17 @@ public abstract class AbstractRoot implements JSIRoot {
 		}
 		return parser;
 	}
-
+	/**
+	 * 获取脚本源文件
+	 * @param packageName
+	 * @param scriptName
+	 * @return 资源不存在时反回null
+	 */
 	public abstract String loadText(String pkgName, String scriptName);
+	public String loadText(String path){
+		int p = path.lastIndexOf('/');
+		String pkgName = path.substring(0,p).replace('/', '.');
+		String scriptName = path.substring(p+1);
+		return loadText(pkgName,scriptName);
+	}
 }

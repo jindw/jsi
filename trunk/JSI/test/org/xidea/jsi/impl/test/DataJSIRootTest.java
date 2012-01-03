@@ -14,8 +14,8 @@ import org.junit.Test;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.ScriptLoader;
-import org.xidea.jsi.impl.DataRoot;
-import org.xidea.jsi.impl.DefaultLoadContext;
+import org.xidea.jsi.impl.v2.DataRoot;
+import org.xidea.jsi.impl.v2.DefaultLoadContext;
 
 public class DataJSIRootTest {
 
@@ -46,7 +46,7 @@ public class DataJSIRootTest {
 	@Test
 	public void testDataRoot() throws UnsupportedEncodingException, IOException {
 		String source = loadDestText("exported-all.xml");
-		JSIRoot root = new DataRoot(source);
+		DataRoot root = new DataRoot(source);
 		JSILoadContext loadContext = new DefaultLoadContext();
 		root.$export("example", loadContext);
 		//root.$import("example.alias.*", loadContext);

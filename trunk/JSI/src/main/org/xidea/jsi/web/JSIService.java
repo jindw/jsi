@@ -21,6 +21,7 @@ import org.apache.commons.logging.LogFactory;
 import org.xidea.jsi.JSIExportor;
 import org.xidea.jsi.JSILoadContext;
 import org.xidea.jsi.JSIRoot;
+import org.xidea.jsi.impl.v2.AbstractRoot;
 import org.xidea.jsi.impl.v2.DataRoot;
 import org.xidea.jsi.impl.v2.DefaultExportorFactory;
 import org.xidea.jsi.impl.v2.DefaultLoadContext;
@@ -212,7 +213,7 @@ public class JSIService extends ResourceRoot {
 			throws IOException, MalformedURLException, ProtocolException,
 			UnsupportedEncodingException {
 		String[] contents = param.get("content");
-		final JSIRoot root;
+		final AbstractRoot root;
 		if (contents != null) {
 			root = new DataRoot(contents[0]);
 		} else {

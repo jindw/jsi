@@ -10,11 +10,11 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.impl.ClasspathRoot;
-import org.xidea.jsi.impl.DefaultPackage;
-import org.xidea.jsi.impl.Java6ScriptPackagePaser;
-import org.xidea.jsi.impl.PackageParser;
+import org.xidea.jsi.impl.v2.ClasspathRoot;
+import org.xidea.jsi.impl.v2.DefaultPackage;
+import org.xidea.jsi.impl.v2.JSIPackage;
+import org.xidea.jsi.impl.v2.Java6ScriptPackagePaser;
+import org.xidea.jsi.impl.v2.PackageParser;
 
 public class PackageParserTest {
 

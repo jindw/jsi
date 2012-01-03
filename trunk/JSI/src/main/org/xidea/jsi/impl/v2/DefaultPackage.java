@@ -11,8 +11,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.xidea.jsi.JSIDependence;
-import org.xidea.jsi.JSIPackage;
 import org.xidea.jsi.JSIRoot;
 import org.xidea.jsi.ScriptLoader;
 
@@ -247,10 +245,8 @@ public class DefaultPackage implements JSIPackage {
 						}
 						if (allTarget) {
 							if (!targetPath.equals("*")) {// *x*
-								targetPackage = this.root
-										.findPackageByPath(targetPath);
-								targetPackage = root.requirePackage(
-										targetPackage.getName());
+								targetPackage = findPackageByPath(targetPath);
+								targetPackage = requirePackage(targetPackage);
 							}
 							targetFileMap = targetPackage.getScriptObjectMap()
 									.keySet();
@@ -263,12 +259,10 @@ public class DefaultPackage implements JSIPackage {
 									.containsKey(targetPath)) {
 								file = targetPath;
 							} else {
-								targetPackage = this.root
-										.findPackageByPath(targetPath);
+								targetPackage = findPackageByPath(targetPath);
 								targetPath = targetPath.substring(targetPackage
 										.getName().length() + 1);
-								targetPackage = root.requirePackage(
-										targetPackage.getName());
+								targetPackage = requirePackage(targetPackage);
 								file = targetPackage.getObjectScriptMap().get(
 										targetPath);
 								if (file != null) {
@@ -307,8 +301,7 @@ public class DefaultPackage implements JSIPackage {
 						} else if (this.scriptObjectMap.containsKey(targetPath)) {
 							file = targetPath;
 						} else {
-							targetPackage = this.root
-									.findPackageByPath(targetPath);
+							targetPackage = findPackageByPath(targetPath);
 							if (targetPackage == null) {
 								log.error(targetPackage);
 								throw new RuntimeException(
@@ -317,8 +310,7 @@ public class DefaultPackage implements JSIPackage {
 							}
 							targetPath = targetPath.substring(targetPackage
 									.getName().length() + 1);
-							targetPackage = root.requirePackage(targetPackage
-									.getName());
+							targetPackage = requirePackage(targetPackage);
 							file = targetPackage.getObjectScriptMap().get(
 									targetPath);
 							if (file != null) {
@@ -338,6 +330,19 @@ public class DefaultPackage implements JSIPackage {
 				}
 			}
 		}
+	}
+
+	private JSIPackage requirePackage(JSIPackage targetPackage) {
+		targetPackage = ((AbstractRoot)root).requirePackage(
+				targetPackage.getName());
+		return targetPackage;
+	}
+
+	private JSIPackage findPackageByPath(String targetPath) {
+		JSIPackage targetPackage;
+		targetPackage = ((AbstractRoot)root)
+				.findPackageByPath(targetPath);
+		return targetPackage;
 	}
 
 	private void saveDependence(DefaultDependence dep, String thisFile,
@@ -410,6 +415,6 @@ public class DefaultPackage implements JSIPackage {
 	 * @see org.xidea.jsi.impl.JSIPackage2#loadText(java.lang.String)
 	 */
 	public String loadText(String scriptName) {
-		return this.root.loadText(this.name, scriptName);
+		return this.root.loadText(this.name.replace('.', '/')+'/'+ scriptName);
 	}
 }

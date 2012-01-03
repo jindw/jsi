@@ -3,9 +3,7 @@ package org.xidea.jsi.impl.v2;
 import java.util.Iterator;
 import java.util.List;
 
-import org.xidea.jsi.JSIDependence;
 import org.xidea.jsi.JSILoadContext;
-import org.xidea.jsi.JSIPackage;
 
 /**
  * 初定该实现的依赖只能时一个文件，可能是该文件的全部脚本，也可能时某个确定脚本

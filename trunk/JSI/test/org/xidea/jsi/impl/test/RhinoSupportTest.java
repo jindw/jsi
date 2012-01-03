@@ -17,8 +17,8 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.ScriptableObject;
 import org.xidea.jsi.JSIRuntime;
-import org.xidea.jsi.impl.JSIText;
-import org.xidea.jsi.impl.RuntimeSupport;
+import org.xidea.jsi.impl.v2.JSIText;
+import org.xidea.jsi.impl.v2.RuntimeSupport;
 
 public class RhinoSupportTest {
 

@@ -16,8 +16,6 @@ import org.mozilla.javascript.Parser;
 import org.mozilla.javascript.ScriptRuntime;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ast.AstRoot;
-import org.xidea.jsi.JSIPackage;
-import org.xidea.jsi.PackageSyntaxException;
 
 public class RhinoScriptPackagePaser extends PackageParser {
 	private static final Log log = LogFactory.getLog(RhinoScriptPackagePaser.class);
