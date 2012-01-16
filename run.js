@@ -1,7 +1,7 @@
-var FS = require('fs');
+var FS = require('fs');//
 var ENV = require('./lib/env');
 var Path  = require('path');
-var root = "d:/git"
+var root = "d:/workspace"
 function writeNotFound(filepath,response,msg){
      response.writeHead(404, {"Content-Type": "text/plain"});    
      response.write("404 Not Found \n filepath:"+filepath+'\n'+(msg||''));    
@@ -22,6 +22,23 @@ function writeDir(url,filepath,response){
 	}
 }
 ENV.setRoot(root);
+var definePattern = /__define__\.js$/;
+ENV.addBinaryBuilder(definePattern,function(data){
+	this.sourcePath = this.path.replace(definePattern,'.js');
+	//console.info('sourcePath:',this.sourcePath);
+});
+ENV.addTextFilter(definePattern,function(text){
+	var source = new Function ('(function(){'+text+'})')+''
+	var result = ["$JSI.define('",this.path,"',["];
+	var sep = '';
+	source.replace(/\brequire\((['"][^'"]+['"])\)/g,function(a,dep){
+		result.push(sep,dep);
+		sep = ','
+	})
+	
+	result.push('],function(){require,exports}{',text,'\n});');
+	return result.join('');
+})
 require('http').createServer(function (req, response) {
 	var url = req.url.replace(/[?#][\s\S]*/,'');
 	var filepath = Path.join(root,url);
