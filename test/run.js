@@ -1,7 +1,7 @@
 var FS = require('fs');//
-var ENV = require('./lib/env');
+var ENV = require('../lib/env');
 var Path  = require('path');
-var root = "d:/git"
+var root = '/workspace';
 function writeNotFound(filepath,response,msg){
      response.writeHead(404, {"Content-Type": "text/plain"});    
      response.write("404 Not Found \n filepath:"+filepath+'\n'+(msg||''));    
@@ -21,15 +21,15 @@ function writeDir(url,filepath,response){
 	            	response.end();    
 	}
 }
-ENV.setRoot(root);
+var env = new ENV(root);
 var definePattern = /__define__\.js$/;
-ENV.addBinaryBuilder(definePattern,function(data){
-	this.sourcePath = this.path.replace(definePattern,'.js');
+env.addBinaryBuilder(definePattern,function(resource,data){
+	resource.sourcePath = resource.path.replace(definePattern,'.js');
 	//console.info('sourcePath:',this.sourcePath);
 });
-ENV.addTextFilter(definePattern,function(text){
+env.addTextFilter(definePattern,function(resource,text){
 	var source = new Function ('(function(){'+text+'})')+''
-	var result = ["$JSI.define('",this.path,"',["];
+	var result = ["$JSI.define('",env.path,"',["];
 	var sep = '';
 	source.replace(/\brequire\((['"][^'"]+['"])\)/g,function(a,dep){
 		result.push(sep,dep);
@@ -48,7 +48,7 @@ require('http').createServer(function (req, response) {
 	    		return writeDir(url,filepath,response);
 	    	}
 	    }
-	    var text = ENV.getContentAsBinary(url);
+	    var text = env.getContentAsBinary(url);
 	    if(text){
 	    	response.writeHead(200, {'Content-Type' : 'text/html;charset=utf-8'});
 	    	response.write(text);
