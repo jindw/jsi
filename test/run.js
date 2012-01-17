@@ -1,7 +1,7 @@
 var FS = require('fs');//
 var ENV = require('../lib/env').ENV;
 var Path  = require('path');
-var root = 'd:/workspace';
+var root = 'd:/workspace/';
 function writeNotFound(filepath,response,msg){
      response.writeHead(404, {"Content-Type": "text/plain"});    
      response.write("404 Not Found \n filepath:"+filepath+'\n'+(msg||''));    
