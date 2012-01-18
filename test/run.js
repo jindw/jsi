@@ -31,7 +31,12 @@ env.addTextFilter(definePattern,function(resource,text){
 	var source = new Function ('(function(){'+text+'})')+''
 	var result = ["$JSI.define('",env.path,"',["];
 	var sep = '';
+	var map = {}
 	source.replace(/\brequire\((['"][^'"]+['"])\)/g,function(a,dep){
+		if(dep in map){
+			return ;
+		}
+		map[dep] = 1;
 		result.push(sep,dep);
 		sep = ','
 	})
@@ -63,3 +68,4 @@ require('http').createServer(function (req, response) {
 	});
 }).listen(1985,'127.0.0.1');
 console.log('lite test server is started: http://'+('127.0.0.1')+':' + (1985) );
+env.getContentAsBinary('/litetest/index.php')
