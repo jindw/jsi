@@ -1,49 +1,21 @@
-var FS = require('fs');//
-var ENV = require('../lib/env').ENV;
 var Path  = require('path');
-var root = 'd:/workspace/';
-function writeNotFound(filepath,response,msg){
-     response.writeHead(404, {"Content-Type": "text/plain"});    
-     response.write("404 Not Found \n filepath:"+filepath+'\n'+(msg||''));    
-     response.end();    
+var root = Path.resolve(__dirname,'../web/');
+
+
+var ENV = require('../lib/env').ENV;
+var setupJSI = require('../lib/jsi-filter').setupJSI;
+var env = new ENV(root);
+setupJSI(env,'/static/');
+
+try{
+	console.log('xmldom is install at:',require.resolve('xmldom'))
+}catch(e){
+	console.error("xmldom for test is not install !! please npm install xmldom");
 }
 
-function writeDir(url,filepath,response){
-	if(/\/$/.test(url)){
-		FS.readdir(filepath, function(err, files) {  
-			for(var i=0;i<files.length;i++){
-				response.write("<a href='"+files[i]+"'>"+files[i]+'</a><hr/>','utf8');
-			}
-			response.end();
-		});
-	}else{
-		response.writeHead(301, {"Location" : url+'/'});    
-	            	response.end();    
-	}
-}
-var env = new ENV(root);
-var definePattern = /__define__\.js$/;
-env.addBinaryBuilder(definePattern,function(resource,data){
-	resource.sourcePath = resource.path.replace(definePattern,'.js');
-	//console.info('sourcePath:',this.sourcePath);
-});
-env.addTextFilter(definePattern,function(resource,text){
-	var source = new Function ('(function(){'+text+'})')+''
-	var result = ["$JSI.define('",env.path,"',["];
-	var sep = '';
-	var map = {}
-	source.replace(/\brequire\((['"][^'"]+['"])\)/g,function(a,dep){
-		if(dep in map){
-			return ;
-		}
-		map[dep] = 1;
-		result.push(sep,dep);
-		sep = ','
-	})
-	
-	result.push('],function(){require,exports}{',text,'\n});');
-	return result.join('');
-})
+console.log(env.getContentAsBinary('/static/xmldom/dom-parser__define__.js')+'')
+
+var FS = require('fs');//
 require('http').createServer(function (req, response) {
 	var url = req.url.replace(/[?#][\s\S]*/,'');
 	var filepath = Path.join(root,url);
@@ -68,4 +40,23 @@ require('http').createServer(function (req, response) {
 	});
 }).listen(1985,'127.0.0.1');
 console.log('lite test server is started: http://'+('127.0.0.1')+':' + (1985) );
-env.getContentAsBinary('/litetest/index.php')
+
+function writeNotFound(filepath,response,msg){
+     response.writeHead(404, {"Content-Type": "text/plain"});    
+     response.write("404 Not Found \n filepath:"+filepath+'\n'+(msg||''));    
+     response.end();    
+}
+
+function writeDir(url,filepath,response){
+	if(/\/$/.test(url)){
+		FS.readdir(filepath, function(err, files) {  
+			for(var i=0;i<files.length;i++){
+				response.write("<a href='"+files[i]+"'>"+files[i]+'</a><hr/>','utf8');
+			}
+			response.end();
+		});
+	}else{
+		response.writeHead(301, {"Location" : url+'/'});    
+	            	response.end();    
+	}
+}

@@ -4,20 +4,26 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 	var notifyMap = {};//path=>[waitingPathMap:{path=>1}]
 	var taskMap = {};//path=>[task...]
 	var async;//is async load model?
+	var script = document.scripts[document.scripts.length-1];
+	var scriptBase = script.src.replace(/[^\/]+$/,'');
 	function require(path){
-		if(path in exportMap){
-			return exportMap[path];
-		}else{
-			var requireCache = {};
-			var result = exportMap[path] = {}
-			console.warn(path)
-			cachedMap[path][0].call(this,function(path2){
-				if(path2 in requireCache){
-					return requireCache[path2];
-				}
-				return requireCache[path2] = require(normalizeModule(path2,path));
-			},result);
-			return result;
+		try{
+			if(path in exportMap){
+				return exportMap[path];
+			}else{
+				var requireCache = {};
+				var result = exportMap[path] = {}
+				//console.warn(path)
+				cachedMap[path][0].call(this,function(path2){
+					if(path2 in requireCache){
+						return requireCache[path2];
+					}
+					return requireCache[path2] = require(normalizeModule(path2,path));
+				},result);
+				return result;
+			}
+		}catch(e){
+			console.error('require error:',path,e)
 		}
 	}
 	$export = function (path,target){
@@ -51,10 +57,13 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 		}
 		task.push(callback);
 		if(cached){
-			for(var dep in cached[1]){
-				return;//task 会在 dependence 装载后自动唤醒。
+			if(cached.length){
+				for(var dep in cached[1]){
+					return;//task 会在 dependence 装载后自动唤醒。
+				}
+				onComplete(path,async);
 			}
-			onComplete(path,async);
+			//else{fired by previous loading}
 		}else{
 			load(path,async);
 		}
@@ -66,7 +75,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 		if(async){
 			var s = document.createElement('script');
 			s.setAttribute('src',path);
-			document.scripts[0].parentNode.appendElement(s);
+			script.parentNode.appendElement(s);
 		}else{
 			document.write('<script src="'+path+'"><\/script>');
 		}
@@ -98,13 +107,14 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 			}
 			onDefined(path)
 		}
+		//else{//loaded before}
 	}
 	function onDefined(path){//只在define 原子块中被调用，重构时小心！！
 		var notifySet = notifyMap[path];
 		var dependenceMap = cachedMap[path][1];
 		var dependenceCount=0;
 		for(var p in dependenceMap){
-			if(cachedMap[p]){
+			if(cachedMap[p].length){
 				delete dependenceMap[p];
 			}else{
 				dependenceCount++;
@@ -163,7 +173,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
     }
 	return {
 		realpath:function(path){
-			return '/scripts/'+path+'__define__.js';////scriptBase:/scripts/,
+			return scriptBase+path+'__define__.js';////scriptBase:/scripts/,
 		},
 		copy	: copy,
 		require : require,
