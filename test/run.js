@@ -13,7 +13,7 @@ try{
 	console.error("xmldom for test is not install !! please npm install xmldom");
 }
 
-console.log(env.getContentAsBinary('/static/xmldom/dom-parser__define__.js')+'')
+console.log(env.getContentAsBinary('/static/xmldom__define__.js')+'')
 
 var FS = require('fs');//
 require('http').createServer(function (req, response) {
