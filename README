@@ -2,14 +2,16 @@ Introduction
 JavaScript Static Service
 
 Functions
-	1. javascript dependence management system form jsi2.0 and refactor as CommonJS 1.0 compatibility
-	2. auto browser load wrapper for nodejs compatibility(commonjs and npm).
-	3. auto css3/javascript browser indepence deference expression support.
-	4. auto css3 selector and animation support for ie6 
-
+	1. CommonJS1.0 compatible JavaScript loader [ require.js]
+		Rewriting of the original [JSI2 http://www.xidea.org/project/jsi] boot.js, give up the original specification, former JSI2 tool set is being reconstructed, later on
+	2. generate browser script wrapper
+		In order to make the scripts installed by NPM can be "require"d in the browser environment , it adds an automatic processor, the script into similar AMD model.
+	3. IE6 CSS3 enhancement
+		you can use css3 selector and some other features in ie6.
+	4. generate different code for different agent (browser)
+		
 Install:
 	npm install jsi
-
 Example:
 	var jsi = require('jsi/test/run');
 	jsi.run();
