@@ -1,4 +1,4 @@
-var $export;
+var require;
 var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在define中初始化。存在(包括空数组)说明当前script已在装载中，不空说明已经装载完成，depengdenceMap为空，说明依赖已经装载。
 	var exportMap = {}//path=>exports// 存在说明已经载入【并初始化】
 	var notifyMap = {};//path=>[waitingPathMap:{path=>1}]
@@ -6,7 +6,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 	var async;//is async load model?
 	var script = document.scripts[document.scripts.length-1];
 	var scriptBase = script.src.replace(/[^\/]+$/,'');
-	function require(path){
+	function _require(path){
 		try{
 			if(path in exportMap){
 				return exportMap[path];
@@ -18,7 +18,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 					if(path2 in requireCache){
 						return requireCache[path2];
 					}
-					return requireCache[path2] = require(normalizeModule(path2,path));
+					return requireCache[path2] = _require(normalizeModule(path2,path));
 				},result);
 				return result;
 			}
@@ -26,27 +26,27 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 			console.error('require error:',path,e)
 		}
 	}
-	$export = function (path,target){
+	function use(path,target){
 		async = typeof target == 'function';
 		var callback = async ?target : function(result){
 			copy(result,target ||this);
 		};
 		if(typeof path  == 'string'){
-			_export(path,callback,async);
+			_load(path,callback,async);
 		}else{//list
 			var i = 0;
 			var end = path.length;
 			var end2 = end;
 			var all = {};
 			while(i<end){
-				_export(path[i++],function(result){
+				_load(path[i++],function(result){
 					copy(result,all)
 					--end2 || callback(all);
 				},async);
 			}
 		}
 	}
-	function _export(path,callback,async){
+	function _load(path,callback,async){
 		if(path in exportMap){
 			return callback(exportMap[path])
 		}
@@ -65,17 +65,17 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 			}
 			//else{fired by previous loading}
 		}else{
-			load(path,async);
+			loadScript(path,async);
 		}
 	}
 
-	function load(path){
+	function loadScript(path){
 		cachedMap[path] = [];//已经开始装载了，但是还没有值
 		path = $JSI.realpath(path);
 		if(async){
 			var s = document.createElement('script');
 			s.setAttribute('src',path);
-			script.parentNode.appendElement(s);
+			script.parentNode.appendChild(s);
 		}else{
 			document.write('<script src="'+path+'"><\/script>');
 		}
@@ -103,7 +103,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 				}
 			}
 			while(dep = list.pop()){
-				load(dep);
+				loadScript(dep);
 			}
 			onDefined(path)
 		}
@@ -148,7 +148,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 	}
 	function onComplete(path){//逻辑上不应该被多次调用【除非有bug】
 		var task = taskMap[path];
-		var result = require(path);
+		var result = _require(path);
 		if(task){
 			var item;
 			while(item = task.pop()){//每个task只能被调用一次！！！
@@ -171,12 +171,13 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
         }
         return url;
     }
+	require = _require;
 	return {
 		realpath:function(path){
 			return scriptBase+path+'__define__.js';////scriptBase:/scripts/,
 		},
 		copy	: copy,
-		require : require,
+		use : use,
 		define : define			// $JSI.define('path',['deps'],function(require,exports){...})
 	}
 }({});

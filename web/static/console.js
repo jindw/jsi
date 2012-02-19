@@ -3,6 +3,7 @@ if(!this.console || !console.dir){
 	console = this.console || {
 		log:function(){
 			this.data.push([].join.call(arguments,' '))>32 && this.data.shift();
+			alert(this.data)
 		},
 		show:function(){alert(this.data.join('\n'))},
 		data:[]//cache ie data; add log view link: javascript:console.show())

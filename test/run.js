@@ -1,11 +1,13 @@
 var Path  = require('path');
 var root = Path.resolve(__dirname,'../web/');
 
-
-var ENV = require('../lib/env').ENV;
-var setupJSI = require('../lib/jsi-filter').setupJSI;
-var env = new ENV(root);
-setupJSI(env,'/static/');
+console.log(root)
+var ResourceManager = require('../lib/resource-manager').ResourceManager;
+var setupJSRequire = require('../lib/js-filter').setupJSRequire;
+var setupCSS = require('../lib/css-filter').setupCSS;
+var env = new ResourceManager(root);
+setupJSRequire(env,'/static/');
+setupCSS(env,'/static/');
 
 try{
 	console.log('xmldom is install at:',require.resolve('xmldom'))
@@ -13,7 +15,7 @@ try{
 	console.error("xmldom for test is not install !! please npm install xmldom");
 }
 
-console.log(env.getContentAsBinary('/static/xmldom__define__.js')+'')
+console.log(env.getContentAsBinary('/static/test.css').toString('utf-8'));//'/static/xmldom__define__.js')+'')
 
 var FS = require('fs');//
 require('http').createServer(function (req, response) {
@@ -38,7 +40,7 @@ require('http').createServer(function (req, response) {
 	    	writeNotFound(filepath,response); 
 	    }
 	});
-}).listen(1985,'127.0.0.1');
+}).listen(2012,'127.0.0.1');
 console.log('lite test server is started: http://'+('127.0.0.1')+':' + (1985) );
 
 function writeNotFound(filepath,response,msg){
