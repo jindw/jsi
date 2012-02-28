@@ -37,6 +37,46 @@ var output = null;
 		</ul>
 	</li>
 </ul>
+
+<hr/>
+
+<ul class="tab-group">
+	<li class="tab"><span>menu1</span>
+		<ul>
+			<p>content1</p>
+		</ul>
+	</li>
+	<li class="tab"><span>menu2</span>
+		<ul>
+			<p>content2</p>
+		</ul>
+	</li>
+	<li class="tab"><span>menu3</span>
+		<ul>
+			<p>content3</p>
+		</ul>
+	</li>
+	<li class="tab"><span>menu3</span>
+		<ul>
+			<p>content3</p>
+		</ul>
+	</li>
+	<li class="tab"><span>menu3</span>
+		<ul>
+			<p>content3</p>
+		</ul>
+	</li>
+	<li class="tab"><span>menu3</span>
+		<ul>
+			<p>content3</p>
+		</ul>
+	</li>
+	<li class="tab"><span>menu3</span>
+		<ul>
+			<p>content3</p>
+		</ul>
+	</li>
+</ul>
 <br/><br/><br/><hr/>
 <form>
 	<a class="input" href="#">a1</a>
@@ -44,182 +84,12 @@ var output = null;
 	<div class="input" href="#">a3</div>
 	<input name="test" class="input" value="456"/>
 	<input name="test" class="input" value="123"/>
-	<textarea class="input" id='output' ondblclick='window.eval(this.value)'></textarea>
+	<textarea class="input" id='output'  ondblclick='document.body.innerHTML+=""'></textarea>
 </form>
+
+
 <script>
 output = document.getElementById('output')
 </script>
 </body>
-
-<!-- 
-<script2>
-var inc = 1;
-var map = {};
-var end = false;
-function test(el,key){
-	if(inc++>650){
-		if(end){return}
-		end  = true;
-		var buf = [];
-		for(var n in map){
-			buf.push([map[n],n]);
-		}
-		buf.sort(function(a,b){
-			return a[0]-b[0];
-		});
-		output.value =  buf.join('\r\n;');
-		return;
-	}
-	key = key.replace(/\-(\w)/g,function(a,c){return c.toUpperCase()});
-	var v = map[key];
-	//setTimeout(function(){
-		if(!v){
-			v = map[key] = 1;
-			try{
-				el.style.setExpression(key,'""');
-				el.style[key] = '';
-				el.runtimeStyle[key] = '';	
-			}catch(e){//alert(key)
-			}
-		}
-	//},1);
-	
-	if(inc>300){
-		map[key] = v &&( v+1) ||1;
-	}
-	return '';
-}
-var list = [
-"behavior",
-"direction",
-"direction", 
-"font", 
-"font-family", 
-"font-size", 
-"font-style", 
-"font-variant", 
-"font-weight", 
-"ime-mode",
-"layout-grid",
-"layout-grid-char",
-"layout-grid-line",
-"layout-grid-mode",
-"layout-grid-type",
-"letter-spacing", 
-"line-break",
-"line-height", 
-"min-height",
-"ruby-align",
-"ruby-overhang",
-"ruby-position",
-"text-align", 
-"text-autospace",
-"text-decoration", 
-"text-indent", 
-"text-overflow", 
-"text-transform", 
-"text-underline-position",
-"unicode-bidi", 
-"vertical-align", 
-"white-space",
-"word-break",
-"word-spacing", 
-"word-wrap",
-"writing-mode",
-"background-attachment", 
-"background-color", 
-"background-image", 
-"background-position", 
-"background-position-x",
-"background-position-y",
-"background-repeat", 
-"color", 
-"border", 
-"border-bottom", 
-"border-bottom-color", 
-"border-bottom-style", 
-"border-bottom-width", 
-"border-collapse",
-"border-color", 
-"border-left", 
-"border-left-color", 
-"border-left-style", 
-"border-left-width", 
-"border-right", 
-"border-right-color", 
-"border-right-style", 
-"border-right-width", 
-"border-style", 
-"border-top", 
-"border-top-color", 
-"border-top-style", 
-"border-top-width", 
-"border-width", 
-"clear", 
-"float", 
-"layout-flow",
-"margin", 
-"margin-bottom", 
-"margin-left", 
-"margin-right", 
-"margin-top", 
-"padding", 
-"padding-bottom", 
-"padding-left", 
-"padding-right", 
-"padding-top", 
-"scrollbar-3dlight-color",
-"scrollbar-arrow-color",
-"scrollbar-base-color",
-"scrollbar-darkshadow-color",
-"scrollbar-face-color",
-"scrollbar-highlight-color",
-"scrollbar-shadow-color",
-"table-layout",
-"zoom",
-"display", 
-"list-style", 
-"list-style-image", 
-"list-style-position", 
-"list-style-type", 
-"bottom",
-"clip", 
-"height", 
-"left", 
-"overflow", 
-"overflow-x",
-"overflow-y",
-"position", 
-"right",
-"top", 
-"visibility", 
-"width", 
-"z-index", 
-"page",
-"page-break-after", 
-"page-break-before", 
-"filter",
-"cursor", 
-"text-kashida-space",
-"text-justify"
- ]
-
-var styles = ['<style>'];
-var htmls = [];
-
-for(var i = 0;i<list.length;i++){
-var p = list[i];
-styles.push('.c',i,'{',p,':expression(test(this,"',p,'"));color:red}');
-htmls.push('<div class="c',i,'">',i,'</div>');
-}
-
-styles.push('</style>')
-document.write(styles.join(''))
-
-document.write(htmls.join(''))
-//alert(document.body.innerHTML)
-//alert(styles.join(''))
-//alert(htmls.join(''))
-</script2>
--->
 </html>

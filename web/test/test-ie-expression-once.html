@@ -33,14 +33,18 @@ var defaultMap = {}
 function test(el,key){
 	key = key.replace(/\-(\w)/g,function(a,c){return c.toUpperCase()});
 	var v = totalCountMap[key];
+	if(inc%100 == 0){
+		document.title = "#"+el.tagName+(inc)
+	}
 	//setTimeout(function(){
 		if(!v){
 			v = totalCountMap[key] = 1;
 			try{
 				var value = el.parentNode.currentStyle[key];
-				defaultMap[key]=value
-				el.runtimeStyle.setAttribute(key,value)
+				defaultMap[key]=[value]
+				//el.runtimeStyle[k]=value
 				el.style[key] = value;	
+				//defaultMap[key].push(el.style[key])
 				if(key.indexOf('Kashida')>0){
 					//alert([key,value])
 				}
@@ -53,11 +57,11 @@ function test(el,key){
 			//)
 		}
 	//},1);
-	if(inc<1000){
+	if(inc<500){
 		inc++;
 		return;
 	}
-	if(inc++>3650){
+	if(inc++>2000){
 		if(end){return}end  = true;
 		var buf = [];
 		for(var n in totalCountMap){
@@ -74,12 +78,13 @@ function test(el,key){
 	totalCountMap[key] = v &&( v+1) ||1;
 	
 	var v = afterCountMap[key];
-	if(inc>2000){
+	if(inc>1000){
 		afterCountMap[key] = v &&( v+1) ||1;
 	}
 	return '';
 }
 var list = [
+'a','b','c',
 "text",
 "text-underline",
 "text-kashida",
@@ -219,14 +224,24 @@ var list = [
 "text-kashida-space",
 "text-justify"
  ]
-
+/**
+var list = [];
+for(var i=9;i<1000;i++){
+	var a = i.toString(32);
+	a = a.replace(/\d/g,'');
+	if(a && !list[a]){
+		list[a] = 1;
+		list.push('-'+a);
+	}
+}
+alert(list)
+//*/
 var styles = ['<style>'];
 var htmls = [];
-
-for(var i = 0;i<list.length;i++){
-var p = list[i];
-styles.push('.c',i,'{',p,':expression(test(this,"',p,'"));color:red}');
-htmls.push('<div class="c',i,'">',i,'</div>');
+for(var i = 0;i < list.length;i++){
+	var p = list[i];
+	styles.push('.c',i,'{',p,':expression(test(this,"',p,'"));color:red}');
+	htmls.push('<div class="c',i,'">',i,'</div>');
 }
 
 styles.push('</style>')

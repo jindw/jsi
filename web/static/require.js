@@ -172,9 +172,22 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
         return url;
     }
 	require = _require;
+	//Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11
+	//Opera/9.80 (Windows NT 5.1; U; Edition IBIS; zh-cn) Presto/2.10.229 Version/11.60
+	//Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022; InfoPath.2)
+	//Mozilla/5.0 (Windows NT 5.1; rv:10.0.2) Gecko/20100101 Firefox/10.0.2
+	//webkit,moz,ie,o
+
+	
+	var uar = /^o(?=pera)|msie [6-8]|ms(?=ie \d+)|webkit|^moz(?=.+firefox)|khtml/.exec(navigator.userAgent.toLowerCase());
+	if(uar){
+		uar = '-'+uar[0].replace(/msie (\d)/,'ie$1')+'-$&';
+	}else{
+		uar = '-ie-$&';
+	}
 	return {
 		realpath:function(path){
-			return scriptBase+path+'__define__.js';////scriptBase:/scripts/,
+			return scriptBase+path.replace(/[^\/]+$/,uar)+'__define__.js';////scriptBase:/scripts/,
 		},
 		copy	: copy,
 		use : use,

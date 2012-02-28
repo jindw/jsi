@@ -1,12 +1,11 @@
 {
     "name": "jsi",
     "version": "0.1.0",
-    "description": "JavaScript Static Compile System. ",
+    "description": "JavaScript static integrated realtime build system.",
     "keywords": [
       "javascript",
       "css",
-      "DOM",
-      "XMLSerializer"
+      "commonjs"
     ],
     "maintainers": [{
       "name": "jindw",

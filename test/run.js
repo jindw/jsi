@@ -15,7 +15,7 @@ try{
 	console.error("xmldom for test is not install !! please npm install xmldom");
 }
 
-console.log(env.getContentAsBinary('/static/test.css').toString('utf-8'));//'/static/xmldom__define__.js')+'')
+console.log(env.getContentAsBinary('/static/-ie6-test.css').toString('utf-8'));//'/static/xmldom__define__.js')+'')
 
 var FS = require('fs');//
 require('http').createServer(function (req, response) {
@@ -41,7 +41,7 @@ require('http').createServer(function (req, response) {
 	    }
 	});
 }).listen(2012,'127.0.0.1');
-console.log('lite test server is started: http://'+('127.0.0.1')+':' + (1985) );
+console.log('lite test server is started: http://'+('127.0.0.1')+':' + (2012) );
 
 function writeNotFound(filepath,response,msg){
      response.writeHead(404, {"Content-Type": "text/plain"});    
