@@ -5,7 +5,18 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 	var taskMap = {};//path=>[task...]
 	var async;//is async load model?
 	var script = document.scripts[document.scripts.length-1];
-	var scriptBase = script.src.replace(/[^\/]+$/,'');
+	var scriptBase = script.src.replace(/[^\/]+$/,'');	
+	//Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11
+	//Opera/9.80 (Windows NT 5.1; U; Edition IBIS; zh-cn) Presto/2.10.229 Version/11.60
+	//Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022; InfoPath.2)
+	//Mozilla/5.0 (Windows NT 5.1; rv:10.0.2) Gecko/20100101 Firefox/10.0.2
+	//webkit,moz,ie,o
+	var uar = /^o(?=pera)|msie [6-8]|ms(?=ie \d+)|webkit|^moz(?=.+firefox)|khtml/.exec(navigator.userAgent.toLowerCase());
+	if(uar){
+		uar = '-'+uar[0].replace(/msie (\d)/,'ie$1')+'-$&';
+	}else{
+		uar = '-ie-$&';
+	}
 	function _require(path){
 		try{
 			if(path in exportMap){
@@ -71,7 +82,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 
 	function loadScript(path){
 		cachedMap[path] = [];//已经开始装载了，但是还没有值
-		path = $JSI.realpath(path);
+		path = $JSI.realpath(path.replace(/[^\/]+$/,uar));
 		if(async){
 			var s = document.createElement('script');
 			s.setAttribute('src',path);
@@ -172,23 +183,12 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
         return url;
     }
 	require = _require;
-	//Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11
-	//Opera/9.80 (Windows NT 5.1; U; Edition IBIS; zh-cn) Presto/2.10.229 Version/11.60
-	//Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022; InfoPath.2)
-	//Mozilla/5.0 (Windows NT 5.1; rv:10.0.2) Gecko/20100101 Firefox/10.0.2
-	//webkit,moz,ie,o
 
-	
-	var uar = /^o(?=pera)|msie [6-8]|ms(?=ie \d+)|webkit|^moz(?=.+firefox)|khtml/.exec(navigator.userAgent.toLowerCase());
-	if(uar){
-		uar = '-'+uar[0].replace(/msie (\d)/,'ie$1')+'-$&';
-	}else{
-		uar = '-ie-$&';
-	}
 	return {
 		realpath:function(path){
-			return scriptBase+path.replace(/[^\/]+$/,uar)+'__define__.js';////scriptBase:/scripts/,
+			return scriptBase+path+'__define__'+(this.hash[path]||'')+'.js';////scriptBase:/scripts/,
 		},
+		hash	: {},
 		copy	: copy,
 		use : use,
 		define : define			// $JSI.define('path',['deps'],function(require,exports){...})
