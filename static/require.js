@@ -34,13 +34,26 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 				return result;
 			}
 		}catch(e){
-			console.error('require error:',path,e)
+			var buf = []
+			var ss = document.scripts;
+			for(var i=0;i<ss.length;i++){
+				buf.push(ss[i].src);
+			}
+			buf.push('\n');
+			for(var i in cachedMap){
+				buf.push(i,!!cachedMap[i][0])
+			}
+			console.error('require error:',path,e.message,buf)
 		}
 	}
-	function use(path,target){
-		async = typeof target == 'function';
-		var callback = async ?target : function(result){
-			copy(result,target ||this);
+	function load(path,target,lazy){
+		async = !lazy;
+		function callback(result){
+			if(typeof target == 'function'){
+				target(result)
+			}else{
+				copy(result,target ||this);
+			}
 		};
 		if(typeof path  == 'string'){
 			_load(path,callback,async);
@@ -101,7 +114,8 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 			var list = [];
 			while(len--){
 				var dep = normalizeModule(dependences[len],path);
-				if(!cachedMap[dep]){
+				loader = cachedMap[dep];//变量复用
+				if(!(loader && loader.length)){//只要沒有裝載成功，就需要添加監聽，不能奢望別人監聽的及時性。
 					var notifySet = notifyMap[dep];
 					if(!notifySet){
 						notifyMap[dep] =notifySet = {};
@@ -190,7 +204,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 		},
 		hash	: {},
 		copy	: copy,
-		use : use,
+		load : load,
 		define : define			// $JSI.define('path',['deps'],function(require,exports){...})
 	}
 }({});
