@@ -1,4 +1,4 @@
-var rbs = require('rbs/test/run').rbs
+var rbs = require('rbs/test').rbs
 var setupJSRequire = require('../lib/js-filter').setupJSRequire;
 setupJSRequire(rbs,'/static/');
 
