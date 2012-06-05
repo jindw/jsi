@@ -18,7 +18,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 		uar = '-ie-$&';
 	}
 	function _require(path){
-//		try{
+		try{
 			if(path in exportMap){
 				return exportMap[path];
 			}else{
@@ -33,18 +33,18 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 				},result);
 				return result;
 			}
-//		}catch(e){
-//			var buf = []
-//			var ss = document.scripts;
-//			for(var i=0;i<ss.length;i++){
-//				buf.push(ss[i].src);
-//			}
-//			buf.push('\n');
-//			for(var i in cachedMap){
-//				buf.push(i,!!cachedMap[i][0])
-//			}
-//			console.error('require error:',path,e.message,buf)
-//		}
+		}catch(e){
+			var buf = []
+			var ss = document.scripts;
+			for(var i=0;i<ss.length;i++){
+				buf.push(ss[i].src);
+			}
+			buf.push('\n');
+			for(var i in cachedMap){
+				buf.push(i,!!cachedMap[i][0])
+			}
+			console.error('require error:',path,e.message,buf)
+		}
 	}
 	function load(path,target,lazy){
 		async = !lazy;

@@ -4,6 +4,7 @@ var RBS = require('rbs').RBS;
 doDepTest('require("abs")',["abs"])
 doDepTest('require("abs");/*require("abs2")*/require(\'abs\')',["abs"])
 doDepTest('require("abs2")/*require("abs2")*/;require(\'abs\')',["abs2","abs"])
+doDepTest('require("abs2")//require("abs2")*/;require(\'abs\')',["abs2"])
 function doDepTest(source,expect){
 	var rbs2 = new RBS();
 	rbs2.addBinaryBuilder(/.*/,function(resource,data){
@@ -15,9 +16,10 @@ function doDepTest(source,expect){
 //	console.log(dest)
 	var dest =dest.substring(dest.indexOf('['),dest.indexOf(']')+1);
 	dest = eval(dest)
-	dest = JSON.stringify(dest)
+	dest = JSON.stringify(dest.sort())
 	console.log(dest)
-	console.assert(JSON.stringify(expect) == dest,dest)
+	var result = JSON.stringify(expect.sort()) ;
+	console.assert(result== dest,dest,result)
 }
 console.log('success')
 try{
