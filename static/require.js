@@ -1,22 +1,12 @@
 var require;
-var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在define中初始化。存在(包括空数组)说明当前script已在装载中，不空说明已经装载完成，depengdenceMap为空，说明依赖已经装载。
+var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中初始化。存在(包括空数组)说明当前script已在装载中，不空说明已经装载完成，depengdences为空，说明依赖已经装载。
 	var exportMap = {}//path=>exports// 存在说明已经载入【并初始化】
-	var notifyMap = {};//path=>[waitingPathMap:{path=>1}]
 	var taskMap = {};//path=>[task...]
+	var notifyMap = {};//dep=>[waitingList]
+	var loading = 0;
 	var async;//is async load model?
 	var script = document.scripts[document.scripts.length-1];
 	var scriptBase = script.src.replace(/[^\/]+$/,'');	
-	//Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11
-	//Opera/9.80 (Windows NT 5.1; U; Edition IBIS; zh-cn) Presto/2.10.229 Version/11.60
-	//Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 2.0.50727; .NET CLR 3.0.04506.648; .NET CLR 3.5.21022; InfoPath.2)
-	//Mozilla/5.0 (Windows NT 5.1; rv:10.0.2) Gecko/20100101 Firefox/10.0.2
-	//webkit,moz,ie,o
-	var uar = /^o(?=pera)|msie [6-8]|ms(?=ie \d+)|webkit|^moz(?=.+firefox)|khtml/.exec(navigator.userAgent.toLowerCase());
-	if(uar){
-		uar = '-'+uar[0].replace(/msie (\d)/,'ie$1')+'-$&';
-	}else{
-		uar = '-ie-$&';
-	}
 	function _require(path){
 		try{
 			if(path in exportMap){
@@ -46,56 +36,68 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 			console.error('require error:',path,e.message,buf)
 		}
 	}
-	function load(path,target,lazy){
-		async = !lazy;
-		function callback(result){
-			if(typeof target == 'function'){
-				target(result)
-			}else{
-				copy(result,target ||this);
-			}
-		};
-		if(typeof path  == 'string'){
-			_load(path,callback,async);
-		}else{//list
-			var i = 0;
-			var end = path.length;
-			var end2 = end;
-			var all = {};
-			while(i<end){
-				_load(path[i++],function(result){
-					copy(result,all)
-					--end2 || callback(all);
-				},async);
+	/**
+	 * @param path
+	 * @param target||callback (optional)
+	 * @param nextTagLazySync (optional)
+	 */
+	function load(path){
+		var end = arguments.length-2;
+		if(end>1){
+			while(typeof arguments[end] == 'string'){end++};
+		}else{
+			end = 1;
+		}
+		var target = arguments[end];
+		var callback =  function(result){
+			copy(result,target||this);
+		}
+		if(typeof target == 'boolean'){
+			target = this;
+			async = !target
+		}else{
+			async = !arguments[end+1];
+			if('function' == typeof target){
+				callback = target;
 			}
 		}
+		if(end>1){
+			var i = 0;
+			var all = {};
+			var end2 = end;
+			while(i<end){
+				_load(arguments[i++],function(result){
+					copy(result,all)
+					--end2 || callback(all);
+				});
+			}
+		}else{
+			_load(path,callback);
+		}
 	}
-	function _load(path,callback,async){
+	function _load(path,callback){
+		path = path.replace(/\\/g,'/')
 		if(path in exportMap){
 			return callback(exportMap[path])
 		}
-		var task = taskMap[path];
 		var cached = cachedMap[path];
-		if(!task){
-			task = taskMap[path] = [];
-		}
-		task.push(callback);
 		if(cached){
-			if(cached.length){
-				for(var dep in cached[1]){
-					return;//task 会在 dependence 装载后自动唤醒。
-				}
-				onComplete(path,async);
+			taskMap[path].push(callback)
+			if(cached.length == 1){//only impl no dependence
+				onComplete(path);
 			}
 			//else{fired by previous loading}
 		}else{
-			loadScript(path,async);
+			taskMap[path] = [callback];
+			loadScript(path);
 		}
 	}
 
-	function loadScript(path){
+	function loadScript(path){//call by _load and onDefine
+		//console.assert(cachedMap[path] == null,'redefine error')
+		loading++;
 		cachedMap[path] = [];//已经开始装载了，但是还没有值
-		path = $JSI.realpath(path.replace(/[^\/]+$/,uar));
+		path = $JSI.realpath(path);//.replace(/[^\/]+$/,uar));
 		if(async){
 			var s = document.createElement('script');
 			s.setAttribute('src',path);
@@ -104,80 +106,78 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 			document.write('<script src="'+path+'"><\/script>');
 		}
 	}
+	/**
+	 * 添加缓存,计数器的因素，只能通过 loadScript 触发，禁止外部调用。
+	 */
 	function define(path,dependences,impl){
-		//if(path in cacheMap){return;} //异常，认为不会发生
-		var dependenceMap = {};
-		var loader = cachedMap[path];
+		var implAndDependence = cachedMap[path];
 		var len = dependences.length;
-		if(!loader.length){//js执行机制需要确保以下行为原子性（js单线程模型确保这点，不会被中断插入其他js逻辑）
-			loader.push(impl,dependenceMap);//dependenceMap 为空确保程序装载完成
-			var list = [];
-			while(len--){
-				var dep = normalizeModule(dependences[len],path);
-				loader = cachedMap[dep];//变量复用
-				if(!(loader && loader.length)){//只要沒有裝載成功，就需要添加監聽，不能奢望別人監聽的及時性。
-					var notifySet = notifyMap[dep];
-					if(!notifySet){
-						notifyMap[dep] =notifySet = {};
-					}
-					notifySet[path]=1;
-					dependenceMap[dep] = 1;
-					//console.info(path,dep)
-					list.push(dep);
-					
+		var newScripts = [];
+		//console.assert(implAndDependence.length==0,'redefine error')}
+		implAndDependence.push(impl);
+		while(len--){
+			var dep = normalizeModule(dependences[len],path);
+			var depCache = cachedMap[dep];;
+			//>1:self loaded but dependence not loaded
+			//=1:self and dependence loaded
+			//=0:script added but not load
+			//=undefined: not added
+			if(depCache){
+				if(depCache.length==1){
+					continue;
 				}
+			}else{
+				newScripts.push(dep)
 			}
-			while(dep = list.pop()){
+			dep in notifyMap ? notifyMap[dep].push(path) : notifyMap[dep]=[path]
+			implAndDependence.push(dep);
+		}
+		if(implAndDependence.length == 1){
+			onComplete(path);
+		}else{
+			while(dep = newScripts.pop()){
 				loadScript(dep);
 			}
-			onDefined(path)
+		}
+		if(--loading<1){
+			onComplete()
 		}
 		//else{//loaded before}
 	}
-	function onDefined(path){//只在define 原子块中被调用，重构时小心！！
-		var notifySet = notifyMap[path];
-		var dependenceMap = cachedMap[path][1];
-		var dependenceCount=0;
-		for(var p in dependenceMap){
-			if(cachedMap[p].length){
-				delete dependenceMap[p];
-			}else{
-				dependenceCount++;
-			}
-		}
-		outer:for(p in notifySet){//遍历所有依赖当前脚本的脚本
-			var notifyDependenceMap = cachedMap[p][1];//找到依赖当前脚本的脚本的依赖【a】
-			if(delete notifyDependenceMap[path]){//如果存在，删除（因为已经装）
-				if(dependenceCount){
-					copy(dependenceMap,notifyDependenceMap);	//并将未装载依赖移入
-					_moveNodify(dependenceMap,p)
-					//add nodify
-				}else{
-					for(p in notifyDependenceMap){ //如果还有其他未装载依赖， 跳过
-						continue outer;
-					}
-					onComplete(p);//没有其他为装载的依赖， 完成
+
+	function onComplete(path){//逻辑上不应该被多次调用【除非有bug】
+		if(path){
+			var task = taskMap[path];
+			if(task && task.length){
+				var result = _require(path);
+				var item;
+				while(item = task.pop()){//每个task只能被调用一次！！！
+					item.call(this,result)
 				}
 			}
-		}
-		if(!dependenceCount){//直接就没有未装载依赖
-			//notify
-			onComplete(path);
-		}
-	}
-	function _moveNodify(loadingMap,path){//这里关联的　notifySet　一定有值，因为曾经添加过　
-		for(var p in loadingMap){
-			var notifySet = notifyMap[p];
-			notifySet[path] = 1;
-		}
-	}
-	function onComplete(path){//逻辑上不应该被多次调用【除非有bug】
-		var task = taskMap[path];
-		var result = _require(path);
-		if(task){
-			var item;
-			while(item = task.pop()){//每个task只能被调用一次！！！
-				item.call(this,result)
+			var targets = notifyMap[path]
+			if(targets){
+				var i = targets.length;
+				while(i--){
+					var target = cachedMap[targets[i]];
+					var j = target.length;
+					//if(j){}//没必要了，j必然>=1
+					while(--j){
+						if(target[j] === path){
+							target.splice(j,1)
+						}
+					}
+					if(target.length == 1){
+						//console.info('immediate trigger:',targets[i])
+						onComplete(targets[i])
+					}
+				}
+			}
+			//console.info('trigger:',path)
+		}else{
+			for(path in taskMap){
+				//if(!exportMap[path]){console.info('complete trigger:',path);	}
+				onComplete(path)
 			}
 		}
 	}
@@ -189,7 +189,6 @@ var $JSI = function(cachedMap){//path=>[impl,dependences:{path=>deps}],//只在d
 		}
 	}
 	function normalizeModule(url,base){
-        var url = url.replace(/\\/g,'/');
         if(url.charAt(0) == '.'){
         	url = base.replace(/[^\/]+$/,'')+url
         	while(url != (url =url.replace( /[^\/]+\/\.\.\/|(\/)?\.\//,'$1')));
