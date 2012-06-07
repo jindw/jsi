@@ -7,33 +7,26 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 	var async;//is async load model?
 	var script = document.scripts[document.scripts.length-1];
 	var scriptBase = script.src.replace(/[^\/]+$/,'');	
-	function _require(path){
-		try{
-			if(path in exportMap){
-				return exportMap[path];
-			}else{
-				var requireCache = {};
-				var result = exportMap[path] = {}
-				//console.warn(path)
-				cachedMap[path][0].call(this,function(path2){
-					if(path2 in requireCache){
-						return requireCache[path2];
-					}
-					return requireCache[path2] = _require(normalizeModule(path2,path));
-				},result);
-				return result;
+	var asyncInterval;
+	var asyncWaitList = [];
+	var syncWaitList = [];
+	var syncWaitInc = 0;
+	function addWait(path,callback,async){
+		if(async){
+			asyncWaitList.push(arguments);
+			asyncInterval = asyncInterval || setInterval(asyncWait,300)
+		}else{
+			if(syncWaitList.push(arguments)<2){
+				document.write('<script src="'+scriptBase+'block.js"><\/script>')
 			}
-		}catch(e){
-			var buf = []
-			var ss = document.scripts;
-			for(var i=0;i<ss.length;i++){
-				buf.push(ss[i].src);
+		}
+	}
+	function asyncWait(args){
+		if(loading == 0){
+			clearInterval(asyncInterval);
+			while(args = asyncWaitList.pop()){
+				_load.apply(this,args)
 			}
-			buf.push('\n');
-			for(var i in cachedMap){
-				buf.push(i,!!cachedMap[i][0])
-			}
-			console.error('require error:',path,e.message,buf)
 		}
 	}
 	/**
@@ -53,10 +46,10 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 			copy(result,target||this);
 		}
 		if(typeof target == 'boolean'){
+			var async = !target
 			target = this;
-			async = !target
 		}else{
-			async = !arguments[end+1];
+			var async = !arguments[end+1];
 			if('function' == typeof target){
 				callback = target;
 			}
@@ -69,30 +62,38 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 				_load(arguments[i++],function(result){
 					copy(result,all)
 					--end2 || callback(all);
-				});
+				},async);
 			}
 		}else{
-			_load(path,callback);
+			_load(path,callback,async);
 		}
 	}
-	function _load(path,callback){
+	function _load(path,callback,thisAsync){
 		path = path.replace(/\\/g,'/')
 		if(path in exportMap){
 			return callback(exportMap[path])
 		}
 		var cached = cachedMap[path];
 		if(cached){
-			taskMap[path].push(callback)
-			if(cached.length == 1){//only impl no dependence
+			push(taskMap,path,callback)
+			if(cached.length === 1){//only impl no dependence
 				onComplete(path);
+				async = thisAsync;
+			}else{
+				if(async !== thisAsync && loading){// assert(sync!=null)
+					addWait(path,taskMap[path].pop(),thisAsync);
+				}//else{fired by previous loading}
 			}
-			//else{fired by previous loading}
 		}else{
-			taskMap[path] = [callback];
-			loadScript(path);
+			if(loading==0 || async === thisAsync ){//if(sync===null) assert(inc ==0) 
+				async = thisAsync;
+				taskMap[path] = [callback];
+				loadScript(path);
+			}else{
+				addWait(path,callback,thisAsync);
+			}
 		}
 	}
-
 	function loadScript(path){//call by _load and onDefine
 		//console.assert(cachedMap[path] == null,'redefine error')
 		loading++;
@@ -129,7 +130,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 			}else{
 				newScripts.push(dep)
 			}
-			dep in notifyMap ? notifyMap[dep].push(path) : notifyMap[dep]=[path]
+			push(notifyMap,dep,path)
 			implAndDependence.push(dep);
 		}
 		if(implAndDependence.length == 1){
@@ -182,10 +183,46 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 		}
 	}
 	
+	function _require(path){
+		try{
+			if(path in exportMap){
+				return exportMap[path];
+			}else{
+				var requireCache = {};
+				var result = exportMap[path] = {}
+				//console.warn(path)
+				cachedMap[path][0].call(this,function(path2){
+					if(path2 in requireCache){
+						return requireCache[path2];
+					}
+					return requireCache[path2] = _require(normalizeModule(path2,path));
+				},result);
+				return result;
+			}
+		}catch(e){
+			var buf = []
+			var ss = document.scripts;
+			for(var i=0;i<ss.length;i++){
+				buf.push(ss[i].src);
+			}
+			buf.push('\n');
+			for(var i in cachedMap){
+				buf.push(i,!!cachedMap[i][0])
+			}
+			console.error('require error:',path,e.message,buf)
+		}
+	}
 	//utils...
 	function copy(src,dest){
 		for(var p in src){
 			dest[p] = src[p]
+		}
+	}
+	function push(map,key,value){
+		if(key in map){
+			map[key].push(value)
+		}else{
+			map[key] = [value]
 		}
 	}
 	function normalizeModule(url,base){
@@ -203,7 +240,25 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 		},
 		hash	: {},
 		copy	: copy,
+		/**
+		 * @param path...
+		 * @param callback
+		 * @param block
+		 */
 		load : load,
+		block : function(current){
+			if(loading == 0){
+				while(current = syncWaitList.pop()){
+					_load.apply(this,current)
+				}
+			}else{
+				current = document.scripts[document.scripts.length-1];
+				//console.log(current.src,this._last - (this._last = +new Date()))
+				document.write('<script src="'+current.src.replace(/\?token=.*$|$/,'?token='+ +new Date)+'&inc='+ ++syncWaitInc+'"><\/script>');
+				//current.parentNode.removeChild(current);
+			}
+			//notify sync task 
+		},
 		define : define			// $JSI.define('path',['deps'],function(require,exports){...})
 	}
 }({});

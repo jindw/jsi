@@ -24,14 +24,7 @@
             "url": "http://www.gnu.org/licenses/lgpl.html"
         }
     ],
-    "repositories": [
-        {
-            "type": "svn",
-            "url": "git@github.com:jindw/jsi.git"
-        }
-    ],
-    "implements": [
-    ],
+    "repository": "git@github.com:jindw/jsi.git",
     "dependencies": {
     	"rbs":"*"
     },
