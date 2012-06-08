@@ -1,0 +1,19 @@
+<!DOCTYPE html><html>
+<head>
+<title>test wait</title>
+<script src="/static/require.js"></script>
+</head>
+<body>
+<hr>
+<script async="async">
+var xmldom = require('xmldom');
+document.write("<h3>DOMParser</h3><p>"+xmldom.DOMParser+"</p>")
+</script>
+<hr>
+<script>
+var CS = require('cs/lib/runtime/index').CS;
+document.write("<h3>cs</h3><p>"+CS+"</p>")
+</script>
+<hr>
+</body>
+</html>
