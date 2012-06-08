@@ -108,42 +108,51 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 		}
 	}
 	/**
-	 * 添加缓存,计数器的因素，只能通过 loadScript 触发，禁止外部调用。
+	 * @arguments implMap
+	 * 		允许外部调用，缓存装载单元（该调用方式下不触发计数器）。
+	 * @arguments path,dependences,impl
+	 * 		添加缓存,计数器的因素，只能通过 loadScript 触发，禁止外部调用。
 	 */
 	function define(path,dependences,impl){
-		var implAndDependence = cachedMap[path];
-		var len = dependences.length;
-		var newScripts = [];
-		//console.assert(implAndDependence.length==0,'redefine error')}
-		implAndDependence.push(impl);
-		while(len--){
-			var dep = normalizeModule(dependences[len],path);
-			var depCache = cachedMap[dep];;
-			//>1:self loaded but dependence not loaded
-			//=1:self and dependence loaded
-			//=0:script added but not load
-			//=undefined: not added
-			if(depCache){
-				if(depCache.length==1){
-					continue;
+		if(impl){
+			var implAndDependence = cachedMap[path];
+			var i = dependences.length;
+			var newScripts = [];
+			//console.assert(implAndDependence.length==0,'redefine error')}
+			implAndDependence.push(impl);
+			while(i--){
+				var dep = normalizeModule(dependences[i],path);
+				var depCache = cachedMap[dep];;
+				//>1:self loaded but dependence not loaded
+				//=1:self and dependence loaded
+				//=0:script added but not load
+				//=undefined: not added
+				if(depCache){
+					if(depCache.length==1){
+						continue;
+					}
+				}else{
+					newScripts.push(dep)
 				}
+				push(notifyMap,dep,path)
+				implAndDependence.push(dep);
+			}
+			if(implAndDependence.length == 1){
+				onComplete(path);
 			}else{
-				newScripts.push(dep)
+				while(dep = newScripts.pop()){
+					loadScript(dep);
+				}
 			}
-			push(notifyMap,dep,path)
-			implAndDependence.push(dep);
-		}
-		if(implAndDependence.length == 1){
-			onComplete(path);
+			if(--loading<1){
+				onComplete()
+			}
+			//else{//loaded before}
 		}else{
-			while(dep = newScripts.pop()){
-				loadScript(dep);
+			for(i in path){
+				cachedMap[i] = cachedMap[i] || path[i]
 			}
 		}
-		if(--loading<1){
-			onComplete()
-		}
-		//else{//loaded before}
 	}
 
 	function onComplete(path){//逻辑上不应该被多次调用【除非有bug】
@@ -259,6 +268,6 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 			}
 			//notify sync task 
 		},
-		define : define			// $JSI.define('path',['deps'],function(require,exports){...})
+		define : define			// $JSI.define('path',['deps'],function(require,exports){...}) || $JSI.define({path:impl})
 	}
 }({});
