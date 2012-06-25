@@ -218,7 +218,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 			for(var i in cachedMap){
 				buf.push(i,!!cachedMap[i][0])
 			}
-			console.error('require error:',path,e,buf)
+			console.error('require error:',path,e.message,buf)
 		}
 	}
 	//utils...
