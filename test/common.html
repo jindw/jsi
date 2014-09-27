@@ -5,14 +5,17 @@
 </head>
 <body>
 <hr>
-<script async="async">
+<script>
 var xmldom = require('xmldom');
+</script>
+<script async="async">
 document.write("<h3>DOMParser</h3><p>"+xmldom.DOMParser+"</p>")
 </script>
 <hr>
+<script>var lite = require('lite');</script>
 <script>
-var CS = require('cs/lib/runtime/index').CS;
-document.write("<h3>cs</h3><p>"+CS+"</p>")
+var LiteEngine = lite.LiteEngine;
+document.write("<h3>LiteEngine</h3><p>"+LiteEngine+"</p>")
 </script>
 <hr>
 </body>

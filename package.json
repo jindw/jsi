@@ -7,7 +7,7 @@
     "repository": "git://github.com/jindw/jsi.git",
     "main": "./lib/index.js",
     "engines" : { "node" : ">=0.1" },
-    "dependencies": {"rbs":"*"},
+    "dependencies": {},
     "maintainers": [{"name":"jindw","email":"jindw@xidea.org","url":"http://www.xidea.org"}],
     "contributors": [],
     "bugs": {"email": "jindw@xidea.org","url": "https://github.com/jindw/jsi/issues"},

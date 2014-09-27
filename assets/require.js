@@ -30,42 +30,38 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 		}
 	}
 	/**
-	 * @param path
 	 * @param target||callback (optional)
-	 * @param nextTagLazySync (optional)
+	 * @param path
 	 */
 	function load(path){
-		var end = arguments.length-2;
-		if(end>1){
-			while(typeof arguments[end] == 'string'){end++};
-		}else{
-			end = 1;
-		}
-		var target = arguments[end];
-		var callback =  function(result){
+		var end = arguments.length;
+		var begin = 1;
+		var count = end-begin;
+		var target = arguments[0];
+		var asyn = true;
+		function callback(result){
 			copy(result,target||this);
 		}
-		if(typeof target == 'boolean'){
-			var async = !target
-			target = this;
-		}else{
-			var async = !arguments[end+1];
-			if('function' == typeof target){
-				callback = target;
-			}
+		switch(typeof target){
+		case 'function':
+			callback == target;
+			break;
+		case 'string':
+			begin = 0;
+			if(begin){target = null;}
+		default:
+			asyn = false;
 		}
-		if(end>1){
-			var i = 0;
+		if(count>1){
 			var all = {};
-			var end2 = end;
-			while(i<end){
-				_load(arguments[i++],function(result){
+			while(begin<end){
+				_load(arguments[begin++],function(result){
 					copy(result,all)
-					--end2 || callback(all);
+					--count || callback(all);
 				},async);
 			}
 		}else{
-			_load(path,callback,async);
+			_load(arguments[begin],callback,async);
 		}
 	}
 	function _load(path,callback,thisAsync){
@@ -198,15 +194,17 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 				return exportMap[path];
 			}else{
 				var requireCache = {};
-				var result = exportMap[path] = {}
+				var exports = exportMap[path] = {}
+				var module = {exports:exports}
+				var url = $JSI.realpath(path);
 				//console.warn(path)
-				cachedMap[path][0].call(this,function(path2){
+				cachedMap[path][0].call(this,exports,function(path2){
 					if(path2 in requireCache){
 						return requireCache[path2];
 					}
 					return requireCache[path2] = _require(normalizeModule(path2,path));
-				},result);
-				return result;
+				},module,url,url.replace(/[^\\\/]+$/,''));
+				return exportMap[path] = module.exports;
 			}
 		}catch(e){
 			var buf = []
@@ -241,7 +239,14 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
         }
         return url;
     }
-	require = _require;
+	require = function(path){
+		var rtv = {};
+		_load(path,function(result){
+			copy(result,rtv);
+			rtv = result;
+		},false);
+		return rtv;
+	}
 
 	return {
 		realpath:function(path){

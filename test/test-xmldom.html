@@ -2,20 +2,20 @@
 <html><head>
 <script src='/static/require.js'></script></head>
 <body>
+<script>var xmldom = require('xmldom') </script>
 <script>
-var DOMParser = require('xmldom').DOMParser;
-var doc = new DOMParser().parseFromString(
-    '<xml xmlns="a" xmlns:c="./lite">\n'+
+var DOMParser = xmldom.DOMParser;
+var xml = '<xml xmlns="a" xmlns:c="./lite">\n'+
         '\t<child>test</child>\n'+
         '\t<child></child>\n'+
         '\t<child/>\n'+
     '</xml>'
-    ,'text/xml');
+var doc = new DOMParser().parseFromString(xml,'text/xml');
 doc.documentElement.setAttribute('x','y');
 doc.documentElement.setAttributeNS('./lite','c:x','y2');
 var nsAttr = doc.documentElement.getAttributeNS('./lite','x')
-console.info(nsAttr)
-console.info(doc)
+console.assert("y2"==nsAttr+'',nsAttr)
+console.assert(xml.replace(/><\/\w+>/g,'/>').replace('>',' x="y" c:x="y2">')==doc+'',doc+'')
 </script>
 </body>
 </html>
