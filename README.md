@@ -27,6 +27,7 @@
 			<hr>
 			<script>
 				//html 中require 函数必须放在最前面的单独的script标签中！
+				//因为html script 中的 require 只能保证在下一个script 出现之前被装载完成！
 				var xmldom = require('xmldom');
 			</script>
 			<script>
