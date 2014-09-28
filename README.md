@@ -20,24 +20,26 @@
  
 		<!DOCTYPE html><html>
 		<head>
-		<title>test wait</title>
-		<script src="/static/boot.js"></script>
+			<title>test wait</title>
+			<script src="/static/boot.js"></script>
 		</head>
 		<body>
-		<hr>
-		<script>
-		var xmldom = require('xmldom');
-		</script>
-		<script async="async">
-		document.write("<h3>DOMParser</h3><p>"+xmldom.DOMParser+"</p>")
-		</script>
-		<hr>
-		<script>var lite = require('lite');</script>
-		<script>
-		var LiteEngine = lite.LiteEngine;
-		document.write("<h3>LiteEngine</h3><p>"+LiteEngine+"</p>")
-		</script>
-		<hr>
+			<hr>
+			<script>
+				//html 中require 函数必须放在最前面的单独的script标签中！
+				var xmldom = require('xmldom');
+			</script>
+			<script>
+				document.write("<h3>DOMParser</h3><p>"+xmldom.DOMParser+"</p>")
+			</script>
+			<hr>
+			<script>
+				var lite = require('lite');</script>
+			<script>
+				var LiteEngine = lite.LiteEngine;
+				document.write("<h3>LiteEngine</h3><p>"+LiteEngine+"</p>")
+			</script>
+			<hr>
 		</body>
 		</html>
 
