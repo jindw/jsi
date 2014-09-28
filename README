@@ -1,15 +1,44 @@
-JavaScript Introduction
+#JSI Introduction
 
-Functions
+##Functions
+ * pure nodejs style syntax.
+   * without browser script wrapper.
+   * npm module support  automatic.
  * CommonJS1.0 compatible JavaScript loader [ require.js]
-   Rewriting of the original [JSI2](http://www.xidea.org/project/jsi) boot.js, give up the original specification, former JSI2 tool set is being reconstructed, later on
- * generate browser script wrapper
-   In order to make the scripts installed by NPM can be "require"d in the browser environment , it adds an automatic processor, the script into similar AMD model.
- * generate different code for different agent (browser)
-		
-Install:
+   * Rewriting of the original [JSI2](http://www.xidea.org/project/jsi) boot.js.
+   * give up the original specification.
+   
+##Install:
 	npm install jsi
-Example:
-	require('jsi/test/run');
+	
+##Example:
+ * start test server:
+ 
+		require('jsi/test');
+
+ * html example:
+ 
+		<!DOCTYPE html><html>
+		<head>
+		<title>test wait</title>
+		<script src="/static/boot.js"></script>
+		</head>
+		<body>
+		<hr>
+		<script>
+		var xmldom = require('xmldom');
+		</script>
+		<script async="async">
+		document.write("<h3>DOMParser</h3><p>"+xmldom.DOMParser+"</p>")
+		</script>
+		<hr>
+		<script>var lite = require('lite');</script>
+		<script>
+		var LiteEngine = lite.LiteEngine;
+		document.write("<h3>LiteEngine</h3><p>"+LiteEngine+"</p>")
+		</script>
+		<hr>
+		</body>
+		</html>
 
 
