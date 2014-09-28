@@ -1,15 +1,3 @@
-// var http = require('http');
-
-// http.createServer(function (request, response) {
-
-//   response.writeHead(200, {'Content-Type': 'text/plain'});
-//   response.end('Hello World\n');
-// }).listen(8124);
-
-// console.log('Server running at http://127.0.0.1:8124/');
-
-
-
 var fs = require('fs');
 var path = require('path');
 var http = require('http');
@@ -23,7 +11,7 @@ createServer(function(req,res){
 		loader.load(url.replace(/^\/static\/|\/assets\//,'/'),function(content){
 			setTimeout(function(){
 				res.writeHead(200, {'Content-Type': 'text/javascript;charset=utf-8'});
-				res.end(content);
+				res.end(content+'');
 				console.log('\tend:'+url)
 			},Math.random()*100);
 		})
