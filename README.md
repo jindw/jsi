@@ -15,7 +15,7 @@
  * start test server:
  
 		require('jsi/test');
-
+		
  * html example:
  
 		<!DOCTYPE html><html>
@@ -41,4 +41,23 @@
 		</body>
 		</html>
 
-
+ * extends server
+ 
+		var ScriptLoader = require('../lib/js-loader.js').ScriptLoader;
+		//setup resource loader
+		var loader = new ScriptLoader('./');
+		
+		createServer(function(req,res){
+			var url = req.url;
+			if(url.match('\.js$')){
+				console.log('start:'+url)
+				loader.load(url.replace(/^\/static\/|\/assets\//,'/'),function(content){
+					setTimeout(function(){
+						res.writeHead(200, {'Content-Type': 'text/javascript;charset=utf-8'});
+						res.end(content+'');
+						console.log('\tend:'+url)
+					},Math.random()*100);
+				})
+				return true;
+			}
+		},'./').listen(8080);
