@@ -1,27 +1,51 @@
+var $JSI;
 var require;
-var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中初始化。存在(包括空数组)说明当前script已在装载中，不空说明已经装载完成，depengdences为空，说明依赖已经装载。
+var define = function(cachedMap){//path=>[impl,dependences...],//只在define中初始化。存在(包括空数组)说明当前script已在装载中，不空说明已经装载完成，depengdences为空，说明依赖已经装载。
 	var script = document.scripts[document.scripts.length-1];
 	var scriptBase = script.src.replace(/[^\/]+$/,'');	
+	var bootSource = script.text || script.textContent ||'';
 
 	var exportMap = {}//path=>exports// 存在说明已经载入【并初始化】
 	var taskMap = {};//path=>[task...]
-	var notifyMap = {};//dep=>[waitingList]
+	
 	var loading = 0;
+	var notifyMap = {};//dep=>[waitingList]
 	var globalAsync;//is async load model?
 
-	var asyncInterval;
-	var asyncWaitList = [];
-	var syncWaitList = [];
-	var syncWaitInc = 0;
-	require = function(path){
+	var asyncInterval;//async monitor 
+	var asyncWaitList = [];//async task list
+	
+	var syncBlockList = [];//block task list,remove?
+	$JSI = {
+		block : function(current){
+			if(loading == 0){
+				while(current = syncBlockList.pop()){
+					_load.apply(this,current)
+				}
+			}else{
+				current = document.scripts[document.scripts.length-1];
+				document.write('<script src="'+scriptBase+'block.js?t='+  +new Date+'"><\/script>');
+			}
+		},
+		realpath:function(path){
+			return scriptBase+path+'__define__.js';////scriptBase:/scripts/,
+		},
+		copy	: copy,
+		define : define			// $JSI.define('path',['deps'],function(require,exports){...}) || $JSI.define({path:impl})
+	}
+	require = function(arg1,arg2){//require(path)|| require(callback,path)
 		var rtv = function(){return rtv.apply(this,arguments)};
-		_load(path,function(result){
+		_load(function(result){
 			copy(result,rtv);
 			rtv.prototype = result.prototype;
 			rtv = result;
-		},false);
+			arg2 && arg1(rtv);
+		},arg2 ,arg2||arg1);
 		return rtv;
 	}
+	/* execute javascript */
+	bootSource.replace(/\s+/,'') && document.write('<script>'+bootSource+'</script>')
+	/* implements function define */
 	function _require(path){
 		try{
 			if(path in exportMap){
@@ -52,42 +76,8 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 			console.error('require error:',path,e.message,buf)
 		}
 	}
-	/**
-	 * @param target||callback (optional)
-	 * @param path
-	 */
-	function load(path){
-		var end = arguments.length;
-		var begin = 1;
-		var count = end-begin;
-		var target = arguments[0];
-		var asyn = true;
-		function callback(result){
-			copy(result,target||this);
-		}
-		switch(typeof target){
-		case 'function':
-			callback == target;
-			break;
-		case 'string':
-			begin = 0;
-			target = null;
-		default:
-			asyn = false;
-		}
-		if(count>1){
-			var all = {};
-			while(begin<end){
-				_load(arguments[begin++],function(result){
-					copy(result,all)
-					--count || callback(all);
-				},async);
-			}
-		}else{
-			_load(arguments[begin],callback,async);
-		}
-	}
-	function _load(path,callback,thisAsync){
+
+	function _load(callback,thisAsync,path){
 		path = path.replace(/\\/g,'/')
 		if(path in exportMap){
 			return callback(exportMap[path])
@@ -100,7 +90,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 				globalAsync = thisAsync;
 			}else{
 				if(globalAsync !== thisAsync && loading){// assert(sync!=null)
-					addWait(path,taskMap[path].pop(),thisAsync);
+					addWait(taskMap[path].pop(),thisAsync,path);
 				}//else{fired by previous loading}
 			}
 		}else{
@@ -109,7 +99,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 				taskMap[path] = [callback];
 				loadScript(path);
 			}else{
-				addWait(path,callback,thisAsync);
+				addWait(callback,thisAsync,path);
 			}
 		}
 	}
@@ -127,17 +117,17 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 		}
 	}
 	
-	function addWait(path,callback,async){
+	function addWait(callback,async,path){
 		if(async){
 			asyncWaitList.push(arguments);
-			asyncInterval = asyncInterval || setInterval(asyncWait,300)
+			asyncInterval = asyncInterval || setInterval(intervalWait,300)
 		}else{
-			if(syncWaitList.push(arguments)<2){
+			if(syncBlockList.push(arguments)<2){
 				document.write('<script src="'+scriptBase+'block.js"><\/script>')
 			}
 		}
 	}
-	function asyncWait(args){
+	function intervalWait(args){
 		if(loading == 0){
 			clearInterval(asyncInterval);
 			while(args = asyncWaitList.pop()){
@@ -250,27 +240,40 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
         }
         return url;
     }
-
-	return{
-		realpath:function(path){
-			return scriptBase+path+'__define__'+(this.hash[path]||'')+'.js';////scriptBase:/scripts/,
-		},
-		hash	: {},
-		copy	: copy,
-		//load : load,
-		block : function(current){
-			if(loading == 0){
-				while(current = syncWaitList.pop()){
-					_load.apply(this,current)
-				}
-			}else{
-				current = document.scripts[document.scripts.length-1];
-				//console.log(current.src,this._last - (this._last = +new Date()))
-				document.write('<script src="'+current.src.replace(/\?token=.*$|$/,'?token='+ +new Date)+'&inc='+ ++syncWaitInc+'"><\/script>');
-				//current.parentNode.removeChild(current);
+	/**
+	 * @param target||callback (optional)
+	 * @param path
+	 */
+	function load(path){
+		var end = arguments.length;
+		var begin = 1;
+		var count = end-begin;
+		var callback = arguments[0];
+		var asyn = true;
+		function callback(result){
+			copy(result,target||this);
+		}
+		switch(typeof target){
+		case 'function':
+			callback == target;
+			break;
+		case 'string':
+			begin = 0;
+			target = null;
+		default:
+			asyn = false;
+		}
+		if(count>1){
+			var all = {};
+			while(begin<end){
+				_load(function(result){
+					copy(result,all)
+					--count || callback(all);
+				},async,arguments[begin++]);
 			}
-			//notify sync task 
-		},
-		define : define			// $JSI.define('path',['deps'],function(require,exports){...}) || $JSI.define({path:impl})
+		}else{
+			_load(callback,async,arguments[begin]);
+		}
 	}
+	return define;
 }({});

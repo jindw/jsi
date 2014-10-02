@@ -2,13 +2,20 @@ var fs = require('fs');
 var path = require('path');
 var http = require('http');
 var ScriptLoader = require('../lib/js-loader.js').ScriptLoader;
-var loader = new ScriptLoader('./');
 
+var loaderMap = {};
 createServer(function(req,res){
 	var url = req.url;
 	if(url.match('\.js$')){
+		var webRoot = '.'
+		var path = url.replace(/^\/(?:static|assets|scripts?)(?:\/js)?\//,'/');
+		var base = webRoot + url.slice(0,1-path.length)
+		var loader = loaderMap[base];
+		if(!loader){
+			loader = loaderMap[base] = new ScriptLoader(base);
+		}
 		console.log('start:'+url)
-		loader.load(url.replace(/^\/static\/|\/assets\//,'/'),function(content){
+		loader.load(path,function(content){
 			setTimeout(function(){
 				res.writeHead(200, {'Content-Type': 'text/javascript;charset=utf-8'});
 				res.end(content+'');
