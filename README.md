@@ -1,4 +1,5 @@
 #JSI Introduction
+a simple module  loader , you can use npm installed modules in web browser such as it work in nodejs!
 
 ##Functions
  * pure nodejs style syntax.

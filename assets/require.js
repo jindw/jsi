@@ -52,9 +52,8 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 			return rtv;
 		}
 	}
-	
 	require = function(path){
-		if(path instanceof Function){return $SJI.require.apply($JSI,arguments)}
+		if(arguments.length>1){console.info('redirect to $JSI.require!!');return $SJI.require.apply($JSI,arguments)}
 		var rtv = function(){return rtv.apply(this,arguments)};
 		_load(function(result){
 			copy(result,rtv);
@@ -74,7 +73,7 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 		}else{
 			var requireCache = {};
 			var exports = exportMap[path] = {}
-			var module = {exports:exports}
+			var module = {exports:exports,id:path}
 			var url = $JSI.realpath(path);
 			try{
 				cachedMap[path][0].call(this,exports,function(path2){
