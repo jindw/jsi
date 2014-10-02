@@ -27,6 +27,11 @@ http.createServer(function (req, res) {
 		writeFile(webRoot,url,res)
 	}
 }).listen(8080);
+console.log('test web started on http://localhost:8080/',
+	'\n test module xmldom && lite template engine:',
+	'\n  1. npm install xmldom',
+	'\n  2. npm install lite',
+	'\n open http://localhost:8080/test/index.html');
 
 
 function writeFile(root,url,response){

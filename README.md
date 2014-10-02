@@ -42,7 +42,6 @@ a simple module  loader , you can use npm installed modules in web browser such 
 			<script>
 			document.write("<h3>loadLiteXML</h3><pre><code>"+xml.loadLiteXML+"</code></pre>")
 			</script>
-						
 			
 			<h3>Async Load Example</h3>
 			<div id="asyncLoadInfo">Async Loading....</div>
