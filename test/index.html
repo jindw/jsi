@@ -1,20 +1,34 @@
 <!DOCTYPE html><html>
 <head>
 <title>test wait</title>
-<script src="/assets/js/boot.js">
+<script src="/assets/boot.js">
 var xmldom = require('xmldom');
 </script>
 </head>
 <body>
 <hr>
+<h3>Blocked Sync Load on boot script:</h3>
 <script>
-document.write("<h3>DOMParser</h3><p>"+xmldom.DOMParser+"</p>")
+document.write("<h3>DOMParser</h3><pre><code>"+xmldom.DOMParser+"</code></pre>")
 </script>
-<hr>
-<script>var lite = require('lite');</script>
+
+<h3>Blocked Sync Load </h3>
 <script>
-var LiteEngine = lite.LiteEngine;
-document.write("<h3>LiteEngine</h3><p>"+LiteEngine+"</p>")
+//xml can be used on the next script node.
+var xml = require('lite/parse/xml');
+</script>
+<script>
+document.write("<h3>loadLiteXML</h3><pre><code>"+xml.loadLiteXML+"</code></pre>")
+</script>
+
+<h3>Async Load Example</h3>
+<div id="asyncLoadInfo">Async Loading....</div>
+<script>
+$JSI.require(function(xmldom,lite){
+	var c = document.getElementById('asyncLoadInfo');
+	c.innerHTML = "<h4>LiteEngine</h4><pre><code>"+lite.LiteEngine+"</code></pre>"+
+				  "<h4>xmldom</h4><pre><code>"+xmldom.DOMParser+"</code></pre>";
+},'xmldom','lite')
 </script>
 <hr>
 </body>

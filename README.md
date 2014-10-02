@@ -21,46 +21,70 @@
 		<!DOCTYPE html><html>
 		<head>
 			<title>test wait</title>
-			<script src="/static/boot.js"></script>
-		</head>
-		<body>
-			<hr>
-			<script>
-				//html 中require 函数必须放在最前面的单独的script标签中！
-				//因为html script 中的 require 只能保证在下一个script 出现之前被装载完成！
+			<script src="/static/boot.js">
+				//blocked sync loading example
+				//lite will be loaded from next script node 
 				var xmldom = require('xmldom');
 			</script>
+		</head>
+		<body>
+			<h3>Blocked Sync Load on boot script</h3>
 			<script>
 				document.write("<h3>DOMParser</h3><p>"+xmldom.DOMParser+"</p>")
 			</script>
-			<hr>
+			
+			<h3>Blocked Sync Load </h3>
 			<script>
-				var lite = require('lite');</script>
+			//xml can be used on the next script node.
+			var xml = require('lite/parse/xml');
+			</script>
 			<script>
-				var LiteEngine = lite.LiteEngine;
-				document.write("<h3>LiteEngine</h3><p>"+LiteEngine+"</p>")
+			document.write("<h3>loadLiteXML</h3><pre><code>"+xml.loadLiteXML+"</code></pre>")
+			</script>
+						
+			
+			<h3>Async Load Example</h3>
+			<div id="asyncLoadInfo">Async Loading....</div>
+			<script>
+			$JSI.require(function(xmldom,lite){
+				var c = document.getElementById('asyncLoadInfo');
+				c.innerHTML = "<h4>LiteEngine</h4><pre><code>"+lite.LiteEngine+"</code></pre>"+
+							  "<h4>xmldom</h4><pre><code>"+xmldom.DOMParser+"</code></pre>";
+			},'xmldom','lite')
 			</script>
 			<hr>
 		</body>
 		</html>
 
  * extends server
- 
-		var ScriptLoader = require('../lib/js-loader.js').ScriptLoader;
-		//setup resource loader
-		var loader = new ScriptLoader('./');
+
+		var fs = require('fs');
+		var path = require('path');
+		var http = require('http');
 		
-		createServer(function(req,res){
-			var url = req.url;
+		var ScriptLoader = require('../lib/js-loader.js').ScriptLoader;
+		var loaderMap = {};
+		var webRoot = require('path').resolve('./')
+		http.createServer(function (req, res) {
+			var url = req.url.replace(/[?#].*$/,'');
 			if(url.match('\.js$')){
+				var path = url.replace(/^\/(?:static|assets|scripts?)(?:\/js)?\//,'/');
+				var base = webRoot + url.slice(0,1-path.length)
+				var loader = loaderMap[base];
+				if(!loader){
+					loader = loaderMap[base] = new ScriptLoader(base);
+				}
 				console.log('start:'+url)
-				loader.load(url.replace(/^\/static\/|\/assets\//,'/'),function(content){
+				loader.load(path,function(content){
 					setTimeout(function(){
 						res.writeHead(200, {'Content-Type': 'text/javascript;charset=utf-8'});
 						res.end(content+'');
 						console.log('\tend:'+url)
-					},Math.random()*100);
+					},Math.random()*1000);
 				})
 				return true;
+			}else{
+				writeFile(webRoot,url,res)
 			}
-		},'./').listen(8080);
+		}).listen(8080);
+

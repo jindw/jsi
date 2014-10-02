@@ -1,13 +1,13 @@
 var fs = require('fs');
 var path = require('path');
 var http = require('http');
-var ScriptLoader = require('../lib/js-loader.js').ScriptLoader;
 
+var ScriptLoader = require('../lib/js-loader.js').ScriptLoader;
 var loaderMap = {};
-createServer(function(req,res){
-	var url = req.url;
+var webRoot = require('path').resolve('./')
+http.createServer(function (req, res) {
+	var url = req.url.replace(/[?#].*$/,'');
 	if(url.match('\.js$')){
-		var webRoot = '.'
 		var path = url.replace(/^\/(?:static|assets|scripts?)(?:\/js)?\//,'/');
 		var base = webRoot + url.slice(0,1-path.length)
 		var loader = loaderMap[base];
@@ -20,22 +20,15 @@ createServer(function(req,res){
 				res.writeHead(200, {'Content-Type': 'text/javascript;charset=utf-8'});
 				res.end(content+'');
 				console.log('\tend:'+url)
-			},Math.random()*100);
+			},Math.random()*1000);
 		})
 		return true;
+	}else{
+		writeFile(webRoot,url,res)
 	}
-},'./').listen(8080);
+}).listen(8080);
 
 
-function createServer(callback,root){
-	root = require('path').resolve(root || './')
-	return http.createServer(function (req, response) {
-		if(!callback(req,response,root)){
-			var url = req.url.replace(/[?#].*$/,'');
-			writeFile(root,url,response)
-		}
-	});
-}
 function writeFile(root,url,response){
 	var filepath = path.join(root,url);
 	fs.stat(filepath,function(error,stats){

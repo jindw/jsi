@@ -1,6 +1,6 @@
 {
     "name": "jsi",
-    "version": "0.1.10",
+    "version": "0.1.11",
     "description": "JavaScript Integration System.",
     "keywords": ["javascript","commonjs" ],
 	"author": "jindw <jindw@xidea.org> (http://www.xidea.org)",

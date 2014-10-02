@@ -8,7 +8,7 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 	var exportMap = {}//path=>exports// 存在说明已经载入【并初始化】
 	var taskMap = {};//path=>[task...]
 	
-	var loading = 0;
+	var loading = 0;//load task list size
 	var notifyMap = {};//dep=>[waitingList]
 	var globalAsync;//is async load model?
 
@@ -19,64 +19,77 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 	$JSI = {
 		block : function(current){
 			if(loading == 0){
-				while(current = syncBlockList.pop()){
-					_load.apply(this,current)
-				}
+				while(current = syncBlockList.pop()){_load.apply(this,current);}
 			}else{
-				current = document.scripts[document.scripts.length-1];
 				document.write('<script src="'+scriptBase+'block.js?t='+  +new Date+'"><\/script>');
 			}
 		},
-		realpath:function(path){
-			return scriptBase+path+'__define__.js';////scriptBase:/scripts/,
+		realpath : function(path){
+			return scriptBase+path+'__define__.js';
 		},
-		copy	: copy,
-		define : define			// $JSI.define('path',['deps'],function(require,exports){...}) || $JSI.define({path:impl})
+		copy   : copy,
+		define : define,
+		require: function(callback){
+			var rtv = {};
+			var async =  (callback instanceof Function);
+			var args = asyncWaitList.splice.call(arguments,+async);
+			var count = args.length;
+			var end = count;
+			var i = -1;
+			while(++i<end){//exit: i == end
+				_load(dec, async ,args[i]);
+			}
+			function dec(result){
+				if(--count){
+					copy(result,rtv);
+				}else{
+					while(end--){
+						args[end] = _require(args[end]);
+					}
+					callback.apply(this,args)
+				}
+			}
+			return rtv;
+		}
 	}
-	require = function(arg1,arg2){//require(path)|| require(callback,path)
+	
+	require = function(path){
+		if(path instanceof Function){return $SJI.require.apply($JSI,arguments)}
 		var rtv = function(){return rtv.apply(this,arguments)};
 		_load(function(result){
 			copy(result,rtv);
 			rtv.prototype = result.prototype;
 			rtv = result;
-			arg2 && arg1(rtv);
-		},arg2 ,arg2||arg1);
+		},false ,path);
 		return rtv;
 	}
+	
 	/* execute javascript */
 	bootSource.replace(/\s+/,'') && document.write('<script>'+bootSource+'</script>')
+	
 	/* implements function define */
 	function _require(path){
-		try{
-			if(path in exportMap){
-				return exportMap[path];
-			}else{
-				var requireCache = {};
-				var exports = exportMap[path] = {}
-				var module = {exports:exports}
-				var url = $JSI.realpath(path);
-				//console.warn(path)
+		if(path in exportMap){
+			return exportMap[path];
+		}else{
+			var requireCache = {};
+			var exports = exportMap[path] = {}
+			var module = {exports:exports}
+			var url = $JSI.realpath(path);
+			try{
 				cachedMap[path][0].call(this,exports,function(path2){
 					if(path2 in requireCache){
 						return requireCache[path2];
 					}
 					return requireCache[path2] = _require(normalizeModule(path2,path));
 				},module,url,url.replace(/[^\\\/]+$/,''));
-				return exportMap[path] = module.exports;
+			}catch(e){//console error for debug:
+				error('require error:'+path,e)
 			}
-		}catch(e){//console error for debug:
-			var buf = [],ss = document.scripts;
-			for(var i=0;i<ss.length;i++){
-				buf.push(ss[i].src);
-			}
-			buf.push('\n');
-			for(var i in cachedMap){
-				buf.push(i,!!cachedMap[i][0])
-			}
-			console.error('require error:',path,e.message,buf)
+			return exportMap[path] = module.exports;
 		}
+		
 	}
-
 	function _load(callback,thisAsync,path){
 		path = path.replace(/\\/g,'/')
 		if(path in exportMap){
@@ -104,7 +117,6 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 		}
 	}
 	function loadScript(path){//call by _load and onDefine
-		//console.assert(cachedMap[path] == null,'redefine error')
 		loading++;
 		cachedMap[path] = [];//已经开始装载了，但是还没有值
 		path = $JSI.realpath(path);//.replace(/[^\/]+$/,uar));
@@ -136,17 +148,16 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 		}
 	}
 	/**
-	 * @arguments implMap
-	 * 		允许外部调用，缓存装载单元（该调用方式下不触发计数器）。需要确保implMap 形成闭包（不能有不在集合中的依赖库）
-	 * @arguments path,dependences,impl
-	 * 		添加缓存,计数器的因素，只能通过 loadScript 触发，禁止外部调用。
+	 * 添加缓存,计数器的因素，只能通过 loadScript 触发，禁止外部调用。
+	 * $JSI.define('path',['deps'],function(exports,require,module,__filename,__dirname){...}) 
+	 * 允许外部调用，缓存装载单元（该调用方式下不触发计数器）。需要确保implMap 形成闭包（不能有不在集合中的依赖库）
+	 * $JSI.define({path:impl})
 	 */
 	function define(path,dependences,impl){
 		if(impl){
 			var implAndDependence = cachedMap[path];
 			var i = dependences.length;
 			var newScripts = [];
-			//console.assert(implAndDependence.length==0,'redefine error')}
 			implAndDependence.push(impl);
 			while(i--){
 				var dep = normalizeModule(dependences[i],path);
@@ -174,8 +185,7 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 			}
 			if(--loading<1){
 				onComplete()
-			}
-			//else{//loaded before}
+			}//else{//loaded before}
 		}else{
 			for(i in path){
 				cachedMap[i] = cachedMap[i] || path[i]
@@ -186,16 +196,15 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 	function onComplete(path){//逻辑上不应该被多次调用【除非有bug】
 		if(path){
 			var task = taskMap[path];
+			var targets = notifyMap[path];
 			if(task && task.length){
-				var result = _require(path);
-				var item;
-				while(item = task.pop()){//每个task只能被调用一次！！！
-					item.call(this,result)
+				var i, target = _require(path);
+				while(i = task.pop()){//每个task只能被调用一次！！！
+					i.call(this,target)
 				}
 			}
-			var targets = notifyMap[path]
 			if(targets){
-				var i = targets.length;
+				i = targets.length;
 				while(i--){
 					var target = cachedMap[targets[i]];
 					var j = target.length;
@@ -220,7 +229,18 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 		}
 	}
 	
-	//utils...
+	/* utils... */
+	function error(title,e){
+		var buf = [],ss = document.scripts,i=ss.length;
+		while(i--){
+			buf.push(String(ss[i].src).replace(/.*\//,' '));
+		}
+		buf.push('\n');
+		for(i in cachedMap){
+			buf.push(i.replace(/.*\//,' '+!!cachedMap[i][0]+':'))
+		}
+		console.error(title,e,buf)
+	}
 	function copy(src,dest){
 		for(var p in src){
 			dest[p] = src[p]
@@ -240,40 +260,5 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
         }
         return url;
     }
-	/**
-	 * @param target||callback (optional)
-	 * @param path
-	 */
-	function load(path){
-		var end = arguments.length;
-		var begin = 1;
-		var count = end-begin;
-		var callback = arguments[0];
-		var asyn = true;
-		function callback(result){
-			copy(result,target||this);
-		}
-		switch(typeof target){
-		case 'function':
-			callback == target;
-			break;
-		case 'string':
-			begin = 0;
-			target = null;
-		default:
-			asyn = false;
-		}
-		if(count>1){
-			var all = {};
-			while(begin<end){
-				_load(function(result){
-					copy(result,all)
-					--count || callback(all);
-				},async,arguments[begin++]);
-			}
-		}else{
-			_load(callback,async,arguments[begin]);
-		}
-	}
 	return define;
 }({});
