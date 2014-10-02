@@ -14,9 +14,10 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 	var syncWaitList = [];
 	var syncWaitInc = 0;
 	require = function(path){
-		var rtv = {};
+		var rtv = function(){return rtv.apply(this,arguments)};
 		_load(path,function(result){
 			copy(result,rtv);
+			rtv.prototype = result.prototype;
 			rtv = result;
 		},false);
 		return rtv;
@@ -256,12 +257,7 @@ var $JSI = function(cachedMap){//path=>[impl,dependences...],//只在define中�
 		},
 		hash	: {},
 		copy	: copy,
-		/**
-		 * @param path...
-		 * @param callback
-		 * @param block
-		 */
-		load : load,
+		//load : load,
 		block : function(current){
 			if(loading == 0){
 				while(current = syncWaitList.pop()){
