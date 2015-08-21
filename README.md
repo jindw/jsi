@@ -15,7 +15,7 @@ a simple module  loader , you can use npm installed modules in web browser such 
 ##Example:
  * start test server:
  
-		require('jsi/test');
+		node -e "require('jsi/test')";
 		
  * html example:
  
