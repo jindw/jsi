@@ -50,6 +50,11 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 				}
 			}
 			return rtv;
+		},
+		ns:function(){
+			//add ns
+			//document.write(src to ns source);
+			//throw Exception
 		}
 	}
 	require = function(path){

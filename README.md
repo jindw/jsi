@@ -63,28 +63,27 @@ a simple module  loader , you can use npm installed modules in web browser such 
 		var http = require('http');
 		
 		var ScriptLoader = require('../lib/js-loader.js').ScriptLoader;
-		var loaderMap = {};
 		var webRoot = require('path').resolve('./')
 		http.createServer(function (req, res) {
 			var url = req.url.replace(/[?#].*$/,'');
 			if(url.match('\.js$')){
 				var path = url.replace(/^\/(?:static|assets|scripts?)(?:\/js)?\//,'/');
 				var base = webRoot + url.slice(0,1-path.length)
-				var loader = loaderMap[base];
-				if(!loader){
-					loader = loaderMap[base] = new ScriptLoader(base);
-				}
-				console.log('start:'+url)
+				var loader = new ScriptLoader(base);
+				
 				loader.load(path,function(content){
-					setTimeout(function(){
-						res.writeHead(200, {'Content-Type': 'text/javascript;charset=utf-8'});
-						res.end(content+'');
-						console.log('\tend:'+url)
-					},Math.random()*1000);
+					res.writeHead(200, {'Content-Type': 'text/javascript;charset=utf-8'});
+					res.end(content+'');
+					console.log('\tend:'+url)
 				})
 				return true;
 			}else{
 				writeFile(webRoot,url,res)
 			}
 		}).listen(8080);
+
+* exports static example
+
+	$ mkdir('../dest/assets')
+	$ node -e "require('jsi/lib/build').build('./webroot/assets','../dest/assets');"
 

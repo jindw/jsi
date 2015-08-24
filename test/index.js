@@ -21,8 +21,7 @@ function startServer(root,port){
 				var md5 = '"'+crypto.createHash('md5').update(content).digest('base64')+'"';
 				var oldMd5 = request.headers['if-none-match'];
 				var headers = {"Content-Type":'text/javascript;charset=utf-8', "ETag":md5};
-					
-			
+
 				setTimeout(function(){
 					if(md5 == oldMd5){
         				response.writeHead(304, headers); 
