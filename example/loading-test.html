@@ -1,0 +1,29 @@
+<!DOCTYPE html><html>
+<head>
+<title>Loading Test</title>
+<style>
+	pre code{background:#EEE;border:solid #999 1px;display:block;}
+	pre{max-height:280px;max-width:580px;overflow:auto;}
+	h3{font-weight:blod;background:#eee;}
+	iframe{width:40%;height:80%;float:right;}
+</style>
+
+<script src="/assets/boot.js">
+	//在下一个script 标签执行前，xmldom 定被载入！
+	var xmldom = require('xmldom');
+</script>
+</head>
+<body>
+
+<h3>XMLDOM Loaded:</h3>
+
+<script>
+	document.write("<h4>DOMParser</h4><pre><code>"+xmldom.DOMParser+"</code></pre>")
+</script>
+
+<h3>Others</h3>
+<p>others contents after sync loading script</p>
+<p title=" npm install xmldom" style="background:yellow">install xmldom for loading test!</p>
+<hr>
+</body>
+</html>

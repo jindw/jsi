@@ -1,0 +1,52 @@
+<!DOCTYPE html><html>
+<head>
+<title>Lite Template Test</title>
+<style>
+	a{display:inline-block;border:solid #333 1px;font-size:11px;line-height:11px;width:12px;height:12px;padding:2px;margin:4px;}
+</style>
+
+<script src="/assets/boot.js">
+	var tpl = require('test/tpl');
+</script>
+
+</head>
+<body onload=page(1)>
+
+<p id="container">
+	loading...
+</p>
+
+翻页： <a href="#" onclick="page(1)">1</a> <a href="#" onclick="page(2)">2</a> <a href="#" onclick="page(3)">3</a>
+
+
+<script>
+function page(n){
+	container.innerHTML = (tpl.test(data.pages[n-1],1))
+}
+var container = document.getElementById('container');
+var data = {
+	pages:[
+		[
+			{name:"aaa",description:"就是第一页"},
+			{name:"bbb",description:"就是第一页"},
+			{name:"ccc",description:"就是第一页"},
+			{name:"ddd",description:"就是第一页"}
+		],
+		[
+			{name:"AAA",description:"就是第二页"},
+			{name:"BBB",description:"就是第二页"},
+			{name:"CCC",description:"就是第二页"},
+			{name:"DDD",description:"就是第二页"}
+		],
+		[
+			{name:"XXX",description:"就是第三页"},
+			{name:"YYY",description:"就是第三页"},
+			{name:"MMM",description:"就是第三页"},
+			{name:"NNN",description:"就是第三页"}
+		]
+	]
+}
+
+</script>
+</body>
+</html>

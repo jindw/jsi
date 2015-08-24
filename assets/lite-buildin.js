@@ -23,3 +23,14 @@ function __df__(pattern,date){
 		}
 	})
 }
+if(!Object.keys){
+	Object.keys = function(o){
+		var result = [];
+		for (p in o) {
+			if (o.hasOwnProperty(p)) {
+				result.push(prop);
+			}
+		}
+		return result;
+	}
+}

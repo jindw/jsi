@@ -53,7 +53,7 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 		}
 	}
 	require = function(path){
-		if(arguments.length>1){console.info('redirect to $JSI.require!!');return $SJI.require.apply($JSI,arguments)}
+		if(arguments.length>1){console.info('redirect to $JSI.require!!');return $JSI.require.apply($JSI,arguments)}
 		var rtv = function(){return rtv.apply(this,arguments)};
 		_load(function(result){
 			copy(result,rtv);

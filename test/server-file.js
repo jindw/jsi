@@ -48,8 +48,8 @@ function writeContent(filepath,request,response){
 		//console.log(request.headers,"\n",headers);
 		
 		if(md5 == oldMd5){
-			console.log('cache hited request: '+filepath)
         	response.writeHead(304, headers); 
+			console.log('304 response: '+filepath)
         	response.end();  
 		}else{
 			if(/^image\//.test(contentType)){
@@ -66,7 +66,8 @@ function writeIndex(filepath,response){
 	fs.readdir(filepath, function(err, files) { 
 		files.sort(); 
 		for(var i=0;i<files.length;i++){
-			response.write("<a href='"+files[i]+"'>"+files[i]+'</a><hr/>','utf8');
+			var filename= files[i];
+			response.write("<a href='"+filename+"'>"+finename+'</a><hr/>','utf8');
 		}
 		response.end();
 	});

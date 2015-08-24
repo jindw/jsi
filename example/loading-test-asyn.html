@@ -1,0 +1,33 @@
+<!DOCTYPE html><html>
+<head>
+<title>All Loading Test</title>
+<style>
+	pre code{background:#EEE;border:solid #999 1px;display:block;}
+	pre{max-height:280px;max-width:580px;overflow:auto;}
+	h3{font-weight:blod;background:#eee;}
+</style>
+<script src="/assets/boot.js"></script>
+</head>
+<body>
+
+<h3>Async Loading Example</h3>
+
+<div id="asyncLoadInfo">Async Loading....</div>
+
+<script>
+$JSI.require(function(xmldom,lite){
+	var c = document.getElementById('asyncLoadInfo');
+	c.innerHTML = "<h4>xmldom</h4><pre><code>"+xmldom.DOMParser+"</code></pre>"
+					+"<h4>LiteEngine</h4><pre><code>"+lite.LiteEngine+"</code></pre>";
+},'xmldom','lite')
+</script>
+
+
+<hr>
+<h3>Others</h3>
+<p title=" npm install xmldom &#10; npm install lite" style="background:yellow">
+	install xmldom and lite template engine for loading test!
+</p>
+<hr>
+</body>
+</html>
