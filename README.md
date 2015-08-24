@@ -84,6 +84,7 @@ a simple module  loader , you can use npm installed modules in web browser such 
 
 * exports static example
 
-	$ mkdir('../dest/assets')
+	$ mkdir('../dest/assets');
+	
 	$ node -e "require('jsi/lib/build').build('./webroot/assets','../dest/assets');"
 
