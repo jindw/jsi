@@ -81,12 +81,12 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 			var module = {exports:exports,id:path}
 			var url = $JSI.realpath(path);
 			//try{
-				cachedMap[path][0].call(this,exports,function(path2){
+				cachedMap[path][0](exports,function(path2){
 					if(path2 in requireCache){
 						return requireCache[path2];
 					}
 					return requireCache[path2] = _require(normalizeModule(path2,path));
-				},module,url,url.replace(/[^\\\/]+$/,''));
+				},module,url);
 			//}catch(e){//console error for debug:
 			//	error('require error:'+path,e)
 			//}

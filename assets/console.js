@@ -6,7 +6,7 @@ if(!this.console || !console.dir){
 			this.data.push([].join.call(arguments,' '))>32 && this.data.shift();
 			this.popup = this.popup && confirm(this.data)
 		},
-		show:function(){alert(this.data.join('\n'))},
+		//show:function(){alert(this.data.join('\n'))},
 		data:[]//cache ie data; add log view link: javascript:console.show())
 	};
 	console.warn || "trace,debug,info,warn,error".replace(/\w+/g,function(n){

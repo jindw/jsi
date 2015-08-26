@@ -1,0 +1,19 @@
+{
+	"default":{
+		"xmldom":"0.1.18",
+		"lite":"3.0.1",
+	},
+	"user":{
+		"test":{
+			"lite":"3.0.0"
+		}
+	},
+	"auto":{
+		"default":{
+			"jsel":"1.0.1"
+		},
+		"test"{
+			
+		}
+	}
+}

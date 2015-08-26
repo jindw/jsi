@@ -1,2 +1,40 @@
 #!/usr/bin/env node
-require('../lib/build').process(process.argv);
+var args = process.argv;
+var cmd = args[2];
+if(cmd=='export'){
+	var path = args[3];
+	var dest = args[4];
+	
+	console.log('export as simple browser runable javascript :'+path+"->"+dest);
+	require('../lib/build').export4web('./',path,dest);
+	
+}else if(cmd == 'install'){
+}else if(cmd == 'uninstall'){
+}else if(cmd == 'list'){
+}else if(cmd == 'help'){
+	console.log('jsi init					',
+	'--init a jsi loading root');
+	console.log();
+
+	console.log('jsi export xmldom				',
+	'--export xmldom for browser and every exports variable as globals');
+	console.log('jsi export -o tmp.js xmldom lite		',
+	'--export xmldom and lite to tmp.js; and every exports variable as globals');
+	console.log('jsi export -o tmp.js -ns util xmldom lite	',
+	'--export xmldom and lite to tmp.js, every exports valiable as util property');
+	console.log();
+	
+	console.log('jsi install xmldom				',
+	'--install from local file system, npm...')
+	console.log('jsi install ./xmldom				',
+	'--install from local file system');
+	console.log('jsi install http://github.com/jindw/xmldom	',
+	'--install from github')
+	console.log();
+	
+	console.log('jsi uninstall xmldom				',
+	'--uninstall xmldom')
+	
+	console.log('jsi list					',
+	'--list all packages installed')
+}

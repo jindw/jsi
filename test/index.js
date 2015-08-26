@@ -47,7 +47,7 @@ function startServer(root,port){
 		'\n test module xmldom && lite template engine:',
 		'\n  1. npm install xmldom',
 		'\n  2. npm install lite',
-		'\n open http://localhost:8080/test/index.html');
+		'\n open http://localhost:8080/');
 }
 var argv = process.execArgv;
 if(argv[0] == '-e' && /^\s*require\(['"]jsi[\/\\]test(?:[\/\\]index)?['"]\);?\s*$/.test(argv[1])){

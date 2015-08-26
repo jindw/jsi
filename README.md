@@ -1,7 +1,8 @@
 #JSI Introduction
 a simple module  loader , you can use npm installed modules in web browser such as it work in nodejs!
 
-##Functions
+Functions
+=====
  * pure nodejs style syntax.
    * without browser script wrapper.
    * npm module support  automatic.
@@ -9,13 +10,15 @@ a simple module  loader , you can use npm installed modules in web browser such 
    * Rewriting of the original [JSI2](http://www.xidea.org/project/jsi) boot.js.
    * give up the original specification.
    
-##Install:
+Install:
+=====
 	npm install jsi
 	
-##Example:
+Example:
+=====
  * start test server:
  
-		node -e "require('jsi/test')";
+		node -e "require('jsi')";
 		
  * html example:
  
@@ -83,8 +86,10 @@ a simple module  loader , you can use npm installed modules in web browser such 
 		}).listen(8080);
 
 * exports static example
-
-	$ mkdir('../dest/assets');
 	
-	$ node -e "require('jsi/lib/build').build('./webroot/assets','../dest/assets');"
+	$ cd <script root> 
+	$ jsi init
+	$ jsi install xmldom
+	$ jsi install lite
+	$ jsi export xmldom,lite
 
