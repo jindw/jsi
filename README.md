@@ -40,7 +40,7 @@ Example:
 
 * command line
 	
-		$ cd <script root> 
+		$ cd ./scripts/
 		$ jsi example 									--deplay hello world example
 		$ jsi install jquery							--install a package from npm
 		$ jsi install ./workspace/xmldom				--install a package from local filesystem
