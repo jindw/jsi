@@ -6,8 +6,9 @@ Functions
  * base on npm server and tools
  	* install from : loacal file,npm server,github ect...
  	* dependences install automatic
- * auto merge,compress and debug support
- 	* merge module scripts as a signle one
+ * auto merge,compress,export(browserify) and debug support
+ 	* merge module scripts as a signle script module
+ 	* merge module scripts as a signle browser support script
  	* build a compressed script for release and a uncompressed script for debug 
  	* if the cookie: JSI_DEBUG=true ,load a uncompressed one, otherwise load the compressed one.
  * pure nodejs style syntax.
