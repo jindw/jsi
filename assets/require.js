@@ -30,6 +30,7 @@ var $JSI,require;
 				if(!/\.js$|\//.test(config)){ config = scriptBase+'config/'+config+'.js' }
 				write('<script src="'+config+'"></script>');
 			}else{
+				$JSI.init = console.error;//no not init muti times
 				copy(config , moduleMap);
 				write(bootSources[2].replace(/\s*(\S[\s\S]*)/,'<script>$&</script>'));
 				bootSources[2] = '';
@@ -77,7 +78,7 @@ var $JSI,require;
 		return rtv;
 	}
 	//first init in require.js
-	write((bootSources[1]||bootSources[2]).replace(/\s*(\S[\s\S]*)/,'<script>$&</script>'));
+	this.eval(bootSources[1]||"$JSI.init()");
 	
 	/* implements function define */
 	function _require(path){
