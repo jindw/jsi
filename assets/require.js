@@ -1,10 +1,8 @@
-var $JSI;
-var require;
-var define = function(cachedMap){//path=>[impl,dependences...],//只在define中初始化。存在(包括空数组)说明当前script已在装载中，不空说明已经装载完成，depengdences为空，说明依赖已经装载。
+var $JSI,require; 
+~function(cachedMap){//path=>[impl,dependences...],//只在define中初始化。存在(包括空数组)说明当前script已在装载中，不空说明已经装载完成，depengdences为空，说明依赖已经装载。
 	var script = document.scripts[document.scripts.length-1];
-	var scriptBase = script.src.replace(/[^\/]+$/,'');	
-	var bootSource = script.text || script.textContent ||'';
-
+	var scriptBase = script.src.replace(/[^\/]+(?:[#?].*)?$/,'');	
+	var bootSources = (script.text || script.textContent ||'' ).match(/^\s*([\s\S]*?\$JSI\s*\.\s*init\([^()]*\))?((?:'[^']*'|"[^"]*"|[^'"]+)*)$/);
 	var exportMap = {}//path=>exports// 存在说明已经载入【并初始化】
 	var taskMap = {};//path=>[task...]
 	
@@ -16,19 +14,28 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 	var asyncWaitList = [];//async task list
 	
 	var syncBlockList = [];//block task list,remove?
+	
+	var moduleMap = {};//module=>version
+	
+	function realpath(scriptBase,path){
+		if(moduleMap && path in moduleMap){
+			return scriptBase + 'o/'+path+'/'+moduleMap[path]+'/'+ +/\bJSI_DEBUG=true\b/.test(document.cookie)+'.js';
+		}
+		return scriptBase+path+'__define__.js';
+	}
 	$JSI = {
-		block : function(current){
-			if(loading == 0){
-				while(current = syncBlockList.pop()){_load.apply(this,current);}
+		init:function(config){
+			config = config||'main'
+			if(typeof config == 'string'){
+				if(!/\.js$|\//.test(config)){ config = scriptBase+'config/'+config+'.js' }
+				write('<script src="'+config+'"></script>');
 			}else{
-				document.write('<script src="'+scriptBase+'block.js?t='+  +new Date+'"><\/script>');
+				copy(config , moduleMap);
+				write(bootSources[2].replace(/\s*(\S[\s\S]*)/,'<script>$&</script>'));
+				bootSources[2] = '';
 			}
 		},
-		realpath : function(path){
-			return scriptBase+path+'__define__.js';
-		},
-		copy   : copy,
-		define : define,
+		define: define,
 		require: function(callback){
 			var rtv = {};
 			var async =  (callback instanceof Function);
@@ -51,12 +58,14 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 			}
 			return rtv;
 		},
-		ns:function(){
-			//add ns
-			//document.write(src to ns source);
-			//throw Exception
+		block: function(current){
+			if(loading == 0){
+				while(current = syncBlockList.pop()){_load.apply(this,current);}
+			}else{
+				write('<script src="'+scriptBase+'block.js?t='+  +new Date+'"><\/script>');
+			}
 		}
-	}
+	};
 	require = function(path){
 		if(arguments.length>1){console.info('redirect to $JSI.require!!');return $JSI.require.apply($JSI,arguments)}
 		var rtv = function(){return rtv.apply(this,arguments)};
@@ -64,12 +73,11 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 			copy(result,rtv);
 			rtv.prototype = result.prototype;
 			rtv = result;
-		},false ,path);
+		},false , path);
 		return rtv;
 	}
-	
-	/* execute javascript */
-	bootSource.replace(/\s+/,'') && document.write('<script>'+bootSource+'</script>')
+	//first init in require.js
+	write((bootSources[1]||bootSources[2]).replace(/\s*(\S[\s\S]*)/,'<script>$&</script>'));
 	
 	/* implements function define */
 	function _require(path){
@@ -79,7 +87,7 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 			var requireCache = {};
 			var exports = exportMap[path] = {}
 			var module = {exports:exports,id:path}
-			var url = $JSI.realpath(path);
+			var url = realpath(scriptBase,path);
 			//try{
 				cachedMap[path][0](exports,function(path2){
 					if(path2 in requireCache){
@@ -123,13 +131,13 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 	function loadScript(path){//call by _load and onDefine
 		loading++;
 		cachedMap[path] = [];//已经开始装载了，但是还没有值
-		path = $JSI.realpath(path);//.replace(/[^\/]+$/,uar));
+		path = realpath(scriptBase,path);//.replace(/[^\/]+$/,uar));
 		if(globalAsync){
 			var s = document.createElement('script');
 			s.setAttribute('src',path);
 			script.parentNode.appendChild(s);
 		}else{
-			document.write('<script src="'+path+'"><\/script>');
+			write('<script src="'+path+'"><\/script>');
 		}
 	}
 	
@@ -139,7 +147,7 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 			asyncInterval = asyncInterval || setInterval(intervalWait,300)
 		}else{
 			if(syncBlockList.push(arguments)<2){
-				document.write('<script src="'+scriptBase+'block.js"><\/script>')
+				write('<script src="'+scriptBase+'block.js"><\/script>')
 			}
 		}
 	}
@@ -162,6 +170,26 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 			var implAndDependence = cachedMap[path];
 			var i = dependences.length;
 			var newScripts = [];
+			var impls = newScripts.slice.call(arguments,2);
+			if(impls.length>1){
+				impl = function(exports,require,module){
+					var cached = {};
+					function internal_require(i,o){
+						if(typeof i=='number'){
+							if(i in cached){return cached[i];}
+							var id = path+'/'+i;
+							var module = {exports:cached[i] = o||{},id:id}
+							impls[i](cached[i],internal_require,module,id);
+				
+							return cached[i] = module.exports;
+						}else{
+							return require(i);
+						}
+					}
+					
+					internal_require(0,exports);
+				}
+			}
 			implAndDependence.push(impl);
 			while(i--){
 				var dep = normalizeModule(dependences[i],path);
@@ -245,6 +273,9 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
 		}
 		console.error(title,e,buf)
 	}
+	function write(h){
+		/\S/.test(h) && document.write(h);
+	}
 	function copy(src,dest){
 		for(var p in src){
 			dest[p] = src[p]
@@ -264,5 +295,4 @@ var define = function(cachedMap){//path=>[impl,dependences...],//只在define中
         }
         return url;
     }
-	return define;
 }({});

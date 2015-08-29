@@ -67,7 +67,7 @@ function writeIndex(filepath,response){
 		files.sort(); 
 		for(var i=0;i<files.length;i++){
 			var filename= files[i];
-			response.write("<a href='"+filename+"'>"+finename+'</a><hr/>','utf8');
+			response.write("<a href='"+filename+"'>"+filename+'</a><hr/>','utf8');
 		}
 		response.end();
 	});

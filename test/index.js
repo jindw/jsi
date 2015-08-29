@@ -2,7 +2,6 @@ var http = require('http');
 var ScriptLoader = require('../lib/js-loader.js').ScriptLoader;
 var loaderMap = {};
 var writeFile = require('./server-file').writeFile
-
 function startServer(root,port){
 	root = root || require('path').resolve('./');
 	http.createServer(function (request, response) {
@@ -24,8 +23,8 @@ function startServer(root,port){
 
 				setTimeout(function(){
 					if(md5 == oldMd5){
-        				response.writeHead(304, headers); 
-        				response.end();  
+						response.writeHead(304, headers); 
+						response.end();  
 						console.log('\t304 loaded:'+url)
 					}else{
 						response.writeHead(200, headers);
@@ -49,10 +48,12 @@ function startServer(root,port){
 		'\n  2. npm install lite',
 		'\n open http://localhost:8080/');
 }
+
+exports.start = startServer;
+
 var argv = process.execArgv;
 if(argv[0] == '-e' && /^\s*require\(['"]jsi[\/\\]test(?:[\/\\]index)?['"]\);?\s*$/.test(argv[1])){
 	startServer();
 }else if(process.argv[1] == __filename){
 	startServer();
 }
-exports.start = startServer;

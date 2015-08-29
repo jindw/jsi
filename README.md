@@ -21,75 +21,29 @@ Example:
 		node -e "require('jsi')";
 		
  * html example:
- 
-		<!DOCTYPE html><html>
+
+		<html> 
 		<head>
-			<title>test wait</title>
-			<script src="/static/boot.js">
-				//blocked sync loading example
-				//lite will be loaded from next script node 
-				var xmldom = require('xmldom');
-			</script>
-		</head>
-		<body>
-			<h3>Blocked Sync Load on boot script</h3>
-			<script>
-				document.write("<h3>DOMParser</h3><p>"+xmldom.DOMParser+"</p>")
-			</script>
-			
-			<h3>Blocked Sync Load </h3>
-			<script>
-			//xml can be used on the next script node.
-			var xml = require('lite/parse/xml');
-			</script>
-			<script>
-			document.write("<h3>loadLiteXML</h3><pre><code>"+xml.loadLiteXML+"</code></pre>")
-			</script>
-			
-			<h3>Async Load Example</h3>
-			<div id="asyncLoadInfo">Async Loading....</div>
-			<script>
-			$JSI.require(function(xmldom,lite){
-				var c = document.getElementById('asyncLoadInfo');
-				c.innerHTML = "<h4>LiteEngine</h4><pre><code>"+lite.LiteEngine+"</code></pre>"+
-							  "<h4>xmldom</h4><pre><code>"+xmldom.DOMParser+"</code></pre>";
-			},'xmldom','lite')
-			</script>
-			<hr>
-		</body>
-		</html>
+		<title>Hello jQuery</title> 
+		<script src="../scripts/boot.js" type="text/javascript">
+		$=require('jquery');
+		</script> 
+		<script type="text/javascript"> 
+		$(document).ready(function(){ 
+			alert("Hello World!"); 
+		}); 
+		</script> 
+		</head> 
+		<body> 
+		</body> 
+		</html> 
 
- * extends server
-
-		var fs = require('fs');
-		var path = require('path');
-		var http = require('http');
-		
-		var ScriptLoader = require('../lib/js-loader.js').ScriptLoader;
-		var webRoot = require('path').resolve('./')
-		http.createServer(function (req, res) {
-			var url = req.url.replace(/[?#].*$/,'');
-			if(url.match('\.js$')){
-				var path = url.replace(/^\/(?:static|assets|scripts?)(?:\/js)?\//,'/');
-				var base = webRoot + url.slice(0,1-path.length)
-				var loader = new ScriptLoader(base);
-				
-				loader.load(path,function(content){
-					res.writeHead(200, {'Content-Type': 'text/javascript;charset=utf-8'});
-					res.end(content+'');
-					console.log('\tend:'+url)
-				})
-				return true;
-			}else{
-				writeFile(webRoot,url,res)
-			}
-		}).listen(8080);
-
-* exports static example
+* command line
 	
-	$ cd <script root> 
-	$ jsi init
-	$ jsi install xmldom
-	$ jsi install lite
-	$ jsi export xmldom,lite
+		$ cd <script root> 
+		$ jsi example 									--deplay hello world example
+		$ jsi install jquery							--install a package from npm
+		$ jsi install ./workspace/xmldom				--install a package from local filesystem
+		$ jsi export -o exported.js xmldom jquery		--export package: xmldom and jquery as a single script can work on the browser.
+		$ jsi browserify -o exported.js xmldom lite		--alias command of export
 

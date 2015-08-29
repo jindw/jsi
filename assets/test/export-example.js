@@ -1,24 +1,33 @@
 var test = function(){
-	var dir = '';
 	var impls = arguments;
 	var cached = {};
-	function internal_require(i,dest){
+	function internal_require(i,o){
 		if(typeof i=='number'){
-			if(i in cached){return cached[i];}
-			var id = dir+i;
-			var module = {exports:cached[i] = {},id:id}
-			impls[i](cached[i],internal_require,module,id);
-
-			return cached[i] = module.exports;
+			var exports = cached[i];
+			if(!exports){
+				cached[i] = exports = {};
+				var id = './'+i;
+				var module = {exports:exports,id:id}
+				impls[i](cached[i],internal_require,module,id);
+				cached[i] = exports = module.exports;
+			}
+			if(o){
+				for(i in exports){
+					o[i] = exports[i];
+				}
+			}
+			return o || exports;
+			
 		}else{
-			return require(i);
+			return this.require ? require(i) : {}
 		}
 	}
+	
 	return internal_require(0);
 }(
 function(exports,require,module,__filename){
-	var x = require(1).x;
-	console.log(__filename,x)
+	var m = require(1)
+	console.log(m.x+123)
 },
 function(exports,require,module){
 	exports.x = 123;
