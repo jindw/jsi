@@ -3,12 +3,19 @@ a simple module  loader , you can use npm installed modules in web browser such 
 
 Functions
 =====
+ * base on npm server and tools
+ 	* install from : loacal file,npm server,github ect...
+ 	* dependences install automatic
+ * auto merge,compress and debug support
+ 	* merge module scripts as a signle one
+ 	* build a compressed script for release and a uncompressed script for debug 
+ 	* if the cookie: JSI_DEBUG=true ,load a uncompressed one, otherwise load the compressed one.
  * pure nodejs style syntax.
-   * without browser script wrapper.
-   * npm module support  automatic.
+	* without browser script wrapper.
+ 	* npm module support  automatic.
  * CommonJS1.0 compatible JavaScript loader [ require.js]
-   * Rewriting of the original [JSI2](http://www.xidea.org/project/jsi) boot.js.
-   * give up the original specification.
+ 	* Rewriting of the original [JSI2](http://www.xidea.org/project/jsi) boot.js.
+ 	* give up the original specification.
    
 Install:
 =====
