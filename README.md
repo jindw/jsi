@@ -20,7 +20,7 @@ Functions
    
 Install:
 =====
-	npm install jsi
+	npm install jsi -g
 	
 Example:
 =====
