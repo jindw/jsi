@@ -21,7 +21,7 @@ var $JSI,require;
 		if(moduleMap && path in moduleMap){
 			return scriptBase + 'o/'+path+'/'+moduleMap[path]+'/'+ +/\bJSI_DEBUG=true\b/.test(document.cookie)+'.js';
 		}
-		return scriptBase+path+'__define__.js';
+		return scriptBase+path.replace(/.*(?:[^c]..|c[^s].|cc[^s])$/,'$&__define__.js');
 	}
 	$JSI = {
 		init:function(config){
@@ -109,6 +109,19 @@ var $JSI,require;
 			return callback(exportMap[path])
 		}
 		var cached = cachedMap[path];
+		if(path.match(/\.css(?:[#?].*)?$/)){
+			if(!cached){
+				if(thisAsync){
+					cached = document.createElement('link');
+					copy({rel:'stylesheet',type:'text/css',href:realpath(scriptBase,path)+'#test'},cached)
+					script.parentNode.appendChild(cached);
+				}else{
+					write('<link rel="stylesheet" href="'+realpath(scriptBase,path)+'" type="text/css"> ')
+				}
+				cached = cachedMap[path] = Function.prototype
+			}
+		}
+		
 		if(cached){
 			push(taskMap,path,callback)
 			if(cached.length === 1){//only impl no dependence
@@ -172,24 +185,27 @@ var $JSI,require;
 			var i = dependences.length;
 			var newScripts = [];
 			var impls = newScripts.slice.call(arguments,2);
-			if(impls.length>1){
-				impl = function(exports,require,module){
-					var cached = {};
-					function internal_require(i,o){
-						if(typeof i=='number'){
-							if(i in cached){return cached[i];}
+			impl = function(exports,require,module){
+				var cached = {};
+				function internal_require(i,o){
+					o = cached[i] = o||{};
+					try{
+						if(i in cached){
+							//void
+						}else if(typeof i=='number'){
 							var id = path+'/'+i;
-							var module = {exports:cached[i] = o||{},id:id}
-							impls[i](cached[i],internal_require,module,id);
-				
-							return cached[i] = module.exports;
+							var module = {exports:o,id:id}
+							impls[i](o,internal_require,module,id);
+							o = cached[i] = module.exports;
 						}else{
-							return require(i);
+							o = require(i);
 						}
+					}catch(e){
+						console.error('script load error:',path)
 					}
-					
-					internal_require(0,exports);
+					return o;
 				}
+				internal_require(0,exports);
 			}
 			implAndDependence.push(impl);
 			while(i--){

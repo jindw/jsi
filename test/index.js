@@ -4,10 +4,11 @@ var loaderMap = {};
 var writeFile = require('./server-file').writeFile
 function startServer(root,port){
 	root = root || require('path').resolve('./');
-	http.createServer(function (request, response) {
+	var server = http.createServer(function (request, response) {
 		var url = request.url.replace(/[?#].*$/,'');
-		if(url.match('\.js$')){
+		if(url.match(/\.js$|\.css$/)){
 			var path = url.replace(/^\/(?:static|assets|scripts?)(?:\/js)?\//,'/');
+			//console.log(path)
 			var base = root + url.slice(0,1-path.length)
 			var loader = loaderMap[base];
 			if(!loader){
@@ -34,19 +35,36 @@ function startServer(root,port){
 				},Math.random()*(md5 == oldMd5?100:1000));
 			})
 			return true;
+		}else if(url.match(/\.css$/)){
+			setTimeout(function(){
+				writeFile(root,request,response)
+				console.log('\tloaded:'+url)
+			},Math.random()*(1000*3));
 		}else{
 			writeFile(root,request,response)
 		}
 		response.on('finish',function(){
 			console.log('finish:'+url)
 		})
-	}).listen(port || 8080);
+	});
+	var tryinc = 10;
+	port = port || 8080;
+	server.on('error', function (e) {
+		if (e.code == 'EADDRINUSE' && tryinc>=0) {
+			console.log('port:'+port+'  is in use, try the next!');
+			server.listen(++port);
+			//console.log('test web started on http://localhost:'+port);
+		}else{
+			throw e;
+		}
+	})
+	try{
+		server.listen(port,function(){
+			console.log('test web started on http://localhost:'+port);
+		});
+	}catch(e){
+	}
 	
-	console.log('test web started on http://localhost:8080/',
-		'\n test module xmldom && lite template engine:',
-		'\n  1. npm install xmldom',
-		'\n  2. npm install lite',
-		'\n open http://localhost:8080/');
 }
 
 exports.start = startServer;
