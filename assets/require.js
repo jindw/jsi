@@ -185,27 +185,24 @@ var $JSI,require;
 			var i = dependences.length;
 			var newScripts = [];
 			var impls = newScripts.slice.call(arguments,2);
-			impl = function(exports,require,module){
-				var cached = {};
-				function internal_require(i,o){
-					o = cached[i] = o||{};
-					try{
-						if(i in cached){
-							//void
-						}else if(typeof i=='number'){
+			if(impls.length>1){
+				impl = function(exports,require,module){
+					var cached = {};
+					function internal_require(i,o){
+						if(typeof i=='number'){
+							if(i in cached){return cached[i];}
 							var id = path+'/'+i;
-							var module = {exports:o,id:id}
-							impls[i](o,internal_require,module,id);
-							o = cached[i] = module.exports;
+							var module = {exports:cached[i] = o||{},id:id}
+							impls[i](cached[i],internal_require,module,id);
+				
+							return cached[i] = module.exports;
 						}else{
-							o = require(i);
+							return require(i);
 						}
-					}catch(e){
-						console.error('script load error:',path)
 					}
-					return o;
+					
+					internal_require(0,exports);
 				}
-				internal_require(0,exports);
 			}
 			implAndDependence.push(impl);
 			while(i--){

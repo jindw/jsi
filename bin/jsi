@@ -70,7 +70,7 @@ if(cmd == 'install'){
 				console.info('export failed!\n		try the commond: jsi ',process.argv.slice(2).concat(externalDeps).join(' '))
 			}else{
 				var source = build.buildExportSource(impls,ns,args.length);
-				fs.writeFile(out,source,function(err){
+				fs.writeFile(out,require('../lib/install').compressJS(source),function(err){
 					if(err){
 						console.log('export failed! write file error',err)
 					}else{
