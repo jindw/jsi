@@ -3,9 +3,9 @@ var path = require('path');
 
 exports.writeFile = writeFile;
 
-function writeFile(root,request,response){
+function writeFile(root,request,response,realPath){
 	var url = request.url.replace(/[?#].*$/,'');
-	var filepath = path.join(root,url);
+	var filepath = path.join(root,realPath||url);
 	fs.stat(filepath,function(error,stats){
 		if(stats){
 	    	if(stats.isDirectory()){

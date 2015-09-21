@@ -54,4 +54,23 @@ Example:
 		$ jsi install ./workspace/xmldom				--install a package from local filesystem
 		$ jsi export -o exported.js xmldom jquery		--export package: xmldom and jquery as a single script can work on the browser.
 		$ jsi browserify -o exported.js xmldom lite		--alias command of export
-
+* test route 
+		
+		<root>/route.js
+		
+		content:
+		exports = [
+			{path:"/service/login.do",data:{"auth-token":"sdeee23734ru3hfbvncm"}},
+			{path:"/service/user.do",remote:"http://test.com/user.do"},
+			{path:"/service/user.do",file:"./mock/user.json"},
+			{
+				path:	/\/service\/user\/(\d+)/,
+				action:	function(request,response,path,uid){
+					var headers = {"Content-Type":"text/json;charset=utf-8"};
+					response.writeHead(200, headers); 
+					response.end(JSON.stringify({"uid":uid}));
+					return true;
+				}
+			}
+			
+		]
