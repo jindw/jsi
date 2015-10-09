@@ -6,7 +6,7 @@ var test = function(){
 			var exports = cached[i];
 			if(!exports){
 				cached[i] = exports = {};
-				var id = './'+i;
+				var id = __dirname+i;
 				var module = {exports:exports,id:id}
 				impls[i](cached[i],internal_require,module,id);
 				cached[i] = exports = module.exports;

@@ -50,6 +50,7 @@ Example:
 
 		$ cd ./scripts/
 		$ jsi example 									--deplay hello world example
+		$ jsi start										--start debug server
 		$ jsi install jquery							--install a package from npm
 		$ jsi install ./workspace/xmldom				--install a package from local filesystem
 		$ jsi export -o exported.js xmldom jquery		--export package: xmldom and jquery as a single script can work on the browser.
@@ -68,10 +69,8 @@ Example:
 		
 * javascript debug and compress
 
-	* enable debug
-		-- document.cookie="JSI_DEBUG=true"
-	* disable debug
-		-- document.cookie="JSI_DEBUG=false"
+	* enable debug									-- javascript:document.cookie="JSI_DEBUG=true"
+	* disable debug									-- javascript:document.cookie="JSI_DEBUG=false"
 
 * test route 
 		<root>/route.js
