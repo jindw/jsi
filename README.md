@@ -47,6 +47,7 @@ Example:
 		</html> 
 		
 * command line
+
 		$ cd ./scripts/
 		$ jsi example 									--deplay hello world example
 		$ jsi install jquery							--install a package from npm
