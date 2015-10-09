@@ -2,13 +2,24 @@ var http = require('http');
 var ScriptLoader = require('../lib/js-loader.js').ScriptLoader;
 var loaderMap = {};
 var writeFile = require('./server-file').writeFile
+var compressJS = require('../lib/js-token').compressJS
 function startServer(root,port){
 	root = root || require('path').resolve('./');
-	var routes = [];
+	var mapping = [];
+	var mappingPath = root.replace(/[\\\/]?$/,'/mapping.js');
 	try{
-	var routes = require(root.replace(/[\\\/]?$/,'/route.js')).routes;
+		var mappingSource = require('fs').readFileSync(mappingPath);
+		//var routes = require(root.replace(/[\\\/]?$/,'/mapping.js')).routes;
 	}catch(e){
-		console.log('route file not found!!')
+		console.log('mapping file not found!!',mappingPath)
+	}
+	if(mappingSource){
+		//routes = require(mappingPath).routes || [];
+		try{
+			mapping = new Function('var exports = {};'+mappingSource+";\nreturn exports.mapping||exports.routes;").call()||[]
+		}catch(e){
+			console.log('invalid mapping file!!')
+		}
 	}
 	var server = http.createServer(function (request, response) {
 		var url = request.url.replace(/[?#].*$/,'');
@@ -22,6 +33,12 @@ function startServer(root,port){
 			}
 			console.log('start:'+url)
 			loader.load(path,function(content){
+				var cookie = request.headers.cookie;
+				var debug = cookie.replace(/^.*\bJSI_DEBUG=(\w+).*$/,'$1')
+				//console.log(debug)
+				if(url.match(/\.js$/) && !url.match(/\/o\//) && /^(false|0)$/.test(debug)){
+					content = compressJS(content);
+				}
 				writeContent(request,response,content,'text/'+(url.match(/\.css$/)?'css':'javascript')+';charset=utf-8');
 			})
 			return true;
@@ -32,16 +49,16 @@ function startServer(root,port){
 			},Math.random()*(1000*3));
 		}else{
 			//console.log(routes)
-			for(var i =0;i<routes.length;i++){
-				var route = routes[i];
-				var pattern = route.url;
+			for(var i =0;i<mapping.length;i++){
+				var route = mapping[i];
+				var pattern = route.path;
 				var match = false;
 				if(pattern instanceof RegExp){
 					match = url.match(pattern);
 				}else{
-					match = url == pattern;
+					match = url == pattern && [];
 				}
-				console.log(url,pattern,match)
+				//console.log(url,pattern,match)
 				if(match){
 					if(route.action){
 						match.unshift(request,response);
@@ -49,10 +66,19 @@ function startServer(root,port){
 							return;
 						}
 					}
-					
 					if(route.file){
 						writeFile(root,request,response,route.file)
 					}else if(route.remote){
+						//console.log(route.remote,route.remote.match(/^https?\:/))
+						if(!route.remote.match(/^https?\:/)){
+							var url = require('path').resolve(url.replace(/(https?\:\/\/[^\/]+)?[^\/\\]*$/,''),route.remote);
+							//route.remote = 'http://'+ request.headers.host+url;
+							request.url = url;
+							//console.log(route.remote,url)
+							arguments.callee.apply(this,arguments);
+							return;
+								
+						}
 						doProxy(request,response,route.remote)
 					}else if(route.data){
 						writeContent(request,response,JSON.stringify(route.data));
@@ -117,7 +143,7 @@ function writeContent(request,response,content,contentType){
 function doProxy(request,response,proxyPath){
 	var path = request.url;
 	var match = path.match(/^([^?]*?.*)(\?|\?.*&)__proxy__=([^&]+)(.*)$/);
-	console.log(proxyPath,match)
+	//console.log(proxyPath,match)
 	if(proxyPath || match){
 		path = proxyPath ? path : match[1]+match[2]+match[4];
 		var realpath = proxyPath || match[3];
