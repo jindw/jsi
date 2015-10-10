@@ -15,22 +15,23 @@ Start:
  		$ open http://localhost:8080
 		
 * command line
-	* on <webroot>
+	* on [webroot]
 
-		$ jsi example 									--deplay hello world example
-		$ jsi start										--start debug server
+			$ jsi example 									--deplay hello world example
+			$ jsi start										--start debug server
 
-	* on <webroot>/<scriptroot>
-		$ jsi export -o temp.js main.js					--export main.js as a single javascript file
-															(main.js variables on global namespace;
-																buf dependence modules is hidden, you can use require('modulename') to get it )
-		$ jsi export -o exported.js -ns xmldom xmldom	--export package: export xmldom to a single script and exports variables on the namespace xmldom.
+	* on [webroot]/[scriptroot]
+
+			$ jsi export -o temp.js main.js					--export main.js as a single javascript file
+																(main.js variables on global namespace;
+																	buf dependence modules is hidden, you can use require('modulename') to get it )
+			$ jsi export -o exported.js -ns xmldom xmldom	--export package: export xmldom to a single script and exports variables on the namespace xmldom.
 
 
 
-		//advance useage:  install a optimized external package on package system.
-		$ jsi install jquery							--install a external optimized package from npm
-		$ jsi install ./workspace/xmldom				--install a external optimized package from local filesystem
+			//advance useage:  install a optimized external package on package system.
+			$ jsi install jquery							--install a external optimized package from npm
+			$ jsi install ./workspace/xmldom				--install a external optimized package from local filesystem
 
 
 * lite template example
