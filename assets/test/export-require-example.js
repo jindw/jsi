@@ -38,7 +38,7 @@
 				var i = list.length;
 				var o = {};
 				while(--i){
-					var result = require(list[i]);
+					var exports = require(list[i]);
 					for(i in exports){
 						o[i] = exports[i];
 					}
@@ -49,9 +49,9 @@
 				var list = require.backup;
 				var i = list.length;
 				while(i--){
-					var result = list[i](pc);
-					if(result != list[i]){
-						return result
+					var exports = list[i](pc);
+					if(exports != list[i]){
+						return exports
 					}
 				}
 				return previous_require?previous_require.apply(this,arguments):{}
