@@ -6,7 +6,7 @@
 </style>
 
 <script src="/assets/boot.js">
-	var tpl = require('test/tpl');
+	var tpl = require('test-tpl');
 </script>
 
 </head>
@@ -21,7 +21,7 @@
 
 <script>
 function page(n){
-	container.innerHTML = (tpl.test(data.pages[n-1],1))
+	container.innerHTML = tpl.test({list:data.pages[n-1]})
 }
 var container = document.getElementById('container');
 var data = {

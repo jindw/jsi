@@ -69,9 +69,13 @@ function startServer(root,port){
 					if(route.file){
 						writeFile(root,request,response,route.file)
 					}else if(route.remote){
+						var remote = route.remote;
+						if(pattern instanceof RegExp && remote.indexOf('$')>=0){
+							remote = url.replace(pattern,remote.replace('$0','$&'));
+						}
 						//console.log(route.remote,route.remote.match(/^https?\:/))
-						if(!route.remote.match(/^https?\:/)){
-							var url = require('path').resolve(url.replace(/(https?\:\/\/[^\/]+)?[^\/\\]*$/,''),route.remote);
+						if(!remote.match(/^https?\:/)){
+							var url = require('path').resolve(url.replace(/(https?\:\/\/[^\/]+)?[^\/\\]*$/,''),remote);
 							//route.remote = 'http://'+ request.headers.host+url;
 							request.url = url;
 							//console.log(route.remote,url)
@@ -79,7 +83,8 @@ function startServer(root,port){
 							return;
 								
 						}
-						doProxy(request,response,route.remote)
+						
+						doProxy(request,response,remote)
 					}else if(route.data){
 						writeContent(request,response,JSON.stringify(route.data));
 					}else{

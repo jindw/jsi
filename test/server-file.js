@@ -62,13 +62,22 @@ function writeContent(filepath,request,response){
 		}
     });
 }
+var exportExample = fs.readFileSync(require.resolve('./index.html')).toString()
 function writeIndex(filepath,response){
+	//console.log('index:'+filepath)
 	fs.readdir(filepath, function(err, files) { 
 		files.sort(); 
+		var buf = [];
 		for(var i=0;i<files.length;i++){
 			var filename= files[i];
-			response.write("<a href='"+filename+"'>"+filename+'</a><hr/>','utf8');
+			if(!/^\./.test(filename)){
+				buf.push("<div class='file-row'><a href='",filename,"'>",filename,'</a></div>\n');
+			}
 		}
+		var html = exportExample.replace('$!{dir}',filepath).replace('$!{content}',buf.join(''));
+		
+		response.writeHead(200,  {"Content-Type":'text/html;charset=utf8'}); 
+		response.write(html,'utf-8');
 		response.end();
 	});
 	

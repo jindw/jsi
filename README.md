@@ -59,28 +59,44 @@ Example:
 
 
 * lite template example
-
+		//inline style
 		var tpl = <div>
 			<p> this is a xml style templete ; 
 				default syntax support for mostly javascript editor (E4X standard) </p>
 		</div>
 		
-		
-		var tpm = liteXML("/path.tpl#body>*")
+		//single template file
+		var tpl = liteXML("/path.tpl")
+
+		//partly template file（css3 selector）
+		var tpl = liteXML("/path.tpl#header")
 		
 * javascript debug and compress
 
-	* enable debug									-- javascript:document.cookie="JSI_DEBUG=true"
-	* disable debug									-- javascript:document.cookie="JSI_DEBUG=false"
+	* enable debug
+
+		javascript:document.cookie="JSI_DEBUG=true"
+	* disable debug	
+
+		javascript:document.cookie="JSI_DEBUG=false"
 
 * test route 
 		<root>/route.js
 		
 		content:
 		exports = [
+
+			//mock with json data
 			{path:"/service/login.do",data:{"auth-token":"sdeee23734ru3hfbvncm"}},
+
+			//mock from remote url 
 			{path:"/service/user.do",remote:"http://test.com/user.do"},
+
+			//mock from local json file
 			{path:"/service/user.do",file:"./mock/user.json"},
+
+
+			//mock with nodejs request handle
 			{
 				path:	/\/service\/user\/(\d+)/,
 				action:	function(request,response,path,uid){
