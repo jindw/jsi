@@ -2,7 +2,7 @@ var $JSI,require;
 ~function(cachedMap){//path=>[impl,dependences...],//只在define中初始化。存在(包括空数组)说明当前script已在装载中，不空说明已经装载完成，depengdences为空，说明依赖已经装载。
 	var script = document.scripts[document.scripts.length-1];
 	var scriptBase = script.src.replace(/[^\/]+(?:[#?].*)?$/,'');	
-	var bootSources = (script.text || script.textContent ||'' ).match(/^\s*([\s\S]*?\$JSI\s*\.\s*init\([^()]*\))?((?:'[^']*'|"[^"]*"|[^'"]+)*)$/);
+	var bootSources = (script.text || script.textContent ||'' );
 	var exportMap = {}//path=>exports// 存在说明已经载入【并初始化】
 	var taskMap = {};//path=>[task...]
 	
@@ -25,16 +25,10 @@ var $JSI,require;
 	}
 	$JSI = {
 		init:function(config){
-			config = config||'main'
-			if(typeof config == 'string'){
-				if(!/\.js$|\//.test(config)){ config = scriptBase+'config/'+config+'.js' }
-				write('<script src="'+config+'"></script>');
-			}else{
-				$JSI.init = console.error;//no not init muti times
-				copy(config , moduleMap);
-				write(bootSources[2].replace(/\s*(\S[\s\S]*)/,'<script>$&</script>'));
-				bootSources[2] = '';
-			}
+			$JSI.init = console.error;//no not init muti times
+			copy(config , moduleMap);
+			write(bootSources.replace(/\s*(\S[\s\S]*)/,'<script>$&</script>'));
+			bootSources = '';
 		},
 		define: define,
 		require: function(callback){
@@ -78,7 +72,8 @@ var $JSI,require;
 		return rtv;
 	}
 	//first init in require.js
-	this.eval(bootSources[1]||"$JSI.init()");
+	var config = script.getAttribute('data-config');
+	config && write('<script src="'+config+'"></script>');
 	
 	/* implements function define */
 	function _require(path){
