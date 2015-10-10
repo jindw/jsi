@@ -186,12 +186,12 @@ var $JSI,require;
 			var newScripts = [];
 			var impls = newScripts.slice.call(arguments,2);
 			if(impls.length>1){
-				impl = function(exports,require,module){
+				impl = function(exports,require,module,__filename){
 					var cached = {};
 					function internal_require(i,o){
 						if(typeof i=='number'){
 							if(i in cached){return cached[i];}
-							var id = path+'/'+i;
+							var id = __filename+'/'+i;
 							var module = {exports:cached[i] = o||{},id:id}
 							impls[i](cached[i],internal_require,module,id);
 				

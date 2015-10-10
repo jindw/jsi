@@ -53,6 +53,7 @@ Example:
 		$ jsi start										--start debug server
 		$ jsi install jquery							--install a package from npm
 		$ jsi install ./workspace/xmldom				--install a package from local filesystem
+		$ jsi export -o temp.js main.js					--export main.js as a single javascript file
 		$ jsi export -o exported.js xmldom jquery		--export package: xmldom and jquery as a single script can work on the browser.
 		$ jsi browserify -o exported.js xmldom lite		--alias command of export
 

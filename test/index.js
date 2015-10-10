@@ -33,7 +33,7 @@ function startServer(root,port){
 			}
 			console.log('start:'+url)
 			loader.load(path,function(content){
-				var cookie = request.headers.cookie;
+				var cookie = request.headers.cookie || '';
 				var debug = cookie.replace(/^.*\bJSI_DEBUG=(\w+).*$/,'$1')
 				//console.log(debug)
 				if(url.match(/\.js$/) && !url.match(/\/o\//) && /^(false|0)$/.test(debug)){
@@ -158,7 +158,7 @@ function doProxy(request,response,proxyPath){
 				port:port,host:host,
 				method:request.method, path:path, headers:request.headers
 			}
-			console.log(options)
+			//console.log(options)
 			var proxy_request = http.request(options);
 			proxy_request.addListener('response', function (proxy_response) {
 				proxy_response.addListener('data', function(chunk) {
