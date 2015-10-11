@@ -2,7 +2,16 @@ var http = require('http');
 var ScriptLoader = require('../lib/js-loader.js').ScriptLoader;
 var loaderMap = {};
 var writeFile = require('./server-file').writeFile
+var writeSource = require('./server-file').writeSource;
 var compressJS = require('../lib/js-token').compressJS
+var formatJS = require('../lib/js-token').formatJS
+function getLoader(base){
+	var loader = loaderMap[base];
+	if(!loader){
+		loader = loaderMap[base] = new ScriptLoader(base);
+	}
+	return loader;
+}
 function startServer(root,port){
 	root = root || require('path').resolve('./');
 	var mapping = [];
@@ -23,25 +32,55 @@ function startServer(root,port){
 	}
 	var server = http.createServer(function (request, response) {
 		var url = request.url.replace(/[?#].*$/,'');
+		//console.log('start:'+url);
+		response.on('finish',function(){
+			//console.log('finish:'+url)
+		})
+		
 		if(url.match(/\.js$|\.css$/)){
 			var path = url.replace(/^\/(?:static|assets|scripts?)(?:\/js)?\//,'/');
-			//console.log(path)
 			var base = root + url.slice(0,1-path.length)
-			var loader = loaderMap[base];
-			if(!loader){
-				loader = loaderMap[base] = new ScriptLoader(base);
+			var loader = getLoader(base);
+			if(request.url.match(/\.js\?export=ui/)){
+				var type = request.url.replace(/.*&type=(\w+).*/,'$1') || 1;
+				var format = request.url.replace(/.*&format=(\w+).*/,'$1').match(/^(true|on|1)$/);
+				//console.log(format)
+				path = path.replace(/^\//,'')
+				require('../lib/exports').exportSingleFile(base,path,type,function(source){
+					var cmd = "$ cd "+base+"\n$ jsi export -o tmp.js -type "+type+" "+path
+					var header = "<form style='text-align:center'><input name='export' value='ui' type='hidden'>" +
+							"<label title='可以用 require 函数获得任意依赖的模块，但是当前文件自身直接在全局域执行，当前模块的变量全部是全局变量。'>" +
+							"	<input type=radio name=type value=1 "+(type==1?'checked':'')+" onclick='this.form.submit()' autocomplete='off'>" +
+							"依赖兼容导出</label>" +
+							"<label title='可以用 require 函数获得任意模块'>" +
+							"	<input type=radio name=type value=2 "+(type==2?'checked':'')+" onclick='this.form.submit()' autocomplete='off'>" +
+							"全兼容导出</label> " +
+							"<label title='当前文件在全局域执行，子模块作为匿名闭包载入，不能再用require(module)方式获得'>" +
+							"	<input type=radio name=type value=3 "+(type==3?'checked':'')+" onclick='this.form.submit()' autocomplete='off'>" +
+							"匿名导出</label>" +
+							"&#160;&#160;&#160;" +
+							"<label>格式化代码" +
+							"<input type='checkbox' name='format' value='true' "+(format &&'checked')+" onclick='this.form.submit()' autocomplete='off'>"+
+							"</label><hr>" +
+							"<code><pre>"+cmd+"</pre></code>"+
+							"</form>"
+					if(format){
+						source = formatJS(source)
+					}
+					writeSource(request,response,root+url,header,source);
+				})
+			}else {
+				loader.load(path,function(content){
+					var cookie = request.headers.cookie || '';
+					var debug = cookie.replace(/^.*\bJSI_DEBUG=(\w+).*$/,'$1')
+					//console.log(debug)
+					if(url.match(/\.js$/) && !url.match(/\/o\//) && /^(false|0)$/.test(debug)){
+						content = compressJS(content);
+					}
+					writeContent(request,response,content,'text/'+(url.match(/\.css$/)?'css':'javascript')+';charset=utf-8');
+				})
+				return true;
 			}
-			console.log('start:'+url)
-			loader.load(path,function(content){
-				var cookie = request.headers.cookie || '';
-				var debug = cookie.replace(/^.*\bJSI_DEBUG=(\w+).*$/,'$1')
-				//console.log(debug)
-				if(url.match(/\.js$/) && !url.match(/\/o\//) && /^(false|0)$/.test(debug)){
-					content = compressJS(content);
-				}
-				writeContent(request,response,content,'text/'+(url.match(/\.css$/)?'css':'javascript')+';charset=utf-8');
-			})
-			return true;
 		}else if(url.match(/\.(css)$/)){
 			setTimeout(function(){
 				writeFile(root,request,response)
@@ -95,9 +134,6 @@ function startServer(root,port){
 			}
 			writeFile(root,request,response)
 		}
-		response.on('finish',function(){
-			console.log('finish:'+url)
-		})
 	});
 	var tryinc = 10;
 	port = port || 8080;

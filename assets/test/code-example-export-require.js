@@ -28,7 +28,6 @@
 			return external_require;
 		}
 	}
-	
 	if(previous_require && previous_require.backup){
 		previous_require.backup.push(external_require)
 	}else{
@@ -38,10 +37,7 @@
 				var i = list.length;
 				var o = {};
 				while(--i){
-					var exports = require(list[i]);
-					for(i in exports){
-						o[i] = exports[i];
-					}
+					copy(require(list[i]),o);
 				}
 				pc(o);
 				return o;
@@ -58,5 +54,11 @@
 			}
 		}
 		this.require.backup = [external_require];
+	}
+	
+	function copy(src,dest){
+		for(var n in src){
+			dest[n] = src[n];
+		}
 	}
 }

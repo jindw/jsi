@@ -2,6 +2,7 @@ var fs = require('fs');
 var path = require('path');
 
 exports.writeFile = writeFile;
+exports.writeSource = writeSource
 
 function writeFile(root,request,response,realPath){
 	var url = request.url.replace(/[?#].*$/,'');
@@ -33,12 +34,12 @@ function writeContent(filepath,request,response){
             return;    
         }
         var contentType = "text/html"
-        if(/.css$/.test(filepath)){
-        	contentType = "text/css";
-        }else if(/.js$/.test(filepath)){
+        if(/.js$/.test(filepath)){
         	contentType = "text/javascript";
         }else if(/\.(jpge?|png|gif)$/.test(filepath)){
         	contentType = filepath.replace(/.*\.(\w+)$/,'image/$1');
+        }else if(/.(xml|css)$/.test(filepath)){
+        	contentType = filepath.replace(/.*\.(\w+)$/,'text/$1');
         }
         
 		var crypto = require('crypto');
@@ -67,18 +68,28 @@ function writeIndex(filepath,response){
 	//console.log('index:'+filepath)
 	fs.readdir(filepath, function(err, files) { 
 		files.sort(); 
-		var buf = [];
+		var buf = ['<div id="file-list">'];
 		for(var i=0;i<files.length;i++){
 			var filename= files[i];
 			if(!/^\./.test(filename)){
 				buf.push("<div class='file-row'><a href='",filename,"'>",filename,'</a></div>\n');
 			}
 		}
+		buf.push('</div>')
 		var html = exportExample.replace('$!{dir}',filepath).replace('$!{content}',buf.join(''));
 		
 		response.writeHead(200,  {"Content-Type":'text/html;charset=utf8'}); 
 		response.write(html,'utf-8');
 		response.end();
 	});
-	
+}
+
+function writeSource(request,response,filepath,header,source){
+	//console.log(source)
+	source = source.replace(/[&]/g,'&amp;').replace(/[<]/g,'&lt;').replace(/[\s\S]*/,'<textarea style="margin-left:5%;width:90%;height:600px">$&</textarea>');
+	var content = header + source;
+	var html = exportExample.replace('$!{dir}',filepath).replace('href="../"','href="./"').replace('$!{content}',content);
+	response.writeHead(200,  {"Content-Type":'text/html;charset=utf8'}); 
+	response.write(html,'utf-8');
+	response.end();
 }

@@ -79,8 +79,8 @@ body div:hover{
 	border:1px solid yellow;
 	display:block;
 	position:absolute;
-	top:16px;
-	left:0px;
+	top:13px;
+	left:-5px;
 	margin:0;
 	padding:0;
 	z-index:100;
@@ -100,6 +100,11 @@ body div:hover{
 .file-action ul li:before{
 	content:'>>';
 }
+code pre{
+	text-align:left;
+	background:#999;
+	border:1px solid #000;
+}
 /*]]>*/
 </style>
 </head>
@@ -109,7 +114,8 @@ body div:hover{
 		$!{content}
 	</div>
 	<script>
-		var as = document.getElementById('content').getElementsByTagName('a');
+		var filelist = document.getElementById('file-list');
+		var as = filelist?filelist.getElementsByTagName('a'):[];
 		var i = as.length;
 		while(i--){
 			var a  = as.item(i);
@@ -120,8 +126,11 @@ body div:hover{
 					+"ie6 ie7 ie8 ie9 ms moz webkit o".replace(/\w+/g,tpl)+"</ul>";
 			}else if(/.*\.js$/i.test(n)){
 				var n2 = n.replace(/\.js$/,'__define__.js')
-				var html = '<span>[js]</span><ul><li><a href="'+n+'">'+n+'</a></li>'+
-							'<li><a href="'+n2+'">'+n2+'</a></li></ul>';
+				var html = '<span>[js]</span><ul>'+
+							'<li><a href="'+n+'?export=ui">导出为单一脚本</a></li>'+
+							'<li><a href="'+n+'">'+n+'</a></li>'+
+							'<li><a href="'+n2+'">'+n2+'</a></li>'+
+							'</ul>';
 			}else{
 				continue;
 			}
@@ -134,8 +143,8 @@ body div:hover{
 	</script>
 	<div class="toolbar" h:trim="true">
 		<strong>$!{dir}</strong>
-		<a href='../' title='返回上一级'>[↑]</a>
-		<a href='https://github.com/jindw/jsi/wiki' title='使用文档'>[>>]</a>
+		<a href="../" title='返回上一级'>[↑]</a>
+		<a href='https://github.com/jindw/jsi/wiki' title='使用文档' target="doc">[>>]</a>
 	</div>
 	<div class="toolbar bottom" id="bottom" h:trim="true">
 	...

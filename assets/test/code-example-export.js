@@ -1,7 +1,7 @@
-var test = function(){
+~function(){
 	var impls = arguments;
 	var cached = {};
-	function internal_require(i,o){
+	function internal_require(i){
 		if(typeof i=='number'){
 			var exports = cached[i];
 			if(!exports){
@@ -11,25 +11,16 @@ var test = function(){
 				impls[i](cached[i],internal_require,module,id);
 				cached[i] = exports = module.exports;
 			}
-			if(o){
-				for(i in exports){
-					o[i] = exports[i];
-				}
-			}
-			return o || exports;
+			
+			return exports;
 			
 		}else{
 			return this.require ? require(i) : {}
 		}
 	}
-	
-	return internal_require(0);
-}(
-function(exports,require,module,__filename){
-	var m = require(1)
-	console.log(m.x+123)
-},
-function(exports,require,module){
-	exports.x = 123;
+	function copy(src,o){
+		for(i in src){
+			o[i] = src[i];
+		}
+	}
 }
-)
