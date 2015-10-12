@@ -55,9 +55,9 @@ function startServer(root,port){
 							"<label title='可以用 require 函数获得任意模块'>" +
 							"	<input type=radio name=type value=2 "+(type==2?'checked':'')+" onclick='this.form.submit()' autocomplete='off'>" +
 							"全兼容导出</label> " +
-							"<label title='当前文件在全局域执行，子模块作为匿名闭包载入，不能再用require(module)方式获得'>" +
-							"	<input type=radio name=type value=3 "+(type==3?'checked':'')+" onclick='this.form.submit()' autocomplete='off'>" +
-							"匿名导出</label>" +
+							//"<label title='当前文件在全局域执行，子模块作为匿名闭包载入，不能再用require(module)方式获得'>" +
+							//"	<input type=radio name=type value=3 "+(type==3?'checked':'')+" onclick='this.form.submit()' autocomplete='off'>" +
+							//"匿名导出</label>" +
 							"&#160;&#160;&#160;" +
 							"<label>格式化代码" +
 							"<input type='checkbox' name='format' value='true' "+(format &&'checked')+" onclick='this.form.submit()' autocomplete='off'>"+
@@ -75,7 +75,7 @@ function startServer(root,port){
 					var debug = cookie.replace(/^.*\bJSI_DEBUG=(\w+).*$/,'$1')
 					//console.log(debug)
 					if(url.match(/\.js$/) && !url.match(/\/o\//) && /^(false|0)$/.test(debug)){
-						content = compressJS(content);
+						content = compressJS(content,path);
 					}
 					writeContent(request,response,content,'text/'+(url.match(/\.css$/)?'css':'javascript')+';charset=utf-8');
 				})
