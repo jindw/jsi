@@ -1,6 +1,6 @@
 {
     "name": "jsi",
-    "version": "0.1.31",
+    "version": "0.1.32",
     "description": "JavaScript Integration System.",
     "bin": {"jsi": "bin/jsi"},
     "keywords": ["javascript","commonjs" ],
