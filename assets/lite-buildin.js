@@ -2,25 +2,24 @@
  * 内置lite 模板工具函数
  */
 function __x__(source,exp){//not ignoreQute?
-//(?!\w+;)
 	return String(source).replace(exp||/&(?!#\d+;|#x[\da-f]+;|[a-z]+;)|[<"]/ig,function(c){
 		return '&#'+c.charCodeAt()+';';
 	});
 }
 function __df__(pattern,date){
-	function __dl__(date,f){return f.length > 1? ('000'+date).slice(-len.length):date;}
-	function __tz__(offset){return offset?(offset>0?'-':offset*=-1,'+')+__dl__(offset/60,2)+':'+__dl__(offset%60,2):'Z'}
+	function dl(date,f){return f.length > 1? ('000'+date).slice(-f.length):date;}
+	function tz(offset){return offset?(offset>0?'-':offset*=-1,'+')+dl(offset/60,'00')+':'+dl(offset%60,'00'):'Z'}
 	date = date?new Date(date):new Date();
-	return pattern.replace(/'[^']+'|\"[^\"]+\"|([YMDhms])\\1*|\\.s|TZD$/g,function(format){
+	return pattern.replace(/([YMDhms])\1*|\.s|TZD$|'[^']+'|"[^"]+"/g,function(format){
 		switch(format.charAt()){
-		case 'Y' :return __dl(date.getFullYear(),format);
-		case 'M' :return __dl(date.getMonth()+1,format);
-		case 'D' :return __dl(date.getDate(),format);
-		case 'h' :return __dl(date.getHours(),format);
-		case 'm' :return __dl(date.getMinutes(),format);
-		case 's' :return __dl(date.getSeconds(),format);
-		case '.' :return '.'+__dl(date.getMilliseconds(),'...');
-		case 'T':return __tz__(date.getTimezoneOffset());
+		case 'Y' :return dl(date.getFullYear(),format);
+		case 'M' :return dl(date.getMonth()+1,format);
+		case 'D' :return dl(date.getDate(),format);
+		case 'h' :return dl(date.getHours(),format);
+		case 'm' :return dl(date.getMinutes(),format);
+		case 's' :return dl(date.getSeconds(),format);
+		case '.' :return '.'+dl(date.getMilliseconds(),'000');
+		case 'T':return tz(date.getTimezoneOffset());
 		case '\'':case '\"':return format.slice(1,-1);
 		default :return format;
 		}

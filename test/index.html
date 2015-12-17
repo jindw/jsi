@@ -131,6 +131,12 @@ code pre{
 							'<li><a href="'+n+'">'+n+'</a></li>'+
 							'<li><a href="'+n2+'">'+n2+'</a></li>'+
 							'</ul>';
+			}else if(/.*\.html$/i.test(n)){
+				//var n2 = n.replace(/\.html$/,'__optimized__.html')
+				var html = '<span>[html]</span><ul>'+
+							'<li><a href="'+n+'?optimized=merge">导出为单页WebApp</a></li>'+
+							'<li><a href="'+n+'">'+n+'</a></li>'+
+							'</ul>';
 			}else{
 				continue;
 			}

@@ -73,7 +73,7 @@ var $JSI,require;
 	}
 	//first init in require.js
 	var config = script.getAttribute('data-config');
-	config && write('<script src="'+config+'"></script>');
+	config ? write('<script src="'+config+'"></script>') : $JSI.init({});
 	
 	/* implements function define */
 	function _require(path){
@@ -237,17 +237,18 @@ var $JSI,require;
 	function onComplete(path){//逻辑上不应该被多次调用【除非有bug】
 		if(path){
 			var task = taskMap[path];
-			var targets = notifyMap[path];
+			var waitList = notifyMap[path];
 			if(task && task.length){
 				var i, target = _require(path);
 				while(i = task.pop()){//每个task只能被调用一次！！！
 					i.call(this,target)
 				}
 			}
-			if(targets){
-				i = targets.length;
+			if(waitList){
+				i = waitList.length;
 				while(i--){
-					var target = cachedMap[targets[i]];
+					var waitItem = waitList[i];
+					var target = cachedMap[waitItem];
 					var j = target.length;
 					//if(j){}//没必要了，j必然>=1
 					while(--j){
@@ -256,8 +257,9 @@ var $JSI,require;
 						}
 					}
 					if(target.length == 1){
-						//console.info('immediate trigger:',targets[i])
-						onComplete(targets[i])
+						//console.info('immediate trigger:',path,waitList)
+						waitList.splice(i,1);//已通知到了，删除
+						onComplete(waitItem)
 					}
 				}
 			}
