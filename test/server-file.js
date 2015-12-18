@@ -45,7 +45,11 @@ function writeContent(filepath,request,response){
 		var crypto = require('crypto');
 		var md5 = '"'+crypto.createHash('md5').update(file).digest('base64')+'"';
 		var oldMd5 = request.headers['if-none-match'];
-		var headers = {"Content-Type": contentType.replace(/^text\/.*/,'$&;charset=utf8'),"ETag":md5};
+		
+		var headers = {
+			"Access-Control-Allow-Origin":"*",
+			"Content-Type": contentType.replace(/^text\/.*/,'$&;charset=utf8'),
+			"ETag":md5};
 		//console.log(request.headers,"\n",headers);
 		
 		if(md5 == oldMd5){
