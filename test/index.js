@@ -5,6 +5,7 @@ var writeFile = require('./server-file').writeFile
 var writeSource = require('./server-file').writeSource;
 var compressJS = require('../lib/js-token').compressJS
 var formatJS = require('../lib/js-token').formatJS
+var maxTimeout = 0;//1000;
 function getLoader(base){
 	var loader = loaderMap[base];
 	if(!loader){
@@ -96,7 +97,7 @@ function startServer(root,port){
 			setTimeout(function(){
 				writeFile(root,request,response)
 				console.log('\tloaded:'+url)
-			},Math.random()*(1000*3));
+			},Math.random()*(maxTimeout*3));
 		}else if(request.url.match(/\.html\?optimized=merge$/)){
 			var exportHTML = require('../lib/export-html').exportHTML;
 			exportHTML(root,url,function(content){
@@ -197,7 +198,7 @@ function writeContent(request,response,content,contentType){
 			response.end(content+'');
 			console.log('\tloaded:'+url)
 		}
-	},Math.random()*(md5 == oldMd5?100:1000));
+	},Math.random()*(md5 == oldMd5?maxTimeout/10:maxTimeout));
 }
 
 function doProxy(request,response,proxyPath){
