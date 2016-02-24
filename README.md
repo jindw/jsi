@@ -1,3 +1,4 @@
+:q
 #JSI Introduction
 a simple module  loader , you can use npm installed modules in web browser such as it work in nodejs!
 
@@ -30,7 +31,7 @@ Start:
 
 
 			//advance useage:  install a optimized external package on package system.
-			$ jsi install jquery							--install a external optimized package from npm
+$ jsi install jquery							--install a exter:qnal optimized package from npm
 			$ jsi install ./workspace/xmldom				--install a external optimized package from local filesystem
 
 

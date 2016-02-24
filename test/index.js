@@ -1,4 +1,5 @@
 var http = require('http');
+var https = require('https');
 var ScriptLoader = require('../lib/js-loader.js').ScriptLoader;
 var loaderMap = {};
 var writeFile = require('./server-file').writeFile
@@ -38,6 +39,7 @@ function startServer(root,port){
 			//console.log('finish:'+url)
 		})
 		
+		//if(url.match(/^\/-shorter.js/)){}else 
 		if(url.match(/\.js$|\.css$/)){
 			var path = url.replace(/^\/(?:static|assets|scripts?)(?:\/js)?\//,'/');
 			var base = root + url.slice(0,1-path.length)
@@ -208,19 +210,21 @@ function doProxy(request,response,proxyPath){
 	if(proxyPath || match){
 		path = proxyPath ? path : match[1]+match[2]+match[4];
 		var realpath = proxyPath || match[3];
-		match = realpath.match(/^http\:\/\/([^\\\/:]+)(\:\d+)?(.*)$/) ;
+		match = realpath.match(/^(https?)\:\/\/([^\\\/:]+)(\:\d+)?(.*)$/) ;
 		if(match){
-			var host = match[1];
-			var port = match[2]||80;
-			var path = match[3] ;
+			var impl = match[1] == 'https'?https:http;
+			var host = match[2];
+			var port = match[3]||(impl == https?443:80);
+			var path = match[4] ;
+			var impl = realpath.match(/^https/)?https:http;
 			//var hostname = 
 			request.headers.host = host;
 			var options = {
-				port:port,host:host,
+				port:port,hostname:host,
 				method:request.method, path:path, headers:request.headers
 			}
-			//console.log(options)
-			var proxy_request = http.request(options);
+			//console.dir(request.headers)
+			var proxy_request = impl.request(options);
 			proxy_request.addListener('response', function (proxy_response) {
 				proxy_response.addListener('data', function(chunk) {
 					response.write(chunk, 'binary');
@@ -228,7 +232,12 @@ function doProxy(request,response,proxyPath){
 				proxy_response.addListener('end', function() {
 					response.end();
 				});
+				
+				proxy_response.headers['Access-Control-Allow-Origin']='*'
 				response.writeHead(proxy_response.statusCode, proxy_response.headers);
+			});
+			proxy_request.on('error',function (e){
+				console.error(e);
 			});
 			request.addListener('data', function(chunk) {
 				proxy_request.write(chunk, 'binary');
