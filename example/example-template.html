@@ -21,7 +21,7 @@
 
 <script>
 function page(n){
-	container.innerHTML = tpl.test({list:data.pages[n-1]})
+	container.innerHTML = tpl.test(data.pages[n-1])
 }
 var container = document.getElementById('container');
 var data = {

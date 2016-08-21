@@ -3,7 +3,7 @@ var $JSI,require;
 	var script = document.scripts[document.scripts.length-1];
 	var scriptBase = script.src.replace(/[^\/]+(?:[#?].*)?$/,'');	
 	var bootSources = (script.text || script.textContent ||'' );
-	var exportMap = {}//path=>exports// 存在说明已经载入【并初始化】
+	var moduleMap = {}//path=>{exports:{}}// 存在说明已经载入【并初始化】
 	var taskMap = {};//path=>[task...]
 	
 	var loading = 0;//load task list size
@@ -15,18 +15,18 @@ var $JSI,require;
 	
 	var syncBlockList = [];//block task list,remove?
 	
-	var moduleMap = {};//module=>version
+	var modulePathMap = {};//module=>version
 	
 	function realpath(scriptBase,path){
-		if(moduleMap && path in moduleMap){
-			return scriptBase + 'o/'+path+'/'+moduleMap[path]+'/'+ +/\bJSI_DEBUG=true\b/.test(document.cookie)+'.js';
+		if(modulePathMap && path in modulePathMap){
+			return scriptBase + 'o/'+path+'/'+modulePathMap[path]+'/'+ +/\bJSI_DEBUG=true\b/.test(document.cookie)+'.js';
 		}
 		return scriptBase+path.replace(/.*(?:[^c]..|c[^s].|cc[^s])$/,'$&__define__.js');
 	}
 	$JSI = {
 		init:function(config){
 			$JSI.init = console.error;//no not init muti times
-			copy(config , moduleMap);
+			copy(config , modulePathMap);
 			write(bootSources.replace(/\s*(\S[\s\S]*)/,'<script>$&</script>'));
 			bootSources = '';
 		},
@@ -77,12 +77,12 @@ var $JSI,require;
 	
 	/* implements function define */
 	function _require(path){
-		if(path in exportMap){
-			return exportMap[path];
+		if(path in moduleMap){
+			return moduleMap[path].exports;
 		}else{
 			var requireCache = {};
-			var exports = exportMap[path] = {}
-			var module = {exports:exports,id:path}
+			var exports = {}
+			var module = moduleMap[path] = {exports:exports,id:path}
 			var url = realpath(scriptBase,path);
 			//try{
 				cachedMap[path][0](exports,function(path2){
@@ -94,14 +94,14 @@ var $JSI,require;
 			//}catch(e){//console error for debug:
 			//	error('require error:'+path,e)
 			//}
-			return exportMap[path] = module.exports;
+			return module.exports;
 		}
 		
 	}
 	function _load(callback,thisAsync,path){
 		path = path.replace(/\\/g,'/')
-		if(path in exportMap){
-			return callback(exportMap[path])
+		if(path in moduleMap){
+			return callback(moduleMap[path].exports)
 		}
 		var cached = cachedMap[path];
 		if(path.match(/\.css(?:[#?].*)?$/)){

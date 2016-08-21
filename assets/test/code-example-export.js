@@ -3,16 +3,13 @@
 	var cached = {};
 	function internal_require(i){
 		if(typeof i=='number'){
-			var exports = cached[i];
-			if(!exports){
-				cached[i] = exports = {};
+			var module = cached[i];
+			if(!module){
 				var id = __dirname+i;
-				var module = {exports:exports,id:id}
-				impls[i](cached[i],internal_require,module,id);
-				cached[i] = exports = module.exports;
+				module = cached[i] = {exports:{},id:id};
+				impls[i](module.exports,internal_require,module,id);
 			}
-			
-			return exports;
+			return module.exports;
 			
 		}else{
 			return this.require ? require(i) : {}

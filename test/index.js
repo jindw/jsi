@@ -34,7 +34,7 @@ function startServer(root,port){
 	}
 	var server = http.createServer(function (request, response) {
 		var url = request.url.replace(/[?#].*$/,'');
-		console.log('start:'+url,request.headers,request.socket.remoteAddress);
+		//console.log('start:'+url,request.headers,request.socket.remoteAddress);
 
 		response.on('finish',function(){
 			//console.log('finish:'+url)
