@@ -14,6 +14,25 @@ function getLoader(base){
 	}
 	return loader;
 }
+
+function buildGenForm(mode,format,rawurl){
+	return "<form style='text-align:center'><input name='export' value='ui' type='hidden'>" +
+	"<label title='该文件在全局域运行，变量全部是全局变量。&#32; 依赖模块可用 require 函数获得。'>" +
+	"	<input type=radio name=mode value=1 "+(mode==1?'checked':'')+
+	" 		onclick='this.form.submit()' autocomplete='off'>" +
+	"全导出</label>" +
+	"<label title='不自动运行，需要require，可用 require 函数获得任意模块, 该方式不自动合并其他模块的内容（只合并模块内文件）。'>" +
+	"	<input type=radio name=mode value=2 "+(mode==2?'checked':'')+
+		" onclick='this.form.submit()' autocomplete='off'>" +
+	"库导出</label> " +
+	"&#160;&#160;&#160;" +
+	"<label>格式化代码" +
+	"<input type='checkbox' name='format' value='format' "+(format &&'checked')+" onclick='this.form.submit()' autocomplete='off'>"+
+	"</label>" +
+	//"<input style='margin-left:40px' type='button' value='查看原始格式' onclick=\"this.form.export.value='raw';this.form.submit()\"/>" +
+	"<input style='margin-left:40px' type='button' value='查看原始格式' onclick=\"location='"+rawurl+"'\"/>" +
+	"<hr></form>"
+}
 function startServer(root,port){
 	root = root || require('path').resolve('./');
 	var mapping = [];
@@ -46,55 +65,39 @@ function startServer(root,port){
 			var base = root + url.slice(0,1-path.length)
 			//console.log(base)
 			var loader = getLoader(base);
+			var mode = request.url.replace(/(?:.*?[&?]mode=(\w+))?.*/,'$1') || 1;
+			var format = request.url.replace(/(?:.*?[&?]format=(\w+))?.*/,'$1')||'compressed';
+			
+			console.log(format)
+			//var jsRaw = request.url.match(/__export__.js/)
 			var jsExportAs = request.url.match(/\.js\?export=(raw|ui)/);
+			path = path.replace(/^\//,'')
 			if(jsExportAs){
-				var mode = request.url.replace(/.*&mode=(\w+).*|.*/,'$1') || 1;
-				var format = request.url.replace(/.*&format=(\w+).*/,'$1').match(/^(true|on|1)$/);
 				//console.log(JSON.stringify(type))
-				path = path.replace(/^\//,'')
-				require('../lib/exports').exportSingleFile(base,path,mode,function(source,externals){
-					if(jsExportAs[1] != 'ui'){
+				path = (mode == 1?path:path.replace(/\.js$/i,''));
+				require('../lib/exports').exportScript(base,[path],onComplete,format);
+				function onComplete(source,externals){
+					if(jsExportAs[1] == 'ui'){
+						var cmd = "$ cd "+base+"\n$ jsi export -o tmp.js -f "+format+' '+path;
+						var rawurl = url.replace(/\.js$/,'__export__.js')+'?format='+format
+						if(mode == 2){
+							rawurl+='&mode=2';
+						}
+						var header = buildGenForm(mode,format == 'format',rawurl);
+						header+='<code><pre style="margin:12px">'+cmd+'</pre></code><p><pre style="background:#ddd;color:#339;padding-left:24px">size:'+source.length+'</pre></p>'
+						if(externals instanceof Array && externals.length){
+							header += '<p><pre style="background:yellow;color:red;padding-left:24px"><strong>使用时别忘了和未导入的外部依赖配合工作：</strong><br>'+externals.join('\n').replace(/.+/g,'require("$&")')+'</pre></p>'
+						}
+						writeSource(request,response,root+url,header,source);
+					}else{
 						writeContent(request,response,source,'text/javascript;charset=utf-8');
-						return;
 					}
-					
-					var cmd = "$ cd "+base+"\n$ jsi export -o tmp.js -mode "+mode+" "+path
-					var header = "<form style='text-align:center'><input name='export' value='ui' type='hidden'>" +
-							"<label title='该文件在全局域运行，变量全部是全局变量。&#32; 依赖模块可用 require 函数获得。'>" +
-							"	<input type=radio name=mode value=1 "+(mode==1?'checked':'')+" onclick='this.form.submit()' autocomplete='off'>" +
-							"全导出</label>" +
-							"<label title='不自动运行，需要require，可用 require 函数获得任意模块, 该方式不自动合并其他模块的内容（只合并模块内文件）。'>" +
-							"	<input type=radio name=mode value=2 "+(mode==2?'checked':'')+" onclick='this.form.submit()' autocomplete='off'>" +
-							"库导出</label> " +
-							//"<label title='当前文件在全局域执行，子模块作为匿名闭包载入，不能再用require(module)方式获得'>" +
-							//"	<input type=radio name=mode value=3 "+(mode==3?'checked':'')+" onclick='this.form.submit()' autocomplete='off'>" +
-							//"匿名导出</label>" +
-							"&#160;&#160;&#160;" +
-							"<label>格式化代码" +
-							"<input type='checkbox' name='format' value='true' "+(format &&'checked')+" onclick='this.form.submit()' autocomplete='off'>"+
-							"</label>" +
-							"<input style='margin-left:40px' type='button' value='查看原始格式' onclick='this.form.export.value=\"raw\";this.form.submit()'/><hr>" +
-							"<code><pre>"+cmd+"</pre></code>"+
-							"</form>"
-					if(format){
-						source = formatJS(source)
-					}
-					if(externals instanceof Array && externals.length){
-						header += '<p><pre style="background:yellow;color:red;padding-left:24px"><strong>使用时别忘了和未导入的外部依赖配合工作：</strong><br>'+externals.join('\n').replace(/.+/g,'require("$&")')+'</pre></p>'
-					}
-					writeSource(request,response,root+url,header,source);
-				})
+				}
 			}else {
-				//console.log('preload!',path)
+				//console.log('preload!',path.replace(/__define__\.js$/,'.js'),loader.base)
 				loader.load(path,function(content){
-					var cookie = request.headers.cookie || '';
-					var debug = cookie.replace(/^.*\bJSI_DEBUG=(\w+).*$/,'$1')
-					//console.log('afterload:',debug,path)
-					if(url.match(/\.js$/) && !url.match(/\/o\//) && /^(false|0)$/.test(debug)){
-						content = compressJS(content,path);
-					}
 					writeContent(request,response,content,'text/'+(url.match(/\.css$/)?'css':'javascript')+';charset=utf-8');
-				})
+				},format)
 				return true;
 			}
 		}else if(url.match(/\.css$/)){

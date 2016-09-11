@@ -31,7 +31,7 @@ exports.test1 = function(arg1,arg2){
  * load from file
  * optimize to simple string
  */
-exports.test2 = liteXML('./example-tpl.xhtml')
+exports.test2 = require('./example-tpl.xhtml')
 
 
 var items = [{name:'name',description:'desc...'}];

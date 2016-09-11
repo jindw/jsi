@@ -126,10 +126,12 @@ code pre{
 					+"ie6 ie7 ie8 ie9 ms moz webkit o".replace(/\w+/g,tpl)+"</ul>";
 			}else if(/.*\.js$/i.test(n)){
 				var n2 = n.replace(/\.js$/,'__define__.js')
+				var n3 = n.replace(/\.js$/,'__export__.js')
 				var html = '<span>[js]</span><ul>'+
-							'<li><a href="'+n+'?export=ui">导出为单一脚本</a></li>'+
+							'<li><a href="'+n+'?export=ui">导出为单一脚本3</a></li>'+
 							'<li><a href="'+n+'">'+n+'</a></li>'+
 							'<li><a href="'+n2+'">'+n2+'</a></li>'+
+							'<li><a href="'+n3+'">'+n3+'</a></li>'+
 							'</ul>';
 			}else if(/.*\.html$/i.test(n)){
 				//var n2 = n.replace(/\.html$/,'__optimized__.html')
