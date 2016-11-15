@@ -1,0 +1,16 @@
+{
+    "name": "test",
+    "version": "0.1.33",
+    "description": "JavaScript Integration System.",
+    "bin": {"jsi": "bin/jsi"},
+    "keywords": ["javascript","commonjs" ],
+	"author": "jindw <jindw@xidea.org> (http://www.xidea.org)",
+    "repository": "git://github.com/jindw/jsi.git",
+    "main": "./node_modules/lite/index2.js",
+    "engines" : { "node" : ">=0.1" },
+    "dependencies": {},
+    "maintainers": [{"name":"jindw","email":"jindw@xidea.org","url":"http://www.xidea.org"}],
+    "contributors": [],
+    "bugs": {"email": "jindw@xidea.org","url": "https://github.com/jindw/jsi/issues"},
+    "licenses": [{"type": "LGPL","url": "http://www.gnu.org/licenses/lgpl.html"}]
+}

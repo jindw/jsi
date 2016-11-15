@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+<style>html,body{width:100%;height:100%}
+div{
+ background:rgba(100,0,0,.4);
+ width:100px;
+ height:100px;
+ position:relative;
+}
+</style>
+<head>
+<title>aaaa</title>
+<style>
+</style>
+<body >
+<div>1111</div>
+<div>1111<div onmousemove='moveMove(event)'>2222</div></div>
+<div>1111</div>
+<div>1111</div>
+<div>1111</div>
+<div>1111</div>
+<div>1111</div>
+</body>
+
+<script>
+function moveMove(event){
+console.log(event)
+event.stopPropagation()
+	event.cancelBubble = true
+}
+document.body.addEventListener('mousemove',function(event){
+	document.title = event.pageY+'/'+event.clientY
+},true)
+</script>
+
+</html>

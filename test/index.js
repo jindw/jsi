@@ -34,7 +34,8 @@ function startServer(root,port){
 	}
 	var server = http.createServer(function (request, response) {
 		var url = request.url.replace(/[?#].*$/,'');
-		//console.log('start:'+url);
+		console.log('start:'+url,request.headers,request.socket.remoteAddress);
+
 		response.on('finish',function(){
 			//console.log('finish:'+url)
 		})
@@ -43,6 +44,7 @@ function startServer(root,port){
 		if(url.match(/\.js$|\.css$/)){
 			var path = url.replace(/^\/(?:static|assets|scripts?)(?:\/js)?\//,'/');
 			var base = root + url.slice(0,1-path.length)
+			//console.log(base)
 			var loader = getLoader(base);
 			var jsExportAs = request.url.match(/\.js\?export=(raw|ui)/);
 			if(jsExportAs){

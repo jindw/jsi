@@ -37,7 +37,15 @@ $ jsi install jquery							--install a exter:qnal optimized package from npm
 
 * lite template example
 
-		//inline style
+		//function template
+		var tpl = function(list){
+			return <div>
+				<c:if test='${var1>var2}'>test${value}</c:if>
+				<p> this is a xml style templete ${varName}; 
+				default syntax support for mostly javascript editor (E4X standard) </p>
+			</div>
+		}
+		//inline template render
 		var tpl = <div>
 			<p> this is a xml style templete ; 
 				default syntax support for mostly javascript editor (E4X standard) </p>

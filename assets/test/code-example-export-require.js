@@ -14,14 +14,13 @@
 				cached[i] = exports = module.exports;
 			}
 			return  exports;
-			
 		}else{
 			return require(i) ;
 		}
 	}
 	
 	function external_require(path){
-		var id = idIndex.indexOf(path);
+		var id = typeof path == 'number'?path:idIndex.indexOf(path);
 		if(id>=0){
 			return internal_require(id);
 		}else{
