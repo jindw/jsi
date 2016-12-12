@@ -1,4 +1,4 @@
-var jstoken = require('../lib/js-token');
+var jstoken = require('lite/parse/js-token');
 function s1(){
 	return a+b  /c/2;
 }

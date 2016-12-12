@@ -4,8 +4,7 @@ var ScriptLoader = require('../lib/js-loader.js').ScriptLoader;
 var loaderMap = {};
 var writeFile = require('./server-file').writeFile
 var writeSource = require('./server-file').writeSource;
-var compressJS = require('../lib/js-token').compressJS
-var formatJS = require('../lib/js-token').formatJS
+var compressJS = require('../lib/js-process').compressJS
 var maxTimeout = 0;//1000;
 function getLoader(base){
 	var loader = loaderMap[base];
