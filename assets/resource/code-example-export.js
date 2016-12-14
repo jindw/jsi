@@ -12,8 +12,11 @@
 			return module.exports;
 			
 		}else{
-			return this.require ? require(i) : {}
+			return require == internal_require ? {}:require(i) ;
 		}
+	}
+	if(!this.require){
+		this.require = internal_require;
 	}
 	function copy(src,o){
 		for(i in src){
