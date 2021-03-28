@@ -27,7 +27,10 @@ var $JSI,require;
 		init:function(config){
 			$JSI.init = console.error;//no not init muti times
 			copy(config , modulePathMap);
-			write(bootSources.replace(/\s*(\S[\s\S]*)/,'<script>$&</script>'));
+			var list = ['<script>'];
+			bootSources.replace(/\brequire\(\s*(['"])[\w\-\.]+\1\s*\)/g,function(a0){list.push(a0)});
+			write(list.join(';')+'</script>');
+			write(bootSources.replace(/[\s\S]+/,'<script>$&</script>'));
 			bootSources = '';
 		},
 		define: define,
@@ -63,8 +66,10 @@ var $JSI,require;
 	};
 	require = function(path){
 		if(arguments.length>1){console.info('redirect to $JSI.require!!');return $JSI.require.apply($JSI,arguments)}
-		var rtv = function(){return rtv.apply(this,arguments)};
+		var rtv = function proxy(){
+			return _require(path).apply(this,arguments)};
 		_load(function(result){
+			//console.log(result)
 			copy(result,rtv);
 			rtv.prototype = result.prototype;
 			rtv = result;
@@ -104,19 +109,6 @@ var $JSI,require;
 			return callback(moduleMap[path].exports)
 		}
 		var cached = cachedMap[path];
-		if(path.match(/\.css(?:[#?].*)?$/)){
-			if(!cached){
-				if(thisAsync){
-					cached = document.createElement('link');
-					copy({rel:'stylesheet',type:'text/css',href:realpath(scriptBase,path)+'#test'},cached)
-					script.parentNode.appendChild(cached);
-				}else{
-					write('<link rel="stylesheet" href="'+realpath(scriptBase,path)+'" type="text/css"> ')
-				}
-				cached = cachedMap[path] = Function.prototype
-			}
-		}
-		
 		if(cached){
 			push(taskMap,path,callback)
 			if(cached.length === 1){//only impl no dependence
@@ -128,6 +120,7 @@ var $JSI,require;
 				}//else{fired by previous loading}
 			}
 		}else{
+			//console.log(loading,path)
 			if(loading==0 || globalAsync === thisAsync ){//if(sync===null) assert(inc ==0) 
 				globalAsync = thisAsync;
 				taskMap[path] = [callback];
@@ -138,6 +131,7 @@ var $JSI,require;
 		}
 	}
 	function loadScript(path){//call by _load and onDefine
+		//console.log(loading,path)
 		loading++;
 		cachedMap[path] = [];//已经开始装载了，但是还没有值
 		path = realpath(scriptBase,path);//.replace(/[^\/]+$/,uar));
@@ -151,6 +145,7 @@ var $JSI,require;
 	}
 	
 	function addWait(callback,async,path){
+		//console.log('addWait!!',loading)
 		if(async){
 			asyncWaitList.push(arguments);
 			asyncInterval = asyncInterval || setInterval(intervalWait,300)
@@ -170,12 +165,13 @@ var $JSI,require;
 	}
 	/**
 	 * 添加缓存,计数器的因素，只能通过 loadScript 触发，禁止外部调用。
-	 * $JSI.define('path',['deps'],function(exports,require,module,__filename,__dirname){...}) 
+	 * $JSI.define('path',['deps'],function(exports,require,module,_&#95;filename,_&#95;dirname){...}) 
 	 * 允许外部调用，缓存装载单元（该调用方式下不触发计数器）。需要确保implMap 形成闭包（不能有不在集合中的依赖库）
 	 * $JSI.define({path:impl})
 	 */
 	function define(path,dependences,impl){
 		if(impl){
+			//console.log(path)
 			var implAndDependence = cachedMap[path];
 			var i = dependences.length;
 			var newScripts = [];
@@ -199,6 +195,8 @@ var $JSI,require;
 					internal_require(0,exports);
 				}
 			}
+
+			//console.log("define:",loading,path,implAndDependence)
 			implAndDependence.push(impl);
 			while(i--){
 				var dep = normalizeModule(dependences[i],path);
@@ -224,6 +222,7 @@ var $JSI,require;
 					loadScript(dep);
 				}
 			}
+			//console.log("define:",loading,implAndDependence)
 			if(--loading<1){
 				onComplete()
 			}//else{//loaded before}

@@ -54,7 +54,7 @@ function writeContent(filepath,request,response){
 		
 		if(md5 == oldMd5){
         	response.writeHead(304, headers); 
-			console.log('304 response: '+filepath)
+			//console.log('304 response: '+filepath)
         	response.end();  
 		}else{
 			if(/^image\//.test(contentType)){

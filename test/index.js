@@ -6,13 +6,16 @@ var writeFile = require('./server-file').writeFile
 var writeSource = require('./server-file').writeSource;
 var compressJS = require('../lib/js-process').compressJS
 var maxTimeout = 0;//1000;
-function getLoader(base){
+function getLoader(base,source){
+
 	var loader = loaderMap[base];
 	if(!loader){
-		loader = loaderMap[base] = new ScriptLoader(base);
+		var ss = source && source.split(/[,;]/);
+		loader = loaderMap[base] = new ScriptLoader(base,{});
 	}
 	return loader;
 }
+const printRequestLog = false;
 
 function buildGenForm(mode,format,rawurl){
 	return "<form style='text-align:center'><input name='export' value='ui' type='hidden'>" +
@@ -32,15 +35,17 @@ function buildGenForm(mode,format,rawurl){
 	"<input style='margin-left:40px' type='button' value='查看原始格式' onclick=\"location='"+rawurl+"'\"/>" +
 	"<hr></form>"
 }
-function startServer(root,port){
-	root = root || require('path').resolve('./');
+function startServer(opt){
+	var root = opt.root || opt.r || require('path').resolve('./');
+	var port = opt.port || opt.p || 8080;
+	var source = opt.source || opt.s;
 	var mapping = [];
 	var mappingPath = root.replace(/[\\\/]?$/,'/mapping.js');
 	try{
 		var mappingSource = require('fs').readFileSync(mappingPath);
 		//var routes = require(root.replace(/[\\\/]?$/,'/mapping.js')).routes;
 	}catch(e){
-		console.log('mapping file not found!!',mappingPath)
+		//console.log('mapping file not found!!',mappingPath)
 	}
 	if(mappingSource){
 		//routes = require(mappingPath).routes || [];
@@ -52,10 +57,10 @@ function startServer(root,port){
 	}
 	var server = http.createServer(function (request, response) {
 		var url = request.url.replace(/[?#].*$/,'');
-		//console.log('start:'+url,request.headers,request.socket.remoteAddress);
+		if(printRequestLog)console.log('start:'+url,request.headers,request.socket.remoteAddress);
 
 		response.on('finish',function(){
-			//console.log('finish:'+url)
+			if(printRequestLog)console.log('finish:'+url)
 		})
 		
 		//if(url.match(/^\/-shorter.js/)){}else 
@@ -63,11 +68,11 @@ function startServer(root,port){
 			var path = url.replace(/^\/(?:static|assets|scripts?)(?:\/js)?\//,'/');
 			var base = root + url.slice(0,1-path.length)
 			//console.log(base)
-			var loader = getLoader(base);
+			var loader = getLoader(base,source);
 			var mode = request.url.replace(/(?:.*?[&?]mode=(\w+))?.*/,'$1') || 1;
-			var format = request.url.replace(/(?:.*?[&?]format=(\w+))?.*/,'$1')||'compressed';
+			var format = request.url.replace(/(?:.*?[&?]format=(\w+))?.*/,'$1')||'raw';
 			
-			console.log(format)
+			//console.log(format)
 			//var jsRaw = request.url.match(/__export__.js/)
 			var jsExportAs = request.url.match(/\.js\?export=(raw|ui)/);
 			path = path.replace(/^\//,'')
@@ -102,13 +107,13 @@ function startServer(root,port){
 		}else if(url.match(/\.css$/)){
 			setTimeout(function(){
 				writeFile(root,request,response)
-				console.log('\tloaded:'+url)
+				if(printRequestLog)console.log('\tloaded:'+url)
 			},Math.random()*(maxTimeout*3));
 		}else if(request.url.match(/\.html\?optimized=merge$/)){
 			var exportHTML = require('../lib/export-html').exportHTML;
 			exportHTML(root,url,function(content){
 				writeContent(request,response,content,"text/html;charset=utf-8");
-				console.log('\tloaded:'+url)
+				if(printRequestLog)console.log('\tloaded:'+url)
 			})
 		}else if(request.url.match(/^\/\?proxy=/)){
 			doProxy(request,response,decodeURIComponent(request.url.replace(/^.*=/,'')));
@@ -162,7 +167,6 @@ function startServer(root,port){
 		}
 	});
 	var tryinc = 10;
-	port = port || 8080;
 	server.on('error', function (e) {
 		if (e.code == 'EADDRINUSE' && tryinc>=0) {
 			console.log('port:'+port+'	is in use, try the next!');
@@ -198,11 +202,11 @@ function writeContent(request,response,content,contentType){
 		if(md5 == oldMd5){
 			response.writeHead(304, headers); 
 			response.end();	
-			console.log('\t304 loaded:'+url)
+			if(printRequestLog)console.log('\t304 loaded:'+url)
 		}else{
 			response.writeHead(200, headers);
 			response.end(content+'');
-			console.log('\tloaded:'+url)
+			//console.log('\tloaded:'+url)
 		}
 	},Math.random()*(md5 == oldMd5?maxTimeout/10:maxTimeout));
 }
