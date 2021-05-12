@@ -11,6 +11,7 @@ function getLoader(base,source){
 	var loader = loaderMap[base];
 	if(!loader){
 		var ss = source && source.split(/[,;]/);
+		console.log('getLoader:',base)
 		loader = loaderMap[base] = new ScriptLoader(base,{});
 	}
 	return loader;
@@ -64,7 +65,7 @@ function startServer(opt){
 		})
 		
 		//if(url.match(/^\/-shorter.js/)){}else 
-		if(url.match(/\.js$|\.css$/)){
+		if(url.match(/\.js$/)){
 			var path = url.replace(/^\/(?:static|assets|scripts?)(?:\/js)?\//,'/');
 			var base = root + url.slice(0,1-path.length)
 			//console.log(base)
