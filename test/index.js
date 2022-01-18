@@ -6,13 +6,13 @@ var writeFile = require('./server-file').writeFile
 var writeSource = require('./server-file').writeSource;
 var compressJS = require('../lib/js-process').compressJS
 var maxTimeout = 0;//1000;
-function getLoader(base,source){
+function getLoader(base,md){
 
 	var loader = loaderMap[base];
 	if(!loader){
-		var ss = source && source.split(/[,;]/);
+		var mds = md && md.split(/[,;]/);
 		console.log('getLoader:',base)
-		loader = loaderMap[base] = new ScriptLoader(base,{});
+		loader = loaderMap[base] = new ScriptLoader(base,{md:mds});
 	}
 	return loader;
 }
@@ -39,9 +39,10 @@ function buildGenForm(mode,format,rawurl){
 function startServer(opt){
 	var root = opt.root || opt.r || require('path').resolve('./');
 	var port = opt.port || opt.p || 8080;
-	var source = opt.source || opt.s;
+	var md = opt.md;
 	var mapping = [];
-	var mappingPath = root.replace(/[\\\/]?$/,'/mapping.js');
+ 	var mappingName = opt.mapping || opt.m || 'mapping.js';
+ 	var mappingPath = root.replace(/[\\\/]?$/,'')+'/'+mappingName;
 	try{
 		var mappingSource = require('fs').readFileSync(mappingPath);
 		//var routes = require(root.replace(/[\\\/]?$/,'/mapping.js')).routes;
@@ -51,9 +52,9 @@ function startServer(opt){
 	if(mappingSource){
 		//routes = require(mappingPath).routes || [];
 		try{
-			mapping = new Function('var exports = {};'+mappingSource+";\nreturn exports.mapping||exports.routes;").call()||[]
+			mapping = new Function('require','var exports = {};'+mappingSource+";\nreturn exports.mapping||exports.routes;").call(0,require)||[]
 		}catch(e){
-			console.log('invalid mapping file!!')
+			console.log('invalid mapping file!!',e)
 		}
 	}
 	var server = http.createServer(function (request, response) {
@@ -65,11 +66,17 @@ function startServer(opt){
 		})
 		
 		//if(url.match(/^\/-shorter.js/)){}else 
-		if(url.match(/\.js$/)){
+		if(require('fs').existsSync(root+url)){
+			setTimeout(function(){
+				writeFile(root,request,response)
+				if(printRequestLog)console.log('\tloaded:'+url)
+			},Math.random()*(maxTimeout*3));
+		}else if(url.match(/\.(css|js)$/)){
+
 			var path = url.replace(/^\/(?:static|assets|scripts?)(?:\/js)?\//,'/');
 			var base = root + url.slice(0,1-path.length)
 			//console.log(base)
-			var loader = getLoader(base,source);
+			var loader = getLoader(base,md);
 			var mode = request.url.replace(/(?:.*?[&?]mode=(\w+))?.*/,'$1') || 1;
 			var format = request.url.replace(/(?:.*?[&?]format=(\w+))?.*/,'$1')||'raw';
 			
@@ -124,16 +131,20 @@ function startServer(opt){
 				var route = mapping[i];
 				var pattern = route.path;
 				var match = false;
+				if((typeof pattern) == 'string'){
+ 					route.path = pattern = new RegExp('^'+
+ 						pattern.split('').map(c=>c == '*'?'.*':(c.charCodeAt()+0x10000).toString(16).replace('1','\\u')).join('')
+ 						+'$','');
+ 				}
+
 				if(pattern instanceof RegExp){
 					match = url.match(pattern);
-				}else{
-					match = url == pattern && [];
 				}
 				//console.log(url,pattern,match)
 				if(match){
 					if(route.action){
 						match.unshift(request,response);
-						if(route.action.apply(this,match)){
+						if(route.action.apply(this,match)!== false){
 							return;
 						}
 					}
@@ -159,7 +170,7 @@ function startServer(opt){
 					}else if(route.data){
 						writeContent(request,response,JSON.stringify(route.data));
 					}else{
-						writeContent("<h3>action || file || remote || data is requied!</h3>")
+						writeContent(request,response,"<h3>action || file || remote || data is requied!</h3>")
 					}
 					return;
 				}
@@ -190,7 +201,7 @@ function writeContent(request,response,content,contentType){
 	var url = request.url;
 	var crypto = require('crypto');
 	var md5 = '"'+crypto.createHash('md5').update(content).digest('base64')+'"';
-	var oldMd5 = request.headers['if-none-match'];
+	var oldMd5 = request.headers && request.headers['if-none-match'];
 	if(contentType == null){
 		if(/^\s*[\[\{][\s\S]*[\[\}]\s*$/.test(content)){
 			contentType = 'text/json;charset=utf-8';

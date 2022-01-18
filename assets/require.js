@@ -28,7 +28,7 @@ var $JSI,require;
 			$JSI.init = console.error;//no not init muti times
 			copy(config , modulePathMap);
 			var list = ['<script>'];
-			bootSources.replace(/\brequire\(\s*(['"])[\w\-\.]+\1\s*\)/g,function(a0){list.push(a0)});
+			bootSources.replace(/\brequire\(\s*(['"])[\w\/\-\.]+\1\s*\)/g,function(a0){list.push(a0)});
 			write(list.join(';')+'</script>');
 			write(bootSources.replace(/[\s\S]+/,'<script>$&</script>'));
 			bootSources = '';

@@ -7,6 +7,7 @@ exports.writeSource = writeSource
 function writeFile(root,request,response,realPath){
 	var url = request.url.replace(/[?#].*$/,'');
 	var filepath = path.join(root,realPath||url);
+	// console.log(url,filepath)
 	fs.stat(filepath,function(error,stats){
 		if(stats){
 	    	if(stats.isDirectory()){
