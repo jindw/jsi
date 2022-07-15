@@ -1,16 +1,47 @@
 {
-    "name": "jsi",
-    "version": "0.2.0",
-    "description": "JavaScript Integration System.",
-    "bin": {"jsi": "bin/jsi"},
-    "keywords": ["javascript","commonjs" ],
-	"author": "jindw <jindw@xidea.org> (http://www.xidea.org)",
-    "repository": "git://github.com/jindw/jsi.git",
-    "main": "./lib/index.js",
-    "engines" : { "node" : ">=0.1" },
-    "dependencies": {"xmldom":"*"},
-    "maintainers": [{"name":"jindw","email":"jindw@xidea.org","url":"http://www.xidea.org"}],
-    "contributors": [],
-    "bugs": {"email": "jindw@xidea.org","url": "https://github.com/jindw/jsi/issues"},
-    "licenses": [{"type": "LGPL","url": "http://www.gnu.org/licenses/lgpl.html"}]
+  "author": {
+    "name": "jindw",
+    "email": "jindw@xidea.org",
+    "url": "http://www.xidea.org"
+  },
+  "bin": {
+    "jsi": "bin/jsi"
+  },
+  "bugs": {
+    "url": "https://github.com/jindw/jsi/issues",
+    "email": "jindw@xidea.org"
+  },
+  "contributors": [],
+  "dependencies": {
+    "xmldom": "*"
+  },
+  "description": "JavaScript Integration System.",
+  "engines": {
+    "node": ">=0.1"
+  },
+  "homepage": "https://github.com/jindw/jsi#readme",
+  "keywords": [
+    "javascript",
+    "commonjs"
+  ],
+  "licenses": [
+    {
+      "type": "LGPL",
+      "url": "http://www.gnu.org/licenses/lgpl.html"
+    }
+  ],
+  "main": "./lib/index.js",
+  "maintainers": [
+    {
+      "name": "jindw",
+      "email": "jindw@xidea.org",
+      "url": "http://www.xidea.org"
+    }
+  ],
+  "name": "jsi",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jindw/jsi.git"
+  },
+  "version": "0.2.4"
 }
